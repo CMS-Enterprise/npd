@@ -572,6 +572,12 @@ class LocationSerializer(serializers.Serializer):
 
     class Meta:
         model = Location
+    
+    def get_address(self, instance):
+        for ota in instance.organization.organizationtoaddress_set.all():
+            if ota.address_id == instance.address_id:
+                return AddressSerializer(ota, context=self.context).data
+        return None
 
     def get_address(self, instance):
         for ota in instance.organization.organizationtoaddress_set.all():
