@@ -515,6 +515,8 @@ class LocationSerializer(serializers.Serializer):
                 and hasattr(instance.address, "address_us")
                 and hasattr(instance.address.address_us, "latitude")
                 and hasattr(instance.address.address_us, "longitude")
+                and instance.address.address_us.longitude is not None
+                and instance.address.address_us.latitude is not None
             ):
                 position = LocationPosition(
                     latitude=instance.address.address_us.latitude,

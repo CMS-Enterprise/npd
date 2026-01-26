@@ -84,7 +84,9 @@ class LocationViewSetTestCase(APITestCase):
                 x=26.1412097,
                 y=-80.191004,
             ),
-            create_location(name="A & B HEALTH CARE, INC.", organization=cls.orgs[0]),
+            create_location(
+                name="A & B HEALTH CARE, INC.", organization=cls.orgs[0], x=None, y=None
+            ),
             create_location(name="ABILENE HELPING HANDS INC", organization=cls.orgs[0]),
             create_location(name="ZEELAND COMMUNITY HOSPITAL", organization=cls.orgs[0]),
             create_location(name="YOUNGSTOWN ORTHOPAEDIC ASSOCIATES LTD", organization=cls.orgs[0]),
