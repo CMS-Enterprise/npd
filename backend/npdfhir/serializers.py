@@ -21,9 +21,6 @@ from fhir.resources.R4B.identifier import Identifier
 from fhir.resources.R4B.location import Location as FHIRLocation, LocationPosition
 from fhir.resources.R4B.meta import Meta
 from fhir.resources.R4B.organization import Organization as FHIROrganization
-from fhir.resources.R4B.organizationaffiliation import (
-    OrganizationAffiliation as FHIROrganizationAffiliation,
-)
 from fhir.resources.R4B.period import Period
 from fhir.resources.R4B.practitioner import Practitioner, PractitionerQualification
 from fhir.resources.R4B.practitionerrole import PractitionerRole
@@ -138,13 +135,13 @@ class TaxonomySerializer(serializers.Serializer):
             ]
         )
         qualification = PractitionerQualification(
-            # identifier=[
-            #    Identifier(
-            #        value="test",
-            #        type=code,  # TODO: Replace
-            #        period=Period(),
-            #    )
-            # ],
+            identifier=[
+                Identifier(
+                    value="test",
+                    type=code,  # TODO: Replace
+                    period=Period(),
+                )
+            ],
             code=code,
         )
         return qualification.model_dump()
@@ -311,16 +308,13 @@ class OrganizationSerializer(serializers.Serializer):
 
     def to_representation(self, instance):
         request = self.context.get("request")
-        instance = instance.organization
         representation = super().to_representation(instance)
-
         organization = FHIROrganization()
         organization.id = str(instance.id)
         organization.meta = Meta(
             profile=["http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"]
         )
         identifiers = []
-
         taxonomies = []
         # if instance.ein:
         #    ein_identifier = Identifier(
@@ -418,7 +412,7 @@ class OrganizationSerializer(serializers.Serializer):
             if len(names) > 1:
                 aliases = names[1:]
         if aliases:
-            organization.alias = [n["name"] for n in aliases]
+            organization.alias = aliases
 
         if instance.parent_id is not None:
             organization.partOf = genReference(
@@ -440,76 +434,7 @@ class OrganizationSerializer(serializers.Serializer):
         return organization.model_dump()
 
 
-class OrganizationAffiliationSerializer(serializers.Serializer):
-    class Meta:
-        fields = [
-            "identifier",
-            "active",
-            "period",
-            "organization",
-            "participatingOrganization",
-            "network",
-            "code",
-            "specialty",
-            "location",
-            "healthcareService",
-            "telecom",
-            "endpoint",
-        ]
-
-    def to_representation(self, instance):
-        request = self.context.get("request")
-        organization_affiliation = FHIROrganizationAffiliation()
-        # organization_affiliation.active = instance.is_active_affiliation
-
-        organization_affiliation.id = str(instance.id)
-
-        locations = []
-
-        organization_affiliation.organization = Reference(display=str(instance.ehr_vendor_name))
-
-        organization_affiliation.participatingOrganization = genReference(
-            "fhir-organization-detail", instance.id, request
-        )
-        organization_affiliation.participatingOrganization.display = str(instance.organization_name)
-
-        # NOTE: Period for OrganizationAffiliation cannot currently be fetched so its blank
-
-        # NOTE: Network here means insurance network, per the FHIR spec. We have not begun to incorporate insurance networks
-        # organization_affiliation.network = [genReference("fhir-organization-detail", instance.id, request)]
-        # organization_affiliation.network[0].display = str(instance.organization_name)
-
-        organization_affiliation.code = [
-            CodeableConcept(
-                coding=[
-                    Coding(
-                        system="http://terminology.hl7.org/CodeSystem/codesystem-organization-role",
-                        code="HIE/HIO",
-                        display="HIE/HIO",
-                    )
-                ]
-            )
-        ]
-
-        # NOTE: not sure how to do specialty yet
-
-        endpoints = []
-
-        for location in instance.location_set.all():
-            locations.append(genReference("fhir-location-detail", location.id, request))
-
-            for link in location.locationtoendpointinstance_set.all():
-                endpoint = link.endpoint_instance
-
-                endpoints.append(genReference("fhir-endpoint-detail", endpoint.id, request))
-
-        organization_affiliation.location = locations
-        organization_affiliation.endpoint = endpoints
-
-        return organization_affiliation.model_dump()
-
-
-class ProviderSerializer(serializers.Serializer):
+class PractitionerSerializer(serializers.Serializer):
     npi = NPISerializer()
     individual = IndividualSerializer(read_only=True)
     identifier = OtherIdentifierSerializer(
@@ -520,16 +445,8 @@ class ProviderSerializer(serializers.Serializer):
     class Meta:
         fields = ["npi", "name", "email", "phone", "identifier", "taxonomy"]
 
-
-class PractitionerSerializer(serializers.Serializer):
-    provider = ProviderSerializer(read_only=True)
-
-    class Meta:
-        fields = ["npi", "name", "email", "phone", "identifier", "taxonomy"]
-
     def to_representation(self, instance):
-        representation = super().to_representation(instance)["provider"]
-        instance = instance.provider
+        representation = super().to_representation(instance)
         practitioner = Practitioner()
         practitioner.id = str(instance.individual.id)
         practitioner.meta = Meta(
@@ -572,12 +489,6 @@ class LocationSerializer(serializers.Serializer):
 
     class Meta:
         model = Location
-    
-    def get_address(self, instance):
-        for ota in instance.organization.organizationtoaddress_set.all():
-            if ota.address_id == instance.address_id:
-                return AddressSerializer(ota, context=self.context).data
-        return None
 
     def get_address(self, instance):
         for ota in instance.organization.organizationtoaddress_set.all():
@@ -604,8 +515,6 @@ class LocationSerializer(serializers.Serializer):
                 and hasattr(instance.address, "address_us")
                 and hasattr(instance.address.address_us, "latitude")
                 and hasattr(instance.address.address_us, "longitude")
-                and instance.address.address_us.longitude is not None
-                and instance.address.address_us.latitude is not None
             ):
                 position = LocationPosition(
                     latitude=instance.address.address_us.latitude,
@@ -636,29 +545,9 @@ class PractitionerRoleSerializer(serializers.Serializer):
         practitioner_role.organization = genReference(
             "fhir-organization-detail", instance.provider_to_organization.organization_id, request
         )
-        if hasattr(instance, "specialty_id") and instance.specialty_id is not None:
-            practitioner_role.specialty = (
-                CodeableConcept(
-                    coding=[
-                        Coding(
-                            system="http://snomed.info/sct",
-                            code=str(instance.specialty_id),
-                        )
-                    ]
-                ),
-            )
         practitioner_role.location = [
             genReference("fhir-location-detail", instance.location.id, request)
         ]
-        if len(instance.location.locationtoendpointinstance_set.all()) > 0:
-            endpoints = []
-            for loc_to_endpoint in instance.location.locationtoendpointinstance_set.all():
-                endpoints.append(
-                    genReference(
-                        "fhir-endpoint-detail", loc_to_endpoint.endpoint_instance_id, request
-                    )
-                )
-            practitioner_role.endpoint = endpoints
         # These lines rely on the fhir.resources.R4B representation of PractitionerRole to be expanded to match the ndh FHIR definition. This is a TODO with an open ticket.
         # if 'other_phone' in representation.keys():
         #    practitioner_role.telecom = representation['other_phone']
@@ -686,6 +575,7 @@ class EndpointSerializer(serializers.Serializer):
         ]
 
     def to_representation(self, instance):
+        # request = self.context.get("request")
         representation = super().to_representation(instance)
 
         if instance.endpoint_connection_type:
@@ -724,11 +614,8 @@ class EndpointSerializer(serializers.Serializer):
             name=instance.name,
             # TODO extend base fhir spec to ndh spec description=instance.description,
             # TODO extend base fhir spec to ndh spec environmentType=environment_type,
-            # We don't currently have a concept of managing organization for endpoint_instance
-            # request = self.context.get("request")
             # managingOrganization=genReference(
-            #    "fhir-organization-detail", representation['location_to_endpoint_instance'][0]['organization_id'], request
-            # ),
+            #    'fhir-organization-detail', instance.location.organization_id, request),
             # contact=ContactPoint(contact),
             # period=Period(period),
             payloadType=representation["payload"],

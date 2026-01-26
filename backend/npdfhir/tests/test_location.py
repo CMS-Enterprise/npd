@@ -68,7 +68,7 @@ class LocationViewSetTestCase(APITestCase):
                 organization=cls.orgs[0],
                 city="St. Louis",
                 state="MO",
-                zipcode="05313",
+                zipcode="65313",
                 addr_line_1="City Museum Rd.",
                 x=38.6336745,
                 y=-90.2032725,
@@ -84,9 +84,7 @@ class LocationViewSetTestCase(APITestCase):
                 x=26.1412097,
                 y=-80.191004,
             ),
-            create_location(
-                name="A & B HEALTH CARE, INC.", organization=cls.orgs[0], x=None, y=None
-            ),
+            create_location(name="A & B HEALTH CARE, INC.", organization=cls.orgs[0]),
             create_location(name="ABILENE HELPING HANDS INC", organization=cls.orgs[0]),
             create_location(name="ZEELAND COMMUNITY HOSPITAL", organization=cls.orgs[0]),
             create_location(name="YOUNGSTOWN ORTHOPAEDIC ASSOCIATES LTD", organization=cls.orgs[0]),
@@ -294,28 +292,6 @@ class LocationViewSetTestCase(APITestCase):
             self.assertIn(name, location_entry["name"])
             self.assertNotIn("ABC DURABLE MEDICAL EQUIPMENT INC", location_entry["name"])
 
-    def test_list_filter_by_y_name(self):
-        name = "SUPPLY"
-
-        url = reverse("fhir-location-list")
-        response = self.client.get(url, {"name": name})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        assert_has_results(self, response)
-
-        bundle = response.data["results"]
-
-        for entry in bundle["entry"]:
-            self.assertIn("resource", entry)
-            location_entry = entry["resource"]
-
-            self.assertEqual(location_entry["resourceType"], "Location")
-            self.assertIn("id", location_entry)
-            self.assertIn("status", location_entry)
-            self.assertIn("managingOrganization", location_entry)
-            self.assertIn("address", location_entry)
-            self.assertIn("name", location_entry)
-            self.assertIn(name, location_entry["name"])
-
     def test_filter_by_org_type(self):
         nucc_type = "283Q00000X"
 
@@ -343,29 +319,6 @@ class LocationViewSetTestCase(APITestCase):
 
     def test_list_filter_by_address(self):
         address_search = "Amazing Avenue"
-        url = reverse("fhir-location-list")
-        response = self.client.get(url, {"address": address_search})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        assert_has_results(self, response)
-
-        bundle = response.data["results"]
-
-        for entry in bundle["entry"]:
-            self.assertIn("resource", entry)
-            location_entry = entry["resource"]
-
-            self.assertEqual(location_entry["resourceType"], "Location")
-            self.assertIn("id", location_entry)
-            self.assertIn("status", location_entry)
-            self.assertIn("managingOrganization", location_entry)
-            self.assertIn("address", location_entry)
-            self.assertIn("name", location_entry)
-
-            address_string = concat_address_string(location_entry["address"])
-            self.assertIn(address_search, address_string)
-
-    def test_list_filter_by_address_leading_zero(self):
-        address_search = "City Museum Rd. St. Louis MO 05313"
         url = reverse("fhir-location-list")
         response = self.client.get(url, {"address": address_search})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -433,28 +386,6 @@ class LocationViewSetTestCase(APITestCase):
 
     def test_list_filter_by_address_postalcode(self):
         zip_search = "55555"
-        url = reverse("fhir-location-list")
-        response = self.client.get(url, {"address_postalcode": zip_search})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        assert_has_results(self, response)
-
-        bundle = response.data["results"]
-
-        for entry in bundle["entry"]:
-            self.assertIn("resource", entry)
-            location_entry = entry["resource"]
-
-            self.assertEqual(location_entry["resourceType"], "Location")
-            self.assertIn("id", location_entry)
-            self.assertIn("status", location_entry)
-            self.assertIn("managingOrganization", location_entry)
-            self.assertIn("address", location_entry)
-            self.assertIn("name", location_entry)
-
-            self.assertIn(zip_search, location_entry["address"]["postalCode"])
-
-    def test_list_filter_by_address_postalcode_leading_zero(self):
-        zip_search = "05313"
         url = reverse("fhir-location-list")
         response = self.client.get(url, {"address_postalcode": zip_search})
         self.assertEqual(response.status_code, status.HTTP_200_OK)

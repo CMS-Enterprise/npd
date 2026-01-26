@@ -8,7 +8,6 @@ from ...models import (
     Individual,
     IndividualToAddress,
     IndividualToName,
-    LocationToEndpointInstance,
     Npi,
     Nucc,
     OtherIdType,
@@ -20,7 +19,6 @@ from ...models import (
     ProviderToTaxonomy,
     RelationshipType,
 )
-from .endpoint import create_endpoint_instance
 from .location import create_location
 from .organization import create_organization
 from .utils import _ensure_name_use
@@ -130,14 +128,7 @@ def create_full_practitionerrole(
     location_id=None,
     role_code="PRV",
     role_display="Provider Role",
-    practitioner_nucc_types=None,
-    organization_nucc_type=None,
-    location_city=None,
-    location_state=None,
-    location_zip=None,
-    endpoint_payload_type="any",
-    endpoint_connection_type=None,
-    specialty_id=None,
+    nucc_types=None
 ):
     """
     Creates:
@@ -152,13 +143,12 @@ def create_full_practitionerrole(
         last_name=last_name,
         gender=gender,
         npi_value=npi_value,
-        practitioner_types=practitioner_nucc_types,
+        practitioner_types=nucc_types
     )
-    org = create_organization(name=org_name, organization_type=organization_nucc_type)
+
+    org = create_organization(name=org_name)
     if location_id is None:
-        loc = create_location(
-            city=location_city, zipcode=location_zip, state=location_state, organization=org
-        )
+        loc = create_location()
         location_id = loc.id
 
     # Ensure relationship + role codes exist
@@ -173,26 +163,12 @@ def create_full_practitionerrole(
         active=True,
     )
 
-    endpoint_instance = create_endpoint_instance(
-        organization=org,
-        url="https://example.org/fhir",
-        name="Test Endpoint",
-        ehr=None,
-        payload_type=endpoint_payload_type,
-        endpoint_connection_type=endpoint_connection_type,
-    )
-
-    LocationToEndpointInstance.objects.create(
-        location_id=location_id, endpoint_instance_id=endpoint_instance.id
-    )
-
     pr = ProviderToLocation.objects.create(
         id=uuid.uuid4(),
         provider_to_organization=pto_org,
         location_id=location_id,
         provider_role_code=role_code,
         active=True,
-        specialty_id=specialty_id,
     )
 
     return pr

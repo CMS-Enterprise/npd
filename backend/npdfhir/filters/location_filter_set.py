@@ -1,56 +1,44 @@
 import re
-from django.contrib.postgres.search import SearchVector, SearchQuery
+from django.contrib.postgres.search import SearchVector
 from django_filters import rest_framework as filters
 from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import D
 from django.db.models import F
 
-from ..documentation_content import docs
 from ..mappings import addressUseMapping
 from ..models import Location
 
 
 class LocationFilterSet(filters.FilterSet):
     name = filters.CharFilter(
-        field_name="name",
-        lookup_expr="contains",
-        help_text=docs.filters.location.name,
+        field_name="name", lookup_expr="contains", help_text="Filter by location name"
     )
 
     organization_type = filters.CharFilter(
-        method="filter_organization_type",
-        help_text=docs.filters.organization.type,
+        method="filter_organization_type", help_text="Filter by organization type"
     )
 
-    address = filters.CharFilter(
-        method="filter_address",
-        help_text=docs.filters.address.full,
-    )
+    address = filters.CharFilter(method="filter_address", help_text="Filter by any part of address")
 
-    address_city = filters.CharFilter(
-        method="filter_address_city",
-        help_text=docs.filters.address.city,
-    )
+    address_city = filters.CharFilter(method="filter_address_city", help_text="Filter by city name")
 
     address_state = filters.CharFilter(
-        method="filter_address_state",
-        help_text=docs.filters.address.state,
+        method="filter_address_state", help_text="Filter by state (2-letter abbreviation)"
     )
 
     address_postalcode = filters.CharFilter(
-        method="filter_address_postalcode",
-        help_text=docs.filters.address.postalcode,
+        method="filter_address_postalcode", help_text="Filter by postal code/zip code"
     )
 
     address_use = filters.ChoiceFilter(
         method="filter_address_use",
         choices=addressUseMapping.to_choices(),
-        help_text=docs.filters.address.use,
+        help_text="Filter by address use type",
     )
 
     near = filters.CharFilter(
         method="filter_distance",
-        help_text=docs.filters.location.near,
+        help_text="Filter by distance from a point expressed as [latitude]|[longitude]|[distance]|[units]. If no units are provided, km is assumed.",
     )
 
     class Meta:
@@ -81,7 +69,7 @@ class LocationFilterSet(filters.FilterSet):
                 "address__address_us__state_code__abbreviation",
                 "address__address_us__zipcode",
             )
-        ).filter(search=SearchQuery(value, search_type="websearch", config="english"))
+        ).filter(search=value)
 
     def filter_address_city(self, queryset, name, value):
         return queryset.annotate(search=SearchVector("address__address_us__city_name")).filter(
@@ -94,7 +82,9 @@ class LocationFilterSet(filters.FilterSet):
         ).filter(search=value)
 
     def filter_address_postalcode(self, queryset, name, value):
-        return queryset.filter(address__address_us__zipcode=value)
+        return queryset.annotate(search=SearchVector("address__address_us__zipcode")).filter(
+            search=value
+        )
 
     def filter_address_use(self, queryset, name, value):
         return queryset.filter(
