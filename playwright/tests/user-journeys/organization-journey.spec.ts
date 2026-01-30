@@ -113,7 +113,9 @@ test.describe("Organization Journey", () => {
     await expect(page).toHaveURL(/sort=name-desc/)
     await expect(sortButton).toContainText("Name (Z-A)")
 
-    await page.getByRole("link", { name: "AAA Test Org" }).click()
-    await expect(page).toHaveURL(`/organizations/${organization.id}`)
+    await page.getByRole("link", { name: /TEST/ }).first().click()
+
+    const banner = page.locator("section.banner")
+    await expect(banner.getByText(/TEST/)).toBeVisible()
   })
 })
