@@ -50,3 +50,4 @@ types-python-dateutil==2.9.0.20250516
 typing_extensions==4.14.0
 unittest-xml-reporting==3.2.0
 urllib3==2.6.3
+whitenoise==6.11.0

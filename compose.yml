@@ -8,11 +8,13 @@ services:
     env_file:
       - path: .env
         required: false
+    entrypoint: [] # Don't run collectstatic in entrypoint.sh
+    command: python manage.py runserver --insecure 0.0.0.0:8000
     environment:
       NPD_DJANGO_SECRET: ${NPD_DJANGO_SECRET:-_pth2#=k8-wf-_^t%2))it+3..8la^@@97^#ock7.v=@792w7}
       DEBUG: ${DEBUG:-True}
       DJANGO_LOGLEVEL: ${DJANGO_LOGLEVEL:-INFO}
-      DJANGO_ALLOWED_HOSTS: "${DJANGO_ALLOWED_HOSTS:-['localhost','127.0.0.1','0.0.0.0']}"
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1,0.0.0.0}
       NPD_DB_ENGINE: ${NPD_DB_ENGINE:-django.contrib.gis.db.backends.postgis}
       NPD_DB_NAME: ${NPD_DB_NAME:-npd_development}
       NPD_DB_USER: ${NPD_DB_USER:-postgres}
