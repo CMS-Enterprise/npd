@@ -540,8 +540,74 @@ class FHIROrganizationAffiliationViewSet(viewsets.GenericViewSet):
     #filterset_class = OrganizationFilterSet
     pagination_class = CustomPaginator
 
+    ordering = ["organization_name"]
     ordering_fields = ["ehr_vendor_name", "organization_name", "endpoint_name"]
     lookup_url_kwarg = "id"
+
+    endpoint_subquery = LocationToEndpointInstance.objects.filter(
+        location__organization=OuterRef("pk"), endpoint_instance__ehr_vendor__isnull=False
+    )
+
+    # Subquery for endpoint name (take first matching)
+    endpoint_name_subquery = LocationToEndpointInstance.objects.filter(
+        location__organization=OuterRef("pk"), endpoint_instance__ehr_vendor__isnull=False
+    ).values("endpoint_instance__name")[:1]
+
+    # Subquery for ehr_vendor name (take first matching)
+    ehr_vendor_name_subquery = LocationToEndpointInstance.objects.filter(
+        location__organization=OuterRef("pk"), endpoint_instance__ehr_vendor__isnull=False
+    ).values("endpoint_instance__ehr_vendor__name")[:1]
+
+    queryset = (
+        Organization.objects.all()
+        .filter(Exists(endpoint_subquery))
+        .prefetch_related(
+            "ein",
+            # Clinical organization (participating org)
+            "clinicalorganization",
+            "clinicalorganization__npi",
+            "clinicalorganization__organizationtootherid_set",
+            "clinicalorganization__organizationtootherid_set__other_id_type",
+            "clinicalorganization__organizationtotaxonomy_set",
+            "clinicalorganization__organizationtotaxonomy_set__nucc_code",
+            # --- NUCC CLASSIFICATIONS ---
+            "clinicalorganization__organizationtotaxonomy_set",
+            "clinicalorganization__organizationtotaxonomy_set__nucc_code",
+            # --- OTHER CODE CLASSIFICATIONS ---
+            "clinicalorganization__organizationtootherid_set",
+            "clinicalorganization__organizationtootherid_set__other_id_type",
+            # Names and addresses
+            "organizationtoname_set",
+            "organizationtoaddress_set",
+            "organizationtoaddress_set__address",
+            "organizationtoaddress_set__address__address_us",
+            "organizationtoaddress_set__address__address_us__state_code",
+            "organizationtoaddress_set__address_use",
+            # Authorized official chain
+            "authorized_official",
+            "authorized_official__individualtophone_set",
+            "authorized_official__individualtoname_set",
+            "authorized_official__individualtoemail_set",
+            "authorized_official__individualtoaddress_set",
+            "authorized_official__individualtoaddress_set__address__address_us",
+            "authorized_official__individualtoaddress_set__address__address_us__state_code",
+            # Endpoint + vendor relationship
+            "location_set",
+            "location_set__locationtoendpointinstance_set",
+            "location_set__locationtoendpointinstance_set__endpoint_instance",
+            "location_set__locationtoendpointinstance_set__endpoint_instance__ehr_vendor",
+        )
+        .annotate(
+            # Organization name
+            organization_name=F("organizationtoname__name"),
+            ein_value=F("ein__ein_id"),
+            endpoint_name=Subquery(endpoint_name_subquery),
+            ehr_vendor_name=Subquery(ehr_vendor_name_subquery),
+            participating_npi=F("clinicalorganization__npi__npi"),
+        )
+        .distinct()
+        .order_by("organization_name")
+    )
 
     # permission_classes = [permissions.IsAuthenticated]
     @extend_schema(
@@ -558,73 +624,7 @@ class FHIROrganizationAffiliationViewSet(viewsets.GenericViewSet):
         Default sort order: ascending by organization name
         """
 
-        endpoint_subquery = LocationToEndpointInstance.objects.filter(
-            location__organization=OuterRef("pk"), endpoint_instance__ehr_vendor__isnull=False
-        )
-
-        # Subquery for endpoint name (take first matching)
-        endpoint_name_subquery = LocationToEndpointInstance.objects.filter(
-            location__organization=OuterRef("pk"), endpoint_instance__ehr_vendor__isnull=False
-        ).values("endpoint_instance__name")[:1]
-
-        # Subquery for ehr_vendor name (take first matching)
-        ehr_vendor_name_subquery = LocationToEndpointInstance.objects.filter(
-            location__organization=OuterRef("pk"), endpoint_instance__ehr_vendor__isnull=False
-        ).values("endpoint_instance__ehr_vendor__name")[:1]
-
-        organization_affiliations = (
-            Organization.objects.all()
-            .filter(Exists(endpoint_subquery))
-            .prefetch_related(
-                "ein",
-                # Clinical organization (participating org)
-                "clinicalorganization",
-                "clinicalorganization__npi",
-                "clinicalorganization__organizationtootherid_set",
-                "clinicalorganization__organizationtootherid_set__other_id_type",
-                "clinicalorganization__organizationtotaxonomy_set",
-                "clinicalorganization__organizationtotaxonomy_set__nucc_code",
-                # --- NUCC CLASSIFICATIONS ---
-                "clinicalorganization__organizationtotaxonomy_set",
-                "clinicalorganization__organizationtotaxonomy_set__nucc_code",
-                # --- OTHER CODE CLASSIFICATIONS ---
-                "clinicalorganization__organizationtootherid_set",
-                "clinicalorganization__organizationtootherid_set__other_id_type",
-                # Names and addresses
-                "organizationtoname_set",
-                "organizationtoaddress_set",
-                "organizationtoaddress_set__address",
-                "organizationtoaddress_set__address__address_us",
-                "organizationtoaddress_set__address__address_us__state_code",
-                "organizationtoaddress_set__address_use",
-                # Authorized official chain
-                "authorized_official",
-                "authorized_official__individualtophone_set",
-                "authorized_official__individualtoname_set",
-                "authorized_official__individualtoemail_set",
-                "authorized_official__individualtoaddress_set",
-                "authorized_official__individualtoaddress_set__address__address_us",
-                "authorized_official__individualtoaddress_set__address__address_us__state_code",
-                # Endpoint + vendor relationship
-                "location_set",
-                "location_set__locationtoendpointinstance_set",
-                "location_set__locationtoendpointinstance_set__endpoint_instance",
-                "location_set__locationtoendpointinstance_set__endpoint_instance__ehr_vendor",
-            )
-            .annotate(
-                # Organization name
-                organization_name=F("organizationtoname__name"),
-                ein_value=F("ein__ein_id"),
-                endpoint_name=Subquery(endpoint_name_subquery),
-                ehr_vendor_name=Subquery(ehr_vendor_name_subquery),
-                participating_npi=F("clinicalorganization__npi__npi"),
-            )
-            .distinct()
-            .order_by("organization_name")
-        )
-
-        #organization_affiliations = self.filter_queryset(organization_affiliations)
-        paginated_organization_affiliations = self.paginate_queryset(organization_affiliations)
+        paginated_organization_affiliations = self.paginate_queryset(self.queryset)
 
         serialized_organization_affiliations = OrganizationAffiliationSerializer(
             paginated_organization_affiliations, many=True, context={"request": request}
@@ -650,67 +650,8 @@ class FHIROrganizationAffiliationViewSet(viewsets.GenericViewSet):
         except (ValueError, TypeError):
             return HttpResponse(f"Organization {escape(id)} not found", status=404)
 
-        endpoint_subquery = LocationToEndpointInstance.objects.filter(
-            location__organization=OuterRef("pk"), endpoint_instance__ehr_vendor__isnull=False
-        )
-
-        # Subquery for endpoint name (take first matching)
-        endpoint_name_subquery = LocationToEndpointInstance.objects.filter(
-            location__organization=OuterRef("pk"), endpoint_instance__ehr_vendor__isnull=False
-        ).values("endpoint_instance__name")[:1]
-
-        # Subquery for ehr_vendor name (take first matching)
-        ehr_vendor_name_subquery = LocationToEndpointInstance.objects.filter(
-            location__organization=OuterRef("pk"), endpoint_instance__ehr_vendor__isnull=False
-        ).values("endpoint_instance__ehr_vendor__name")[:1]
-
         organization_affiliation = get_object_or_404(
-            Organization.objects.filter(Exists(endpoint_subquery))
-            .prefetch_related(
-                "ein",
-                # Clinical organization (participating org)
-                "clinicalorganization",
-                "clinicalorganization__npi",
-                "clinicalorganization__organizationtootherid_set",
-                "clinicalorganization__organizationtootherid_set__other_id_type",
-                "clinicalorganization__organizationtotaxonomy_set",
-                "clinicalorganization__organizationtotaxonomy_set__nucc_code",
-                # --- NUCC CLASSIFICATIONS ---
-                "clinicalorganization__organizationtotaxonomy_set",
-                "clinicalorganization__organizationtotaxonomy_set__nucc_code",
-                # --- OTHER CODE CLASSIFICATIONS ---
-                "clinicalorganization__organizationtootherid_set",
-                "clinicalorganization__organizationtootherid_set__other_id_type",
-                # Names and addresses
-                "organizationtoname_set",
-                "organizationtoaddress_set",
-                "organizationtoaddress_set__address",
-                "organizationtoaddress_set__address__address_us",
-                "organizationtoaddress_set__address__address_us__state_code",
-                "organizationtoaddress_set__address_use",
-                # Authorized official chain
-                "authorized_official",
-                "authorized_official__individualtophone_set",
-                "authorized_official__individualtoname_set",
-                "authorized_official__individualtoemail_set",
-                "authorized_official__individualtoaddress_set",
-                "authorized_official__individualtoaddress_set__address__address_us",
-                "authorized_official__individualtoaddress_set__address__address_us__state_code",
-                # Endpoint + vendor relationship
-                "location_set",
-                "location_set__locationtoendpointinstance_set",
-                "location_set__locationtoendpointinstance_set__endpoint_instance",
-                "location_set__locationtoendpointinstance_set__endpoint_instance__ehr_vendor",
-            )
-            .annotate(
-                # Organization name
-                organization_name=F("organizationtoname__name"),
-                ein_value=F("ein__ein_id"),
-                endpoint_name=Subquery(endpoint_name_subquery),
-                ehr_vendor_name=Subquery(ehr_vendor_name_subquery),
-                participating_npi=F("clinicalorganization__npi__npi"),
-            )
-            .distinct(),
+            self.queryset,
             pk=id,
         )
 
