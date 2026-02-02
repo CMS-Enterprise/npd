@@ -1,9 +1,9 @@
 DO $$
 BEGIN
-    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'npd_readonly') THEN
-        CREATE USER npd_readonly WITH PASSWORD '${npdReadonlyPassword}';
+    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'npd_readonly_db_user') THEN
+        CREATE USER npd_readonly WITH PASSWORD '${npdReadonlyUserPassword}';
     ELSE
-        ALTER USER npd_readonly WITH PASSWORD '${npdReadonlyPassword}';
+        ALTER USER npd_readonly WITH PASSWORD '${npdReadonlyUserPassword}';
     END IF;
 END
 $$;
