@@ -469,9 +469,8 @@ class OrganizationAffiliationSerializer(serializers.Serializer):
 
         locations = []
 
-        organization_affiliation.organization = genReference("fhir-organization-detail", instance.id, request)
-        organization_affiliation.organization.display = str(instance.ehr_vendor_name)
-
+        organization_affiliation.organization = Reference(display=str(instance.ehr_vendor_name))
+        
         organization_affiliation.participatingOrganization = Reference(display=instance.organization_name)#genReference("fhir-organization-detail", instance.id, request)
         #organization_affiliation.participatingOrganization.display = str(instance.organization_name)
 

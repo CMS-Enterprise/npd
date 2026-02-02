@@ -195,6 +195,18 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
         assert_fhir_response(self, response)
         assert_has_results(self, response)
 
+        bundle = response.data["results"]
+
+        for entry in bundle["entry"]:
+            self.assertIn("resource", entry)
+            org_affiliation_entry = entry["resource"]
+            self.assertEqual(org_affiliation_entry["resourceType"], "OrganizationAffiliation")
+
+            self.assertIn('id', org_affiliation_entry)
+            self.assertIn('organization', org_affiliation_entry)
+            self.assertIn('participatingOrganization', org_affiliation_entry)
+            self.assertIn('endpoint', org_affiliation_entry)
+
 #    def test_list_in_default_order(self):
 #        url = reverse("fhir-organizationaffiliation-list")
 #        response = self.client.get(url)
@@ -268,6 +280,16 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
         response = self.client.get(url)
 
         self.assertEqual(str(self.orgs[0].id), response.data["id"])
+
+        org_affiliation_entry = response.data
+        
+        print(org_affiliation_entry)
+        self.assertEqual(org_affiliation_entry["resourceType"], "OrganizationAffiliation")
+
+        self.assertIn('id', org_affiliation_entry)
+        self.assertIn('organization', org_affiliation_entry)
+        self.assertIn('participatingOrganization', org_affiliation_entry)
+        self.assertIn('endpoint', org_affiliation_entry)
 
     def test_retrieve_non_existant_organization_affil(self):
         url = reverse(
