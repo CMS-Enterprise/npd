@@ -537,7 +537,7 @@ class FHIROrganizationAffiliationViewSet(viewsets.GenericViewSet):
     else:
         renderer_classes = [FHIRRenderer]
     filter_backends = [DjangoFilterBackend, ParamOrderingFilter]
-    #filterset_class = OrganizationFilterSet
+    # filterset_class = OrganizationFilterSet
     pagination_class = CustomPaginator
 
     ordering = ["organization_name"]

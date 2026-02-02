@@ -1,7 +1,6 @@
 from django.contrib.postgres.search import SearchVector
 from django_filters import rest_framework as filters
 
-from ..mappings import addressUseMapping
 from ..models import EhrVendor
 from ..utils import parse_identifier_query
 

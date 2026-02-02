@@ -470,25 +470,29 @@ class OrganizationAffiliationSerializer(serializers.Serializer):
         locations = []
 
         organization_affiliation.organization = Reference(display=str(instance.ehr_vendor_name))
-        
-        organization_affiliation.participatingOrganization = Reference(display=instance.organization_name)#genReference("fhir-organization-detail", instance.id, request)
-        #organization_affiliation.participatingOrganization.display = str(instance.organization_name)
+
+        organization_affiliation.participatingOrganization = Reference(
+            display=instance.organization_name
+        )  # genReference("fhir-organization-detail", instance.id, request)
+        # organization_affiliation.participatingOrganization.display = str(instance.organization_name)
 
         # NOTE: Period for OrganizationAffiliation cannot currently be fetched so its blank
 
         # NOTE: Network here means insurance network, per the FHIR spec. We have not begun to incorporate insurance networks
-        #organization_affiliation.network = [genReference("fhir-organization-detail", instance.id, request)]
-        #organization_affiliation.network[0].display = str(instance.organization_name)
+        # organization_affiliation.network = [genReference("fhir-organization-detail", instance.id, request)]
+        # organization_affiliation.network[0].display = str(instance.organization_name)
 
-        organization_affiliation.code = [CodeableConcept(
-            coding=[
-                Coding(
-                    system="http://terminology.hl7.org/CodeSystem/codesystem-organization-role",
-                    code="HIE/HIO",
-                    display="HIE/HIO"
-                )
-            ]
-        )]
+        organization_affiliation.code = [
+            CodeableConcept(
+                coding=[
+                    Coding(
+                        system="http://terminology.hl7.org/CodeSystem/codesystem-organization-role",
+                        code="HIE/HIO",
+                        display="HIE/HIO",
+                    )
+                ]
+            )
+        ]
 
         # NOTE: not sure how to do specialty yet
 
