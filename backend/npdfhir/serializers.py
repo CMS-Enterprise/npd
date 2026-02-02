@@ -311,6 +311,7 @@ class OrganizationSerializer(serializers.Serializer):
 
     def to_representation(self, instance):
         request = self.context.get("request")
+        representation = super().to_representation(instance)
 
         organization = FHIROrganization()
         organization.id = str(instance.id)
@@ -319,7 +320,6 @@ class OrganizationSerializer(serializers.Serializer):
         )
         identifiers = []
 
-        representation = super().to_representation(instance)
         taxonomies = []
         # if instance.ein:
         #    ein_identifier = Identifier(
@@ -472,8 +472,8 @@ class OrganizationAffiliationSerializer(serializers.Serializer):
         organization_affiliation.organization = genReference("fhir-organization-detail", instance.id, request)
         organization_affiliation.organization.display = str(instance.ehr_vendor_name)
 
-        organization_affiliation.participatingOrganization = genReference("fhir-organization-detail", instance.id, request)
-        organization_affiliation.participatingOrganization.display = str(instance.organization_name)
+        organization_affiliation.participatingOrganization = Reference(display=instance.organization_name)#genReference("fhir-organization-detail", instance.id, request)
+        #organization_affiliation.participatingOrganization.display = str(instance.organization_name)
 
         # NOTE: Period for OrganizationAffiliation cannot currently be fetched so its blank
 
