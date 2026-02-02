@@ -100,7 +100,7 @@ test.describe("Practitioner search", () => {
   test("search for a Practitioner and confirm pagination works", async ({ page }) => {
     await page.goto("/practitioners/search")
     await expect(page).toHaveURL("/practitioners/search")
-    await expect(page.getByText("Search Practitioners")).toBeVisible()
+    await expect(page.getByText("Search practitioners")).toBeVisible()
 
     await page
       .getByRole("textbox", { name: "Name or NPI" })
