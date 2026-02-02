@@ -17,15 +17,13 @@ from rest_framework.filters import OrderingFilter
 from .pagination import CustomPaginator
 from .renderers import FHIRRenderer
 
-from .filters.ehr_vendor_filter_set import EhrVendorFilterSet
 from .filters.endpoint_filter_set import EndpointFilterSet
 from .filters.location_filter_set import LocationFilterSet
-from .filters.organization_filter_set import OrganizationFilterSet
+#from .filters.organization_filter_set import OrganizationFilterSet
 from .filters.practitioner_filter_set import PractitionerFilterSet
 from .filters.practitioner_role_filter_set import PractitionerRoleFilterSet
 
 from .models import (
-    EhrVendor,
     EndpointInstance,
     Location,
     LocationToEndpointInstance,
@@ -45,7 +43,6 @@ from .serializers import (
     PractitionerSerializer,
     CapabilityStatementSerializer,
 )
-from .utils import FHIROrganizationSource
 
 DEBUG = settings.DEBUG
 
