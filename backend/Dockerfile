@@ -73,8 +73,7 @@ USER appuser
 # Expose the application port
 EXPOSE 8000 
 
-# Run Django’s development server
-CMD ["python", "manage.py", "runserver", "--insecure", "0.0.0.0:8000"]
-
-# Start the application using Gunicorn
-#CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "app.wsgi:application"]
+# In production, collect static assets then start gunicorn in entrypoint.sh
+# Note that this behavior is disabled for local dev by updating entrypoint in compose.yml
+ENTRYPOINT ["./entrypoint.sh"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "app.wsgi:application"]

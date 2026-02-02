@@ -83,4 +83,4 @@ The National Provider Directory team is taking an open source approach to the pr
 
 Although this project is led by a CMS team, we know that we can learn from a wide variety of communities, including those who will use or will be impacted by the tool, who are experts in technology, or who have experience with similar technologies deployed in other spaces. We are dedicated to creating forums for continuous conversation and feedback to help shape the design and development of the tool and welcome external contributions to our project.
 
-To learn more, visit the [primary code repository](https://github.com/DSACMS/npd) on GitHub. Visit the [CMS Open Source Program Office](https://go.cms.gov/ospo) to learn more about their work.
+To learn more, visit the [primary code repository](https://github.com/CMS-Enterprise/npd) on GitHub. Visit the [CMS Open Source Program Office](https://go.cms.gov/ospo) to learn more about their work.
