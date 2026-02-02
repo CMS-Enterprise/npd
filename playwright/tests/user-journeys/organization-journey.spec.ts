@@ -60,18 +60,31 @@ test.describe("Organization Journey", () => {
     await expect(banner.getByText(`NPI: ${organization.npi}`)).toBeVisible()
   })
 
-  test("landing -> organization detail", async ({ page }) => {
+  test("landing -> last page -> organization detail", async ({ page }) => {
     await page.goto("/")
-
+  
     await page.getByRole("link", { name: /search/i }).first().click()
     await page.getByRole("link", { name: /organization/i }).click()
-
-    await page.getByRole("textbox", { name: "Name or NPI" }).fill("AAA Test Org")
+  
+    await page.getByRole("textbox", { name: "Name or NPI" }).fill("TEST")
     await page.getByRole("button", { name: "Search" }).click()
 
+    const sortButton = page.locator(".ds-c-dropdown__button")
+    await expect(sortButton).toContainText("Name (A-Z)")
+    await sortButton.click()
+    await expect(page.locator("[role='listbox']")).toBeVisible()
+    await page.getByRole("option", { name: "Name (Z-A)" }).click()
+    await expect(sortButton).toContainText("Name (Z-A)")
+  
+    await page.getByLabel("Next Page").first().click()
+    await expect(page).toHaveURL(/page=2/)
+  
+    await page.getByLabel("Next Page").first().click()
+    await expect(page).toHaveURL(/page=3/)
+  
     await expect(page.getByRole("link", { name: "AAA Test Org" })).toBeVisible()
     await page.getByRole("link", { name: "AAA Test Org" }).click()
-
+  
     await expect(page).toHaveURL(`/organizations/${organization.id}`)
     await expect(page.locator("div[role='heading']")).toContainText(organization.name)
   })
