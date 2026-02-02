@@ -19,7 +19,7 @@ from .renderers import FHIRRenderer
 
 from .filters.endpoint_filter_set import EndpointFilterSet
 from .filters.location_filter_set import LocationFilterSet
-#from .filters.organization_filter_set import OrganizationFilterSet
+from .filters.organization_filter_set import OrganizationFilterSet
 from .filters.practitioner_filter_set import PractitionerFilterSet
 from .filters.practitioner_role_filter_set import PractitionerRoleFilterSet
 
@@ -342,7 +342,7 @@ class FHIROrganizationViewSet(viewsets.GenericViewSet):
     else:
         renderer_classes = [FHIRRenderer]
     filter_backends = [DjangoFilterBackend, ParamOrderingFilter]
-    # filterset_class = OrganizationFilterSet
+    filterset_class = OrganizationFilterSet
     pagination_class = CustomPaginator
     lookup_url_kwarg = "id"
     ordering = ["organizationtoname__name"]
