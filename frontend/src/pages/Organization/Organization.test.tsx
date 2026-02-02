@@ -34,7 +34,9 @@ describe("Organization", () => {
     })
 
     it("does not render content when feature flag is unset", async () => {
-      render(<RoutedOrganization path="/organizations/12345" />)
+      render(<RoutedOrganization path="/organizations/12345" />, {
+        settings: { feature_flags: { ORGANIZATION_LOOKUP_DETAILS: false } },
+      })
 
       // ensure FeatureFlag components have finished loading
       await screen.findByText("Content not available")

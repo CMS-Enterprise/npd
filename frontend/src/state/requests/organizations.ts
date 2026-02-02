@@ -113,8 +113,6 @@ export const useOrganizationsAPI = (
   params: PaginationParams & SearchParams,
   options?: QueryOptions,
 ) => {
-  // console.debug("[useOrganizationsAPI]", { params, options })
-
   return useQuery<FHIRCollection<FHIROrganization>>({
     queryKey: ["organizations", params.sort, params.query, params.page || 1],
     queryFn:
