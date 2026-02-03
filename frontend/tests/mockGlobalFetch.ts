@@ -1,12 +1,7 @@
 import { vi } from "vitest"
 import type { Organization } from "../src/@types/fhir/Organization"
 import type { Practitioner } from "../src/@types/fhir/Practitioner"
-
-export const DEFAULT_FRONTEND_SETTINGS: FrontendSettings = {
-  require_authentication: false,
-  user: { is_anonymous: false, username: "testuser" },
-  feature_flags: {},
-}
+import { DEFAULT_FRONTEND_SETTINGS } from "./fixtures"
 
 export const settingsResponseWithFeature = (
   flagValues: Record<string, boolean>,

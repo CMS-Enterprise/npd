@@ -4,11 +4,10 @@ import { beforeEach, describe, expect, it } from "vitest"
 import { DEFAULT_PRACTITIONER } from "../../../tests/fixtures"
 import {
   mockGlobalFetch,
-  settingsResponseWithFeature,
   type MockResponse,
 } from "../../../tests/mockGlobalFetch"
 import { render } from "../../../tests/render"
-import type { Practitioner as FHIRPractitioner } from "../../state/requests/practitioners"
+import type { FHIRPractitioner } from "../../@types/fhir"
 import { Practitioner } from "./Practitioner"
 
 const practitionerApiResponse: MockResponse = [
@@ -39,14 +38,13 @@ const RoutedPractitioner = ({ path }: { path: string }) => {
 describe("Practitioner", () => {
   describe("without PRACTITIONER_LOOKUP_DETAILS feature flag", () => {
     beforeEach(() => {
-      mockGlobalFetch([
-        settingsResponseWithFeature({ PRACTITIONER_LOOKUP_DETAILS: false }),
-        practitionerApiResponse,
-      ])
+      mockGlobalFetch([practitionerApiResponse])
     })
 
     it("does not render content when feature flag is unset", async () => {
-      render(<RoutedPractitioner path="/practitioners/12345" />)
+      render(<RoutedPractitioner path="/practitioners/12345" />, {
+        settings: { feature_flags: { PRACTITIONER_LOOKUP_DETAILS: false } },
+      })
 
       // ensure loading has finished
       await screen.findByText(EXPECTED_NAME)
@@ -60,17 +58,17 @@ describe("Practitioner", () => {
 
   describe("with PRACTITIONER_LOOKUP_DETAILS feature flag", () => {
     beforeEach(() => {
-      // update /api/frontend_settings mocked response
-      mockGlobalFetch([
-        settingsResponseWithFeature({ PRACTITIONER_LOOKUP_DETAILS: true }),
-        practitionerApiResponse,
-      ])
+      mockGlobalFetch([practitionerApiResponse])
     })
 
     it("shows detailed content", async () => {
-      render(<RoutedPractitioner path="/practitioners/12345" />)
+      render(<RoutedPractitioner path="/practitioners/12345" />, {
+        settings: { feature_flags: { PRACTITIONER_LOOKUP_DETAILS: true } },
+      })
 
-      await screen.findByText(EXPECTED_NAME)
+      const nameElement = await screen.findByTestId("practitioner-name")
+
+      expect(nameElement).toHaveTextContent(EXPECTED_NAME)
       await screen.findByText("About", { selector: "section h2" })
       await screen.findByText("Contact information", { selector: "section h2" })
       await screen.findByText("Identifiers", { selector: "section h2" })
