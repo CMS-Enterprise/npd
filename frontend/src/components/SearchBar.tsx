@@ -2,7 +2,7 @@ import { Button } from "@cmsgov/design-system"
 import type { FormEvent, ChangeEvent } from "react"
 import { useTranslation } from "react-i18next"
 import classNames from "classnames"
-import search from "../Search.module.css"
+import search from "../pages/Search.module.css"
 
 type Props = {
   value: string
