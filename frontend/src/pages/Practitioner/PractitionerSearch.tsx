@@ -1,4 +1,10 @@
-import { Alert, Button, Pagination, Dropdown, type DropdownChangeObject  } from "@cmsgov/design-system"
+import {
+  Alert,
+  Button,
+  Pagination,
+  Dropdown,
+  type DropdownChangeObject,
+} from "@cmsgov/design-system"
 import classNames from "classnames"
 import React, { type ChangeEvent, type FormEvent, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -11,10 +17,14 @@ import { useSearchDispatch, useSearchState } from "../../state/Search/useSearch"
 import layout from "../Layout.module.css"
 import search from "../Search.module.css"
 import { ListedPractitioner } from "./ListedPractitioner"
-import { PRACTITIONER_SORT_OPTIONS, type PractitionerSortKey } from "../../state/requests/practitioners"
+import {
+  PRACTITIONER_SORT_OPTIONS,
+  type PractitionerSortKey,
+} from "../../state/requests/practitioners"
 import { usePractitionersAPI } from "../../state/requests/practitioners"
 import type { FHIRPractitioner } from "../../@types/fhir"
 import { FaUserMd } from "react-icons/fa"
+import { SearchResultsHeader } from "../../components/SearchResultsHeader"
 
 const PractitionerSearchForm: React.FC = () => {
   const { t } = useTranslation()
@@ -27,7 +37,7 @@ const PractitionerSearchForm: React.FC = () => {
     error: searchError,
     data,
     pagination,
-    sort
+    sort,
   } = useSearchState<FHIRPractitioner>()
 
   const [query, setQueryValue] = useState<string>(initialQuery || "")
@@ -54,7 +64,7 @@ const PractitionerSearchForm: React.FC = () => {
     ([value, option]) => ({
       value: value as PractitionerSortKey,
       label: t(option.labelKey),
-    })
+    }),
   )
 
   return (
@@ -85,9 +95,13 @@ const PractitionerSearchForm: React.FC = () => {
                   <Button
                     type="submit"
                     variation="solid"
-                    disabled={query.length < 1 || isLoading && !isBackgroundLoading}
+                    disabled={
+                      query.length < 1 || (isLoading && !isBackgroundLoading)
+                    }
                   >
-                    {isLoading && !isBackgroundLoading ? "Searching..." : "Search practitioners"}
+                    {isLoading && !isBackgroundLoading
+                      ? "Searching..."
+                      : "Search practitioners"}
                   </Button>
                 </div>
               </div>
@@ -109,22 +123,13 @@ const PractitionerSearchForm: React.FC = () => {
               <>
                 {pagination && (
                   <>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <PaginationCaption pagination={pagination} />
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                      {t("practitioners.sort.by")}
-                      <Dropdown
-                        label=""
-                        name="sort-dropdown-field"
-                        labelClassName="ds-u-display--none"
-                        options={sortOptions}
-                        value={sort}
-                        onChange={handleSort}
-                      />
-                    </div>
-                  </div>
+                    <SearchResultsHeader
+                      pagination={pagination}
+                      options={sortOptions}
+                      value={sort}
+                      onChange={setSort}
+                      inputLabel={"practitioners.sort.by"}
+                    />
                     <Pagination
                       currentPage={pagination.page}
                       onPageChange={(evt, page) => {
@@ -144,7 +149,10 @@ const PractitionerSearchForm: React.FC = () => {
                 )}
                 <div data-testid="searchresults" role="list">
                   {data.map((practitioner) => (
-                    <ListedPractitioner data={practitioner} key={practitioner.id} />
+                    <ListedPractitioner
+                      data={practitioner}
+                      key={practitioner.id}
+                    />
                   ))}
                 </div>
               </>
@@ -168,7 +176,7 @@ const PractitionerSearchForm: React.FC = () => {
 
 export const PractitionerSearch = () => {
   return (
-    <SearchProvider 
+    <SearchProvider
       useSearchAPI={usePractitionersAPI}
       defaultSort="first-name-asc"
     >
