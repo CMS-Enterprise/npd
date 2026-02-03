@@ -22,3 +22,6 @@ jobs:
           reporter: github-pr-annotations
           level: warning
           filter_mode: diff_context
+          exclude: |
+            V__*
+            frontend/src/@types/fhir/*
