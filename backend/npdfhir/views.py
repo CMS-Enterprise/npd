@@ -562,7 +562,6 @@ class FHIROrganizationAffiliationViewSet(viewsets.GenericViewSet):
         Organization.objects.all()
         .filter(Exists(endpoint_subquery))
         .prefetch_related(
-            "ein",
             # Clinical organization (participating org)
             "clinicalorganization",
             "clinicalorganization__npi",
@@ -583,14 +582,6 @@ class FHIROrganizationAffiliationViewSet(viewsets.GenericViewSet):
             "organizationtoaddress_set__address__address_us",
             "organizationtoaddress_set__address__address_us__state_code",
             "organizationtoaddress_set__address_use",
-            # Authorized official chain
-            "authorized_official",
-            "authorized_official__individualtophone_set",
-            "authorized_official__individualtoname_set",
-            "authorized_official__individualtoemail_set",
-            "authorized_official__individualtoaddress_set",
-            "authorized_official__individualtoaddress_set__address__address_us",
-            "authorized_official__individualtoaddress_set__address__address_us__state_code",
             # Endpoint + vendor relationship
             "location_set",
             "location_set__locationtoendpointinstance_set",
@@ -600,7 +591,6 @@ class FHIROrganizationAffiliationViewSet(viewsets.GenericViewSet):
         .annotate(
             # Organization name
             organization_name=F("organizationtoname__name"),
-            ein_value=F("ein__ein_id"),
             endpoint_name=Subquery(endpoint_name_subquery),
             ehr_vendor_name=Subquery(ehr_vendor_name_subquery),
             participating_npi=F("clinicalorganization__npi__npi"),

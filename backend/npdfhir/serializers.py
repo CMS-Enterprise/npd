@@ -440,10 +440,6 @@ class OrganizationSerializer(serializers.Serializer):
 
 
 class OrganizationAffiliationSerializer(serializers.Serializer):
-    identifier = OtherIdentifierSerializer(
-        source="organizationtootheridentifier_set", many=True, read_only=True
-    )
-
     class Meta:
         fields = [
             "identifier",
@@ -471,10 +467,8 @@ class OrganizationAffiliationSerializer(serializers.Serializer):
 
         organization_affiliation.organization = Reference(display=str(instance.ehr_vendor_name))
 
-        organization_affiliation.participatingOrganization = Reference(
-            display=instance.organization_name
-        )  # genReference("fhir-organization-detail", instance.id, request)
-        # organization_affiliation.participatingOrganization.display = str(instance.organization_name)
+        organization_affiliation.participatingOrganization = genReference("fhir-organization-detail", instance.id, request)
+        organization_affiliation.participatingOrganization.display = str(instance.organization_name)
 
         # NOTE: Period for OrganizationAffiliation cannot currently be fetched so its blank
 
