@@ -182,7 +182,7 @@ export const organizationIdentifiersSelector = (org?: FHIROrganization) => {
     type: identity.type?.coding?.[0]?.display || "Unknown",
     number: identity.value,
     details: identity.period?.start
-      ? `Active, Received ${formatDate(identity.period.start)}` // hardcoding active and recieved if we get a response?
+      ? `Active, Received ${formatDate(identity.period.start)}` // hardcoding active and received if we get a response?
       : "",
     system: identity.system,
   }))
