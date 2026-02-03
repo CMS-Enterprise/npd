@@ -4,15 +4,15 @@ import { formatAddress, formatDate } from "../../helpers/formatters"
 import { apiUrl } from "../api"
 import type { SortOption } from "../../@types/search"
 
-export const ORGANIZATION_SORT_OPTIONS: Record<string, SortOption>  = {
-  'name-asc': {
-    labelKey: 'organizations.sort.name-asc',
-    apiValue: 'organizationtoname__name'
+export const ORGANIZATION_SORT_OPTIONS: Record<string, SortOption> = {
+  "name-asc": {
+    labelKey: "organizations.sort.name-asc",
+    apiValue: "organizationtoname__name",
   },
-  'name-desc': {
-    labelKey: 'organizations.sort.name-desc',
-    apiValue: '-organizationtoname__name'
-  }
+  "name-desc": {
+    labelKey: "organizations.sort.name-desc",
+    apiValue: "-organizationtoname__name",
+  },
 } as const
 
 export type OrganizationSortKey = keyof typeof ORGANIZATION_SORT_OPTIONS
@@ -113,8 +113,6 @@ export const useOrganizationsAPI = (
   params: PaginationParams & SearchParams,
   options?: QueryOptions,
 ) => {
-  console.debug("[useOrganizationsAPI]", { params, options })
-
   return useQuery<FHIRCollection<FHIROrganization>>({
     queryKey: ["organizations", params.sort, params.query, params.page || 1],
     queryFn:
