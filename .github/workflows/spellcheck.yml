@@ -24,4 +24,4 @@ jobs:
           filter_mode: diff_context
           exclude: |
             V__*
-            frontend/src/@types/fhir/*
+            frontend/src/@types/fhir/*.ts
