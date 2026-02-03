@@ -1,0 +1,27 @@
+name: Spellcheck
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+on:
+  pull_request:
+
+jobs:
+  typos:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Run spellcheck
+        uses: reviewdog/action-misspell@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-annotations
+          level: warning
+          filter_mode: diff_context
+          exclude: |
+            flyway/sql/*
+            frontend/src/@types/fhir/*.ts

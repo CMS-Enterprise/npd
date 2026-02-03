@@ -5,6 +5,7 @@
 | Updated | 2029-09-30 | @abachman-dsac | clarification of coding styles and PR details |
 | Updated | 2029-10-15 | @abachman-dsac | addressing feedback from #108                 |
 | Updated | 2029-12-03 | @abachman-dsac | adding notes on `make` and `bin/npr`          |
+| Updated | 2026-01-28 | @sachin-panayil| updating links with new path                  |
 
 - [How to Contribute](#how-to-contribute)
   - [Getting Started](#getting-started)
@@ -44,7 +45,7 @@ We encourage you to read this project's CONTRIBUTING policy (you are here), its
 [LICENSE](LICENSE.md), and its [README](README.md).
 
 These instructions are general and do not cover every scenario. [Create an
-issue](https://github.com/DSACMS/npd/issues) on this project or double check
+issue](https://github.com/CMS-Enterprise/npd/issues) on this project or double check
 current documentation if you run into a situation you are unable to solve by
 rebuilding the application from scratch.
 
@@ -55,8 +56,8 @@ rebuilding the application from scratch.
 While being fully developed in the open, this project is a hybrid project
 largely staffed by members of the [DSAC](https://www.cms.gov/digital-service)
 team, but not restricted to CMS team members. We welcome
-[issues](https://github.com/DSACMS/npd/issues) and
-[contributions](https://github.com/DSACMS/npd/pulls) from the open source and
+[issues](https://github.com/CMS-Enterprise/npd/issues) and
+[contributions](https://github.com/CMS-Enterprise/npd/pulls) from the open source and
 health-tech community at large.
 
 The team uses an internal Jira instance for planning and tracking work but
@@ -127,9 +128,9 @@ We follow the [GitHub Flow Workflow](https://guides.github.com/introduction/flow
 2.  Check out the `main` branch
 3.  Create a feature branch
 4.  Write code and tests for your change
-5.  From your branch, make a pull request against `DSACMS/npd/main`
+5.  From your branch, make a pull request against `CMS-Enterprise/npd/main`
 6.  Work with repo maintainers to get your change reviewed
-7.  Wait for your change to be pulled into `DSACMS/npd/main`
+7.  Wait for your change to be pulled into `CMS-Enterprise/npd/main`
 8.  Delete your feature branch
 
 ### Testing Conventions
@@ -180,7 +181,7 @@ When creating an issue please try to adhere to the following format:
 
     see our .github/ISSUE_TEMPLATE.md for more examples.
 
-In this project, [new issues](https://github.com/DSACMS/npd/issues) should be
+In this project, [new issues](https://github.com/CMS-Enterprise/npd/issues) should be
 limited to code, development tooling, automation, or site bugs, ___NOT___ data
 quality.
 
@@ -322,7 +323,7 @@ npd will see regular updates and new releases. This section describes the genera
 
 <!-- ### Versioning
 
-npd uses [Semantic Versioning](https://semver.org/). Each release is associated with a [`git tag`](github.com/DSACMS/npd/tags) of the form `X.Y.Z`.
+npd uses [Semantic Versioning](https://semver.org/). Each release is associated with a [`git tag`](github.com/CMS-Enterprise/npd/tags) of the form `X.Y.Z`.
 
 Given a version number in the `MAJOR.MINOR.PATCH` (eg., `X.Y.Z`) format, here are the differences in these terms:
 
@@ -520,13 +521,13 @@ In rare cases, a hotfix for a prior release may be required out-of-phase with th
    This is a pre-release: DO NOT check
    ```
 
-[proj-releases-new]: https://github.com/DSACMS/npd/releases/new
+[proj-releases-new]: https://github.com/CMS-Enterprise/npd/releases/new
 -->
 
 ## Documentation
 
 We also welcome improvements to the project documentation or to the existing
-docs. Please file an [issue](https://github.com/DSACMS/npd/issues).
+docs. Please file an [issue](https://github.com/CMS-Enterprise/npd/issues).
 
 ## Policies
 

@@ -17,12 +17,15 @@ from .helpers import (
 from ..models import (
     Nucc,
     EndpointInstanceToPayload,
+    OrganizationToName,
+    Provider,
     ProviderToOrganization,
     ProviderToLocation,
     ProviderToTaxonomy,
     PayloadType,
     Location,
     LocationToEndpointInstance,
+    IndividualToName
 )
 
 
@@ -160,6 +163,7 @@ class PractitionerRoleViewSetTestCase(APITestCase):
 
         # Create organization and location
         cls.org_name = "Sunshine Health"
+        cls.orgs.append(cls.org_name)
         org = create_organization(
             name=cls.org_name, organization_type=taxonomy_code.code if taxonomy_code else None
         )
@@ -266,10 +270,34 @@ class PractitionerRoleViewSetTestCase(APITestCase):
 
     # Filter tests
     def test_list_filter_by_name(self):
+        sample_name = "Charlie"
         url = reverse("fhir-practitionerrole-list")
-        response = self.client.get(url, {"name": "Cumberland"})
+        response = self.client.get(url, {"practitioner_name": sample_name})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
+
+        for entry in response.data["results"]["entry"]:
+            #Query the practitioner names based on the returned id
+            practitioner_id = entry["resource"]["practitioner"]["reference"].split("/")[-1]
+            provider = Provider.objects.select_related("individual").get(
+                individual_id=practitioner_id
+            )
+
+            name_objects = IndividualToName.objects.filter(individual=provider.individual).all()
+
+            #Save if the search matches an individual name associated with a provider
+            match_conditions = []
+
+            for name in name_objects:
+                name_string = ""
+                name_string += f"{name.prefix or ""}"
+                name_string += f"{name.first_name or ""} {name.middle_name or ""}"
+                name_string += f"{name.last_name or ""} {name.suffix or ""}"
+
+                match_conditions.append(sample_name in name_string)
+
+            #Make sure that the provider has any individual name that matches
+            self.assertTrue(any(match_conditions))
 
     def test_list_filter_by_practitioner_gender(self):
         url = reverse("fhir-practitionerrole-list")
@@ -277,11 +305,33 @@ class PractitionerRoleViewSetTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
 
+        for entry in response.data["results"]["entry"]:
+            #Query the practitioner individual based on the returned id
+            practitioner_id = entry["resource"]["practitioner"]["reference"].split("/")[-1]
+            provider = Provider.objects.select_related("individual").get(
+                individual_id=practitioner_id
+            )
+
+            self.assertEqual('F', provider.individual.gender)
+
     def test_list_filter_by_organization_name(self):
+        name_search = "MEDICAL"
         url = reverse("fhir-practitionerrole-list")
-        response = self.client.get(url, {"organization_name": "MEDICAL"})
+        response = self.client.get(url, {"organization_name": name_search})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
+
+        for entry in response.data["results"]["entry"]:
+            #Query the practitioner names based on the returned id
+            org_id = entry["resource"]["organization"]["reference"].split("/")[-1]
+            org_name = (
+                OrganizationToName.objects
+                .filter(organization_id=org_id)
+                .values_list("name", flat=True)
+                .first()
+            )
+            
+            self.assertIn(name_search, org_name)
 
     def test_filter_by_distance_with_km(self):
         lat = -90.194315

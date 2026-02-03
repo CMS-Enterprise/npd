@@ -11,7 +11,7 @@
   - [Core Team](#core-team)
   - [Repository Structure](#repository-structure)
 - [Development and Software Delivery Lifecycle](#development-and-software-delivery-lifecycle)
-  - [Project Setup and Development](#project-setup-and-development) 
+  - [Project Setup and Development](#project-setup-and-development)
   - [Community](#community)
     - [Community Guidelines](#community-guidelines)
   - [Governance](#governance)
@@ -80,7 +80,7 @@ This is the main repository for the National Provider Directory (NPD) workstream
 - [flyway](./flyway/): Database migrations
 - [playwright](./playwright/): End-to-end test suite
 
-The [DSACMS/npd_etl](https://github.com/DSACMS/npd_etl) project on GitHub provides data ingestion for this system.
+The [CMS-Enterprise/npd_etl](https://github.com/CMS-Enterprise/npd_etl) project on GitHub, which is currently a private repository, provides data ingestion for this system.
 
 # Development and Software Delivery Lifecycle
 
@@ -110,7 +110,7 @@ Information about how the NPD community is governed may be found in [GOVERNANCE.
 
 If you have ideas for how we can improve or add to our capacity building efforts and methods for welcoming people into our community, please let us know at **opensource@cms.hhs.gov**.
 
-If you would like to comment on the tool itself, please let us know by [filing an issue on our GitHub repository](https://github.com/DSACMS/npd/issues).
+If you would like to comment on the tool itself, please let us know by [filing an issue on our GitHub repository](https://github.com/CMS-Enterprise/npd/issues).
 
 ## Policies
 
@@ -128,7 +128,7 @@ For more information about our Security, Vulnerability, and Responsible Disclosu
 
 A Software Bill of Materials (SBOM) is a formal record containing the details and supply chain relationships of various components used in building software.
 
-In the spirit of [Executive Order 14028 - Improving the Nation’s Cyber Security](https://www.gsa.gov/technology/it-contract-vehicles-and-purchasing-programs/information-technology-category/it-security/executive-order-14028), a SBOM for this repository is provided here: https://github.com/DSACMS/npd/network/dependencies.
+In the spirit of [Executive Order 14028 - Improving the Nation’s Cyber Security](https://www.gsa.gov/technology/it-contract-vehicles-and-purchasing-programs/information-technology-category/it-security/executive-order-14028), a SBOM for this repository is provided here: https://github.com/CMS-Enterprise/npd/network/dependencies.
 
 For more information and resources about SBOMs, visit: https://www.cisa.gov/sbom.
 

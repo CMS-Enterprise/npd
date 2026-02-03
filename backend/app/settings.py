@@ -71,6 +71,7 @@ MIDDLEWARE = [
     "npdfhir.middleware.HealthCheckMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -205,19 +206,14 @@ USE_I18N = True
 
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
+# Static file collection (CSS, JavaScript, Images)
+# django.contrib.staticfiles collects static files in a consistent place
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
-
 STATIC_URL = "static/"
-
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
-    os.path.join(BASE_DIR, "provider_directory", "static"),
-]
-
-# STATICFILES_DIRS = [
-#        os.path.join(BASE_DIR, "static"),
-#    ]
+# Static file hosting
+# whitenoise hosts static files collected by django.contrib.staticfiles
+# https://whitenoise.readthedocs.io/en/latest/
+STATIC_ROOT = STATIC_URL
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

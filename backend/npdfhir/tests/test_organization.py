@@ -112,17 +112,18 @@ class OrganizationViewSetTestCase(APITestCase):
         names = extract_resource_names(response)
 
         sorted_names = [
-            "1ST CHOICE HOME HEALTH CARE INC",
-            "1ST CHOICE MEDICAL DISTRIBUTORS, LLC",
-            "986 INFUSION PHARMACY #1 INC.",
-            "A & A MEDICAL SUPPLY COMPANY",
-            "ABACUS BUSINESS CORPORATION GROUP INC.",
-            "ABBY D CENTER, INC.",
-            "ABC DURABLE MEDICAL EQUIPMENT INC",
-            "ABC HOME MEDICAL SUPPLY, INC.",
-            "A BEAUTIFUL SMILE DENTISTRY, L.L.C.",
-            "A & B HEALTH CARE, INC.",
+            '1ST CHOICE HOME HEALTH CARE INC',
+            '1ST CHOICE MEDICAL DISTRIBUTORS, LLC', 
+            '986 INFUSION PHARMACY #1 INC.',
+            'A & A MEDICAL SUPPLY COMPANY',
+            'ABACUS BUSINESS CORPORATION GROUP INC.',
+            'ABBY D CENTER, INC.',
+            'ABC DURABLE MEDICAL EQUIPMENT INC',
+            'ABC HOME MEDICAL SUPPLY, INC.',
+            'A BEAUTIFUL SMILE DENTISTRY, L.L.C.',
+            'A & B HEALTH CARE, INC.'
         ]
+
         self.assertEqual(
             names,
             sorted_names,

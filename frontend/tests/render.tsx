@@ -3,17 +3,29 @@ import {
   render as originalRender,
   type RenderOptions,
 } from "@testing-library/react"
-import { FrontendSettingsProvider } from "../src/state/FrontendSettingsProvider"
+import { TestFrontendSettingsProvider } from "./TestFrontendSettingsProvider"
 
 const testQueryClient = new QueryClient()
 
-export const customRender = (ui: React.ReactNode, options?: RenderOptions) =>
-  originalRender(
+type CustomRenderOptions = RenderOptions & {
+  settings?: Partial<FrontendSettings>
+}
+
+export const customRender = (
+  ui: React.ReactNode,
+  options?: CustomRenderOptions,
+) => {
+  const { settings, ...renderOptions } = options ?? {}
+
+  return originalRender(
     <QueryClientProvider client={testQueryClient}>
-      <FrontendSettingsProvider>{ui}</FrontendSettingsProvider>
+      <TestFrontendSettingsProvider settings={settings}>
+        {ui}
+      </TestFrontendSettingsProvider>
     </QueryClientProvider>,
-    options,
+    renderOptions,
   )
+}
 
 // eslint-disable-next-line react-refresh/only-export-components
 export * from "@testing-library/react" // Re-export all original exports

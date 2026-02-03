@@ -1,9 +1,5 @@
 import { screen, waitFor } from "@testing-library/react"
-import { beforeEach, describe, expect, it } from "vitest"
-import {
-  DEFAULT_FRONTEND_SETTINGS,
-  mockGlobalFetch,
-} from "../../tests/mockGlobalFetch"
+import { describe, expect, it } from "vitest"
 import { render } from "../../tests/render"
 import { FeatureFlag } from "./FeatureFlag"
 
@@ -29,22 +25,10 @@ describe("FeatureFlag", () => {
   })
 
   describe("with SOMETHING set", () => {
-    beforeEach(() => {
-      mockGlobalFetch([
-        [
-          "^/api/frontend_settings$",
-          {
-            ...DEFAULT_FRONTEND_SETTINGS,
-            feature_flags: {
-              SOMETHING: true,
-            },
-          },
-        ],
-      ])
-    })
-
     it("renders content", async () => {
-      render(<FeatureFlag name="SOMETHING">Some content</FeatureFlag>)
+      render(<FeatureFlag name="SOMETHING">Some content</FeatureFlag>, {
+        settings: { feature_flags: { SOMETHING: true } },
+      })
       await waitFor(() => {
         expect(screen.queryByText("Some content")).toBeInTheDocument()
       })
@@ -55,6 +39,7 @@ describe("FeatureFlag", () => {
         <FeatureFlag inverse name="SOMETHING">
           Some content
         </FeatureFlag>,
+        { settings: { feature_flags: { SOMETHING: true } } },
       )
       await waitFor(() => {
         expect(screen.queryByText("Some content")).toBeNull()
