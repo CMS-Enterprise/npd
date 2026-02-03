@@ -2,14 +2,12 @@ import {
   Alert,
   Button,
   Pagination,
-  Dropdown,
   type DropdownChangeObject,
 } from "@cmsgov/design-system"
 import classNames from "classnames"
 import React, { type ChangeEvent, type FormEvent, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { NpdMarkdown } from "../../components/markdown/NpdMarkdown"
-import { PaginationCaption } from "../../components/PaginationCaption"
 import { TitlePanel } from "../../components/TitlePanel"
 import { apiUrl } from "../../state/api"
 import { SearchProvider } from "../../state/Search/SearchProvider"
@@ -53,11 +51,6 @@ const PractitionerSearchForm: React.FC = () => {
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const value = e.target.value
     setQueryValue(value)
-  }
-
-  const handleSort = (change: DropdownChangeObject): void => {
-    const value = change.target.value
-    setSort(value)
   }
 
   const sortOptions = Object.entries(PRACTITIONER_SORT_OPTIONS).map(
