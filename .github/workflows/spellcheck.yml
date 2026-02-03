@@ -23,5 +23,5 @@ jobs:
           level: warning
           filter_mode: diff_context
           exclude: |
-            V__*
+            flyway/sql/*
             frontend/src/@types/fhir/*.ts
