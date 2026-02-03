@@ -1,11 +1,6 @@
-import {
-  Alert,
-  Button,
-  Pagination,
-  type DropdownChangeObject,
-} from "@cmsgov/design-system"
+import { Alert, Pagination } from "@cmsgov/design-system"
 import classNames from "classnames"
-import React, { type ChangeEvent, type FormEvent, useState } from "react"
+import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { NpdMarkdown } from "../../components/markdown/NpdMarkdown"
 import { TitlePanel } from "../../components/TitlePanel"
@@ -13,7 +8,6 @@ import { apiUrl } from "../../state/api"
 import { SearchProvider } from "../../state/Search/SearchProvider"
 import { useSearchDispatch, useSearchState } from "../../state/Search/useSearch"
 import layout from "../Layout.module.css"
-import search from "../Search.module.css"
 import { ListedPractitioner } from "./ListedPractitioner"
 import {
   PRACTITIONER_SORT_OPTIONS,
@@ -23,6 +17,7 @@ import { usePractitionersAPI } from "../../state/requests/practitioners"
 import type { FHIRPractitioner } from "../../@types/fhir"
 import { FaUserMd } from "react-icons/fa"
 import { SearchResultsHeader } from "../../components/SearchResultsHeader"
+import { SearchBar } from "../../components/SearchBar"
 
 const PractitionerSearchForm: React.FC = () => {
   const { t } = useTranslation()
@@ -41,17 +36,6 @@ const PractitionerSearchForm: React.FC = () => {
   const [query, setQueryValue] = useState<string>(initialQuery || "")
 
   const contentClass = classNames(layout.content, "ds-l-container")
-  const inputClass = classNames(search.input)
-
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setQuery(query)
-  }
-
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>): void => {
-    const value = e.target.value
-    setQueryValue(value)
-  }
 
   const sortOptions = Object.entries(PRACTITIONER_SORT_OPTIONS).map(
     ([value, option]) => ({
@@ -68,39 +52,15 @@ const PractitionerSearchForm: React.FC = () => {
         color="var(--color-primary-darkest)"
         className={layout.compactLeader}
       >
-        <div className="ds-l-row">
-          <div className="ds-l-col--12 ds-u-padding-bottom--4">
-            <form onSubmit={handleSubmit}>
-              <input type="hidden" name="page" value={pagination?.page} />
-              <div className="ds-u-clearfix">
-                <label className="ds-c-label" htmlFor="query">
-                  {t("practitioners.search.inputLabel")}
-                </label>
-                <div className={inputClass}>
-                  <input
-                    className="ds-c-field"
-                    type="text"
-                    name="query"
-                    id="query"
-                    value={query}
-                    onChange={handleInputChange}
-                  />
-                  <Button
-                    type="submit"
-                    variation="solid"
-                    disabled={
-                      query.length < 1 || (isLoading && !isBackgroundLoading)
-                    }
-                  >
-                    {isLoading && !isBackgroundLoading
-                      ? "Searching..."
-                      : "Search practitioners"}
-                  </Button>
-                </div>
-              </div>
-            </form>
-          </div>
-        </div>
+        <SearchBar
+          value={query}
+          onChange={setQueryValue}
+          onSearch={setQuery}
+          labelKey="practitioners.search.inputLabel"
+          buttonTextKey="practitioners.search.button"
+          isLoading={isLoading}
+          isBackgroundLoading={isBackgroundLoading}
+        />
       </TitlePanel>
 
       <main className={contentClass}>
