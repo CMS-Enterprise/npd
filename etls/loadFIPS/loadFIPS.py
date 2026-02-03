@@ -78,7 +78,7 @@ class FIPSCountyETL:
                     logger.error(f"404 Error for URL: {url}")
             except requests.Timeout as e:
                 logger.error(
-                    f"Timeout error has occured after waiting 30 seconds.")
+                    f"Timeout error has occurred after waiting 30 seconds.")
             except requests.RequestException as e:
                 if attempt == self.max_retries - 1:
                     logger.error(f"Failed to fetch after 3 attempts: {e}")

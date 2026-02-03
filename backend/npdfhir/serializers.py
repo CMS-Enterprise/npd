@@ -21,6 +21,9 @@ from fhir.resources.R4B.identifier import Identifier
 from fhir.resources.R4B.location import Location as FHIRLocation, LocationPosition
 from fhir.resources.R4B.meta import Meta
 from fhir.resources.R4B.organization import Organization as FHIROrganization
+from fhir.resources.R4B.organizationaffiliation import (
+    OrganizationAffiliation as FHIROrganizationAffiliation,
+)
 from fhir.resources.R4B.period import Period
 from fhir.resources.R4B.practitioner import Practitioner, PractitionerQualification
 from fhir.resources.R4B.practitionerrole import PractitionerRole
@@ -309,12 +312,14 @@ class OrganizationSerializer(serializers.Serializer):
     def to_representation(self, instance):
         request = self.context.get("request")
         representation = super().to_representation(instance)
+
         organization = FHIROrganization()
         organization.id = str(instance.id)
         organization.meta = Meta(
             profile=["http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"]
         )
         identifiers = []
+
         taxonomies = []
         # if instance.ein:
         #    ein_identifier = Identifier(
@@ -432,6 +437,73 @@ class OrganizationSerializer(serializers.Serializer):
             organization.contact = [authorized_official]
 
         return organization.model_dump()
+
+
+class OrganizationAffiliationSerializer(serializers.Serializer):
+    class Meta:
+        fields = [
+            "identifier",
+            "active",
+            "period",
+            "organization",
+            "participatingOrganization",
+            "network",
+            "code",
+            "specialty",
+            "location",
+            "healthcareService",
+            "telecom",
+            "endpoint",
+        ]
+
+    def to_representation(self, instance):
+        request = self.context.get("request")
+        organization_affiliation = FHIROrganizationAffiliation()
+        # organization_affiliation.active = instance.is_active_affiliation
+
+        organization_affiliation.id = str(instance.id)
+
+        locations = []
+
+        organization_affiliation.organization = Reference(display=str(instance.ehr_vendor_name))
+
+        organization_affiliation.participatingOrganization = genReference("fhir-organization-detail", instance.id, request)
+        organization_affiliation.participatingOrganization.display = str(instance.organization_name)
+
+        # NOTE: Period for OrganizationAffiliation cannot currently be fetched so its blank
+
+        # NOTE: Network here means insurance network, per the FHIR spec. We have not begun to incorporate insurance networks
+        # organization_affiliation.network = [genReference("fhir-organization-detail", instance.id, request)]
+        # organization_affiliation.network[0].display = str(instance.organization_name)
+
+        organization_affiliation.code = [
+            CodeableConcept(
+                coding=[
+                    Coding(
+                        system="http://terminology.hl7.org/CodeSystem/codesystem-organization-role",
+                        code="HIE/HIO",
+                        display="HIE/HIO",
+                    )
+                ]
+            )
+        ]
+
+        # NOTE: not sure how to do specialty yet
+
+        endpoints = []
+
+        for location in instance.location_set.all():
+            locations.append(genReference("fhir-location-detail", location.id, request))
+
+            for link in location.locationtoendpointinstance_set.all():
+                endpoint = link.endpoint_instance
+
+                endpoints.append(genReference("fhir-endpoint-detail", endpoint.id, request))
+
+        organization_affiliation.location = locations
+        organization_affiliation.endpoint = endpoints
+
+        return organization_affiliation.model_dump()
 
 
 class PractitionerSerializer(serializers.Serializer):
