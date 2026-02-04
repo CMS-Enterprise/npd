@@ -26,7 +26,7 @@ class OrganizationViewSetTestCase(APITestCase):
                 id="5f56f3f0-3bd6-42ce-b275-f12f92a4ba40",
                 parent_id="c591bfc5-b4ed-49af-926f-569056b5b1aa",
             ),
-            create_organization(name="986 INFUSION PHARMACY #1 INC."),
+            create_organization(name="986 INFUSION PHARMACY #1 INC.", aliases=["INFUSION INC.", "ABC Infusion"]),
             create_organization(name="A & A MEDICAL SUPPLY COMPANY"),
             create_organization(name="ABACUS BUSINESS CORPORATION GROUP INC."),
             create_organization(name="ABBY D CENTER, INC."),
@@ -41,7 +41,7 @@ class OrganizationViewSetTestCase(APITestCase):
             create_organization(name="YORKTOWN EMERGENCY MEDICAL SERVICE"),
             create_organization(name="YODORINCMISSIONPLAZAPHARMACY"),
             create_organization(name="YOAKUM COMMUNITY HOSPITAL"),
-            create_organization(name="YARMOUTH AUDIOLOGY"),
+            create_organization(name="YARMOUTH AUDIOLOGY", aliases=["ABC YARMOUTH"]),
         ]
 
         cls.locs = [
