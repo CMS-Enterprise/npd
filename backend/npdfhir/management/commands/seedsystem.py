@@ -23,7 +23,7 @@ class Command(BaseCommand):
     def generate_sample_organizations(self, qty: int = 25):
         fake = Faker()
         for i in range(qty):
-            name = f"TEST {fake.company()}"
+            name = f"TEST {fake.company()}"  # adding TEST here so that we can query results with the same name
             org = create_organization(
                 name=name,
                 # not bothering with checksum here
@@ -38,7 +38,7 @@ class Command(BaseCommand):
     def generate_sample_practitioners(self, qty: int = 25):
         fake = Faker()
         for i in range(qty):
-            first_name = f"TEST {fake.first_name()}"
+            first_name = f"TEST {fake.first_name()}"  # adding TEST here so that we can query results with the same name
             last_name = fake.last_name()
             practitioner = create_practitioner(
                 first_name=first_name,
