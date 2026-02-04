@@ -389,7 +389,7 @@ class IndividualToLanguageSpoken(models.Model):
 
 class IndividualToName(models.Model):
     pk = models.CompositePrimaryKey("individual_id", "first_name", "last_name", "name_use_id")
-    individual = models.ForeignKey(Individual, models.DO_NOTHING)
+    individual = models.ForeignKey(Individual, models.DO_NOTHING, db_index=True)
     prefix = models.CharField(max_length=10, blank=True, null=True)
     first_name = models.CharField(max_length=50, db_index=True)
     middle_name = models.CharField(max_length=50, blank=True, null=True)
@@ -646,7 +646,7 @@ class PayloadType(models.Model):
 
 
 class Provider(models.Model):
-    npi = models.OneToOneField(Npi, models.DO_NOTHING, db_column="npi")
+    npi = models.OneToOneField(Npi, models.DO_NOTHING, db_column="npi", db_index=True)
     individual = models.OneToOneField(Individual, models.DO_NOTHING, primary_key=True)
 
     class Meta:

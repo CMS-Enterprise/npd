@@ -147,33 +147,20 @@ class FHIRPractitionerViewSet(viewsets.GenericViewSet):
     ViewSet for FHIR Practitioner resources
     """
 
-    queryset = (
-        Provider.objects.all()
-        .prefetch_related(
-            "npi",
-            "individual",
-            Prefetch(
-                "individual__individualtoaddress_set",
-                queryset=IndividualToAddress.objects.select_related(
-                    "address_use", "address__address_us", "address__address_us__state_code"
-                ),
+    queryset = Provider.objects.all().prefetch_related(
+        "npi",
+        "individual",
+        Prefetch(
+            "individual__individualtoaddress_set",
+            queryset=IndividualToAddress.objects.select_related(
+                "address_use", "address__address_us", "address__address_us__state_code"
             ),
-            "individual__individualtophone_set",
-            "individual__individualtoemail_set",
-            "individual__individualtoname_set",
-            "providertootherid_set__other_id_type",
-            "providertotaxonomy_set",
-        )
-        .annotate(
-            first_name=F(
-                "individual__individualtoname__first_name",
-                filter=Q(individual__individualtoname__name_use_id=1),
-            ),
-            last_name=F(
-                "individual__individualtoname__last_name",
-                filter=Q(individual__individualtoname__name_use_id=1),
-            ),
-        )
+        ),
+        "individual__individualtophone_set",
+        "individual__individualtoemail_set",
+        "individual__individualtoname_set",
+        "providertootherid_set",
+        "providertotaxonomy_set",
     )
     if DEBUG:
         renderer_classes = [FHIRRenderer, BrowsableAPIRenderer]
@@ -185,13 +172,13 @@ class FHIRPractitionerViewSet(viewsets.GenericViewSet):
     lookup_url_kwarg = "id"
 
     ordering = [
-        "last_name",
-        "first_name",
+        "individual__individualtoname__last_name",
+        "individual__individualtoname__first_name",
     ]
 
     ordering_fields = [
-        "last_name",
-        "first_name",
+        "individual__individualtoname__last_name",
+        "individual__individualtoname__first_name",
         "npi_value",
     ]
 

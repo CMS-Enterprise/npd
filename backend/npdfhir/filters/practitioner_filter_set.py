@@ -14,7 +14,8 @@ class PractitionerFilterSet(filters.FilterSet):
     )
 
     name = filters.CharFilter(
-        method="filter_name", help_text="Filter by practitioner name (first, last, or full name)"
+        method="filter_name",
+        help_text="Filter by practitioner name (first, middle, last, or full name). Name filter accepts websearch syntax",
     )
 
     gender = filters.ChoiceFilter(
@@ -84,7 +85,7 @@ class PractitionerFilterSet(filters.FilterSet):
         return queryset.filter(queries).distinct()
 
     def filter_name(self, queryset, name, value):
-        query = SearchQuery(f"{value.upper()}:*", search_type="raw")
+        query = SearchQuery(f"{value.upper()}", search_type="websearch")
         return queryset.filter(individual__individualtoname__search_vector=query).distinct()
 
     def filter_practitioner_type(self, queryset, name, value):
