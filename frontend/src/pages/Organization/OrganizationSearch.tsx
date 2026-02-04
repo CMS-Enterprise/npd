@@ -1,4 +1,10 @@
-import { Alert, Button, Pagination, Dropdown, type DropdownChangeObject } from "@cmsgov/design-system"
+import {
+  Alert,
+  Button,
+  Pagination,
+  Dropdown,
+  type DropdownChangeObject,
+} from "@cmsgov/design-system"
 import classNames from "classnames"
 import React, { type ChangeEvent, type FormEvent, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -11,7 +17,10 @@ import { useSearchDispatch, useSearchState } from "../../state/Search/useSearch"
 import layout from "../Layout.module.css"
 import search from "../Search.module.css"
 import { ListedOrganization } from "./ListedOrganization"
-import { ORGANIZATION_SORT_OPTIONS, type OrganizationSortKey } from "../../state/requests/organizations"
+import {
+  ORGANIZATION_SORT_OPTIONS,
+  type OrganizationSortKey,
+} from "../../state/requests/organizations"
 import { useOrganizationsAPI } from "../../state/requests/organizations"
 import type { FHIROrganization } from "../../@types/fhir"
 import { FaHospital } from "react-icons/fa"
@@ -27,7 +36,7 @@ const OrganizationSearchForm: React.FC = () => {
     error: searchError,
     data,
     pagination,
-    sort
+    sort,
   } = useSearchState<FHIROrganization>()
 
   const [query, setQueryValue] = useState<string>(initialQuery || "")
@@ -54,7 +63,7 @@ const OrganizationSearchForm: React.FC = () => {
     ([value, option]) => ({
       value: value as OrganizationSortKey,
       label: t(option.labelKey),
-    })
+    }),
   )
 
   return (
@@ -85,9 +94,13 @@ const OrganizationSearchForm: React.FC = () => {
                   <Button
                     type="submit"
                     variation="solid"
-                    disabled={query.length < 1 || isLoading && !isBackgroundLoading}
+                    disabled={
+                      query.length < 1 || (isLoading && !isBackgroundLoading)
+                    }
                   >
-                    {isLoading && !isBackgroundLoading ? "Searching..." : "Search"}
+                    {isLoading && !isBackgroundLoading
+                      ? "Searching..."
+                      : "Search organizations"}
                   </Button>
                 </div>
               </div>
@@ -109,13 +122,25 @@ const OrganizationSearchForm: React.FC = () => {
               <>
                 {pagination && (
                   <>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <PaginationCaption pagination={pagination} />
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      {t("organizations.sort.by")}
-                      <Dropdown
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <div style={{ display: "flex", gap: "8px" }}>
+                        <PaginationCaption pagination={pagination} />
+                      </div>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                        }}
+                      >
+                        {t("organizations.sort.by")}
+                        <Dropdown
                           label=""
                           name="sort-dropdown-field"
                           labelClassName="ds-u-display--none"
@@ -168,10 +193,7 @@ const OrganizationSearchForm: React.FC = () => {
 
 export const OrganizationSearch = () => {
   return (
-    <SearchProvider 
-      useSearchAPI={useOrganizationsAPI}
-      defaultSort="name-asc"
-    >
+    <SearchProvider useSearchAPI={useOrganizationsAPI} defaultSort="name-asc">
       <OrganizationSearchForm />
     </SearchProvider>
   )
