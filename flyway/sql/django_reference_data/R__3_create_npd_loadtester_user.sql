@@ -1,11 +1,28 @@
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'npd_load_tester') THEN
-        CREATE USER npd_load_tester WITH PASSWORD '${loadTesterPassword}';
-    ELSE
-        ALTER USER npd_load_tester WITH PASSWORD '${loadTesterPassword}';
-    END IF;
-END
-$$;
-
-GRANT pg_read_all_data TO npd_load_tester;
+INSERT INTO
+    auth_user (
+        password,
+        is_superuser,
+        username,
+        email,
+        first_name,
+        last_name,
+        is_staff,
+        is_active,
+        date_joined
+    )
+SELECT
+    '${loadTesterPassword}',
+    true,
+    'npd+load+tester@cms.hhs.gov',
+    'npd+load+tester@cms.hhs.gov',
+    'NPD Load',
+    'Tester',
+    false,
+    true,
+    now()
+WHERE
+    '${superuserDefaultPassword}' LIKE 'pbkdf2_sha256$%' ON CONFLICT (username)
+DO
+UPDATE
+SET
+    password = '${loadTesterUserPassword}';
