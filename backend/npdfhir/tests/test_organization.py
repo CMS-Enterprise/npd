@@ -196,6 +196,7 @@ class OrganizationViewSetTestCase(APITestCase):
     
     def test_list_filter_by_name_broad(self):
         filter_param_value = "ABC"
+        ensure_in_results = ["ABC HOME MEDICAL SUPPLY, INC.","ABC DURABLE MEDICAL EQUIPMENT INC"]
 
         url = reverse("fhir-organization-list")
         response = self.client.get(url, {"name": filter_param_value})
@@ -203,6 +204,15 @@ class OrganizationViewSetTestCase(APITestCase):
         assert_has_results(self, response)
 
         bundle = response.data["results"]
+
+        for ensure_name in ensure_in_results:
+            names = [entry['resource']['name'] for entry in bundle["entry"]]
+            
+            for entry in bundle["entry"]:
+                if 'alias' in entry['resource']:
+                    names.extend(alias for alias in entry['resource']['alias'])
+            
+            self.assertIn(ensure_name, names)
 
         for entry in bundle["entry"]:
             self.assertIn("resource", entry)
