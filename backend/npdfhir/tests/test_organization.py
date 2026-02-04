@@ -10,7 +10,7 @@ from .helpers import (
     assert_has_results,
     assert_pagination_limit,
     extract_resource_names,
-    concat_address_string
+    concat_address_string,
 )
 
 
@@ -26,7 +26,9 @@ class OrganizationViewSetTestCase(APITestCase):
                 id="5f56f3f0-3bd6-42ce-b275-f12f92a4ba40",
                 parent_id="c591bfc5-b4ed-49af-926f-569056b5b1aa",
             ),
-            create_organization(name="986 INFUSION PHARMACY #1 INC.", aliases=["INFUSION INC.", "ABC Infusion"]),
+            create_organization(
+                name="986 INFUSION PHARMACY #1 INC.", aliases=["INFUSION INC.", "ABC Infusion"]
+            ),
             create_organization(name="A & A MEDICAL SUPPLY COMPANY"),
             create_organization(name="ABACUS BUSINESS CORPORATION GROUP INC."),
             create_organization(name="ABBY D CENTER, INC."),
@@ -48,19 +50,22 @@ class OrganizationViewSetTestCase(APITestCase):
             create_location(name="Main Clinic", organization=cls.orgs[0]),
             create_location(name="1ST CHOICE MEDICAL DISTRIBUTORS, LLC", organization=cls.orgs[0]),
             create_location(name="986 INFUSION PHARMACY #1 INC.", organization=cls.orgs[1]),
-            create_location(name="A & A MEDICAL SUPPLY COMPANY", organization=cls.orgs[2],
+            create_location(
+                name="A & A MEDICAL SUPPLY COMPANY",
+                organization=cls.orgs[2],
                 city="Boston",
                 state="MA",
                 zipcode="10001",
-                addr_line_1="1 Boston Avenue"
+                addr_line_1="1 Boston Avenue",
             ),
             create_location(
-                name="ABACUS BUSINESS CORPORATION GROUP INC.", organization=cls.orgs[3],
+                name="ABACUS BUSINESS CORPORATION GROUP INC.",
+                organization=cls.orgs[3],
                 city="Sandiego",
                 state="CA",
                 zipcode="55555",
-                addr_line_1="404 Great Amazing Avenue"
-            )
+                addr_line_1="404 Great Amazing Avenue",
+            ),
         ]
 
         cls.joe_legal_entity = create_legal_entity(dba_name="Joe Administrative Services LLC")
@@ -112,16 +117,16 @@ class OrganizationViewSetTestCase(APITestCase):
         names = extract_resource_names(response)
 
         sorted_names = [
-            '1ST CHOICE HOME HEALTH CARE INC',
-            '1ST CHOICE MEDICAL DISTRIBUTORS, LLC', 
-            '986 INFUSION PHARMACY #1 INC.',
-            'A & A MEDICAL SUPPLY COMPANY',
-            'ABACUS BUSINESS CORPORATION GROUP INC.',
-            'ABBY D CENTER, INC.',
-            'ABC DURABLE MEDICAL EQUIPMENT INC',
-            'ABC HOME MEDICAL SUPPLY, INC.',
-            'A BEAUTIFUL SMILE DENTISTRY, L.L.C.',
-            'A & B HEALTH CARE, INC.'
+            "1ST CHOICE HOME HEALTH CARE INC",
+            "1ST CHOICE MEDICAL DISTRIBUTORS, LLC",
+            "986 INFUSION PHARMACY #1 INC.",
+            "A & A MEDICAL SUPPLY COMPANY",
+            "ABACUS BUSINESS CORPORATION GROUP INC.",
+            "ABBY D CENTER, INC.",
+            "ABC DURABLE MEDICAL EQUIPMENT INC",
+            "ABC HOME MEDICAL SUPPLY, INC.",
+            "A BEAUTIFUL SMILE DENTISTRY, L.L.C.",
+            "A & B HEALTH CARE, INC.",
         ]
 
         self.assertEqual(
@@ -186,17 +191,17 @@ class OrganizationViewSetTestCase(APITestCase):
             self.assertIn("resource", entry)
 
             org_entry = entry["resource"]
-            param_in_name = [filter_param_value in org_entry['name']]
+            param_in_name = [filter_param_value in org_entry["name"]]
 
-            if 'alias' in org_entry:
-                for n in org_entry['alias']:
+            if "alias" in org_entry:
+                for n in org_entry["alias"]:
                     param_in_name.append(filter_param_value in n)
-            
+
             self.assertTrue(any(param_in_name))
-    
+
     def test_list_filter_by_name_broad(self):
         filter_param_value = "ABC"
-        ensure_in_results = ["ABC HOME MEDICAL SUPPLY, INC.","ABC DURABLE MEDICAL EQUIPMENT INC"]
+        ensure_in_results = ["ABC HOME MEDICAL SUPPLY, INC.", "ABC DURABLE MEDICAL EQUIPMENT INC"]
 
         url = reverse("fhir-organization-list")
         response = self.client.get(url, {"name": filter_param_value})
@@ -206,26 +211,26 @@ class OrganizationViewSetTestCase(APITestCase):
         bundle = response.data["results"]
 
         for ensure_name in ensure_in_results:
-            names = [entry['resource']['name'] for entry in bundle["entry"]]
-            
+            names = [entry["resource"]["name"] for entry in bundle["entry"]]
+
             for entry in bundle["entry"]:
-                if 'alias' in entry['resource']:
-                    names.extend(alias for alias in entry['resource']['alias'])
-            
+                if "alias" in entry["resource"]:
+                    names.extend(alias for alias in entry["resource"]["alias"])
+
             self.assertIn(ensure_name, names)
 
         for entry in bundle["entry"]:
             self.assertIn("resource", entry)
 
             org_entry = entry["resource"]
-            param_in_name = [filter_param_value in org_entry['name']]
+            param_in_name = [filter_param_value in org_entry["name"]]
 
-            if 'alias' in org_entry:
-                for n in org_entry['alias']:
+            if "alias" in org_entry:
+                for n in org_entry["alias"]:
                     param_in_name.append(filter_param_value in n)
-            
+
             self.assertTrue(any(param_in_name))
-    
+
     def test_list_filter_by_name_specific(self):
         filter_param_value = "ABC HOME MEDICAL SUPPLY, INC."
         ensure_not_in_results = "ABC DURABLE MEDICAL EQUIPMENT INC"
@@ -241,15 +246,15 @@ class OrganizationViewSetTestCase(APITestCase):
             self.assertIn("resource", entry)
 
             org_entry = entry["resource"]
-            param_in_name = [filter_param_value in org_entry['name']]
+            param_in_name = [filter_param_value in org_entry["name"]]
 
-            if 'alias' in org_entry:
-                for n in org_entry['alias']:
+            if "alias" in org_entry:
+                for n in org_entry["alias"]:
                     param_in_name.append(filter_param_value in n)
                     self.assertNotIn(ensure_not_in_results, n)
-            
+
             self.assertTrue(any(param_in_name))
-            self.assertNotIn(ensure_not_in_results, org_entry['name'])
+            self.assertNotIn(ensure_not_in_results, org_entry["name"])
 
     def test_list_filter_by_organization_type(self):
         filter_param_value = "Hospital"
@@ -265,7 +270,7 @@ class OrganizationViewSetTestCase(APITestCase):
 
             org_entry = entry["resource"]
 
-            self.assertEqual(org_entry['id'],str(self.hospital_nucc_org.id))
+            self.assertEqual(org_entry["id"], str(self.hospital_nucc_org.id))
 
     # Identifiers Filter tests
     def test_list_filter_by_npi_general(self):
@@ -281,9 +286,9 @@ class OrganizationViewSetTestCase(APITestCase):
             self.assertIn("resource", entry)
 
             org_entry = entry["resource"]
-            
-            identifiers = [identifier['value'] for identifier in org_entry['identifier']]
-            
+
+            identifiers = [identifier["value"] for identifier in org_entry["identifier"]]
+
             self.assertIn(filter_param_value, identifiers)
 
     def test_list_filter_by_npi_specific(self):
@@ -299,11 +304,13 @@ class OrganizationViewSetTestCase(APITestCase):
             self.assertIn("resource", entry)
 
             org_entry = entry["resource"]
-            
+
             identifiers = [
-                identifier for identifier in org_entry['identifier'] if filter_param_value in identifier['value']
+                identifier
+                for identifier in org_entry["identifier"]
+                if filter_param_value in identifier["value"]
             ]
-            
+
             self.assertTrue(identifiers)
 
             for identifier in identifiers:
@@ -337,9 +344,9 @@ class OrganizationViewSetTestCase(APITestCase):
             self.assertIn("resource", entry)
 
             org_entry = entry["resource"]
-            identifiers = [identifier['value'] for identifier in org_entry['identifier']]
+            identifiers = [identifier["value"] for identifier in org_entry["identifier"]]
 
-            self.assertIn(filter_param_value,identifiers)
+            self.assertIn(filter_param_value, identifiers)
 
     # def test_list_filter_by_otherID_specific(self):
     #     url = reverse("fhir-organization-list")
@@ -363,15 +370,15 @@ class OrganizationViewSetTestCase(APITestCase):
             location_entry = entry["resource"]
             self.assertIn("id", location_entry)
             self.assertIn("contact", location_entry)
-            #self.assertIn("name", location_entry)
+            # self.assertIn("name", location_entry)
 
             search_in_location_list = []
 
-            for address in location_entry['contact']:
-                self.assertIn('address', address)
-                address_string = concat_address_string(address['address'])
+            for address in location_entry["contact"]:
+                self.assertIn("address", address)
+                address_string = concat_address_string(address["address"])
                 search_in_location_list.append(address_search in address_string)
-            
+
             self.assertTrue(any(search_in_location_list))
 
             self.assertEqual(location_entry["resourceType"], "Organization")
@@ -390,14 +397,14 @@ class OrganizationViewSetTestCase(APITestCase):
             location_entry = entry["resource"]
             self.assertIn("id", location_entry)
             self.assertIn("contact", location_entry)
-            #self.assertIn("name", location_entry)
+            # self.assertIn("name", location_entry)
 
             search_in_location_list = []
 
-            for address in location_entry['contact']:
-                self.assertIn('address', address)
-                search_in_location_list.append(address_search in address['address']['city'])
-            
+            for address in location_entry["contact"]:
+                self.assertIn("address", address)
+                search_in_location_list.append(address_search in address["address"]["city"])
+
             self.assertTrue(any(search_in_location_list))
 
             self.assertEqual(location_entry["resourceType"], "Organization")
@@ -416,14 +423,14 @@ class OrganizationViewSetTestCase(APITestCase):
             location_entry = entry["resource"]
             self.assertIn("id", location_entry)
             self.assertIn("contact", location_entry)
-            #self.assertIn("name", location_entry)
+            # self.assertIn("name", location_entry)
 
             search_in_location_list = []
 
-            for address in location_entry['contact']:
-                self.assertIn('address', address)
-                search_in_location_list.append(address_search == address['address']['state'])
-            
+            for address in location_entry["contact"]:
+                self.assertIn("address", address)
+                search_in_location_list.append(address_search == address["address"]["state"])
+
             self.assertTrue(any(search_in_location_list))
 
             self.assertEqual(location_entry["resourceType"], "Organization")
@@ -442,14 +449,14 @@ class OrganizationViewSetTestCase(APITestCase):
             location_entry = entry["resource"]
             self.assertIn("id", location_entry)
             self.assertIn("contact", location_entry)
-            #self.assertIn("name", location_entry)
+            # self.assertIn("name", location_entry)
 
             search_in_location_list = []
 
-            for address in location_entry['contact']:
-                self.assertIn('address', address)
-                search_in_location_list.append(address_search in address['address']['postalCode'])
-            
+            for address in location_entry["contact"]:
+                self.assertIn("address", address)
+                search_in_location_list.append(address_search in address["address"]["postalCode"])
+
             self.assertTrue(any(search_in_location_list))
 
             self.assertEqual(location_entry["resourceType"], "Organization")
@@ -468,14 +475,14 @@ class OrganizationViewSetTestCase(APITestCase):
             location_entry = entry["resource"]
             self.assertIn("id", location_entry)
             self.assertIn("contact", location_entry)
-            #self.assertIn("name", location_entry)
+            # self.assertIn("name", location_entry)
 
             search_in_location_list = []
 
-            for address in location_entry['contact']:
-                self.assertIn('address', address)
-                search_in_location_list.append(address_search in address['address']['use'])
-            
+            for address in location_entry["contact"]:
+                self.assertIn("address", address)
+                search_in_location_list.append(address_search in address["address"]["use"])
+
             self.assertTrue(any(search_in_location_list))
 
             self.assertEqual(location_entry["resourceType"], "Organization")
