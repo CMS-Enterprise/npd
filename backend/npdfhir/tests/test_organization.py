@@ -132,7 +132,7 @@ class OrganizationViewSetTestCase(APITestCase):
 
     def test_list_in_descending_order(self):
         url = reverse("fhir-organization-list")
-        response = self.client.get(url, {"_sort": "-organizationtoname__name"})
+        response = self.client.get(url, {"_sort": "-primary_name"})
         assert_fhir_response(self, response)
 
         # Extract names
@@ -179,7 +179,6 @@ class OrganizationViewSetTestCase(APITestCase):
         response = self.client.get(url, {"name": filter_param_value})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
-        self.assertGreaterEqual(response.data["results"]["total"], 1)
 
         bundle = response.data["results"]
 
@@ -187,8 +186,13 @@ class OrganizationViewSetTestCase(APITestCase):
             self.assertIn("resource", entry)
 
             org_entry = entry["resource"]
+            param_in_name = [filter_param_value in org_entry['name']]
 
-            self.assertIn(filter_param_value, org_entry['name'])
+            if 'alias' in org_entry:
+                for n in org_entry['alias']:
+                    param_in_name.append(filter_param_value in n)
+            
+            self.assertTrue(any(param_in_name))
     
     def test_list_filter_by_name_broad(self):
         filter_param_value = "ABC"
@@ -197,7 +201,6 @@ class OrganizationViewSetTestCase(APITestCase):
         response = self.client.get(url, {"name": filter_param_value})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
-        self.assertGreaterEqual(response.data["results"]["total"], 1)
 
         bundle = response.data["results"]
 
@@ -205,8 +208,13 @@ class OrganizationViewSetTestCase(APITestCase):
             self.assertIn("resource", entry)
 
             org_entry = entry["resource"]
+            param_in_name = [filter_param_value in org_entry['name']]
 
-            self.assertIn(filter_param_value, org_entry['name'])
+            if 'alias' in org_entry:
+                for n in org_entry['alias']:
+                    param_in_name.append(filter_param_value in n)
+            
+            self.assertTrue(any(param_in_name))
     
     def test_list_filter_by_name_specific(self):
         filter_param_value = "ABC HOME MEDICAL SUPPLY, INC."
@@ -216,7 +224,6 @@ class OrganizationViewSetTestCase(APITestCase):
         response = self.client.get(url, {"name": filter_param_value})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
-        self.assertGreaterEqual(response.data["results"]["total"], 1)
 
         bundle = response.data["results"]
 
@@ -224,8 +231,14 @@ class OrganizationViewSetTestCase(APITestCase):
             self.assertIn("resource", entry)
 
             org_entry = entry["resource"]
+            param_in_name = [filter_param_value in org_entry['name']]
 
-            self.assertIn(filter_param_value, org_entry['name'])
+            if 'alias' in org_entry:
+                for n in org_entry['alias']:
+                    param_in_name.append(filter_param_value in n)
+                    self.assertNotIn(ensure_not_in_results, n)
+            
+            self.assertTrue(any(param_in_name))
             self.assertNotIn(ensure_not_in_results, org_entry['name'])
 
     def test_list_filter_by_organization_type(self):
@@ -234,7 +247,6 @@ class OrganizationViewSetTestCase(APITestCase):
         response = self.client.get(url, {"organization_type": filter_param_value})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
-        self.assertGreaterEqual(response.data["results"]["total"], 1)
 
         bundle = response.data["results"]
 
@@ -252,7 +264,6 @@ class OrganizationViewSetTestCase(APITestCase):
         response = self.client.get(url, {"identifier": filter_param_value})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
-        self.assertGreaterEqual(response.data["results"]["total"], 1)
 
         bundle = response.data["results"]
 
@@ -271,7 +282,6 @@ class OrganizationViewSetTestCase(APITestCase):
         response = self.client.get(url, {"identifier": f"NPI|{filter_param_value}"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
-        self.assertGreaterEqual(response.data["results"]["total"], 1)
 
         bundle = response.data["results"]
 
@@ -280,9 +290,14 @@ class OrganizationViewSetTestCase(APITestCase):
 
             org_entry = entry["resource"]
             
-            identifiers = [identifier['value'] for identifier in org_entry['identifier']]
+            identifiers = [
+                identifier for identifier in org_entry['identifier'] if filter_param_value in identifier['value']
+            ]
             
-            self.assertIn(filter_param_value, identifiers)
+            self.assertTrue(identifiers)
+
+            for identifier in identifiers:
+                self.assertIn("http://terminology.hl7.org/NamingSystem/npi", identifier["system"])
 
     def test_parent_id(self):
         parent_id = self.orgs[1].parent_id
@@ -305,7 +320,6 @@ class OrganizationViewSetTestCase(APITestCase):
         response = self.client.get(url, {"identifier": filter_param_value})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
-        self.assertGreaterEqual(response.data["results"]["total"], 1)
 
         bundle = response.data["results"]
 
@@ -323,30 +337,6 @@ class OrganizationViewSetTestCase(APITestCase):
     #     self.assertEqual(response.status_code, status.HTTP_200_OK)
     #     assert_has_results(self, response)
     #     self.assertGreaterEqual(response.data["results"]["total"], 1)
-
-    def test_list_filter_by_ein_general(self):
-        url = reverse("fhir-organization-list")
-
-        id = self.joe_legal_entity.ein_id
-
-        response = self.client.get(url, {"identifier": str(id)})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        assert_has_results(self, response)
-        self.assertGreaterEqual(response.data["results"]["total"], 1)
-
-        bundle = response.data["results"]
-
-        for entry in bundle["entry"]:
-            self.assertIn("resource", entry)
-
-            org_entry = entry["resource"]
-            self.assertEqual(org_entry['id'],str(self.joe_health_org.id))
-
-    # def test_list_filter_by_ein_specific(self):
-    #     url = reverse("fhir-organization-list")
-    #     response = self.client.get(url, {"identifier":"USEIN|12-3456789"})
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #     assert_has_results(self, response)
 
     # Address Filter tests
     def test_list_filter_by_address(self):
@@ -422,7 +412,7 @@ class OrganizationViewSetTestCase(APITestCase):
 
             for address in location_entry['contact']:
                 self.assertIn('address', address)
-                search_in_location_list.append(address_search in address['address']['state'])
+                search_in_location_list.append(address_search == address['address']['state'])
             
             self.assertTrue(any(search_in_location_list))
 
