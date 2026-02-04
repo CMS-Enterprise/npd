@@ -104,9 +104,11 @@ class PractitionerFilterSet(filters.FilterSet):
                 "individual__individualtoaddress__address__address_us__delivery_line_2",
                 "individual__individualtoaddress__address__address_us__city_name",
                 "individual__individualtoaddress__address__address_us__state_code__abbreviation",
-                "individual__individualtoaddress__address__address_us__zipcode",
             )
-        ).filter(search=value)
+        ).filter(Q(search=value) |
+            Q(individual__individualtoaddress__address__address_us__zipcode=value)
+        )
+
 
     def filter_address_city(self, queryset, name, value):
         return queryset.annotate(
@@ -121,9 +123,9 @@ class PractitionerFilterSet(filters.FilterSet):
         ).filter(search=value)
 
     def filter_address_postalcode(self, queryset, name, value):
-        return queryset.annotate(
-            search=SearchVector("individual__individualtoaddress__address__address_us__zipcode")
-        ).filter(search=value)
+        return queryset.filter(
+            individual__individualtoaddress__address__address_us__zipcode=value
+        )
 
     def filter_address_use(self, queryset, name, value):
         if value in addressUseMapping.keys():

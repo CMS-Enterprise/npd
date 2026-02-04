@@ -99,9 +99,10 @@ class OrganizationFilterSet(filters.FilterSet):
                 "organizationtoaddress__address__address_us__delivery_line_2",
                 "organizationtoaddress__address__address_us__city_name",
                 "organizationtoaddress__address__address_us__state_code__abbreviation",
-                "organizationtoaddress__address__address_us__zipcode",
             )
-        ).filter(search=value)
+        ).filter(Q(search=value) |
+            Q(organizationtoaddress__address__address_us__zipcode=value)
+        )
 
     def filter_address_city(self, queryset, name, value):
         return queryset.annotate(
@@ -116,9 +117,9 @@ class OrganizationFilterSet(filters.FilterSet):
         ).filter(search=value)
 
     def filter_address_postalcode(self, queryset, name, value):
-        return queryset.annotate(
-            search=SearchVector("organizationtoaddress__address__address_us__zipcode")
-        ).filter(search=value)
+        return queryset.filter(
+            organizationtoaddress__address__address_us__zipcode=value
+        )
 
     def filter_address_use(self, queryset, name, value):
         if value in addressUseMapping.keys():
