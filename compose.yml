@@ -63,6 +63,9 @@ services:
       FLYWAY_PASSWORD: ${NPD_DB_PASSWORD:-postgres}
       FLYWAY_PLACEHOLDERS_apiSchema: ${NPD_DB_SCHEMA:-npd}
       FLYWAY_PLACEHOLDERS_superuserDefaultPassword: ""
+      FLYWAY_PLACEHOLDERS_npdReadonlyUserPassword: ""
+      # This is `testpassword` encoded using PBKDF2 algorithm with a SHA256 hash
+      FLYWAY_PLACEHOLDERS_loadTesterPassword: ${NPD_LOAD_TESTER_PASSWORD:-8dc154b3582f94b3b8e0f5c453d94b33ec5b5b4fb6a05d76165e5e749a6526c9}
       FLYWAY_DEFAULT_SCHEMA: public
       FLYWAY_PLACEHOLDERS_npdReadonlyUserPassword: ${NPD_READONLY_PASSWORD:-test-password-123}
     volumes:

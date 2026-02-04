@@ -21,8 +21,8 @@ SELECT
     true,
     now()
 WHERE
-    '${superuserDefaultPassword}' LIKE 'pbkdf2_sha256$%' ON CONFLICT (username)
+    '${loadTesterPassword}' LIKE 'pbkdf2_sha256$%' ON CONFLICT (username)
 DO
 UPDATE
 SET
-    password = '${loadTesterUserPassword}';
+    password = '${loadTesterPassword}';
