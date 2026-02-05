@@ -13,6 +13,7 @@ from ...models import (
     OrganizationToOtherId,
     OrganizationToTaxonomy,
 )
+from .utils import _ensure_name_use
 
 
 def create_legal_entity(dba_name="Sample Legal Entity"):
@@ -50,7 +51,7 @@ def create_organization(
         individual=ind,
         first_name=authorized_official_first_name,
         last_name=authorized_official_last_name,
-        name_use_id=1,
+        name_use=_ensure_name_use(),
     )
 
     if id is None:

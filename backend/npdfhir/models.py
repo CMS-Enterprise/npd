@@ -127,10 +127,16 @@ class AddressUs(models.Model):
     suitelink_match = models.CharField(max_length=5, blank=True, null=True)
     enhanced_match = models.CharField(max_length=64, blank=True, null=True)
     geolocation = geomodels.PointField(srid=4326)
+    search_vector = SearchVectorField(blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = "address_us"
+
+    def _do_insert(self, manager, using, fields, update_pk, raw):
+        # Prevents the model from attempting to insert values into the generated search_vector field
+        fields = [f for f in fields if f.attname != "search_vector"]
+        return super()._do_insert(manager, using, fields, update_pk, raw)
 
 
 class ClinicalOrganization(models.Model):
@@ -512,10 +518,16 @@ class Nucc(models.Model):
     notes = models.TextField(blank=True, null=True)
     certifying_board_name = models.TextField(blank=True, null=True)
     certifying_board_url = models.TextField(blank=True, null=True)
+    search_vector = SearchVectorField(blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = "nucc"
+
+    def _do_insert(self, manager, using, fields, update_pk, raw):
+        # Prevents the model from attempting to insert values into the generated search_vector field
+        fields = [f for f in fields if f.attname != "search_vector"]
+        return super()._do_insert(manager, using, fields, update_pk, raw)
 
 
 class NuccClassification(models.Model):

@@ -131,9 +131,10 @@ class PractitionerRoleFilterSet(filters.FilterSet):
         return queryset
 
     def filter_practitioner_type(self, queryset, name, value):
+        query = SearchQuery(value, search_type="websearch")
         return queryset.filter(
-            provider_to_organization__individual__providertotaxonomy__nucc_code__code=value
-        ).distinct()
+            provider_to_organization__individual__providertotaxonomy__nucc_code__search_vector=query
+        )
 
     def filter_organization_name(self, queryset, name, value):
         return queryset.annotate(
@@ -199,7 +200,9 @@ class PractitionerRoleFilterSet(filters.FilterSet):
 
     def filter_connection_type(self, queryset, name, value):
         return queryset.annotate(
-            search=SearchVector("other_endpoint__endpoint_instance__endpoint_connection_type__id")
+            search=SearchVector(
+                "location__locationtoendpointinstance__endpoint_instance__endpoint_connection_type_id"
+            )
         ).filter(search=value)
 
     def filter_endpoint_status(self, queryset, name, value):
@@ -209,7 +212,7 @@ class PractitionerRoleFilterSet(filters.FilterSet):
 
     def filter_payload_type(self, queryset, name, value):
         return queryset.filter(
-            location__locationtoendpointinstance__endpoint_instance__endpointinstancetopayload__payload_type__id=value
+            location__locationtoendpointinstance__endpoint_instance__endpointinstancetopayload__payload_type_id=value
         ).distinct()
 
     def filter_endpoint_organization_id(self, queryset, name, value):
@@ -221,15 +224,8 @@ class PractitionerRoleFilterSet(filters.FilterSet):
         return queryset.filter(location__organization__organizationtoname__name=value)
 
     def filter_address(self, queryset, name, value):
-        return queryset.annotate(
-            search=SearchVector(
-                "location__address__address_us__delivery_line_1",
-                "location__address__address_us__delivery_line_2",
-                "location__address__address_us__city_name",
-                "location__address__address_us__state_code__abbreviation",
-                "location__address__address_us__zipcode",
-            )
-        ).filter(search=value)
+        query = SearchQuery(value, search_type="websearch")
+        return queryset.filter(location__address__address_us__search_vector=query)
 
     def filter_address_city(self, queryset, name, value):
         return queryset.annotate(

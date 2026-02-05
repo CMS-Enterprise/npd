@@ -455,7 +455,7 @@ class PractitionerRoleViewSetTestCase(APITestCase):
         taxonomy = ProviderToTaxonomy.objects.filter(npi=self.provider).first()
         self.assertIsNotNone(taxonomy)
         url = reverse("fhir-practitionerrole-list")
-        response = self.client.get(url, {"practitioner_type": str(taxonomy.nucc_code.code)})
+        response = self.client.get(url, {"practitioner_type": str(taxonomy.nucc_code.display_name)})
         self.assertEqual(response.status_code, 200)
         assert_has_results(self, response)
 
