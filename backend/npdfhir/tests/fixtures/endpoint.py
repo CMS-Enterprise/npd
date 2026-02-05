@@ -33,7 +33,7 @@ def create_endpoint(
     url="https://example.org/fhir",
     name="Test Endpoint",
     ehr=None,
-    payload_type=None,
+    payload_type="any",
 ):
     """
     Creates EndpointType, EndpointConnectionType, EndpointInstance, Endpoint.
@@ -50,8 +50,6 @@ def create_endpoint(
     else:
         ehr_vendor = ehr
 
-    pt = PayloadType.objects.get(pk=payload_type or "urn:hl7-org:sdwg:ccda-structuredBody:1.1")
-
     instance = EndpointInstance.objects.create(
         id=uuid.uuid4(),
         ehr_vendor_id=ehr_vendor.id,
@@ -61,7 +59,9 @@ def create_endpoint(
         environment_type_id="prod",
     )
 
-    EndpointInstanceToPayload.objects.create(endpoint_instance=instance, payload_type=pt)
+    EndpointInstanceToPayload.objects.create(
+        endpoint_instance=instance, payload_type_id=payload_type
+    )
 
     ep = Endpoint.objects.create(
         id=uuid.uuid4(),

@@ -234,6 +234,11 @@ class NPISerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class BasicIdSerializer(serializers.ModelSerializer):
+    def to_representation(self, instance):
+        return instance.id
+
+
 class IndividualSerializer(serializers.Serializer):
     name = NameSerializer(source="individualtoname_set", read_only=True, many=True)
     email = EmailSerializer(source="individualtoemail_set", read_only=True, many=True)
@@ -605,6 +610,9 @@ class LocationSerializer(serializers.Serializer):
 
 class PractitionerRoleSerializer(serializers.Serializer):
     other_phone = PhoneSerializer(read_only=True)
+    endpoints = BasicIdSerializer(
+        source="location.locationtoendpointinstance_set", many=True, read_only=True
+    )
 
     class Meta:
         model = ProviderToOrganization
@@ -624,6 +632,10 @@ class PractitionerRoleSerializer(serializers.Serializer):
         practitioner_role.location = [
             genReference("fhir-location-detail", instance.location.id, request)
         ]
+        endpoints = []
+        for endpoint_id in instance.endpoints:
+            endpoints.append(genReference("fhir-location-detail", endpoint_id, request))
+        practitioner_role.endpoint = endpoints
         # These lines rely on the fhir.resources.R4B representation of PractitionerRole to be expanded to match the ndh FHIR definition. This is a TODO with an open ticket.
         # if 'other_phone' in representation.keys():
         #    practitioner_role.telecom = representation['other_phone']

@@ -13,7 +13,6 @@ from ...models import (
     OrganizationToOtherId,
     OrganizationToTaxonomy,
 )
-from .utils import _ensure_name_use
 
 
 def create_legal_entity(dba_name="Sample Legal Entity"):
@@ -35,7 +34,7 @@ def create_organization(
     other_id_name="testMBI",
     other_state_code="NY",
     other_issuer="New York State Medicaid",
-    organization_type=None,
+    organization_type="193200000X",
 ):
     """
     Creates an Organization + OrganizationToName.
@@ -51,7 +50,7 @@ def create_organization(
         individual=ind,
         first_name=authorized_official_first_name,
         last_name=authorized_official_last_name,
-        name_use=_ensure_name_use(),
+        name_use_id=1,
     )
 
     if id is None:
@@ -79,11 +78,9 @@ def create_organization(
                 state_code=other_state_code,
                 issuer=other_issuer,
             )
-
-        if organization_type:
-            code = Nucc.objects.get(pk=organization_type)
-
-            OrganizationToTaxonomy.objects.create(npi=clinical_organization, nucc_code=code)
+        OrganizationToTaxonomy.objects.create(
+            npi=clinical_organization, nucc_code_id=organization_type
+        )
 
     OrganizationToName.objects.create(
         organization=org,
