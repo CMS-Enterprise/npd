@@ -74,6 +74,48 @@ test.describe("Organization search", () => {
     await page.getByRole("button", { name: "Search" }).click()
     await expect(page.getByRole("link", { name: "AAA Test Org" })).toBeVisible()
   })
+
+  test("search for a Organization and confirm pagination works", async ({ page }) => {
+    await page.goto("/organizations/search")
+    await expect(page).toHaveURL("/organizations/search")
+    await expect(page.getByText("Search organizations")).toBeVisible()
+
+    await page
+      .getByRole("textbox", { name: "Name or NPI" })
+      .click()
+    await page
+      .getByRole("textbox", { name: "Name or NPI" })
+      .fill("TEST")
+    await page.getByRole("button", { name: "Search" }).click()
+    await expect(page.getByRole("link", { name: /AAA Test Org/i })).toBeVisible()
+    await expect(page.getByRole("caption")).toContainText(
+      "Showing 1 - 10 of 26",
+    )
+
+    await expect(
+      page.locator("[data-testid='searchresults']").getByRole("listitem"),
+    ).toHaveCount(10)
+
+    await page.getByLabel("Next Page").first().click()
+
+    await expect(page).toHaveURL(/page=2/)
+    await expect(page.getByRole("caption")).toContainText(
+      "Showing 11 - 20 of 26",
+    )
+    await expect(
+      page.locator("[data-testid='searchresults']").getByRole("listitem"),
+    ).toHaveCount(10)
+
+    await page.getByLabel("Next Page").first().click()
+
+    await expect(page).toHaveURL(/page=3/)
+    await expect(page.locator("span[role='caption']")).toContainText(
+      "Showing 21 - 26 of 26",
+    )
+    await expect(
+      page.locator("[data-testid='searchresults']").getByRole("listitem"),
+    ).toHaveCount(6)
+  })
 })
 
 test.describe("Organization show", () => {

@@ -23,7 +23,7 @@ class Command(BaseCommand):
     def generate_sample_organizations(self, qty: int = 25):
         fake = Faker()
         for i in range(qty):
-            name = fake.company()
+            name = f"TEST {fake.company()}"  # adding TEST here so that we can query results with the same name
             org = create_organization(
                 name=name,
                 # not bothering with checksum here
@@ -34,11 +34,11 @@ class Command(BaseCommand):
                 other_issuer=fake.company(),
             )
             self.stdout.write(f"created Organization: {org.id} {name}")
-    
+
     def generate_sample_practitioners(self, qty: int = 25):
         fake = Faker()
         for i in range(qty):
-            first_name = fake.first_name()
+            first_name = f"TEST {fake.first_name()}"  # adding TEST here so that we can query results with the same name
             last_name = fake.last_name()
             practitioner = create_practitioner(
                 first_name=first_name,
@@ -46,7 +46,9 @@ class Command(BaseCommand):
                 npi_value=self.generate_npi(),
                 gender=random.choice(["M", "F"]),
             )
-            self.stdout.write(f"created Practitioner: {practitioner.individual.id} {first_name} {last_name}")
+            self.stdout.write(
+                f"created Practitioner: {practitioner.individual.id} {first_name} {last_name}"
+            )
 
     def handle(self, *args, **options):
         if options.get("seed", None):
