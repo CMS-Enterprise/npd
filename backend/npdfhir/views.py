@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from django.conf import settings
-from django.db.models import CharField, Exists, F, OuterRef, Subquery, Value, Prefetch, Q
+from django.db.models import CharField, Exists, F, OuterRef, Subquery, Value, Prefetch
 from django.db.models.functions import Concat
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404

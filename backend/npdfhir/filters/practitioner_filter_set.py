@@ -1,4 +1,4 @@
-from django.contrib.postgres.search import SearchVector, SearchQuery
+from django.contrib.postgres.search import SearchQuery
 from django.db.models import Q
 from django_filters import rest_framework as filters
 
