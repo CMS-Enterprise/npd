@@ -64,6 +64,8 @@ services:
       FLYWAY_PLACEHOLDERS_apiSchema: ${NPD_DB_SCHEMA:-npd}
       FLYWAY_PLACEHOLDERS_superuserDefaultPassword: ""
       FLYWAY_DEFAULT_SCHEMA: public
+      FLYWAY_PLACEHOLDERS_npdReadonlyUserPassword: ${NPD_READONLY_PASSWORD:-test-password-123}
+      FLYWAY_PLACEHOLDERS_loadTesterPassword: ${NPD_LOAD_TESTER_PASSWORD:-""}
     volumes:
       - ./flyway/sql:/flyway/sql
     depends_on:

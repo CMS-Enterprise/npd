@@ -19,7 +19,6 @@ services:
       service: db-migrations
     environment:
       FLYWAY_URL: jdbc:postgresql://${NPD_DB_HOST:-db}:${NPD_DB_PORT:-5432}/npd_test
-      FLYWAY_PLACEHOLDERS_npdReadonlyUserPassword: ${NPD_READONLY_PASSWORD:-test-password-123}
     volumes: !override
       - ./flyway/sql/django_migrations:/flyway/sql/django_migrations
       - ./flyway/sql/django_reference_data:/flyway/sql/django_reference_data
