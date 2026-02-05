@@ -1,7 +1,7 @@
 import re
 from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import D
-from django.contrib.postgres.search import SearchVector
+from django.contrib.postgres.search import SearchVector, SearchQuery
 from django.db.models import Q
 from django_filters import rest_framework as filters
 
@@ -11,9 +11,11 @@ from ..utils import parse_identifier_query
 
 
 class PractitionerRoleFilterSet(filters.FilterSet):
+    practitioner_table = "provider_to_organization"
+    # practitioner_name = PractitionerFilterSet.name
     practitioner_name = filters.CharFilter(
         method="filter_practitioner_name",
-        help_text="Filter by practitioner name (first, last, or full name)",
+        help_text="Filter by practitioner name (first, middle, last, or full name). Name filter accepts websearch syntax.",
     )
 
     practitioner_gender = filters.ChoiceFilter(
@@ -117,13 +119,10 @@ class PractitionerRoleFilterSet(filters.FilterSet):
         ]
 
     def filter_practitioner_name(self, queryset, name, value):
-        return queryset.annotate(
-            search=SearchVector(
-                "provider_to_organization__individual__individual__individualtoname__first_name",
-                "provider_to_organization__individual__individual__individualtoname__last_name",
-                "provider_to_organization__individual__individual__individualtoname__middle_name",
-            )
-        ).filter(search=value)
+        query = SearchQuery(f"{value.upper()}", search_type="websearch")
+        return queryset.filter(
+            provider_to_organization__individual__individual__individualtoname__search_vector=query
+        ).distinct()
 
     def filter_practitioner_gender(self, queryset, name, value):
         if value in genderMapping.keys():

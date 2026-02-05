@@ -6,3 +6,4 @@ create index on npd.provider(npi);
 create index on npd.individual_to_name(individual_id);
 create index on npd.individual_to_name(last_name);
 create index on npd.individual_to_name(first_name);
+CREATE INDEX IF NOT EXISTS idx_individualbyname_on_first_name_last_name ON npd.individual_to_name (first_name ASC, last_name ASC);

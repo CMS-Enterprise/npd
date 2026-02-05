@@ -8,13 +8,15 @@ from ..utils import parse_identifier_query
 
 
 class PractitionerFilterSet(filters.FilterSet):
+    practitioner_table = None
+
     identifier = filters.CharFilter(
         method="filter_identifier",
         help_text="Filter by identifier (NPI or other). Format: value or system|value",
     )
 
     name = filters.CharFilter(
-        method="filter_name",
+        method="filter_practitioner_name",
         help_text="Filter by practitioner name (first, middle, last, or full name). Name filter accepts websearch syntax",
     )
 
@@ -84,7 +86,7 @@ class PractitionerFilterSet(filters.FilterSet):
 
         return queryset.filter(queries).distinct()
 
-    def filter_name(self, queryset, name, value):
+    def filter_practitioner_name(self, queryset, name, value):
         query = SearchQuery(f"{value.upper()}", search_type="websearch")
         return queryset.filter(individual__individualtoname__search_vector=query).distinct()
 

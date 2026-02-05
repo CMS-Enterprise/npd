@@ -398,11 +398,16 @@ class IndividualToName(models.Model):
     end_date = models.DateField(blank=True, null=True)
     name_use = models.ForeignKey(FhirNameUse, models.DO_NOTHING)
     suffix = models.CharField(max_length=10, blank=True, null=True)
-    search_vector = SearchVectorField()
+    search_vector = SearchVectorField(blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = "individual_to_name"
+
+    def _do_insert(self, manager, using, fields, update_pk, raw):
+        # Prevents the model from attempting to insert values into the generated search_vector field
+        fields = [f for f in fields if f.attname != "search_vector"]
+        return super()._do_insert(manager, using, fields, update_pk, raw)
 
 
 class IndividualToPhone(models.Model):
