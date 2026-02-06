@@ -47,19 +47,22 @@ class OrganizationViewSetTestCase(APITestCase):
             create_location(name="Main Clinic", organization=cls.orgs[0]),
             create_location(name="1ST CHOICE MEDICAL DISTRIBUTORS, LLC", organization=cls.orgs[0]),
             create_location(name="986 INFUSION PHARMACY #1 INC.", organization=cls.orgs[1]),
-            create_location(name="A & A MEDICAL SUPPLY COMPANY", organization=cls.orgs[2],
+            create_location(
+                name="A & A MEDICAL SUPPLY COMPANY",
+                organization=cls.orgs[2],
                 city="Boston",
                 state="MA",
                 zipcode="10001",
-                addr_line_1="1 Boston Avenue"
+                addr_line_1="1 Boston Avenue",
             ),
             create_location(
-                name="ABACUS BUSINESS CORPORATION GROUP INC.", organization=cls.orgs[3],
+                name="ABACUS BUSINESS CORPORATION GROUP INC.",
+                organization=cls.orgs[3],
                 city="Sandiego",
                 state="CA",
                 zipcode="05555",
-                addr_line_1="404 Great Amazing Avenue"
-            )
+                addr_line_1="404 Great Amazing Avenue",
+            ),
         ]
 
         cls.joe_legal_entity = create_legal_entity(dba_name="Joe Administrative Services LLC")
@@ -111,16 +114,16 @@ class OrganizationViewSetTestCase(APITestCase):
         names = extract_resource_names(response)
 
         sorted_names = [
-            '1ST CHOICE HOME HEALTH CARE INC',
-            '1ST CHOICE MEDICAL DISTRIBUTORS, LLC', 
-            '986 INFUSION PHARMACY #1 INC.',
-            'A & A MEDICAL SUPPLY COMPANY',
-            'ABACUS BUSINESS CORPORATION GROUP INC.',
-            'ABBY D CENTER, INC.',
-            'ABC DURABLE MEDICAL EQUIPMENT INC',
-            'ABC HOME MEDICAL SUPPLY, INC.',
-            'A BEAUTIFUL SMILE DENTISTRY, L.L.C.',
-            'A & B HEALTH CARE, INC.'
+            "1ST CHOICE HOME HEALTH CARE INC",
+            "1ST CHOICE MEDICAL DISTRIBUTORS, LLC",
+            "986 INFUSION PHARMACY #1 INC.",
+            "A & A MEDICAL SUPPLY COMPANY",
+            "ABACUS BUSINESS CORPORATION GROUP INC.",
+            "ABBY D CENTER, INC.",
+            "ABC DURABLE MEDICAL EQUIPMENT INC",
+            "ABC HOME MEDICAL SUPPLY, INC.",
+            "A BEAUTIFUL SMILE DENTISTRY, L.L.C.",
+            "A & B HEALTH CARE, INC.",
         ]
 
         self.assertEqual(
@@ -251,7 +254,7 @@ class OrganizationViewSetTestCase(APITestCase):
         response = self.client.get(url, {"address": "Main"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
-    
+
     def test_list_filter_by_address_zipcode_leading_zero(self):
         url = reverse("fhir-organization-list")
         response = self.client.get(url, {"address": "404 Great Amazing Avenue Sandiego CA 05555"})
@@ -275,7 +278,7 @@ class OrganizationViewSetTestCase(APITestCase):
         response = self.client.get(url, {"address_postalcode": "10001"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
-    
+
     def test_list_filter_by_address_zipcode_filter_leading_zero(self):
         url = reverse("fhir-organization-list")
         response = self.client.get(url, {"address_postalcode": "05555"})

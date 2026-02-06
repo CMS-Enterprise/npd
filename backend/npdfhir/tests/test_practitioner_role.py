@@ -25,7 +25,7 @@ from ..models import (
     PayloadType,
     Location,
     LocationToEndpointInstance,
-    IndividualToName
+    IndividualToName,
 )
 
 
@@ -277,7 +277,7 @@ class PractitionerRoleViewSetTestCase(APITestCase):
         assert_has_results(self, response)
 
         for entry in response.data["results"]["entry"]:
-            #Query the practitioner names based on the returned id
+            # Query the practitioner names based on the returned id
             practitioner_id = entry["resource"]["practitioner"]["reference"].split("/")[-1]
             provider = Provider.objects.select_related("individual").get(
                 individual_id=practitioner_id
@@ -285,18 +285,18 @@ class PractitionerRoleViewSetTestCase(APITestCase):
 
             name_objects = IndividualToName.objects.filter(individual=provider.individual).all()
 
-            #Save if the search matches an individual name associated with a provider
+            # Save if the search matches an individual name associated with a provider
             match_conditions = []
 
             for name in name_objects:
                 name_string = ""
-                name_string += f"{name.prefix or ""}"
-                name_string += f"{name.first_name or ""} {name.middle_name or ""}"
-                name_string += f"{name.last_name or ""} {name.suffix or ""}"
+                name_string += f"{name.prefix or ''}"
+                name_string += f"{name.first_name or ''} {name.middle_name or ''}"
+                name_string += f"{name.last_name or ''} {name.suffix or ''}"
 
                 match_conditions.append(sample_name in name_string)
 
-            #Make sure that the provider has any individual name that matches
+            # Make sure that the provider has any individual name that matches
             self.assertTrue(any(match_conditions))
 
     def test_list_filter_by_practitioner_gender(self):
@@ -306,13 +306,13 @@ class PractitionerRoleViewSetTestCase(APITestCase):
         assert_has_results(self, response)
 
         for entry in response.data["results"]["entry"]:
-            #Query the practitioner individual based on the returned id
+            # Query the practitioner individual based on the returned id
             practitioner_id = entry["resource"]["practitioner"]["reference"].split("/")[-1]
             provider = Provider.objects.select_related("individual").get(
                 individual_id=practitioner_id
             )
 
-            self.assertEqual('F', provider.individual.gender)
+            self.assertEqual("F", provider.individual.gender)
 
     def test_list_filter_by_organization_name(self):
         name_search = "MEDICAL"
@@ -322,15 +322,14 @@ class PractitionerRoleViewSetTestCase(APITestCase):
         assert_has_results(self, response)
 
         for entry in response.data["results"]["entry"]:
-            #Query the practitioner names based on the returned id
+            # Query the practitioner names based on the returned id
             org_id = entry["resource"]["organization"]["reference"].split("/")[-1]
             org_name = (
-                OrganizationToName.objects
-                .filter(organization_id=org_id)
+                OrganizationToName.objects.filter(organization_id=org_id)
                 .values_list("name", flat=True)
                 .first()
             )
-            
+
             self.assertIn(name_search, org_name)
 
     def test_filter_by_distance_with_km(self):
@@ -543,7 +542,7 @@ class PractitionerRoleViewSetTestCase(APITestCase):
             location_obj = Location.objects.get(pk=location_id)
 
             self.assertEqual(zip_search, location_obj.address.address_us.zipcode)
-    
+
     def test_list_filter_by_address_zip_leading_zero(self):
         zip_search = "05555"
         url = reverse("fhir-practitionerrole-list")

@@ -10,7 +10,7 @@ from .helpers import (
     assert_pagination_limit,
     extract_practitioner_names,
     get_female_npis,
-    concat_address_string
+    concat_address_string,
 )
 
 
@@ -238,7 +238,7 @@ class PractitionerViewSetTestCase(APITestCase):
         for practitioner_entry in response.data["results"]["entry"]:
             self.assertIn("resource", practitioner_entry)
             self.assertIn("id", practitioner_entry["resource"])
-            npi_id = practitioner_entry["resource"]['identifier'][0]['value']
+            npi_id = practitioner_entry["resource"]["identifier"][0]["value"]
             npi_ids.append(int(npi_id))
 
         # Check to make sure no female practitioners were fetched by mistake
@@ -321,7 +321,7 @@ class PractitionerViewSetTestCase(APITestCase):
                 # self.assertIn(test_search, address_string)
                 present_checks.append(test_search in address_string)
             self.assertTrue(any(present_checks))
-    
+
     def test_list_filter_by_address_leading_zero(self):
         url = reverse("fhir-practitioner-list")
         test_search = "333 Rocky Road. Sacramento CA 04321"
@@ -378,7 +378,7 @@ class PractitionerViewSetTestCase(APITestCase):
             for address in entry["resource"]["address"]:
                 zips.append(address["postalCode"])
             self.assertIn(postal_code_string, zips)
-    
+
     def test_list_filter_by_address_postalcode_leading_zero(self):
         url = reverse("fhir-practitioner-list")
         postal_code_string = "04321"

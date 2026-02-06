@@ -341,7 +341,7 @@ class LocationViewSetTestCase(APITestCase):
 
             address_string = concat_address_string(location_entry["address"])
             self.assertIn(address_search, address_string)
-    
+
     def test_list_filter_by_address_leading_zero(self):
         address_search = "City Museum Rd. St. Louis MO 05313"
         url = reverse("fhir-location-list")
@@ -430,7 +430,7 @@ class LocationViewSetTestCase(APITestCase):
             self.assertIn("name", location_entry)
 
             self.assertIn(zip_search, location_entry["address"]["postalCode"])
-    
+
     def test_list_filter_by_address_postalcode_leading_zero(self):
         zip_search = "05313"
         url = reverse("fhir-location-list")
