@@ -105,7 +105,7 @@ release:
 - Changes to `release` are automatically deployed to the `prod-test` environment in AWS
 - `release` is a protected branch and can only be updated using a pull request
 - `release` should rarely break. If `release` breaks fixing it is high priority because `release` being broken prevents production releases.
-- We minimize the time that `release` is broken by requiring pull requests to be peer reviewed and for applicable checks to pass before merging is alowed
+- We minimize the time that `release` is broken by requiring pull requests to be peer reviewed and for applicable checks to pass before merging is allowed
   - **caveat**: Work that is in `main` has already been reviewed. Reviewing that work again, especially if a lot of work has been done since the last update, is often not a good use of time.
   - We instead rely on automated testing to help ensure code quality
   - A PR that is opened against `release` can only be merged after unit and integration tests pass
