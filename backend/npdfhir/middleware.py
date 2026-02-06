@@ -1,7 +1,8 @@
-from django.http import JsonResponse
-from django.db import connection
 from datetime import datetime, timezone
+
 import structlog
+from django.db import connection
+from django.http import JsonResponse
 
 logger = structlog.get_logger(__name__)
 

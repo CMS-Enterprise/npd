@@ -1,0 +1,190 @@
+{
+  "additionalProperties": false,
+  "description": "Disclaimer: Any field name ends with ``__ext`` doesn't part of\nResource StructureDefinition, instead used to enable Extensibility feature\nfor FHIR Primitive Data Types.\n\nDetails of a Technology mediated contact point (phone, fax, email, etc.).\nDetails for all kinds of technology mediated contact points for a person or\norganization, including telephone, email, etc.",
+  "properties": {
+    "fhir_comments": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "element_property": false,
+      "title": "Fhir Comments"
+    },
+    "extension": {
+      "anyOf": [
+        {
+          "items": {},
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "May be used to represent additional information that is not part of the basic definition of the element. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.",
+      "element_property": true,
+      "title": "Additional content defined by implementations"
+    },
+    "id": {
+      "anyOf": [
+        {
+          "pattern": "[ \r\n\t\\S]+",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
+      "element_property": true,
+      "title": "Unique id for inter-element referencing"
+    },
+    "period": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "element_property": true,
+      "summary_element_property": true,
+      "title": "Time period when the contact point was/is in use"
+    },
+    "rank": {
+      "anyOf": [
+        {
+          "maximum": 2147483647,
+          "minimum": -2147483648,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Specifies a preferred order in which to use a set of contacts. ContactPoints with lower rank values are more preferred than those with higher rank values.",
+      "element_property": true,
+      "summary_element_property": true,
+      "title": "Specify preferred order of use (1 = highest)"
+    },
+    "_rank": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Extension field for ``rank``."
+    },
+    "system": {
+      "anyOf": [
+        {
+          "pattern": "^[^\\s]+(\\s[^\\s]+)*$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Telecommunications form for contact point - what communications system is required to make use of the contact.",
+      "element_property": true,
+      "enum_values": [
+        "phone",
+        "fax",
+        "email",
+        "pager",
+        "url",
+        "sms",
+        "other"
+      ],
+      "summary_element_property": true,
+      "title": "phone | fax | email | pager | url | sms | other"
+    },
+    "_system": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Extension field for ``system``."
+    },
+    "use": {
+      "anyOf": [
+        {
+          "pattern": "^[^\\s]+(\\s[^\\s]+)*$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Identifies the purpose for the contact point.",
+      "element_property": true,
+      "enum_values": [
+        "home",
+        "work",
+        "temp",
+        "old",
+        "mobile"
+      ],
+      "summary_element_property": true,
+      "title": "home | work | temp | old | mobile - purpose of this contact point"
+    },
+    "_use": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Extension field for ``use``."
+    },
+    "value": {
+      "anyOf": [
+        {
+          "pattern": "[ \r\n\t\\S]+",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "The actual contact point details, in a form that is meaningful to the designated communication system (i.e. phone number or email address).",
+      "element_property": true,
+      "summary_element_property": true,
+      "title": "The actual contact point details"
+    },
+    "_value": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Extension field for ``value``."
+    }
+  },
+  "title": "ContactPoint",
+  "type": "object"
+}

@@ -1,0 +1,20 @@
+{
+  "not_found": {
+    "title": "Page not found",
+    "message": "The page you are looking for isn't in our records.",
+    "links": [
+      {
+        "href": "/",
+        "text": "Home"
+      },
+      {
+        "href": "/developers",
+        "text": "Developer resources"
+      },
+      {
+        "href": "/fhir/docs/",
+        "text": "API documentation"
+      }
+    ]
+  }
+}

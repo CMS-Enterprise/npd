@@ -24,7 +24,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
 
   /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : undefined,
+  workers: 1, // process.env.CI ? 1 : undefined,
 
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: "html",
@@ -37,14 +37,20 @@ export default defineConfig({
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "on-first-retry",
 
-    actionTimeout: 10000,
+    actionTimeout: 5000,
   },
 
   /* Configure projects for major browsers */
   projects: [
+    { name: "setup", testMatch: /.*\.setup\.ts/ },
+
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      use: {
+        ...devices["Desktop Chrome"],
+        storageState: "tests/.auth/user.json",
+      },
+      dependencies: ["setup"],
     },
 
     // {
@@ -81,9 +87,10 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    cwd: "../backend",
+    cwd: "../",
     command: "make test-server",
     url: "http://localhost:8008",
     reuseExistingServer: !process.env.CI,
+    timeout: 300000, // give at least 5 minutes to download all container dependencies
   },
 })

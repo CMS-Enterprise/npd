@@ -1,0 +1,99 @@
+{
+  "additionalProperties": false,
+  "description": "Disclaimer: Any field name ends with ``__ext`` doesn't part of\nResource StructureDefinition, instead used to enable Extensibility feature\nfor FHIR Primitive Data Types.\n\nConcept - reference to a terminology or just  text.\nA concept that may be defined by a formal reference to a terminology or\nontology or may be provided by text.",
+  "properties": {
+    "fhir_comments": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "element_property": false,
+      "title": "Fhir Comments"
+    },
+    "extension": {
+      "anyOf": [
+        {
+          "items": {},
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "May be used to represent additional information that is not part of the basic definition of the element. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.",
+      "element_property": true,
+      "title": "Additional content defined by implementations"
+    },
+    "id": {
+      "anyOf": [
+        {
+          "pattern": "[ \r\n\t\\S]+",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
+      "element_property": true,
+      "title": "Unique id for inter-element referencing"
+    },
+    "coding": {
+      "anyOf": [
+        {
+          "items": {},
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "A reference to a code defined by a terminology system.",
+      "element_property": true,
+      "summary_element_property": true,
+      "title": "Code defined by a terminology system"
+    },
+    "text": {
+      "anyOf": [
+        {
+          "pattern": "[ \r\n\t\\S]+",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "A human language representation of the concept as seen/selected/uttered by the user who entered the data and/or which represents the intended meaning of the user.",
+      "element_property": true,
+      "summary_element_property": true,
+      "title": "Plain text representation of the concept"
+    },
+    "_text": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Extension field for ``text``."
+    }
+  },
+  "title": "CodeableConcept",
+  "type": "object"
+}

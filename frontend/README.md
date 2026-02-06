@@ -9,10 +9,10 @@
   - [Local development](#local-development)
     - [Prerequesites](#prerequesites)
     - [Running the frontend app](#running-the-frontend-app)
-      - [Option 1: vite dev server](#option-1-vite-dev-server)
-      - [Option 2: build assets for the backend](#option-2-build-assets-for-the-backend)
+      - [Option 1: build assets for the backend](#option-1-build-assets-for-the-backend)
+      - [Option 2: vite dev server](#option-2-vite-dev-server)
   - [Adding dependencies](#adding-dependencies)
-
+    - [Example dependency addition](#example-dependency-addition)
 
 The NPD front end consists of React + TypeScript built by vite.dev, deployed as static assets and developed as part of the NPD `backend/` Django application.
 
@@ -52,7 +52,9 @@ const MyComponent = () => {
   return (
     <div className="ds-u-display--flex">
       <p>{t("component.disclaimer")}</p>
-      <p><a href="#">{t("component.link")}</a></p>
+      <p>
+        <a href="#">{t("component.link")}</a>
+      </p>
     </div>
   )
 }
@@ -61,15 +63,14 @@ const MyComponent = () => {
 For larger or full-page content, we're using Markdown files, conventionally named `*.content.md`, loaded with the `?raw` query supported by vite.
 
 ```tsx
-import Markdown from 'react-markdown'
+import Markdown from "react-markdown"
 
-import content from './MyPage.content.md?raw'
+import content from "./MyPage.content.md?raw"
 
 const MyPage = () => {
-
   return (
     <div className="usa-prose">
-      <Markdown>{ content }</Markdown>
+      <Markdown>{content}</Markdown>
     </div>
   )
 }
@@ -103,14 +104,41 @@ code.blocks()
 
 There are two options for running the frontend application in development. Each has a time and a place
 
-#### Option 1: vite dev server
+#### Option 1: build assets for the backend
+
+At present, NPD deployment involves compiling the frontend assets into the `backend/provider_directory/static` directory and then building an image with the resulting static assets present.
+
+You can simulate this setup by using the `npm run watch` command to build frontend assets and serve them from the backend application.
+
+From the `npd` project root:
+
+0. Start the backend with `docker compose up -d django-web`
+1. Run the frontend server in build + watch mode:
+   - in docker with: `docker compose up web`
+   - on host with: `cd frontend; npm run watch`
+2. Visit http://localhost:8000 in your browser
+
+**Limitations:**
+
+- rebuilds the entire frontend app on changes, takes around 3 seconds
+- requires manual page reload when assests are rebuilt (no hot reload)
+- assets are deleted when the backend test suite runs
+- trickier to trace from compiled assets back to original components
+
+**Benefits:**
+
+- matches the deploy project setup
+- plain HTML form POST works as expected
+- one set of URLs (localhost:8000) for search app and API work
+
+#### Option 2: vite dev server
 
 From the `npd` project root:
 
 1. Run the frontend vite dev server
-    - in docker with: `docker compose up web`
-    - on host with: `cd frontend; npm run dev`
-3. Visit http://localhost:3000 in your browser
+   - in docker with: `bin/npr --publish 3000:3000 npm run dev`
+   - on host with: `cd frontend; npm run dev`
+2. Visit http://localhost:3000 in your browser
 
 **Limitations:**
 
@@ -120,37 +148,17 @@ From the `npd` project root:
 
 - nearly instantaneous reloading of changed components and styles
 
-#### Option 2: build assets for the backend
-
-At present, NPD deployment involves compiling the frontend assets into the `backend/provider_directory/static` directory and then building an image with the resulting static assets present.
-
-You can simulate this setup by using the `npm run watch` command to build frontend assets and serve them from the backend application.
-
-From the `npd` project root:
-
-1. Run the frontend server in build + watch mode:
-    - in docker with: `docker compose run --rm web npm run watch`
-    - on host with: `cd frontend; npm run watch`
-2. Visit http://localhost:8000 in your browser
-
-**Limitations:**
-
-- rebuilds the entire frontend app on changes, takes around 3 seconds
-- requires manual page reload when assests are rebuilt
-- assets are deleted when the backend test suite runs
-
-**Benefits:**
-
-- matches the deploy project setup
-- plain HTML form POST works as expected
-
 ## Adding dependencies
 
-Because of our current frontend docker compose setup, new dependencies **MUST** be installed with `docker compose run web npm install`. They will not be picked up by `docker compose build web` or `docker compose up --build web`.
+tl;dr - Because of our current frontend docker compose setup, new dependencies **MUST** be installed with `docker compose run web npm install`. They will not be picked up by `docker compose build web` or `docker compose up --build web`.
 
-The reason is that we are mounting a virtual docker compose volume in place of the container's `/app/node_modules` directory, but `docker compose build` doesn't know about _runtime_ volume mounts, only _host_ and _base image_ mounts, so it cannot update the docker compose virtual volume, only the directory which is present inside the image during the build process.
+In the interest of not creating large, orphaned docker volumes whenever frontend dependencies updated, we are using a virtual docker compose volume in place of the frontend service image's `/app/node_modules` directory.
 
-For us, this means that if you are running in docker containers with `docker compose` and want to add a frontend dependency, you'll need to make sure they are added inside the running container with `docker compose run npm install`, as well as outside (on your host machine) if you need that for editor support or to run `npm` commands on host.
+Unfortunately, `docker compose build` doesn't recognize _runtime_ virtual volume mounts, only _host_ and _base image_ mounts described by the `frontend/Dockerfile`. This means rerunning `docker compose build web` after `package.json` updates will only update base image `/app/node_modules` directory, not the `docker compose up web` virtual `node_modules:/app/node_modules` virtual volume.
+
+Thus, if you are running in docker containers with `docker compose` and want to add a frontend dependency, you'll need to make sure they are added to the docker compose `node_modules` virtual volume mount, which is what running `docker compose run npm install` does. This is similar to keeping your host environment up to date, which requires re-running `npm install` after pulling changes to `frontend/package.json`.
+
+### Example dependency addition
 
 ```sh
 # install and save a new dependency on host, to make the editor tooling happy

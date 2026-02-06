@@ -1,0 +1,109 @@
+{
+  "additionalProperties": false,
+  "description": "Disclaimer: Any field name ends with ``__ext`` doesn't part of\nResource StructureDefinition, instead used to enable Extensibility feature\nfor FHIR Primitive Data Types.\n\nTime range defined by start and end date/time.\nA time period defined by a start and end date and optionally time.",
+  "properties": {
+    "fhir_comments": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "element_property": false,
+      "title": "Fhir Comments"
+    },
+    "extension": {
+      "anyOf": [
+        {
+          "items": {},
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "May be used to represent additional information that is not part of the basic definition of the element. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.",
+      "element_property": true,
+      "title": "Additional content defined by implementations"
+    },
+    "id": {
+      "anyOf": [
+        {
+          "pattern": "[ \r\n\t\\S]+",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
+      "element_property": true,
+      "title": "Unique id for inter-element referencing"
+    },
+    "end": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "The end of the period. If the end of the period is missing, it means no end was known or planned at the time the instance was created. The start may be in the past, and the end date in the future, which means that period is expected/planned to end at that time.",
+      "element_property": true,
+      "summary_element_property": true,
+      "title": "End time with inclusive boundary, if not ongoing"
+    },
+    "_end": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Extension field for ``end``."
+    },
+    "start": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "The start of the period. The boundary is inclusive.",
+      "element_property": true,
+      "summary_element_property": true,
+      "title": "Starting time with inclusive boundary"
+    },
+    "_start": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Extension field for ``start``."
+    }
+  },
+  "title": "Period",
+  "type": "object"
+}

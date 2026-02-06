@@ -110,51 +110,58 @@ export const Header = ({ hideLinks }: HeaderProps) => {
 
               <ul className="usa-nav__primary usa-accordion" role="navigation">
                 {user && !user?.is_anonymous && (
-                  <li className="usa-nav__primary-item">
-                    <button
-                      type="button"
-                      className="usa-accordion__button usa-nav__link"
-                      aria-expanded="false"
-                      aria-controls="basic-nav-section"
-                    >
-                      <span>{t("header.link.developers")}</span>
-                    </button>
-                    <ul
-                      id="basic-nav-section"
-                      className={`usa-nav__submenu ${styles.submenuList}`}
-                      role="menu"
-                      hidden
-                    >
-                      <li className="usa-nav__submenu-item">
-                        <a
-                          href={`/developers${slugId(t("developers.nav.overview"))}`}
-                        >
-                          <span>{t("developers.nav.overview")}</span>
-                        </a>
-                      </li>
-                      <li className="usa-nav__submenu-item">
-                        <a
-                          href={`/developers${slugId(t("developers.nav.about"))}`}
-                        >
-                          <span>{t("developers.nav.about")}</span>
-                        </a>
-                      </li>
-                      <li className="usa-nav__submenu-item">
-                        <a
-                          href={`/developers${slugId(t("developers.nav.accessing"))}`}
-                        >
-                          <span>{t("developers.nav.accessing")}</span>
-                        </a>
-                      </li>
-                      <li className="usa-nav__submenu-item">
-                        <a
-                          href={`/developers${slugId(t("developers.nav.opensource"))}`}
-                        >
-                          <span>{t("developers.nav.opensource")}</span>
-                        </a>
-                      </li>
-                    </ul>
-                  </li>
+                  <>
+                    <li className="usa-nav__primary-item">
+                      <a href="/search" className="usa-nav__link">
+                        <span>{t("header.link.search")}</span>
+                      </a>
+                    </li>
+                    <li className="usa-nav__primary-item">
+                      <button
+                        type="button"
+                        className="usa-accordion__button usa-nav__link"
+                        aria-expanded="false"
+                        aria-controls="basic-nav-section"
+                      >
+                        <span>{t("header.link.developers")}</span>
+                      </button>
+                      <ul
+                        id="basic-nav-section"
+                        className={`usa-nav__submenu ${styles.submenuList}`}
+                        role="menu"
+                        hidden
+                      >
+                        <li className="usa-nav__submenu-item">
+                          <a
+                            href={`/developers${slugId(t("developers.nav.participating"))}`}
+                          >
+                            <span>{t("developers.nav.participating")}</span>
+                          </a>
+                        </li>
+                        <li className="usa-nav__submenu-item">
+                          <a
+                            href={`/developers${slugId(t("developers.nav.about"))}`}
+                          >
+                            <span>{t("developers.nav.about")}</span>
+                          </a>
+                        </li>
+                        <li className="usa-nav__submenu-item">
+                          <a
+                            href={`/developers${slugId(t("developers.nav.accessing"))}`}
+                          >
+                            <span>{t("developers.nav.accessing")}</span>
+                          </a>
+                        </li>
+                        <li className="usa-nav__submenu-item">
+                          <a
+                            href={`/developers${slugId(t("developers.nav.opensource"))}`}
+                          >
+                            <span>{t("developers.nav.opensource")}</span>
+                          </a>
+                        </li>
+                      </ul>
+                    </li>
+                  </>
                 )}
 
                 <AuthenticationControl />

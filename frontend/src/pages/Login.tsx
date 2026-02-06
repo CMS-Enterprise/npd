@@ -37,7 +37,7 @@ export const Login = () => {
                     The National Provider Directory is under development with
                     limited access for test users.
                   </p>
-                  <label className="usa-label" htmlFor="email">
+                  <label className="usa-label" htmlFor="username">
                     Username
                   </label>
                   <input
@@ -51,12 +51,12 @@ export const Login = () => {
                     autoFocus
                     required
                   />
-                  <label className="usa-label" htmlFor="password-sign-in">
+                  <label className="usa-label" htmlFor="password">
                     Password
                   </label>
                   <input
                     className="usa-input"
-                    id="password-sign-in"
+                    id="password"
                     name="password"
                     type="password"
                     required
@@ -65,7 +65,7 @@ export const Login = () => {
                     title="Toggle password"
                     type="button"
                     className="usa-show-password"
-                    aria-controls="password-sign-in"
+                    aria-controls="password"
                     data-show-text="Show password"
                     data-hide-text="Hide password"
                   >

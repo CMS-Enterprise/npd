@@ -1,18 +1,44 @@
-import classNames from "classnames"
+import { Button } from "@cmsgov/design-system"
+import { FaUserMd, FaHospital } from "react-icons/fa"
+import { TitlePanel } from "../../components/TitlePanel"
 import layout from "../Layout.module.css"
+import { useTranslation } from "react-i18next"
 
 export const Search = () => {
-  const contentClass = classNames(layout.content, "ds-l-container")
+  const { t } = useTranslation()
 
   return (
-    <main className={contentClass}>
-      <div className="ds-l-row">
-        <div className="ds-l-col--12">
-          <div className={layout.leader}>
-            <h1>Search goes here</h1>
+    <>
+      <TitlePanel
+        title={t("search.title")}
+        className={layout.compactLeader}
+      >
+        <p>
+        {t("search.subtitle")}
+        </p>
+
+        <div className="ds-l-row">
+          <div className="ds-l-col--12 ds-u-display--flex ds-u-justify-content--start ds-u-margin-top--4 ds-u-margin-bottom--4">
+            <Button
+              variation="solid"
+              size="big"
+              href="/practitioners/search"
+              className="ds-u-margin-right--2"
+            >
+              <FaUserMd className="ds-u-margin-right--1" aria-hidden="true" />
+              {t("search.practitioner")}
+            </Button>
+            <Button
+              variation="solid"
+              size="big"
+              href="/organizations/search"
+            >
+              <FaHospital className="ds-u-margin-right--1" aria-hidden="true" />
+              {t("search.organization")}
+            </Button>
           </div>
         </div>
-      </div>
-    </main>
+      </TitlePanel>
+    </>
   )
 }

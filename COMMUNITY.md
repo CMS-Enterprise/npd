@@ -7,14 +7,19 @@ NPD is supported by a dedicated team of individuals fulfilling various roles to 
 
 | Role   | Name    | Affiliation    |
 | :----- | :------ | :------------- |
-| Product Manager | Julie Sossamon | DSAC |
-| Design Lead | Heather Myers | DSAC |
-| Technical Lead | Fred Trotter | DSAC |
+| Product/ Project Lead | Julie Sossamon | DSAC |
+| Product Manager | Julia McCafferty | DSAC |
+| Interim Design Lead | Sunil Manchikanti | DSAC |
+| Data/ Community Lead and Sr. Advisor | Fred Trotter | DSAC |
+| Engineering/ Architecture Lead | Ross Miller | DSAC |
+| DevSecOps/ Release Lead and ISSO | Blaine Price | DSAC |
 | Engineer | Sarah Popelka | DSAC |
-| Engineer | Blaine Price | DSAC |
+| Engineer | Dan Turner | USDS |
+| Engineer | Demetrius Kellum | USDS |
+| Engineer | Trevor Specht | USDS |
 | Engineer | Sachin Panayil | USDC @ DSAC |
 | Engineer | Isaac Milarsky | USDC @ DSAC |
-| Engineer | Ross Miller | DSAC |
+| Data Scientist | Keith Otis | DSAC |
 
 See [CODEOWNERS.md](.github/CODEOWNERS.md) for a list of those responsible for the code and documentation in this repository.
 
@@ -26,20 +31,23 @@ The members of npd community are responsible for guiding its development, ensuri
 
 ### Maintainers:
 
-- @ftrotter-gov
+- @rmillergv
+- @wbprice
 - @spopelka-dsac
 
 ### Approvers:
 
-- @ftrotter-gov
+- @rmillergv
+- @wbprice
 - @spopelka-dsac
 
 
 ### Reviewers:
 
-- @ftrotter-gov
-- @spopeelka-dsac
-
+- @rmillergv
+- @wbprice
+- @spopelka-dsac
+  
 
 | Roles      | Responsibilities                               | Requirements                                                                      | Defined by                                                |
 | ---------- | :--------------------------------------------- | :-------------------------------------------------------------------------------- | :-------------------------------------------------------- |
@@ -52,7 +60,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for more details on the release process.
 
 ## Contributors
 
-![](https://img.shields.io/github/contributors/DSACMS/npd?style=flat-square&label=Contributor%20Count(incl.%20bots)) 
+![](https://img.shields.io/github/contributors/CMS-Enterprise/npd?style=flat-square&label=Contributor%20Count(incl.%20bots)) 
 
 <!-- readme: contributors -start -->
 <table>

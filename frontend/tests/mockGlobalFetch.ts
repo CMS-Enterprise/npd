@@ -1,10 +1,7 @@
 import { vi } from "vitest"
-
-export const DEFAULT_FRONTEND_SETTINGS: FrontendSettings = {
-  require_authentication: false,
-  user: { is_anonymous: false, username: "testuser" },
-  feature_flags: {},
-}
+import type { Organization } from "../src/@types/fhir/Organization"
+import type { Practitioner } from "../src/@types/fhir/Practitioner"
+import { DEFAULT_FRONTEND_SETTINGS } from "./fixtures"
 
 export const settingsResponseWithFeature = (
   flagValues: Record<string, boolean>,
@@ -25,7 +22,7 @@ export const settingsResponseWithFeature = (
 
 type UrlMatch = string
 // new API response types should be added as a union to ApiResponseType
-type ApiResponseType = FrontendSettings | FhirOrganization
+type ApiResponseType = FrontendSettings | Organization | Practitioner
 
 export type MockResponse = [UrlMatch, ApiResponseType]
 

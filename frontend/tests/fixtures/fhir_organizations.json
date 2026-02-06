@@ -1,0 +1,621 @@
+{
+  "count": 1767,
+  "next": "http://localhost:8000/fhir/Organization/?page=2",
+  "previous": null,
+  "results": {
+    "resourceType": "Bundle",
+    "type": "searchset",
+    "total": 10,
+    "entry": [
+      {
+        "fullUrl": "http://localhost:8000/fhir/Organization/3ac907f0-c7d0-484e-ad0e-653dd011a55b",
+        "resource": {
+          "resourceType": "Organization",
+          "id": "3ac907f0-c7d0-484e-ad0e-653dd011a55b",
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"
+            ]
+          },
+          "identifier": [
+            {
+              "use": "official",
+              "type": {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                    "code": "PRN",
+                    "display": "Provider number"
+                  }
+                ]
+              },
+              "system": "http://terminology.hl7.org/NamingSystem/npi",
+              "value": "1679576367",
+              "period": {
+                "start": "2005-05-27T00:00:00"
+              }
+            }
+          ],
+          "name": "1ST CHOICE HOME HEALTH CARE INC",
+          "contact": [
+            {
+              "name": {
+                "use": "official",
+                "text": "REBECCA CARNELL",
+                "family": "CARNELL",
+                "given": ["REBECCA", null],
+                "prefix": [null],
+                "suffix": [null],
+                "period": {}
+              },
+              "telecom": [
+                {
+                  "system": "phone",
+                  "value": "9072605959",
+                  "use": "work"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "fullUrl": "http://localhost:8000/fhir/Organization/cb13ddaf-49c9-4067-b745-e637896b8390",
+        "resource": {
+          "resourceType": "Organization",
+          "id": "cb13ddaf-49c9-4067-b745-e637896b8390",
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"
+            ]
+          },
+          "identifier": [
+            {
+              "use": "official",
+              "type": {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                    "code": "PRN",
+                    "display": "Provider number"
+                  }
+                ]
+              },
+              "system": "http://terminology.hl7.org/NamingSystem/npi",
+              "value": "1942203542",
+              "period": {
+                "start": "2005-05-27T00:00:00"
+              }
+            }
+          ],
+          "name": "1ST CHOICE MEDICAL DISTRIBUTORS, LLC",
+          "contact": [
+            {
+              "name": {
+                "use": "official",
+                "text": "MS. VALARIE K ANDERSON",
+                "family": "ANDERSON",
+                "given": ["VALARIE", "K"],
+                "prefix": ["MS."],
+                "suffix": [null],
+                "period": {}
+              },
+              "telecom": [
+                {
+                  "system": "phone",
+                  "value": "8122380400",
+                  "use": "work"
+                }
+              ],
+              "address": {
+                "line": ["3212 S 7th St"],
+                "city": "Terre Haute",
+                "state": "IN",
+                "postalCode": "47802",
+                "country": "US"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "fullUrl": "http://localhost:8000/fhir/Organization/3f0aa737-814a-480e-84c1-7ff43330ac61",
+        "resource": {
+          "resourceType": "Organization",
+          "id": "3f0aa737-814a-480e-84c1-7ff43330ac61",
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"
+            ]
+          },
+          "identifier": [
+            {
+              "use": "official",
+              "type": {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                    "code": "PRN",
+                    "display": "Provider number"
+                  }
+                ]
+              },
+              "system": "http://terminology.hl7.org/NamingSystem/npi",
+              "value": "1447253448",
+              "period": {
+                "start": "2005-05-23T00:00:00"
+              }
+            }
+          ],
+          "name": "986 INFUSION PHARMACY #1 INC.",
+          "contact": [
+            {
+              "name": {
+                "use": "official",
+                "text": "MR. DANNY THAI",
+                "family": "THAI",
+                "given": ["DANNY", null],
+                "prefix": ["MR."],
+                "suffix": [null],
+                "period": {}
+              },
+              "telecom": [
+                {
+                  "system": "phone",
+                  "value": "7147011192",
+                  "use": "work"
+                }
+              ],
+              "address": {
+                "line": ["4420 E Miraloma Ave", "Ste F"],
+                "city": "Anaheim",
+                "state": "CA",
+                "postalCode": "92807",
+                "country": "US"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "fullUrl": "http://localhost:8000/fhir/Organization/ade8cd26-dcb5-4ed6-ae56-e2bdd46b0cc8",
+        "resource": {
+          "resourceType": "Organization",
+          "id": "ade8cd26-dcb5-4ed6-ae56-e2bdd46b0cc8",
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"
+            ]
+          },
+          "identifier": [
+            {
+              "use": "official",
+              "type": {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                    "code": "PRN",
+                    "display": "Provider number"
+                  }
+                ]
+              },
+              "system": "http://terminology.hl7.org/NamingSystem/npi",
+              "value": "1295738284",
+              "period": {
+                "start": "2005-05-23T00:00:00"
+              }
+            }
+          ],
+          "name": "A & A MEDICAL SUPPLY COMPANY",
+          "contact": [
+            {
+              "name": {
+                "use": "official",
+                "text": "MR. MIKHAIL TRAKHTMAN",
+                "family": "TRAKHTMAN",
+                "given": ["MIKHAIL", null],
+                "prefix": ["MR."],
+                "suffix": [null],
+                "period": {}
+              },
+              "telecom": [
+                {
+                  "system": "phone",
+                  "value": "4105269323",
+                  "use": "work"
+                }
+              ],
+              "address": {
+                "line": ["146 Chartley Dr", "Ste 100"],
+                "city": "Reisterstown",
+                "state": "MD",
+                "postalCode": "21136",
+                "country": "US"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "fullUrl": "http://localhost:8000/fhir/Organization/7910b605-3cc9-4531-9155-b04b5bf3d116",
+        "resource": {
+          "resourceType": "Organization",
+          "id": "7910b605-3cc9-4531-9155-b04b5bf3d116",
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"
+            ]
+          },
+          "identifier": [
+            {
+              "use": "official",
+              "type": {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                    "code": "PRN",
+                    "display": "Provider number"
+                  }
+                ]
+              },
+              "system": "http://terminology.hl7.org/NamingSystem/npi",
+              "value": "1821091067",
+              "period": {
+                "start": "2005-05-23T00:00:00"
+              }
+            }
+          ],
+          "name": "ABACUS BUSINESS CORPORATION GROUP INC.",
+          "contact": [
+            {
+              "name": {
+                "use": "official",
+                "text": "MR. DAVID SOMALI",
+                "family": "SOMALI",
+                "given": ["DAVID", null],
+                "prefix": ["MR."],
+                "suffix": [null],
+                "period": {}
+              },
+              "telecom": [
+                {
+                  "system": "phone",
+                  "value": "3232226688",
+                  "use": "work"
+                }
+              ],
+              "address": {
+                "line": ["2730 N Main St"],
+                "city": "Los Angeles",
+                "state": "CA",
+                "postalCode": "90031",
+                "country": "US"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "fullUrl": "http://localhost:8000/fhir/Organization/59eb0abb-966a-4adf-96dd-33f06627de0e",
+        "resource": {
+          "resourceType": "Organization",
+          "id": "59eb0abb-966a-4adf-96dd-33f06627de0e",
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"
+            ]
+          },
+          "identifier": [
+            {
+              "use": "official",
+              "type": {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                    "code": "PRN",
+                    "display": "Provider number"
+                  }
+                ]
+              },
+              "system": "http://terminology.hl7.org/NamingSystem/npi",
+              "value": "1780687095",
+              "period": {
+                "start": "2005-05-31T00:00:00"
+              }
+            }
+          ],
+          "name": "ABBY D CENTER, INC.",
+          "contact": [
+            {
+              "name": {
+                "use": "official",
+                "text": "DR. LAURA ELISABETH LENKEY",
+                "family": "LENKEY",
+                "given": ["LAURA", "ELISABETH"],
+                "prefix": ["DR."],
+                "suffix": [null],
+                "period": {}
+              },
+              "telecom": [
+                {
+                  "system": "phone",
+                  "value": "2313487777",
+                  "use": "work"
+                }
+              ],
+              "address": {
+                "line": ["2206 Mitchell Park Dr", "Ste 14"],
+                "city": "Petoskey",
+                "state": "MI",
+                "postalCode": "49770",
+                "country": "US"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "fullUrl": "http://localhost:8000/fhir/Organization/7714015f-908e-4bd6-a7e4-2434b001cbda",
+        "resource": {
+          "resourceType": "Organization",
+          "id": "7714015f-908e-4bd6-a7e4-2434b001cbda",
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"
+            ]
+          },
+          "identifier": [
+            {
+              "use": "official",
+              "type": {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                    "code": "PRN",
+                    "display": "Provider number"
+                  }
+                ]
+              },
+              "system": "http://terminology.hl7.org/NamingSystem/npi",
+              "value": "1104829175",
+              "period": {
+                "start": "2005-05-24T00:00:00"
+              }
+            }
+          ],
+          "name": "ABC DURABLE MEDICAL EQUIPMENT INC",
+          "contact": [
+            {
+              "name": {
+                "use": "official",
+                "text": "VERONICA S VELA",
+                "family": "VELA",
+                "given": ["VERONICA", "S"],
+                "prefix": [null],
+                "suffix": [null],
+                "period": {}
+              },
+              "telecom": [
+                {
+                  "system": "phone",
+                  "value": "9565842775",
+                  "use": "work"
+                }
+              ],
+              "address": {
+                "line": ["919 N Slabaugh Ave"],
+                "city": "Mission",
+                "state": "TX",
+                "postalCode": "78572",
+                "country": "US"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "fullUrl": "http://localhost:8000/fhir/Organization/cd713715-3092-4092-adbc-7c1002d5c154",
+        "resource": {
+          "resourceType": "Organization",
+          "id": "cd713715-3092-4092-adbc-7c1002d5c154",
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"
+            ]
+          },
+          "identifier": [
+            {
+              "use": "official",
+              "type": {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                    "code": "PRN",
+                    "display": "Provider number"
+                  }
+                ]
+              },
+              "system": "http://terminology.hl7.org/NamingSystem/npi",
+              "value": "1427051531",
+              "period": {
+                "start": "2005-05-23T00:00:00"
+              }
+            }
+          ],
+          "name": "ABC HOME MEDICAL SUPPLY, INC.",
+          "contact": [
+            {
+              "name": {
+                "use": "official",
+                "text": "EMILY M VESTAL",
+                "family": "VESTAL",
+                "given": ["EMILY", "M"],
+                "prefix": [null],
+                "suffix": [null],
+                "period": {}
+              },
+              "telecom": [
+                {
+                  "system": "phone",
+                  "value": "8668978588",
+                  "use": "work"
+                }
+              ],
+              "address": {
+                "line": ["2483 15th St NW", "Ste B"],
+                "city": "New Brighton",
+                "state": "MN",
+                "postalCode": "55112",
+                "country": "US"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "fullUrl": "http://localhost:8000/fhir/Organization/62cdbaa0-e139-42bd-8b6c-040ac2602dd3",
+        "resource": {
+          "resourceType": "Organization",
+          "id": "62cdbaa0-e139-42bd-8b6c-040ac2602dd3",
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"
+            ]
+          },
+          "identifier": [
+            {
+              "use": "official",
+              "type": {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                    "code": "PRN",
+                    "display": "Provider number"
+                  }
+                ]
+              },
+              "system": "http://terminology.hl7.org/NamingSystem/npi",
+              "value": "1316940224",
+              "period": {
+                "start": "2005-05-24T00:00:00"
+              }
+            }
+          ],
+          "name": "A BEAUTIFUL SMILE DENTISTRY, L.L.C.",
+          "contact": [
+            {
+              "name": {
+                "use": "official",
+                "text": "DAVID JIN",
+                "family": "JIN",
+                "given": ["DAVID", null],
+                "prefix": [null],
+                "suffix": [null],
+                "period": {}
+              },
+              "telecom": [
+                {
+                  "system": "phone",
+                  "value": "2012244400",
+                  "use": "work"
+                }
+              ],
+              "address": {
+                "line": ["1315 Anderson Ave", "Ste A"],
+                "city": "Fort Lee",
+                "state": "NJ",
+                "postalCode": "7024 ",
+                "country": "US"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "fullUrl": "http://localhost:8000/fhir/Organization/a331754c-5ff9-4279-829d-a899c7669e5c",
+        "resource": {
+          "resourceType": "Organization",
+          "id": "a331754c-5ff9-4279-829d-a899c7669e5c",
+          "meta": {
+            "profile": [
+              "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"
+            ]
+          },
+          "identifier": [
+            {
+              "use": "official",
+              "type": {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                    "code": "PRN",
+                    "display": "Provider number"
+                  }
+                ]
+              },
+              "system": "http://terminology.hl7.org/NamingSystem/npi",
+              "value": "1689677502",
+              "period": {
+                "start": "2005-05-24T00:00:00"
+              }
+            },
+            {
+              "type": {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                    "code": "test",
+                    "display": "test"
+                  }
+                ]
+              },
+              "system": "1",
+              "value": "34629"
+            },
+            {
+              "type": {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                    "code": "test",
+                    "display": "test"
+                  }
+                ]
+              },
+              "system": "1",
+              "value": "45771"
+            }
+          ],
+          "name": "A & B HEALTH CARE, INC.",
+          "contact": [
+            {
+              "name": {
+                "use": "official",
+                "text": "RONALD EDWARD VEAZEY",
+                "family": "VEAZEY",
+                "given": ["RONALD", "EDWARD"],
+                "prefix": [null],
+                "suffix": [null],
+                "period": {}
+              },
+              "telecom": [
+                {
+                  "system": "phone",
+                  "value": "3606292977",
+                  "use": "work"
+                }
+              ],
+              "address": {
+                "line": ["10020 270th St NW"],
+                "city": "Stanwood",
+                "state": "WA",
+                "postalCode": "98292",
+                "country": "US"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

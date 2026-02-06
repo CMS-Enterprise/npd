@@ -1,17 +1,20 @@
-| Status | Date | Author | Context |
-| --- | --- | --- | --- |
-| Drafted | 2029-07-01 | @spopelka-dsac | project scaffolding |
-| Updated | 2029-08-19 | @spopelka-dsac | adding data and docker notes |
+| Status  | Date       | Author         | Context                                       |
+| ------- | ---------- | -------------- | --------------------------------------------- |
+| Drafted | 2029-07-01 | @spopelka-dsac | project scaffolding                           |
+| Updated | 2029-08-19 | @spopelka-dsac | adding data and docker notes                  |
 | Updated | 2029-09-30 | @abachman-dsac | clarification of coding styles and PR details |
-| Updated | 2029-10-15 | @abachman-dsac | addressing feedback from #108 |
+| Updated | 2029-10-15 | @abachman-dsac | addressing feedback from #108                 |
+| Updated | 2029-12-03 | @abachman-dsac | adding notes on `make` and `bin/npr`          |
+| Updated | 2026-01-28 | @sachin-panayil| updating links with new path                  |
 
 - [How to Contribute](#how-to-contribute)
   - [Getting Started](#getting-started)
     - [Team Specific Guidelines](#team-specific-guidelines)
-    - [Building dependencies](#building-dependencies)
+    - [Installing](#installing)
     - [Building the Project](#building-the-project)
       - [Database Setup](#database-setup)
       - [Running the Application](#running-the-application)
+      - [One-off commands](#one-off-commands)
     - [Workflow and Branching](#workflow-and-branching)
     - [Testing Conventions](#testing-conventions)
       - [Backend Tests](#backend-tests)
@@ -28,7 +31,6 @@
     - [Security and Responsible Disclosure Policy](#security-and-responsible-disclosure-policy)
   - [Public domain](#public-domain)
 
-
 # How to Contribute
 
 <!-- Basic instructions about where to send patches, check out source code, and get development support.-->
@@ -42,6 +44,11 @@ contributions.
 We encourage you to read this project's CONTRIBUTING policy (you are here), its
 [LICENSE](LICENSE.md), and its [README](README.md).
 
+These instructions are general and do not cover every scenario. [Create an
+issue](https://github.com/CMS-Enterprise/npd/issues) on this project or double check
+current documentation if you run into a situation you are unable to solve by
+rebuilding the application from scratch.
+
 ## Getting Started
 
 ### Team Specific Guidelines
@@ -49,40 +56,39 @@ We encourage you to read this project's CONTRIBUTING policy (you are here), its
 While being fully developed in the open, this project is a hybrid project
 largely staffed by members of the [DSAC](https://www.cms.gov/digital-service)
 team, but not restricted to CMS team members. We welcome
-[issues](https://github.com/DSACMS/npd/issues) and
-[contributions](https://github.com/DSACMS/npd/pulls) from the open source and
+[issues](https://github.com/CMS-Enterprise/npd/issues) and
+[contributions](https://github.com/CMS-Enterprise/npd/pulls) from the open source and
 health-tech community at large.
 
 The team uses an internal Jira instance for planning and tracking work but
 seeks to hold any discussions relevant to specific Pull Requests in the open.
 
-### Building dependencies
+### Installing
 
 Python and Javascript dependencies are handled via docker containers, so they
 will be built when running `docker compose build` or when running `docker
-compose up` for the first time in the `backend/` or `frontend/` directories,
-respectively.
+compose up` for the first time.
 
-The `backend/` directory additionally includes support for `make` commands to
-help with development. You can run `make help` from inside that folder to get
-more information.
+Local dependencies for project tooling and testing can be installed with `make`:
+
+```sh
+# build containers, create and migrate the development database
+make setup
+
+# install ruff and playwright
+make install-tools
+```
 
 If you prefer to run on host (aka, not inside docker containers), you will have
 to follow the instructions provided by your language tooling for installing
-dependencies locally with `pip` for Python or `npm` for Javascript.
+dependencies locally. We recommend using `pip` in the `backend/` directory for Python and `npm` in the `frontend/` and `playwright/` directories for Javascript.
 
 ### Building the Project
 
-The project is currently limited to a Django (Python) application located in the
-`backend/` sub-directory.
+The NPD application is a Django application located in the
+`backend/` sub-directory, serving a React single-page application which is located in the `frontend/` sub-directory, with data provided by a database whose schema is managed by [flyway](https://documentation.red-gate.com/fd/getting-started-with-flyway-184127223.html) using SQL source code from the `flyway/` directory.
 
-The following guidance assumes that you have navigated in your console to the
-respective folder. To run a `docker compose` command, for example:
-
-```console
-$ cd backend/
-$ make setup && make up
-```
+All commands listed below assume you are at the root of the project in your shell.
 
 #### Database Setup
 
@@ -94,38 +100,38 @@ Running `make setup` will:
 
 #### Running the Application
 
-These instructions are general and do not cover every scenario. [Create an
-issue](https://github.com/DSACMS/npd/issues) on this project or double check
-current documentation if you run into a situation you are unable to solve by
-rebuilding the application from scratch.
+To start the development project with system defaults, run `make setup` and then `make up`.
 
-0. Navigate to the `backend/` directory.
-1. Ensure that the `db` service is running. Use `docker compose up -d db` if it
-  is not.
-2. Create a `.env` file in the `backend/` directory with `cp
-  backend/.env_template backend/.env`
-  * _note:_ set `NPD_DB_HOST` to `host.docker.internal` if using a host
-    Postgres instance from inside a container.
-3. Run `docker compose up` initially to start the web application service and
-  `docker compose up --build` following any substantial updates to the backend
-  application
-4. Navigate to `http://localhost:8000/fhir/` or run `curl localhost:8000/fhir`
-  to visit the application. You should see an API documentation landing page.
-5. Happy coding!
+You can sign in to the application using the default development user account at http://localhost:8000/accounts/login/ with username: ` developer@cms.hhs.gov`, password: `password123`. You can use the same credentials to sign in to the Django admin site at http://localhost:8000/admin/login/.
+
+_Optional_: you can manage your local project environment variables by creating a "dotenv" file in the `backend/` directory. The easiest way to do that is make a copy of the example:
+
+```sh
+cp backend/.env_template backend/.env
+```
+
+#### One-off commands
+
+We recommend use of [Docker Compose](https://docs.docker.com/compose/), `make`, and the `bin/npr` tool included in this project for all development work.
+
+You can review the use of those tools by running `make` or `bin/npr --help` at the command line.
+
+`make` is intended to provide the most common commands in a standard shape for development work.
+
+`bin/npr` is a runner for managing complex `docker compose run` commands across the various services that make up this project.
 
 ### Workflow and Branching
 
-We follow the [GitHub Flow Workflow](https://guides.github.com/introduction/flow/)
+We follow the [GitHub Flow Workflow](https://guides.github.com/introduction/flow/).
 
 1.  Fork the project
 2.  Check out the `main` branch
 3.  Create a feature branch
 4.  Write code and tests for your change
-5.  From your branch, make a pull request against `DSACMS/npd/main`
+5.  From your branch, make a pull request against `CMS-Enterprise/npd/main`
 6.  Work with repo maintainers to get your change reviewed
-7.  Wait for your change to be pulled into `DSACMS/npd/main`
+7.  Wait for your change to be pulled into `CMS-Enterprise/npd/main`
 8.  Delete your feature branch
-
 
 ### Testing Conventions
 
@@ -136,6 +142,8 @@ passing.
 We do not expect 100% test coverage but we will be unlikely to accept Pull
 Requests which reduce test coverage or new features which do not include
 updates to the test suite.
+
+We recommend starting new feature work with a new Playwright end-to-end test and going from there.
 
 #### Backend Tests
 
@@ -149,9 +157,9 @@ on testing for additional details.
 
 ### Coding Style and Linters
 
-> [!NOTE]
-> **Proposed**: Use `ruff` for python, `prettier` for typescript / javascript.
-> Linter + formatter wins all debates. Use defaults whenever possible.
+We require use of `ruff` to format all Python code and `prettier` to format all Typescript code.
+
+The easiest way to keep your commits clean is to install the formatting tools and pre-commit with `make install-tools`.
 
 ### Writing Issues
 
@@ -173,8 +181,9 @@ When creating an issue please try to adhere to the following format:
 
     see our .github/ISSUE_TEMPLATE.md for more examples.
 
-In this project, issues should be limited to code, development tooling,
-automation, or site bugs, ___NOT___ data quality.
+In this project, [new issues](https://github.com/CMS-Enterprise/npd/issues) should be
+limited to code, development tooling, automation, or site bugs, ___NOT___ data
+quality.
 
 ### Creating Commits
 
@@ -314,7 +323,7 @@ npd will see regular updates and new releases. This section describes the genera
 
 <!-- ### Versioning
 
-npd uses [Semantic Versioning](https://semver.org/). Each release is associated with a [`git tag`](github.com/DSACMS/npd/tags) of the form `X.Y.Z`.
+npd uses [Semantic Versioning](https://semver.org/). Each release is associated with a [`git tag`](github.com/CMS-Enterprise/npd/tags) of the form `X.Y.Z`.
 
 Given a version number in the `MAJOR.MINOR.PATCH` (eg., `X.Y.Z`) format, here are the differences in these terms:
 
@@ -512,14 +521,13 @@ In rare cases, a hotfix for a prior release may be required out-of-phase with th
    This is a pre-release: DO NOT check
    ```
 
-[proj-releases-new]: https://github.com/DSACMS/npd/releases/new
+[proj-releases-new]: https://github.com/CMS-Enterprise/npd/releases/new
 -->
 
 ## Documentation
 
 We also welcome improvements to the project documentation or to the existing
-docs. Please file an [issue](https://github.com/DSACMS/npd/issues).
-
+docs. Please file an [issue](https://github.com/CMS-Enterprise/npd/issues).
 
 ## Policies
 

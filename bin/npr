@@ -1,0 +1,233 @@
+#!/usr/bin/env python3
+
+import argparse
+import os
+import subprocess
+import sys
+
+"""
+npr is an NPd Runner
+
+Run docker compose commands in the npd project directory (https://github.com/CMS-Enterprise/npd)
+"""
+
+EPILOG_TEXT = """
+examples:
+  \033[36;1m[ Backend ]\033[0m service: django-web
+
+  %(prog)s -t python manage.py test
+    Run backend tests in the "django-web" container, with
+    backend/compose.test.yml configuration, without db setup
+
+  %(prog)s -e DJANGO_SETTINGS_MODULE=app.settings.test python manage.py shell
+    Open Django shell with test settings using an environment variable
+
+  \033[36;1m[ Frontend ]\033[0m service: web
+
+  %(prog)s npm [COMMAND]
+    Run frontend npm commands in the "web" service container
+
+  %(prog)s npm test
+    Run frontend tests
+
+  %(prog)s npm install
+    Install npm packages in the web service container
+
+  %(prog)s npm install --save react-whatever
+    Add an npm package to the frontend project
+
+  \033[36;1m[ Database ]\033[0m service: db
+
+  %(prog)s -e PGPASSWORD=postgres -s db psql -U postgres -h db
+    Connect to PostgreSQL database in the db service with default user/pass
+
+  \033[36;1m[ Flyway ]\033[0m service: db-migrations
+
+  %(prog)s migrate
+    Run database migrations using the db-migrations service
+"""
+
+
+def determine_service(command: list[str]) -> str | None:
+    """
+    Determine the appropriate Docker service or run on host based on the
+    command name.
+    """
+    if not command:
+        return None
+
+    first_arg = command[0].lower()
+
+    if first_arg == "playwright":
+        rest = " ".join(command[1:])
+        eprint(
+            f"Unsupported command. Run `npx playwright {rest}` directly in the playwright/ directory instead"
+        )
+        sys.exit(1)
+
+    # Python-related commands go to django-web
+    python_commands = ["python", "python3", "pip", "pip3", "django-admin", "manage.py"]
+    if first_arg in python_commands or first_arg.startswith("python"):
+        return "django-web"
+
+    database_commands = ["psql", "pg_dump"]
+    if first_arg in database_commands:
+        return "db"
+
+    flyway_commands = ["migrate", "info", "repair"]
+    if first_arg in flyway_commands:
+        return "db-migrations"
+
+    # npm commands go to web
+    frontend_commands = ["npm", "node", "npx"]
+    if first_arg in frontend_commands:
+        return "web"
+
+    return None
+
+
+def dprint(*msg: list[str]):
+    sys.stderr.write(f"\033[2m> {' '.join(str(m) for m in msg)}\033[0m\n")
+
+
+def eprint(*msg: list[str]):
+    sys.stderr.write(f"\033[31m[Error] {' '.join(str(m) for m in msg)}\033[0m\n")
+
+
+def argument_parser() -> argparse.ArgumentParser:
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser(
+        add_help=True,
+        epilog=EPILOG_TEXT,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description="Docker Compose service runner - automatically determines the appropriate service for your command",
+    )
+
+    parser.add_argument("-s", "--service", dest="service", help="Specify service name")
+    parser.add_argument(
+        "-e", action="append", dest="env_vars", help="Environment variables"
+    )
+    parser.add_argument(
+        "-t",
+        "--test",
+        action="store_true",
+        default=False,
+        help="Use compose.test.yml compose file",
+    )
+    parser.add_argument(
+        "--debug", action="store_true", default=False, help="Show verbose debug output"
+    )
+
+    parser.add_argument(
+        "--publish",
+        action="append",
+        dest="publishes",
+        help="Expose ports from the running command",
+    )
+
+    # after all known options have been parsed, expect a command with its own arguments
+    parser.add_argument(
+        "command",
+        nargs=argparse.REMAINDER,
+        help="command to pass on to docker or the shell",
+    )
+
+    return parser
+
+
+def parse_arguments() -> tuple[argparse.Namespace, list[str]]:
+    parser = argument_parser()
+
+    # Parse known args to separate our options from the command
+    known_args, _ = parser.parse_known_args()
+
+    return known_args, known_args.command
+
+
+def run_command(command: list[str], cwd: str | None = None, noexit: bool = False):
+    try:
+        dprint(*command)
+        result = subprocess.run(command, cwd=cwd)
+        if not noexit:
+            sys.exit(result.returncode)
+        return result.returncode
+    except KeyboardInterrupt:
+        if not noexit:
+            sys.exit(130)
+        return 130
+    except Exception as e:
+        print(f"Error executing command: {e}")
+        if not noexit:
+            sys.exit(1)
+        return 1
+
+
+def main():
+    if len(sys.argv) < 2:
+        parser = argument_parser()
+        parser.print_help()
+
+        sys.exit(1)
+
+    # Parse arguments
+    known_args, command_args = parse_arguments()
+
+    if known_args.debug:
+        dprint("known_args:  ", known_args)
+        dprint("command_args:", command_args)
+
+    # Determine service
+    if known_args.service:
+        service = known_args.service
+    else:
+        service = determine_service(command_args)
+        if not service:
+            print("Error: Could not determine appropriate service")
+            sys.exit(1)
+
+        if known_args.debug:
+            dprint("service:", service)
+
+    # Build runnable command
+    cwd = os.getcwd()
+
+    run_cmd = [
+        "docker",
+        "compose",
+    ]
+
+    # Add optional test configuration
+    if service in ("django-web", "db", "db-migrations") and known_args.test:
+        run_cmd.extend(("-f", "compose.test.yml"))
+
+    run_cmd.extend(("run", "--rm"))
+
+    # Add environment variables
+    if known_args.env_vars:
+        for env_var in known_args.env_vars:
+            run_cmd.extend(["-e", env_var])
+
+    if known_args.publishes:
+        for publish in known_args.publishes:
+            run_cmd.extend(["--publish", publish])
+
+    # Add service name
+    run_cmd.append(service)
+
+    # Add the actual command
+    run_cmd.extend(command_args)
+
+    # Execute the command
+    try:
+        dprint(*run_cmd)
+        result = subprocess.run(run_cmd, cwd=cwd)
+        sys.exit(result.returncode)
+    except KeyboardInterrupt:
+        sys.exit(130)
+    except Exception as e:
+        print(f"Error executing command: {e}")
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

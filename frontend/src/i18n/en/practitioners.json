@@ -1,0 +1,61 @@
+{
+    "npi": "NPI",
+    
+    "detail": {
+        "unavailable": "This content is not currently available.",
+        "update": {
+            "title": "Are you the practitioner listed?",
+            "subtitle" : "Learn how to",
+            "link": "update your information."
+        },
+        "about": {
+            "title": "About",
+            "name": "Name(s)",
+            "gender": "Gender",
+            "deceased": "Deceased",
+            "status": "Active status"
+        },
+        "contact": {
+            "title": "Contact information",
+            "address": "Mailing address",
+            "phone": "Phone",
+            "fax": "Fax"
+        },
+        "identifiers": {
+            "title": "Identifiers",
+            "type": "Type",
+            "number": "Number",
+            "details": "Details",
+            "fallback": "No identifiers available"
+        },
+        "taxonomy": "Taxonomy",
+        "organizations": "Organization(s)",
+        "endpoints": "Endpoint(s)",
+        "locations": "Locations"
+    },
+
+    "listing": {
+        "title": "All Practitioners",
+        "taxonomy": "Primary taxonomy",
+        "location": "Location"
+    },
+    
+      "search": {
+        "title": "Practitioner search",
+        "inputLabel": "Name or NPI"
+    },
+
+    "sort": {
+        "by": "Sort by",
+        "first-asc": "First Name (A-Z)",
+        "first-desc": "First Name (Z-A)",
+        "last-asc": "Last Name (A-Z)",
+        "last-desc": "Last Name (Z-A)"
+    },
+
+    "alert": {
+        "heading": "Are you looking for an organization?",
+        "body": "Visit the [Organization search](/organizations/search) page."
+      }
+
+}

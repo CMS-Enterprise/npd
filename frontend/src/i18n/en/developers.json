@@ -3,11 +3,13 @@
   "subtitle": "For developers",
   "backtotop": "Back to top",
   "nav": {
-    "overview": "Overview",
     "participating": "Participating in the beta",
     "feedback": "Providing feedback",
     "about": "About the data",
     "accessing": "Accessing the data",
+    "overview": "Overview",
+    "authentication": "Authentication",
+    "endpoints": "Available endpoints",
     "sandbox": "Developer sandbox",
     "opensource": "Open source project"
   }

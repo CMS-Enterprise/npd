@@ -1,5 +1,5 @@
-from django.urls import resolve, reverse
 from django.test import TestCase
+from django.urls import resolve, reverse
 
 
 class ProviderDirectorySpaRouting(TestCase):
@@ -77,5 +77,5 @@ class FhirApiRouting(TestCase):
         endpoint_list_path = reverse("fhir-endpoint-list")
         self.assertEqual(endpoint_list_path, "/fhir/Endpoint")
 
-        endpoint_detail_path = reverse("fhir-endpoint-detail", kwargs={"pk": 12345})
+        endpoint_detail_path = reverse("fhir-endpoint-detail", kwargs={"id": 12345})
         self.assertEqual(endpoint_detail_path, "/fhir/Endpoint/12345")

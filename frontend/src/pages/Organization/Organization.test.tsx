@@ -1,10 +1,9 @@
-import { screen } from "@testing-library/react"
+import { screen, within } from "@testing-library/react"
 import { MemoryRouter, Route, Routes } from "react-router"
 import { beforeEach, describe, expect, it } from "vitest"
 import { DEFAULT_ORGANIZATION } from "../../../tests/fixtures"
 import {
   mockGlobalFetch,
-  settingsResponseWithFeature,
   type MockResponse,
 } from "../../../tests/mockGlobalFetch"
 import { render } from "../../../tests/render"
@@ -31,35 +30,30 @@ const RoutedOrganization = ({ path }: { path: string }) => {
 describe("Organization", () => {
   describe("without ORGANIZATION_LOOKUP_DETAILS feature flag", () => {
     beforeEach(() => {
-      mockGlobalFetch([
-        settingsResponseWithFeature({ ORGANIZATION_LOOKUP_DETAILS: false }),
-        orgApiResponse,
-      ])
+      mockGlobalFetch([orgApiResponse])
     })
 
     it("does not render content when feature flag is unset", async () => {
-      render(<RoutedOrganization path="/organizations/12345" />)
+      render(<RoutedOrganization path="/organizations/12345" />, {
+        settings: { feature_flags: { ORGANIZATION_LOOKUP_DETAILS: false } },
+      })
 
-      // ensure loading has finished
-      await screen.findByText("Provider group")
+      // ensure FeatureFlag components have finished loading
+      await screen.findByText("Content not available")
 
       expect(screen.queryByText("About", { selector: "section h2" })).toBeNull()
     })
   })
 
   describe("with ORGANIZATION_LOOKUP_DETAILS feature flag", () => {
-    beforeEach(() => {
-      // update /api/frontend_settings mocked response
-      mockGlobalFetch([
-        settingsResponseWithFeature({ ORGANIZATION_LOOKUP_DETAILS: true }),
-        orgApiResponse,
-      ])
-    })
-
     it("shows detailed content", async () => {
-      render(<RoutedOrganization path="/organizations/12345" />)
+      render(<RoutedOrganization path="/organizations/12345" />, {
+        settings: { feature_flags: { ORGANIZATION_LOOKUP_DETAILS: true } },
+      })
 
-      await screen.findByText("Provider group")
+      // ensure FeatureFlag components have finished loading
+      await screen.findByText("Are you the practitioner listed?")
+
       expect(
         screen.queryByText("About", { selector: "section h2" }),
       ).toBeInTheDocument()
@@ -73,5 +67,32 @@ describe("Organization", () => {
         screen.queryByText("Taxonomy", { selector: "section h2" }),
       ).toBeInTheDocument()
     })
+  })
+})
+
+describe("identifiers section", () => {
+  beforeEach(() => {
+    mockGlobalFetch([orgApiResponse])
+  })
+
+  it("displays identifiers table when identifiers exist", async () => {
+    render(<RoutedOrganization path="/organizations/12345" />, {
+      settings: { feature_flags: { ORGANIZATION_LOOKUP_DETAILS: true } },
+    })
+
+    await screen.findByText("Are you the practitioner listed?")
+
+    const table = screen.getByRole("table")
+    expect(table).toBeInTheDocument()
+
+    expect(
+      within(table).getByText("Type", { selector: "th" }),
+    ).toBeInTheDocument()
+    expect(
+      within(table).getByText("Number", { selector: "th" }),
+    ).toBeInTheDocument()
+    expect(
+      within(table).getByText("Details", { selector: "th" }),
+    ).toBeInTheDocument()
   })
 })

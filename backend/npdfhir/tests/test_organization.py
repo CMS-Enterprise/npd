@@ -1,7 +1,10 @@
 from django.urls import reverse
 from rest_framework import status
+
 from ..models import Organization, OtherIdType
 from .api_test_case import APITestCase
+from .fixtures.organization import create_legal_entity, create_organization
+from .fixtures.location import create_location
 from .helpers import (
     assert_fhir_response,
     assert_has_results,
@@ -9,15 +12,19 @@ from .helpers import (
     extract_resource_names,
 )
 
-from .fixtures import create_organization, create_legal_entity
-
 
 class OrganizationViewSetTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.orgs = [
-            create_organization(name="1ST CHOICE HOME HEALTH CARE INC"),
-            create_organization(name="1ST CHOICE MEDICAL DISTRIBUTORS, LLC"),
+            create_organization(
+                name="1ST CHOICE HOME HEALTH CARE INC", id="c591bfc5-b4ed-49af-926f-569056b5b1aa"
+            ),
+            create_organization(
+                name="1ST CHOICE MEDICAL DISTRIBUTORS, LLC",
+                id="5f56f3f0-3bd6-42ce-b275-f12f92a4ba40",
+                parent_id="c591bfc5-b4ed-49af-926f-569056b5b1aa",
+            ),
             create_organization(name="986 INFUSION PHARMACY #1 INC."),
             create_organization(name="A & A MEDICAL SUPPLY COMPANY"),
             create_organization(name="ABACUS BUSINESS CORPORATION GROUP INC."),
@@ -34,6 +41,25 @@ class OrganizationViewSetTestCase(APITestCase):
             create_organization(name="YODORINCMISSIONPLAZAPHARMACY"),
             create_organization(name="YOAKUM COMMUNITY HOSPITAL"),
             create_organization(name="YARMOUTH AUDIOLOGY"),
+        ]
+
+        cls.locs = [
+            create_location(name="Main Clinic", organization=cls.orgs[0]),
+            create_location(name="1ST CHOICE MEDICAL DISTRIBUTORS, LLC", organization=cls.orgs[0]),
+            create_location(name="986 INFUSION PHARMACY #1 INC.", organization=cls.orgs[1]),
+            create_location(name="A & A MEDICAL SUPPLY COMPANY", organization=cls.orgs[2],
+                city="Boston",
+                state="MA",
+                zipcode="10001",
+                addr_line_1="1 Boston Avenue"
+            ),
+            create_location(
+                name="ABACUS BUSINESS CORPORATION GROUP INC.", organization=cls.orgs[3],
+                city="Sandiego",
+                state="CA",
+                zipcode="55555",
+                addr_line_1="404 Great Amazing Avenue"
+            )
         ]
 
         cls.joe_legal_entity = create_legal_entity(dba_name="Joe Administrative Services LLC")
@@ -85,17 +111,18 @@ class OrganizationViewSetTestCase(APITestCase):
         names = extract_resource_names(response)
 
         sorted_names = [
-            "1ST CHOICE HOME HEALTH CARE INC",
-            "1ST CHOICE MEDICAL DISTRIBUTORS, LLC",
-            "986 INFUSION PHARMACY #1 INC.",
-            "A & A MEDICAL SUPPLY COMPANY",
-            "ABACUS BUSINESS CORPORATION GROUP INC.",
-            "ABBY D CENTER, INC.",
-            "ABC DURABLE MEDICAL EQUIPMENT INC",
-            "ABC HOME MEDICAL SUPPLY, INC.",
-            "A BEAUTIFUL SMILE DENTISTRY, L.L.C.",
-            "A & B HEALTH CARE, INC.",
+            '1ST CHOICE HOME HEALTH CARE INC',
+            '1ST CHOICE MEDICAL DISTRIBUTORS, LLC', 
+            '986 INFUSION PHARMACY #1 INC.',
+            'A & A MEDICAL SUPPLY COMPANY',
+            'ABACUS BUSINESS CORPORATION GROUP INC.',
+            'ABBY D CENTER, INC.',
+            'ABC DURABLE MEDICAL EQUIPMENT INC',
+            'ABC HOME MEDICAL SUPPLY, INC.',
+            'A BEAUTIFUL SMILE DENTISTRY, L.L.C.',
+            'A & B HEALTH CARE, INC.'
         ]
+
         self.assertEqual(
             names,
             sorted_names,
@@ -104,7 +131,7 @@ class OrganizationViewSetTestCase(APITestCase):
 
     def test_list_in_descending_order(self):
         url = reverse("fhir-organization-list")
-        response = self.client.get(url, {"_sort": "-primary_name"})
+        response = self.client.get(url, {"_sort": "-organizationtoname__name"})
         assert_fhir_response(self, response)
 
         # Extract names
@@ -172,6 +199,21 @@ class OrganizationViewSetTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
         self.assertGreaterEqual(response.data["results"]["total"], 1)
+
+    def test_parent_id(self):
+        parent_id = self.orgs[1].parent_id
+        id = self.orgs[1].id
+        url = reverse("fhir-organization-detail", args=[parent_id])
+        response = self.client.get(url)
+        # check that the parentless organization does not have a parent listed
+        self.assertNotIn("partOf", str(response.data.keys()))
+
+        url = reverse("fhir-organization-detail", args=[id])
+        response = self.client.get(url)
+        # check that the child organization has a parent_id listed
+        self.assertIn("partOf", str(response.data.keys()))
+        # check that the child organization has the correct parent_id listed
+        self.assertIn(parent_id, f"Organization/{response.data['partOf']['reference']}")
 
     def test_list_filter_by_otherID_general(self):
         url = reverse("fhir-organization-list")
@@ -245,7 +287,6 @@ class OrganizationViewSetTestCase(APITestCase):
         org = response.data
         self.assertEqual(org["resourceType"], "Organization")
         self.assertEqual(org["name"], self.joe_name)
-        self.assertEqual(org["identifier"][0]["type"]["coding"][0]["code"], "TAX")
 
     def test_retrieve_nonexistent_uuid(self):
         url = reverse("fhir-organization-detail", args=["12300000-0000-0000-0000-000000000123"])

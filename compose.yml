@@ -1,5 +1,97 @@
 name: npd
 
-include:
-  - backend/docker-compose.yml
-  - frontend/docker-compose.yml
+services:
+  django-web:
+    build:
+      context: ./backend
+    container_name: npd
+    env_file:
+      - path: .env
+        required: false
+    entrypoint: [] # Don't run collectstatic in entrypoint.sh
+    command: python manage.py runserver --insecure 0.0.0.0:8000
+    environment:
+      NPD_DJANGO_SECRET: ${NPD_DJANGO_SECRET:-_pth2#=k8-wf-_^t%2))it+3..8la^@@97^#ock7.v=@792w7}
+      DEBUG: ${DEBUG:-True}
+      DJANGO_LOGLEVEL: ${DJANGO_LOGLEVEL:-INFO}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1,0.0.0.0}
+      NPD_DB_ENGINE: ${NPD_DB_ENGINE:-django.contrib.gis.db.backends.postgis}
+      NPD_DB_NAME: ${NPD_DB_NAME:-npd_development}
+      NPD_DB_USER: ${NPD_DB_USER:-postgres}
+      NPD_DB_PASSWORD: ${NPD_DB_PASSWORD:-postgres}
+      NPD_DB_HOST: ${NPD_DB_HOST:-db}
+      NPD_DB_PORT: ${NPD_DB_PORT:-5432}
+      NPD_REQUIRE_AUTHENTICATION: False
+    ports:
+      - '8000:8000'
+    volumes:
+      - './backend/:/app'
+      - ./backend/artifacts:/app/artifacts:rw
+      - ./backend/provider_directory/static:/app/provider_directory/static:rw
+    depends_on:
+      - db
+
+  db:
+    image: 'postgis/postgis:17-3.5'
+    platform: linux/x86_64
+    env_file:
+      - path: backend/.env
+        required: false
+    environment:
+      POSTGRES_DB: ${NPD_DB_NAME:-npd_development}
+      POSTGRES_USER: ${NPD_DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${NPD_DB_PASSWORD:-postgres}
+      PGUSER: ${NPD_DB_USER:-postgres}
+    ports:
+      - ${NPD_DB_PORT:-5432}:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d",  "${NPD_DB_NAME:-npd_development}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  db-migrations:
+    image: 'flyway/flyway:10'
+    env_file:
+      - path: backend/.env
+        required: false
+    environment:
+      FLYWAY_URL: jdbc:postgresql://${NPD_DB_HOST:-db}:5432/${NPD_DB_NAME:-npd_development}
+      FLYWAY_USER: ${NPD_DB_USER:-postgres}
+      FLYWAY_PASSWORD: ${NPD_DB_PASSWORD:-postgres}
+      FLYWAY_PLACEHOLDERS_apiSchema: ${NPD_DB_SCHEMA:-npd}
+      FLYWAY_PLACEHOLDERS_superuserDefaultPassword: ""
+      FLYWAY_DEFAULT_SCHEMA: public
+      FLYWAY_PLACEHOLDERS_npdReadonlyUserPassword: ${NPD_READONLY_PASSWORD:-test-password-123}
+      FLYWAY_PLACEHOLDERS_loadTesterPassword: ${NPD_LOAD_TESTER_PASSWORD:-""}
+    volumes:
+      - ./flyway/sql:/flyway/sql
+    depends_on:
+      - db
+    command: migrate -environment=development -outputType=json
+
+  ## frontend
+
+  web:
+    build:
+      context: frontend
+    ports:
+      - 3000:3000
+    volumes:
+      - ./frontend/:/app
+      # Container-based build output should be written to the appropriate backend static directory
+      - ./backend/provider_directory/static:/app/dist
+      # Ensure node_modules are not overwritten by the volume mount
+      - node_modules:/app/node_modules
+    environment:
+      CHOKIDAR_USEPOLLING: "true" # For file watching in Docker
+      BUILD_OUTPUT_DIR: "/app/dist"
+      VITE_API_BASE_URL: "http://localhost:8000" # assume django-web is also running
+      IN_DOCKER: 1
+    command: ["npm", "run", "watch"]
+
+volumes:
+  postgres_data:
+  node_modules:

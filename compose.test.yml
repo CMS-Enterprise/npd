@@ -1,0 +1,37 @@
+name: npd
+
+# by using `compose.test.yml` alone with `docker compose -f compose.test.yml and
+# the `extends:` settings for each of the named services, we can merge these
+# service definitions cleanly with the ones that already exist in the base
+# compose.yml file
+
+services:
+  db:
+    extends:
+      file: compose.yml
+      service: db
+    environment:
+      POSTGRES_DB: npd_test
+
+  db-migrations:
+    extends:
+      file: compose.yml
+      service: db-migrations
+    environment:
+      FLYWAY_URL: jdbc:postgresql://${NPD_DB_HOST:-db}:${NPD_DB_PORT:-5432}/npd_test
+    volumes: !override
+      - ./flyway/sql/django_migrations:/flyway/sql/django_migrations
+      - ./flyway/sql/django_reference_data:/flyway/sql/django_reference_data
+      - ./flyway/sql/migrations:/flyway/sql/migrations
+      - ./flyway/sql/reference_data:/flyway/sql/reference_data
+
+  django-web:
+    extends:
+      file: compose.yml
+      service: django-web
+    environment:
+      NPD_DB_NAME: npd_test
+      TESTING: True
+
+volumes:
+  postgres_data:

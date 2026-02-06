@@ -1,0 +1,325 @@
+{
+  "additionalProperties": false,
+  "description": "Disclaimer: Any field name ends with ``__ext`` doesn't part of\nResource StructureDefinition, instead used to enable Extensibility feature\nfor FHIR Primitive Data Types.\n\nAn address expressed using postal conventions (as opposed to GPS or other\nlocation definition formats).\nAn address expressed using postal conventions (as opposed to GPS or other\nlocation definition formats).  This data type may be used to convey\naddresses for use in delivering mail as well as for visiting locations\nwhich might not be valid for mail delivery.  There are a variety of postal\naddress formats defined around the world.",
+  "properties": {
+    "fhir_comments": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "element_property": false,
+      "title": "Fhir Comments"
+    },
+    "extension": {
+      "anyOf": [
+        {
+          "items": {},
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "May be used to represent additional information that is not part of the basic definition of the element. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.",
+      "element_property": true,
+      "title": "Additional content defined by implementations"
+    },
+    "id": {
+      "anyOf": [
+        {
+          "pattern": "[ \r\n\t\\S]+",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
+      "element_property": true,
+      "title": "Unique id for inter-element referencing"
+    },
+    "city": {
+      "anyOf": [
+        {
+          "pattern": "[ \r\n\t\\S]+",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "The name of the city, town, suburb, village or other community or delivery center.",
+      "element_property": true,
+      "summary_element_property": true,
+      "title": "Name of city, town etc."
+    },
+    "_city": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Extension field for ``city``."
+    },
+    "country": {
+      "anyOf": [
+        {
+          "pattern": "[ \r\n\t\\S]+",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Country - a nation as commonly understood or generally accepted.",
+      "element_property": true,
+      "summary_element_property": true,
+      "title": "Country (e.g. can be ISO 3166 2 or 3 letter code)"
+    },
+    "_country": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Extension field for ``country``."
+    },
+    "district": {
+      "anyOf": [
+        {
+          "pattern": "[ \r\n\t\\S]+",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "The name of the administrative area (county).",
+      "element_property": true,
+      "summary_element_property": true,
+      "title": "District name (aka county)"
+    },
+    "_district": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Extension field for ``district``."
+    },
+    "line": {
+      "anyOf": [
+        {
+          "items": {
+            "anyOf": [
+              {
+                "pattern": "[ \r\n\t\\S]+",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "This component contains the house number, apartment number, street name, street direction,  P.O. Box number, delivery hints, and similar address information.",
+      "element_property": true,
+      "summary_element_property": true,
+      "title": "Street name, number, direction & P.O. Box etc."
+    },
+    "_line": {
+      "anyOf": [
+        {
+          "items": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Extension field for ``line``."
+    },
+    "period": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "element_property": true,
+      "summary_element_property": true,
+      "title": "Time period when address was/is in use"
+    },
+    "postalCode": {
+      "anyOf": [
+        {
+          "pattern": "[ \r\n\t\\S]+",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "A postal code designating a region defined by the postal service.",
+      "element_property": true,
+      "summary_element_property": true,
+      "title": "Postal code for area"
+    },
+    "_postalCode": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Extension field for ``postalCode``."
+    },
+    "state": {
+      "anyOf": [
+        {
+          "pattern": "[ \r\n\t\\S]+",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Sub-unit of a country with limited sovereignty in a federally organized country. A code may be used if codes are in common use (e.g. US 2 letter state codes).",
+      "element_property": true,
+      "summary_element_property": true,
+      "title": "Sub-unit of country (abbreviations ok)"
+    },
+    "_state": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Extension field for ``state``."
+    },
+    "text": {
+      "anyOf": [
+        {
+          "pattern": "[ \r\n\t\\S]+",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Specifies the entire address as it should be displayed e.g. on a postal label. This may be provided instead of or as well as the specific parts.",
+      "element_property": true,
+      "summary_element_property": true,
+      "title": "Text representation of the address"
+    },
+    "_text": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Extension field for ``text``."
+    },
+    "type": {
+      "anyOf": [
+        {
+          "pattern": "^[^\\s]+(\\s[^\\s]+)*$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Distinguishes between physical addresses (those you can visit) and mailing addresses (e.g. PO Boxes and care-of addresses). Most addresses are both.",
+      "element_property": true,
+      "enum_values": ["postal", "physical", "both"],
+      "summary_element_property": true,
+      "title": "postal | physical | both"
+    },
+    "_type": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Extension field for ``type``."
+    },
+    "use": {
+      "anyOf": [
+        {
+          "pattern": "^[^\\s]+(\\s[^\\s]+)*$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "The purpose of this address.",
+      "element_property": true,
+      "enum_values": ["home", "work", "temp", "old", "billing"],
+      "summary_element_property": true,
+      "title": "home | work | temp | old | billing - purpose of this address"
+    },
+    "_use": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Extension field for ``use``."
+    }
+  },
+  "title": "Address",
+  "type": "object"
+}

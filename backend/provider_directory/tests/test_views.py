@@ -1,15 +1,24 @@
-from datetime import datetime
-from http import HTTPStatus
-import os
-from pathlib import Path
+from unittest import mock
+
 from django.contrib.auth.models import User
+from django.http import HttpResponse
 from django.test import TestCase
 from django.urls import reverse
 
-TEST_DIR = Path(os.path.dirname(os.path.abspath(__file__)))
-STATIC_INDEX = TEST_DIR / ".." / "static" / "index.html"
+
+def mock_not_found(path: str) -> list[str] | str | None:
+    return None
 
 
+def mock_found(path: str) -> list[str] | str | None:
+    return "/some/path/to/index.html"
+
+
+def mock_render(request, template_name: str, ctx: dict | None = None):
+    return HttpResponse(content=f"{template_name} test content")
+
+
+@mock.patch("provider_directory.views.index.find", mock_not_found)
 class WithoutStaticIndex(TestCase):
     """
     Visiting the index route when no static/index.html asset exists.
@@ -20,8 +29,6 @@ class WithoutStaticIndex(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create(username="testuser", password="nothing")
-        if os.path.exists(STATIC_INDEX):
-            os.unlink(STATIC_INDEX)
 
     def setUp(self):
         self.client.force_login(self.user)
@@ -34,6 +41,8 @@ class WithoutStaticIndex(TestCase):
         self.assertRedirects(response, "http://localhost:3000/", fetch_redirect_response=False)
 
 
+@mock.patch("provider_directory.views.index.find", mock_found)
+@mock.patch("provider_directory.views.index.render", mock_render)
 class WithStaticIndex(TestCase):
     """
     Visiting the index route when static/index.html asset does exist.
@@ -42,10 +51,6 @@ class WithStaticIndex(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create(username="testuser", password="nothing")
-        if os.path.exists(STATIC_INDEX):
-            os.unlink(STATIC_INDEX)
-        with open(STATIC_INDEX, "a") as index:
-            index.write(f"\n<!-- test content {datetime.now()} -->")
 
     def setUp(self):
         self.client.force_login(self.user)
@@ -55,4 +60,4 @@ class WithStaticIndex(TestCase):
         When static/index.html exists, route serves it
         """
         response = self.client.get(reverse("provider_directory:index"))
-        self.assertContains(response, "test content", status_code=HTTPStatus.OK)
+        self.assertContains(response, "index.html test content")

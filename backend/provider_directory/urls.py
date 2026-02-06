@@ -1,7 +1,7 @@
-from django.urls import path
 from django.contrib.auth import views as contrib_auth_views
+from django.urls import path
 
-from .views import index, authentication, frontend_settings
+from .views import authentication, frontend_settings, index
 
 app_name = "provider_directory"
 urlpatterns = [

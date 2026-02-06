@@ -1,11 +1,5 @@
-# This is an auto-generated Django model module.
-# You'll have to do the following manually to clean this up:
-#   * Rearrange models' order
-#   * Make sure each model has one field with primary_key=True
-#   * Make sure each ForeignKey and OneToOneField has `on_delete` set to the desired behavior
-#   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
-# Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
+from django.contrib.gis.db import models as geomodels
 
 
 class Address(models.Model):
@@ -51,6 +45,7 @@ class AddressInternational(models.Model):
     verification_status = models.CharField(max_length=32, blank=True, null=True)
     address_precision = models.CharField(max_length=32, blank=True, null=True)
     max_address_precision = models.CharField(max_length=32, blank=True, null=True)
+    geolocation = geomodels.PointField(srid=4326)
 
     class Meta:
         managed = False
@@ -68,6 +63,7 @@ class AddressNonstandard(models.Model):
     latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
     notes = models.TextField(blank=True, null=True)
+    geolocation = geomodels.PointField(srid=4326)
 
     class Meta:
         managed = False
@@ -75,7 +71,7 @@ class AddressNonstandard(models.Model):
 
 
 class AddressUs(models.Model):
-    id = models.CharField(primary_key=True, max_length=10)
+    id = models.BigIntegerField(primary_key=True)
     delivery_line_1 = models.CharField(max_length=64)
     delivery_line_2 = models.CharField(max_length=64, blank=True, null=True)
     last_line = models.CharField(max_length=64, blank=True, null=True)
@@ -129,6 +125,7 @@ class AddressUs(models.Model):
     lacslink_indicator = models.CharField(max_length=1, blank=True, null=True)
     suitelink_match = models.CharField(max_length=5, blank=True, null=True)
     enhanced_match = models.CharField(max_length=64, blank=True, null=True)
+    geolocation = geomodels.PointField(srid=4326)
 
     class Meta:
         managed = False
@@ -204,6 +201,8 @@ class EndpointInstance(models.Model):
     environment_type = models.ForeignKey(
         "EnvironmentType", models.DO_NOTHING, blank=True, null=True
     )
+
+    status = models.CharField(max_length=64, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -486,7 +485,7 @@ class MimeType(models.Model):
 class Npi(models.Model):
     npi = models.BigIntegerField(primary_key=True)
     entity_type_code = models.SmallIntegerField()
-    replacement_npi = models.CharField(max_length=11, blank=True, null=True)
+    replacement_npi = models.BigIntegerField(blank=True, null=True)
     enumeration_date = models.DateField()
     last_update_date = models.DateField()
     deactivation_reason_code = models.CharField(max_length=3, blank=True, null=True)
@@ -558,7 +557,7 @@ class NuccToMedicareProviderType(models.Model):
 
 class Organization(models.Model):
     id = models.UUIDField(primary_key=True)
-    authorized_official = models.ForeignKey(Individual, models.DO_NOTHING)
+    authorized_official = models.ForeignKey(Individual, models.DO_NOTHING, blank=True, null=True)
     ein = models.ForeignKey(LegalEntity, models.DO_NOTHING, blank=True, null=True)
     parent = models.ForeignKey("self", models.DO_NOTHING, blank=True, null=True)
 
@@ -645,8 +644,8 @@ class PayloadType(models.Model):
 
 
 class Provider(models.Model):
-    npi = models.OneToOneField(Npi, models.DO_NOTHING, db_column="npi", primary_key=True)
-    individual = models.OneToOneField(Individual, models.DO_NOTHING, blank=True, null=True)
+    npi = models.OneToOneField(Npi, models.DO_NOTHING, db_column="npi")
+    individual = models.OneToOneField(Individual, models.DO_NOTHING, primary_key=True)
 
     class Meta:
         managed = False
@@ -655,7 +654,7 @@ class Provider(models.Model):
 
 class ProviderEducation(models.Model):
     pk = models.CompositePrimaryKey("npi", "school_id")
-    npi = models.ForeignKey(Provider, models.DO_NOTHING, db_column="npi")
+    npi = models.ForeignKey(Provider, models.DO_NOTHING, db_column="npi", to_field="npi")
     school_id = models.IntegerField()
     degree_type = models.ForeignKey(DegreeType, models.DO_NOTHING)
     start_date = models.DateField(blank=True, null=True)
@@ -711,7 +710,7 @@ class ProviderToLocation(models.Model):
 
 
 class ProviderToOrganization(models.Model):
-    individual = models.ForeignKey(Provider, models.DO_NOTHING, to_field="individual_id")
+    individual = models.ForeignKey(Provider, models.DO_NOTHING)
     organization = models.ForeignKey(Organization, models.DO_NOTHING)
     relationship_type = models.ForeignKey("RelationshipType", models.DO_NOTHING)
     id = models.UUIDField(primary_key=True)
@@ -725,7 +724,7 @@ class ProviderToOrganization(models.Model):
 
 class ProviderToOtherId(models.Model):
     pk = models.CompositePrimaryKey("npi", "other_id", "other_id_type_id", "issuer", "state_code")
-    npi = models.ForeignKey(Provider, models.DO_NOTHING, db_column="npi")
+    npi = models.ForeignKey(Provider, models.DO_NOTHING, db_column="npi", to_field="npi")
     other_id = models.CharField(max_length=100)
     other_id_type = models.ForeignKey(OtherIdType, models.DO_NOTHING)
     state_code = models.ForeignKey(FipsState, models.DO_NOTHING, db_column="state_code")
@@ -737,7 +736,7 @@ class ProviderToOtherId(models.Model):
 
 
 class ProviderToTaxonomy(models.Model):
-    npi = models.ForeignKey(Provider, models.DO_NOTHING, db_column="npi")
+    npi = models.ForeignKey(Provider, models.DO_NOTHING, db_column="npi", to_field="npi")
     nucc_code = models.ForeignKey(Nucc, models.DO_NOTHING, db_column="nucc_code")
     is_primary = models.BooleanField(blank=True, null=True)
     id = models.UUIDField(primary_key=True)

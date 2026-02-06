@@ -1,0 +1,295 @@
+{
+  "additionalProperties": false,
+  "description": "Disclaimer: Any field name ends with ``__ext`` doesn't part of\nResource StructureDefinition, instead used to enable Extensibility feature\nfor FHIR Primitive Data Types.\n\nName of a human - parts and usage.\nA human's name with the ability to identify parts and usage.",
+  "properties": {
+    "fhir_comments": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "element_property": false,
+      "title": "Fhir Comments"
+    },
+    "extension": {
+      "anyOf": [
+        {
+          "items": {},
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "May be used to represent additional information that is not part of the basic definition of the element. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.",
+      "element_property": true,
+      "title": "Additional content defined by implementations"
+    },
+    "id": {
+      "anyOf": [
+        {
+          "pattern": "[ \r\n\t\\S]+",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
+      "element_property": true,
+      "title": "Unique id for inter-element referencing"
+    },
+    "family": {
+      "anyOf": [
+        {
+          "pattern": "[ \r\n\t\\S]+",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "The part of a name that links to the genealogy. In some cultures (e.g. Eritrea) the family name of a son is the first name of his father.",
+      "element_property": true,
+      "summary_element_property": true,
+      "title": "Family name (often called 'Surname')"
+    },
+    "_family": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Extension field for ``family``."
+    },
+    "given": {
+      "anyOf": [
+        {
+          "items": {
+            "anyOf": [
+              {
+                "pattern": "[ \r\n\t\\S]+",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Given name.",
+      "element_property": true,
+      "summary_element_property": true,
+      "title": "Given names (not always 'first'). Includes middle names"
+    },
+    "_given": {
+      "anyOf": [
+        {
+          "items": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Extension field for ``given``."
+    },
+    "period": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Indicates the period of time when this name was valid for the named person.",
+      "element_property": true,
+      "summary_element_property": true,
+      "title": "Time period when name was/is in use"
+    },
+    "prefix": {
+      "anyOf": [
+        {
+          "items": {
+            "anyOf": [
+              {
+                "pattern": "[ \r\n\t\\S]+",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Part of the name that is acquired as a title due to academic, legal, employment or nobility status, etc. and that appears at the start of the name.",
+      "element_property": true,
+      "summary_element_property": true,
+      "title": "Parts that come before the name"
+    },
+    "_prefix": {
+      "anyOf": [
+        {
+          "items": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Extension field for ``prefix``."
+    },
+    "suffix": {
+      "anyOf": [
+        {
+          "items": {
+            "anyOf": [
+              {
+                "pattern": "[ \r\n\t\\S]+",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Part of the name that is acquired as a title due to academic, legal, employment or nobility status, etc. and that appears at the end of the name.",
+      "element_property": true,
+      "summary_element_property": true,
+      "title": "Parts that come after the name"
+    },
+    "_suffix": {
+      "anyOf": [
+        {
+          "items": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Extension field for ``suffix``."
+    },
+    "text": {
+      "anyOf": [
+        {
+          "pattern": "[ \r\n\t\\S]+",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Specifies the entire name as it should be displayed e.g. on an application UI. This may be provided instead of or as well as the specific parts.",
+      "element_property": true,
+      "summary_element_property": true,
+      "title": "Text representation of the full name"
+    },
+    "_text": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Extension field for ``text``."
+    },
+    "use": {
+      "anyOf": [
+        {
+          "pattern": "^[^\\s]+(\\s[^\\s]+)*$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Identifies the purpose for this name.",
+      "element_property": true,
+      "enum_values": [
+        "usual",
+        "official",
+        "temp",
+        "nickname",
+        "anonymous",
+        "old",
+        "maiden"
+      ],
+      "summary_element_property": true,
+      "title": "usual | official | temp | nickname | anonymous | old | maiden"
+    },
+    "_use": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Extension field for ``use``."
+    }
+  },
+  "title": "HumanName",
+  "type": "object"
+}

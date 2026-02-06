@@ -1,0 +1,54 @@
+{
+  "resourceType": "Practitioner",
+  "id": "c3a56586-40a8-4fef-9394-2dd0c0ba0b60",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner"
+    ]
+  },
+  "identifier": [
+    {
+      "use": "official",
+      "type": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "PRN",
+            "display": "Provider number"
+          }
+        ]
+      },
+      "system": "http://terminology.hl7.org/NamingSystem/npi",
+      "value": "1720081672",
+      "period": { "start": "2005-05-24T00:00:00" }
+    }
+  ],
+  "name": [
+    {
+      "use": "usual",
+      "text": "DR. KIRK AADALEN",
+      "family": "AADALEN",
+      "given": ["KIRK", null],
+      "prefix": ["DR."],
+      "suffix": [null],
+      "period": { "start": "1900-01-01T00:00:00" }
+    }
+  ],
+  "address": [
+    {
+      "line": ["8170 33rd Ave S Stop 21110Q"],
+      "city": "Bloomington",
+      "state": "MN",
+      "postalCode": "55425",
+      "country": "US"
+    },
+    {
+      "line": ["8100 Northland Dr"],
+      "city": "Bloomington",
+      "state": "MN",
+      "postalCode": "55431",
+      "country": "US"
+    }
+  ],
+  "qualification": []
+}

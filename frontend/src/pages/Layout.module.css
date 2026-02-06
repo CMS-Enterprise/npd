@@ -1,4 +1,13 @@
 /* CSS classes for common page elements */
+.main {
+  flex: 1;
+}
+
+.pageWrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
 
 .leader {
   display: flex;
@@ -7,6 +16,12 @@
   align-items: flex-start;
   gap: var(--spacer-1, 0.5rem);
   align-self: stretch;
+}
+
+.compactLeader {
+  & .leader {
+    padding-bottom: var(--spacer-2, 1rem);
+  }
 }
 
 .title {

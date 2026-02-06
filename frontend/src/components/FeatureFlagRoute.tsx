@@ -3,7 +3,7 @@ import { useFrontendSettings } from "../hooks/useFrontendSettings"
 
 export const FeatureFlagRoute = ({ name }: { name: string }) => {
   const {
-    settings: { feature_flags },
+    settings: { feature_flags, user },
     loading,
   } = useFrontendSettings()
 
@@ -17,6 +17,9 @@ export const FeatureFlagRoute = ({ name }: { name: string }) => {
     return <Outlet />
   }
 
-  console.warn("route is not available")
+  console.warn(
+    "route is not available",
+    JSON.stringify({ user, feature_flags }),
+  )
   return <Navigate to="/" replace />
 }

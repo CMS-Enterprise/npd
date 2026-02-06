@@ -1,9 +1,9 @@
-from django_filters import rest_framework as filters
 from django.contrib.postgres.search import SearchVector
 from django.db.models import Q
+from django_filters import rest_framework as filters
 
-from ..models import Organization
 from ..mappings import addressUseMapping
+from ..models import Organization
 from ..utils import parse_identifier_query
 
 

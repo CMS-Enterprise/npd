@@ -1,21 +1,25 @@
 from django.urls import reverse
 from rest_framework import status
+
+from geopy.distance import geodesic
+
 from .api_test_case import APITestCase
+from .fixtures.location import create_location
+from .fixtures.organization import create_organization
 from .helpers import (
     assert_fhir_response,
     assert_has_results,
     assert_pagination_limit,
     extract_resource_names,
+    concat_address_string,
 )
-
-from .fixtures import create_location, create_organization
 
 
 class LocationViewSetTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.orgs = [
-            create_organization(name="Alpha Org"),
+            create_organization(name="Alpha Org", organization_type="283Q00000X"),
             create_organization(name="Beta Org"),
         ]
 
@@ -25,13 +29,64 @@ class LocationViewSetTestCase(APITestCase):
             create_location(name="986 INFUSION PHARMACY #1 INC.", organization=cls.orgs[1]),
             create_location(name="A & A MEDICAL SUPPLY COMPANY", organization=cls.orgs[1]),
             create_location(
-                name="ABACUS BUSINESS CORPORATION GROUP INC.", organization=cls.orgs[0]
+                id="3719c831-a4b7-4a7f-bb47-465a024384fc",
+                name="ABACUS BUSINESS CORPORATION GROUP INC.",
+                organization=cls.orgs[0],
+                city="San Diego",
+                state="CA",
+                zipcode="55555",
+                addr_line_1="404 Great Amazing Avenue",
+                x=32.824056,
+                y=-117.437397,
             ),
-            create_location(name="ABBY D CENTER, INC.", organization=cls.orgs[1]),
-            create_location(name="ABC DURABLE MEDICAL EQUIPMENT INC", organization=cls.orgs[0]),
-            create_location(name="ABC HOME MEDICAL SUPPLY, INC.", organization=cls.orgs[0]),
-            create_location(name="A BEAUTIFUL SMILE DENTISTRY, L.L.C.", organization=cls.orgs[0]),
-            create_location(name="A & B HEALTH CARE, INC.", organization=cls.orgs[0]),
+            create_location(
+                id="7c7a433b-fca7-4fb2-9283-dc764fb0ed5c",
+                name="ABBY D CENTER, INC.",
+                organization=cls.orgs[1],
+                city="Seattle",
+                state="WA",
+                zipcode="77777",
+                addr_line_1="333 Grunge Blvd.",
+                address_use="home",
+                x=47.608597,
+                y=-122.5046021,
+            ),
+            create_location(
+                id="6df24407-ebe0-4f0b-9a75-bdfee486f0df",
+                name="ABC DURABLE MEDICAL EQUIPMENT INC",
+                organization=cls.orgs[0],
+                city="St. Louis",
+                state="MO",
+                zipcode="89898",
+                addr_line_1="66 Arch Lane",
+                x=38.6219297,
+                y=-90.182935,
+            ),
+            create_location(
+                id="c1fc1ada-841a-4b92-9e8e-37f4d17b65d4",
+                name="ABC HOME MEDICAL SUPPLY, INC.",
+                organization=cls.orgs[0],
+                city="St. Louis",
+                state="MO",
+                zipcode="65313",
+                addr_line_1="City Museum Rd.",
+                x=38.6336745,
+                y=-90.2032725,
+            ),
+            create_location(
+                id="b7517cc7-b406-4932-9856-6983ac4ec308",
+                name="A BEAUTIFUL SMILE DENTISTRY, L.L.C.",
+                organization=cls.orgs[0],
+                city="Ft. Lauderdale",
+                state="FL",
+                zipcode="43433",
+                addr_line_1="789 Palmetto Road",
+                x=26.1412097,
+                y=-80.191004,
+            ),
+            create_location(
+                name="A & B HEALTH CARE, INC.", organization=cls.orgs[0], x=None, y=None
+            ),
             create_location(name="ABILENE HELPING HANDS INC", organization=cls.orgs[0]),
             create_location(name="ZEELAND COMMUNITY HOSPITAL", organization=cls.orgs[0]),
             create_location(name="YOUNGSTOWN ORTHOPAEDIC ASSOCIATES LTD", organization=cls.orgs[0]),
@@ -69,8 +124,6 @@ class LocationViewSetTestCase(APITestCase):
         url = reverse("fhir-location-list")
         response = self.client.get(url)
         assert_fhir_response(self, response)
-
-        # print(response.data["results"]["entry"][0]['resource']['name'])
 
         # Extract names
         names = extract_resource_names(response)
@@ -145,13 +198,13 @@ class LocationViewSetTestCase(APITestCase):
             "1ST CHOICE MEDICAL DISTRIBUTORS, LLC",
             "986 INFUSION PHARMACY #1 INC.",
             "A & A MEDICAL SUPPLY COMPANY",
-            "ABACUS BUSINESS CORPORATION GROUP INC.",
-            "ABBY D CENTER, INC.",
-            "ABC DURABLE MEDICAL EQUIPMENT INC",
-            "ABC HOME MEDICAL SUPPLY, INC.",
-            "A BEAUTIFUL SMILE DENTISTRY, L.L.C.",
             "A & B HEALTH CARE, INC.",
             "ABILENE HELPING HANDS INC",
+            "AMBER ENTERPRISES INC.",
+            "BAY AREA REHABILITATION MEDICAL GROUP",
+            "COUNTY OF KOOCHICHING",
+            "FROEDTERT MEMORIAL LUTHERAN HOSPITAL, INC.",
+            "HENDRICKS COUNTY HOSPITAL",
         ]
 
         self.assertEqual(
@@ -175,40 +228,301 @@ class LocationViewSetTestCase(APITestCase):
 
     # Filter tests
     def test_list_filter_by_name(self):
+        name = self.locs[0].name
+
         url = reverse("fhir-location-list")
-        response = self.client.get(url, {"name": "Cumberland"})
+        response = self.client.get(url, {"name": name})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
+
+        bundle = response.data["results"]
+
+        for entry in bundle["entry"]:
+            self.assertIn("resource", entry)
+            location_entry = entry["resource"]
+
+            self.assertEqual(location_entry["resourceType"], "Location")
+            self.assertIn("id", location_entry)
+            self.assertIn("status", location_entry)
+            self.assertIn("managingOrganization", location_entry)
+            self.assertIn("address", location_entry)
+            self.assertIn("name", location_entry)
+            self.assertIn(name, location_entry["name"])
+
+    def test_list_filter_by_name_partial(self):
+        name = "ABC"
+
+        url = reverse("fhir-location-list")
+        response = self.client.get(url, {"name": name})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert_has_results(self, response)
+
+        bundle = response.data["results"]
+
+        for entry in bundle["entry"]:
+            self.assertIn("resource", entry)
+            location_entry = entry["resource"]
+
+            self.assertEqual(location_entry["resourceType"], "Location")
+            self.assertIn("id", location_entry)
+            self.assertIn("status", location_entry)
+            self.assertIn("managingOrganization", location_entry)
+            self.assertIn("address", location_entry)
+            self.assertIn("name", location_entry)
+            self.assertIn(name, location_entry["name"])
+
+    def test_list_filter_by_name_whole(self):
+        name = "ABC HOME MEDICAL SUPPLY, INC."
+
+        url = reverse("fhir-location-list")
+        response = self.client.get(url, {"name": name})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert_has_results(self, response)
+
+        bundle = response.data["results"]
+
+        for entry in bundle["entry"]:
+            self.assertIn("resource", entry)
+            location_entry = entry["resource"]
+
+            self.assertEqual(location_entry["resourceType"], "Location")
+            self.assertIn("id", location_entry)
+            self.assertIn("status", location_entry)
+            self.assertIn("managingOrganization", location_entry)
+            self.assertIn("address", location_entry)
+            self.assertIn("name", location_entry)
+            self.assertIn(name, location_entry["name"])
+            self.assertNotIn("ABC DURABLE MEDICAL EQUIPMENT INC", location_entry["name"])
+
+    def test_filter_by_org_type(self):
+        nucc_type = "283Q00000X"
+
+        url = reverse("fhir-location-list")
+        response = self.client.get(url, {"organization_type": nucc_type})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert_has_results(self, response)
+
+        bundle = response.data["results"]
+
+        for entry in bundle["entry"]:
+            self.assertIn("resource", entry)
+            location_entry = entry["resource"]
+            self.assertEqual(location_entry["resourceType"], "Location")
+            self.assertIn("id", location_entry)
+            self.assertIn("status", location_entry)
+            self.assertIn("managingOrganization", location_entry)
+            self.assertIn("address", location_entry)
+            self.assertIn("name", location_entry)
+
+            parsed_org_id = location_entry["managingOrganization"]["reference"].split("/")[-1]
+
+            # Assert that correct org was referenced by org type
+            self.assertEqual(str(self.orgs[0].id), parsed_org_id)
 
     def test_list_filter_by_address(self):
+        address_search = "Amazing Avenue"
         url = reverse("fhir-location-list")
-        response = self.client.get(url, {"address": "Avenue"})
+        response = self.client.get(url, {"address": address_search})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
+
+        bundle = response.data["results"]
+
+        for entry in bundle["entry"]:
+            self.assertIn("resource", entry)
+            location_entry = entry["resource"]
+
+            self.assertEqual(location_entry["resourceType"], "Location")
+            self.assertIn("id", location_entry)
+            self.assertIn("status", location_entry)
+            self.assertIn("managingOrganization", location_entry)
+            self.assertIn("address", location_entry)
+            self.assertIn("name", location_entry)
+
+            address_string = concat_address_string(location_entry["address"])
+            self.assertIn(address_search, address_string)
 
     def test_list_filter_by_address_city(self):
+        city_search = "St. Louis"
         url = reverse("fhir-location-list")
-        response = self.client.get(url, {"address_city": "Seattle"})
+        response = self.client.get(url, {"address_city": city_search})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
+
+        bundle = response.data["results"]
+
+        for entry in bundle["entry"]:
+            self.assertIn("resource", entry)
+            location_entry = entry["resource"]
+
+            self.assertEqual(location_entry["resourceType"], "Location")
+            self.assertIn("id", location_entry)
+            self.assertIn("status", location_entry)
+            self.assertIn("managingOrganization", location_entry)
+            self.assertIn("address", location_entry)
+            self.assertIn("name", location_entry)
+
+            self.assertIn(city_search, location_entry["address"]["city"])
 
     def test_list_filter_by_address_state(self):
+        state_search = "MO"
         url = reverse("fhir-location-list")
-        response = self.client.get(url, {"address_state": "TX"})
+        response = self.client.get(url, {"address_state": state_search})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
+
+        bundle = response.data["results"]
+
+        for entry in bundle["entry"]:
+            self.assertIn("resource", entry)
+            location_entry = entry["resource"]
+
+            self.assertEqual(location_entry["resourceType"], "Location")
+            self.assertIn("id", location_entry)
+            self.assertIn("status", location_entry)
+            self.assertIn("managingOrganization", location_entry)
+            self.assertIn("address", location_entry)
+            self.assertIn("name", location_entry)
+
+            self.assertIn(state_search, location_entry["address"]["state"])
 
     def test_list_filter_by_address_postalcode(self):
+        zip_search = "55555"
         url = reverse("fhir-location-list")
-        response = self.client.get(url, {"address_postalcode": "90210"})
+        response = self.client.get(url, {"address_postalcode": zip_search})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
 
+        bundle = response.data["results"]
+
+        for entry in bundle["entry"]:
+            self.assertIn("resource", entry)
+            location_entry = entry["resource"]
+
+            self.assertEqual(location_entry["resourceType"], "Location")
+            self.assertIn("id", location_entry)
+            self.assertIn("status", location_entry)
+            self.assertIn("managingOrganization", location_entry)
+            self.assertIn("address", location_entry)
+            self.assertIn("name", location_entry)
+
+            self.assertIn(zip_search, location_entry["address"]["postalCode"])
+
     def test_list_filter_by_address_use(self):
+        use_search = "home"
         url = reverse("fhir-location-list")
-        response = self.client.get(url, {"address_use": "work"})
+        response = self.client.get(url, {"address_use": use_search})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
+
+        bundle = response.data["results"]
+
+        for entry in bundle["entry"]:
+            self.assertIn("resource", entry)
+            location_entry = entry["resource"]
+
+            self.assertEqual(location_entry["resourceType"], "Location")
+            self.assertIn("id", location_entry)
+            self.assertIn("status", location_entry)
+            self.assertIn("managingOrganization", location_entry)
+            self.assertIn("address", location_entry)
+            self.assertIn("name", location_entry)
+
+            self.assertIn(use_search, location_entry["address"]["use"])
+
+    def test_filter_by_distance_with_km(self):
+        lat = -90.194315
+        lon = 38.629267
+        location = (lon, lat)
+        distance = 3
+        units = "km"
+        near_query = f"{lat}|{lon}|{distance}|{units}"
+        url = reverse("fhir-location-list")
+        response = self.client.get(url, {"near": near_query})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert_has_results(self, response)
+
+        bundle = response.data["results"]
+
+        for entry in bundle["entry"]:
+            position = (
+                entry["resource"]["position"]["longitude"],
+                entry["resource"]["position"]["latitude"],
+            )
+            self.assertLessEqual(geodesic(location, position).km, distance)
+
+    def test_filter_by_distance_with_mi(self):
+        lat = -90.194315
+        lon = 38.629267
+        location = (lon, lat)
+        distance = 1
+        units = "mi"
+        near_query = f"{lat}|{lon}|{distance}|{units}"
+        url = reverse("fhir-location-list")
+        response = self.client.get(url, {"near": near_query})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert_has_results(self, response)
+
+        bundle = response.data["results"]
+
+        for entry in bundle["entry"]:
+            position = (
+                entry["resource"]["position"]["longitude"],
+                entry["resource"]["position"]["latitude"],
+            )
+            self.assertLessEqual(geodesic(location, position).miles, distance)
+
+    def test_filter_by_distance_with_ft(self):
+        lat = -90.194315
+        lon = 38.629267
+        location = (lon, lat)
+        distance = 5000
+        units = "ft"
+        near_query = f"{lat}|{lon}|{distance}|{units}"
+        url = reverse("fhir-location-list")
+        response = self.client.get(url, {"near": near_query})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert_has_results(self, response)
+
+        bundle = response.data["results"]
+
+        for entry in bundle["entry"]:
+            position = (
+                entry["resource"]["position"]["longitude"],
+                entry["resource"]["position"]["latitude"],
+            )
+            self.assertLessEqual(geodesic(location, position).feet, distance)
+
+    def test_filter_by_distance_witout_units(self):
+        lat = -90.194315
+        lon = 38.629267
+        location = (lon, lat)
+        distance = 3
+        near_query = f"{lat}|{lon}|{distance}"
+        url = reverse("fhir-location-list")
+        response = self.client.get(url, {"near": near_query})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert_has_results(self, response)
+
+        bundle = response.data["results"]
+
+        for entry in bundle["entry"]:
+            position = (
+                entry["resource"]["position"]["longitude"],
+                entry["resource"]["position"]["latitude"],
+            )
+            self.assertLessEqual(geodesic(location, position).km, distance)
+
+    def test_filter_by_distance_none_nearby(self):
+        lat = 64
+        lon = 12
+        distance = 30.5
+        units = "km"
+        near_query = f"{lon}|{lat}|{distance}|{units}"
+        url = reverse("fhir-location-list")
+        response = self.client.get(url, {"near": near_query})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data["results"]["entry"]), 0)
 
     # Retrieve tests
     def test_retrieve_nonexistent(self):

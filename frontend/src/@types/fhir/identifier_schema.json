@@ -1,0 +1,176 @@
+{
+  "additionalProperties": false,
+  "description": "Disclaimer: Any field name ends with ``__ext`` doesn't part of\nResource StructureDefinition, instead used to enable Extensibility feature\nfor FHIR Primitive Data Types.\n\nAn identifier intended for computation.\nAn identifier - identifies some entity uniquely and unambiguously.\nTypically this is used for business identifiers.",
+  "properties": {
+    "fhir_comments": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "element_property": false,
+      "title": "Fhir Comments"
+    },
+    "extension": {
+      "anyOf": [
+        {
+          "items": {},
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "May be used to represent additional information that is not part of the basic definition of the element. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.",
+      "element_property": true,
+      "title": "Additional content defined by implementations"
+    },
+    "id": {
+      "anyOf": [
+        {
+          "pattern": "[ \r\n\t\\S]+",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
+      "element_property": true,
+      "title": "Unique id for inter-element referencing"
+    },
+    "assigner": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Organization that issued/manages the identifier.",
+      "element_property": true,
+      "enum_reference_types": ["Organization"],
+      "summary_element_property": true,
+      "title": "Organization that issued id (may be just text)"
+    },
+    "period": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Time period during which identifier is/was valid for use.",
+      "element_property": true,
+      "summary_element_property": true,
+      "title": "Time period when id is/was valid for use"
+    },
+    "system": {
+      "anyOf": [
+        {
+          "pattern": "\\S*",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Establishes the namespace for the value - that is, a URL that describes a set values that are unique.",
+      "element_property": true,
+      "summary_element_property": true,
+      "title": "The namespace for the identifier value"
+    },
+    "_system": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Extension field for ``system``."
+    },
+    "type": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "A coded type for the identifier that can be used to determine which identifier to use for a specific purpose.",
+      "element_property": true,
+      "summary_element_property": true,
+      "title": "Description of identifier"
+    },
+    "use": {
+      "anyOf": [
+        {
+          "pattern": "^[^\\s]+(\\s[^\\s]+)*$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "The purpose of this identifier.",
+      "element_property": true,
+      "enum_values": ["usual", "official", "temp", "secondary", "old"],
+      "summary_element_property": true,
+      "title": "usual | official | temp | secondary | old (If known)"
+    },
+    "_use": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Extension field for ``use``."
+    },
+    "value": {
+      "anyOf": [
+        {
+          "pattern": "[ \r\n\t\\S]+",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "The portion of the identifier typically relevant to the user and which is unique within the context of the system.",
+      "element_property": true,
+      "summary_element_property": true,
+      "title": "The value that is unique"
+    },
+    "_value": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Extension field for ``value``."
+    }
+  },
+  "title": "Identifier",
+  "type": "object"
+}

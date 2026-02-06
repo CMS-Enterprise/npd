@@ -1,13 +1,17 @@
-from django_filters import rest_framework as filters
+import re
 from django.contrib.postgres.search import SearchVector
+from django_filters import rest_framework as filters
+from django.contrib.gis.geos import Point
+from django.contrib.gis.measure import D
+from django.db.models import F
 
-from ..models import Location
 from ..mappings import addressUseMapping
+from ..models import Location
 
 
 class LocationFilterSet(filters.FilterSet):
     name = filters.CharFilter(
-        field_name="name", lookup_expr="exact", help_text="Filter by location name"
+        field_name="name", lookup_expr="contains", help_text="Filter by location name"
     )
 
     organization_type = filters.CharFilter(
@@ -32,6 +36,11 @@ class LocationFilterSet(filters.FilterSet):
         help_text="Filter by address use type",
     )
 
+    near = filters.CharFilter(
+        method="filter_distance",
+        help_text="Filter by distance from a point expressed as [latitude]|[longitude]|[distance]|[units]. If no units are provided, km is assumed.",
+    )
+
     class Meta:
         model = Location
         fields = [
@@ -41,11 +50,14 @@ class LocationFilterSet(filters.FilterSet):
             "address_state",
             "address_postalcode",
             "address_use",
+            "near",
         ]
 
     def filter_organization_type(self, queryset, name, value):
         return queryset.annotate(
-            search=SearchVector("organizationtotaxonomy__nucc_code__display_name")
+            search=SearchVector(
+                "organization__clinicalorganization__organizationtotaxonomy__nucc_code__code"
+            )
         ).filter(search=value)
 
     def filter_address(self, queryset, name, value):
@@ -75,8 +87,29 @@ class LocationFilterSet(filters.FilterSet):
         )
 
     def filter_address_use(self, queryset, name, value):
-        if value in addressUseMapping.keys():
-            value = addressUseMapping.toNPD(value)
+        return queryset.filter(
+            organization__organizationtoaddress__address=F("address"),
+            organization__organizationtoaddress__address_use__value=value,
+        ).distinct()
+
+    def filter_distance(self, queryset, name, value):
+        pattern = r"(-?\d+\.?\d*)\|(-?\d+\.?\d*)\|(\d+\.?\d*)\|?(km|mi|ft)?"
+        match = re.fullmatch(pattern, value)
+        if match:
+            lat, lon, distance, units = match.groups()
+            lon = float(lon)
+            lat = float(lat)
+            distance = float(distance)
+            user_location = Point(lon, lat, srid=4326)
+            match units:
+                case "mi":
+                    distance_function = D(mi=distance)
+                case "ft":
+                    distance_function = D(ft=distance)
+                case _:
+                    distance_function = D(km=distance)
+            return queryset.filter(
+                address__address_us__geolocation__distance_lte=(user_location, distance_function)
+            )
         else:
-            value = -1
-        return queryset.filter(address_id=value)
+            return Location.objects.none()

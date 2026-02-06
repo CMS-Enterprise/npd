@@ -28,6 +28,7 @@ def assert_fhir_response(test_case, response, expected_status=200):
 
 def assert_has_results(test_case, response):
     test_case.assertIn("results", response.data)
+    test_case.assertGreater(len(response.data["results"]["entry"]), 0)
 
 
 def assert_pagination_limit(test_case, response, max_size=100):
@@ -49,3 +50,20 @@ def extract_practitioner_names(response):
 
 def extract_resource_ids(response):
     return [d["resource"].get("id", {}) for d in response.data["results"]["entry"]]
+
+
+def extract_resource_fields(response, field):
+    return [d["resource"].get(field, {}) for d in response.data["results"]["entry"]]
+
+
+def concat_address_string(address):
+    address_string = ""
+
+    for line in address["line"]:
+        address_string += line + " "
+
+    address_string += address["city"] + " "
+    address_string += address["state"] + " "
+    address_string += address["postalCode"]
+
+    return address_string

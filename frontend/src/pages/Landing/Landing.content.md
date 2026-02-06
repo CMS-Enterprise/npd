@@ -8,10 +8,10 @@ The National Provider Directory (NPD) aims to fix that by creating a single, tru
 
 This early release introduces the first version of this modern platform, focused on core building blocks:
 
-* Accurate provider and organizational hierarchies  
-* Practice and facility addresses  
-* Licensing and credentialing information  
-* Interoperability details at each location, such as FHIR endpoints
+- Accurate provider and organizational hierarchies
+- Practice and facility addresses
+- Licensing and credentialing information
+- Interoperability details at each location, such as FHIR endpoints
 
 This information is currently only using CMS data sources and is in the early testing feedback phase. Early users will help CMS validate and improve these foundational elements. Feedback from this testing phase will directly inform the next development cycles, ensuring the directory meets the real-world needs of patients, providers, and payers.
 
@@ -25,12 +25,12 @@ By consolidating the fragmented systems that exist today, the NPD will allow upd
 
 Future releases will expand beyond the initial scope to include:
 
-* Verification of provider identity and standing through CMS-managed identity proofing  
-* APIs that allow systems to confirm provider status in real time  
-* Integration of health plan participation data  
-* Incorporation of external data sources to enhance accuracy and completeness  
-* User pathways to report new or corrected information, enabling shared accountability for data quality  
-* Continued collaboration with states, networks, and private organizations to ensure comprehensive coverage  
-* Richer interoperability data, including FHIR endpoints and participation in CMS-Aligned Networks
+- Verification of provider identity and standing through CMS-managed identity proofing
+- APIs that allow systems to confirm provider status in real time
+- Integration of health plan participation data
+- Incorporation of external data sources to enhance accuracy and completeness
+- User pathways to report new or corrected information, enabling shared accountability for data quality
+- Continued collaboration with states, networks, and private organizations to ensure comprehensive coverage
+- Richer interoperability data, including FHIR endpoints and participation in CMS-Aligned Networks
 
 An accurate, connected directory is essential infrastructure for modern healthcare. It supports interoperability, enables trusted data exchange, and strengthens care coordination nationwide. The National Provider Directory will serve as the digital map of U.S. healthcare, linking the people, organizations, and systems that deliver care every day.

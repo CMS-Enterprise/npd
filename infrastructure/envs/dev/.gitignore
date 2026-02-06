@@ -1,5 +1,0 @@
-CERT_PATH
-*.env
-.terraform
-.terraform.lock.hcl
-.idea

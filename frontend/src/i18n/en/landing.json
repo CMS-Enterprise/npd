@@ -12,7 +12,8 @@
   "links": {
     "developers": "Developer resources",
     "providers": "Provider resources",
-    "learn": "Learn how it works"
+    "learn": "Learn how it works",
+    "search": "Search the data"
   },
   "authentication": {
     "error": {

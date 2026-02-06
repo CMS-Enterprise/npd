@@ -1,0 +1,38 @@
+{
+  "title": "Provider group",
+  "unavailable": "This content is not currently available.",
+  "update": {
+    "title": "Are you the practitioner listed?",
+    "subtitle": "Learn how to",
+    "link": "update your information."
+  },
+  "about": "About",
+  "contact": "Contact information",
+  "identifiers": "Identifiers",
+  "taxonomy": "Taxonomy",
+  "endpoints": "Endpoints",
+  "locations": "Locations",
+  "practitioners": "Practitioners",
+
+  "listing": {
+    "title": "All Organizations",
+    "taxonomy": "Primary taxonomy",
+    "location": "Location"
+  },
+
+  "search": {
+    "title": "Organization search",
+    "inputLabel": "Name or NPI"
+  },
+
+  "sort": {
+    "by": "Sort by",
+    "name-asc": "Name (A-Z)",
+    "name-desc": "Name (Z-A)"
+  },
+
+  "alert": {
+    "heading": "Are you looking for an practitioner?",
+    "body": "Visit the [Practitioner search](/practitioners/search) page."
+}
+}

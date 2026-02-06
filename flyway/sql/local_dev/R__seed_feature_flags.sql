@@ -1,16 +1,19 @@
+-- clean up old naming convention that caused feature flag bugs
+DELETE FROM flags_flagstate WHERE name IN ('PROVIDER_LOOKUP', 'PROVIDER_LOOKUP_DETAILS');
+
 -- seed default feature flags
 INSERT INTO
     flags_flagstate (name, condition, value, required)
 values
     ('SEARCH_APP', 'in_group', 'Developers', false),
     (
-        'PROVIDER_LOOKUP',
+        'PRACTITIONER_LOOKUP',
         'in_group',
         'Developers',
         false
     ),
     (
-        'PROVIDER_LOOKUP_DETAILS',
+        'PRACTITIONER_LOOKUP_DETAILS',
         'in_group',
         'Developers',
         false

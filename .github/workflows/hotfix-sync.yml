@@ -1,0 +1,46 @@
+name: Hotfix Sync
+
+on:
+  pull_request:
+    branches: [release]
+    types: [opened, closed]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  remind-label:
+    if: github.event.action == 'opened'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const labels = context.payload.pull_request.labels.map(l => l.name);
+            
+            if (!labels.includes('hotfix')) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: `👋 If this is a hotfix, please add the \`hotfix\` label to automatically cherry pick and sync your changes with main via PR!`
+              });
+            }
+
+  cherry-pick:
+    if: >
+      github.event.action == 'closed' &&
+      github.event.pull_request.merged == true &&
+      contains(github.event.pull_request.labels.*.name, 'hotfix')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: carloscastrojumo/github-cherry-pick-action@v1.0.1
+        with:
+          branch: main
+          labels: synced-cherry-pick
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
