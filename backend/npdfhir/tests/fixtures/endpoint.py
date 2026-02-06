@@ -2,7 +2,6 @@ import uuid
 
 from ...models import (
     EhrVendor,
-    Endpoint,
     EndpointInstance,
     EndpointInstanceToPayload,
 )

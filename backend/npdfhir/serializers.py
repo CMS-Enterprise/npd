@@ -37,7 +37,6 @@ from .models import (
     Organization,
     OrganizationToName,
     ProviderToOrganization,
-    LocationToEndpointInstance,
 )
 from .utils import genReference, get_schema_data
 
