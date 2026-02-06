@@ -22,13 +22,14 @@ class EndpointFilterSet(filters.FilterSet):
 
     status = filters.CharFilter(method="filter_status", help_text="Filter by status")
 
-    organization = filters.CharFilter(
-        method="filter_organization", help_text="Filter by organization"
-    )
+    # We don't have a concept of endpoint organization at the moment
+    # organization = filters.CharFilter(
+    #    method="filter_organization", help_text="Filter by organization"
+    # )
 
     class Meta:
         model = EndpointInstance
-        fields = ["name", "connection_type", "payload_type", "status", "organization"]
+        fields = ["name", "connection_type", "payload_type", "status"]
 
     def filter_status(self, queryset, name, value):
         # needs to be implemented

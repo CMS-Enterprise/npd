@@ -6,7 +6,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.db import IntegrityError
 from faker import Faker
 
-from npdfhir.tests.fixtures.endpoint import create_endpoint
+from npdfhir.tests.fixtures.endpoint import create_endpoint_instance
 from npdfhir.tests.fixtures.organization import create_organization
 from npdfhir.tests.fixtures.practitioner import create_practitioner
 
@@ -124,7 +124,7 @@ class Command(BaseCommand):
             self.stdout.write("(organization with other_id 1234567893 already exists)")
 
         if organization:
-            endpoint = create_endpoint(organization=organization)
+            endpoint = create_endpoint_instance(organization=organization)
             self.stdout.write(f"created Endpoint: {self.to_json(id=endpoint.id)}")
 
         self.generate_sample_organizations(25)

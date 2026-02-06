@@ -7,7 +7,6 @@ from ...models import (
     IndividualToName,
     LegalEntity,
     Npi,
-    Nucc,
     Organization,
     OrganizationToName,
     OrganizationToOtherId,

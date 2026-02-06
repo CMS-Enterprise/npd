@@ -3,7 +3,7 @@ from fhir.resources.R4B.bundle import Bundle
 from rest_framework import status
 
 from .api_test_case import APITestCase
-from .fixtures.endpoint import create_endpoint
+from .fixtures.endpoint import create_endpoint_instance
 from .helpers import (
     assert_fhir_response,
     assert_has_results,
@@ -16,18 +16,21 @@ class EndpointViewSetTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.endpoints = [
-            create_endpoint(name="88 MEDICINE LLC"),
-            create_endpoint(name="AAIA of Tampa Bay, LLC"),
-            create_endpoint(name="ABC Healthcare Service Base URL"),
-            create_endpoint(name="A Better Way LLC"),
-            create_endpoint(name="Abington Surgical Center"),
-            create_endpoint(name="Access Mental Health Agency"),
-            create_endpoint(name="Abington Center Surgical"),
-            create_endpoint(name="ADHD & Autism Psychological Services PLLC"),
-            create_endpoint(name="Adolfo C FernandezObregon Md"),
-            create_endpoint(name="Advanced Anesthesia, LLC"),
-            create_endpoint(name="Advanced Cardiovascular Center"),
-            create_endpoint(name="Kansas City Psychiatric Group"),
+            create_endpoint_instance(name="88 MEDICINE LLC"),
+            create_endpoint_instance(name="AAIA of Tampa Bay, LLC"),
+            create_endpoint_instance(name="ABC Healthcare Service Base URL"),
+            create_endpoint_instance(name="A Better Way LLC"),
+            create_endpoint_instance(name="Abington Surgical Center"),
+            create_endpoint_instance(name="Access Mental Health Agency"),
+            create_endpoint_instance(name="Abington Center Surgical"),
+            create_endpoint_instance(name="ADHD & Autism Psychological Services PLLC"),
+            create_endpoint_instance(name="Adolfo C FernandezObregon Md"),
+            create_endpoint_instance(name="Advanced Anesthesia, LLC"),
+            create_endpoint_instance(name="Advanced Cardiovascular Center"),
+            create_endpoint_instance(
+                name="Kansas City Psychiatric Group",
+                payload_type="urn:ihe:pcc:360x:hl7:OMG:O19:2017",
+            ),
         ]
 
         return super().setUpTestData()
@@ -148,7 +151,8 @@ class EndpointViewSetTestCase(APITestCase):
             self.assertEqual(connection_type, code)
 
     def test_filter_by_payload_type(self):
-        payload_type = "ccda-structuredBody:1.1"
+        payload_type = "urn:ihe:pcc:360x:hl7:OMG:O19:2017"
+        payload_display = "PCC 360X Referral Request"
         response = self.client.get(self.list_url, {"payload_type": payload_type})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -161,8 +165,10 @@ class EndpointViewSetTestCase(APITestCase):
             endpoint = entry["resource"]
             self.assertIn("payloadType", endpoint)
 
-            code = endpoint["payloadType"][0]["coding"][0]["display"]
+            code = endpoint["payloadType"][0]["coding"][0]["code"]
+            display = endpoint["payloadType"][0]["coding"][0]["display"]
             self.assertEqual(payload_type, code)
+            self.assertEqual(payload_display, display)
 
     def test_filter_returns_empty_for_nonexistent_name(self):
         response = self.client.get(self.list_url, {"name": "NonexistentEndpointName12345"})
@@ -174,7 +180,7 @@ class EndpointViewSetTestCase(APITestCase):
 
     # Retrieve tests
     def test_retrieve_specific_endpoint(self):
-        endpoint_id = str(self.endpoints[0].endpoint_instance.id)
+        endpoint_id = str(self.endpoints[0].id)
         detail_url = reverse("fhir-endpoint-detail", args=[endpoint_id])
 
         response = self.client.get(detail_url)
@@ -193,4 +199,3 @@ class EndpointViewSetTestCase(APITestCase):
         response = self.client.get(detail_url)
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
