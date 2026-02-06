@@ -65,18 +65,31 @@ test.describe("Practitioner Journey", () => {
     await expect(page.getByTestId("practitioner-npi")).toContainText(`NPI: ${practitioner.npi}`)
   })
 
-  test("landing -> practitioner detail", async ({ page }) => {
+  test("landing -> last page -> practitioner detail", async ({ page }) => {
     await page.goto("/")
-
+  
     await page.getByRole("link", { name: /search/i }).first().click()
     await page.getByRole("link", { name: /practitioner/i }).click()
-
-    await page.getByRole("textbox", { name: "Name or NPI" }).fill("AAA Test Practitioner")
+  
+    await page.getByRole("textbox", { name: "Name or NPI" }).fill("TEST")
     await page.getByRole("button", { name: "Search" }).click()
-
+  
+    const sortButton = page.locator(".ds-c-dropdown__button")
+    await expect(sortButton).toContainText("First Name (A-Z)")
+    await sortButton.click()
+    await expect(page.locator("[role='listbox']")).toBeVisible()
+    await page.getByRole("option", { name: "First Name (Z-A)" }).click()
+    await expect(sortButton).toContainText("First Name (Z-A)")
+  
+    await page.getByLabel("Next Page").first().click()
+    await expect(page).toHaveURL(/page=2/)
+  
+    await page.getByLabel("Next Page").first().click()
+    await expect(page).toHaveURL(/page=3/)
+  
     await expect(page.getByRole("link", { name: /AAA Test Practitioner/i })).toBeVisible()
     await page.getByRole("link", { name: /AAA Test Practitioner/i }).click()
-
+  
     await expect(page).toHaveURL(`/practitioners/${practitioner.id}`)
     await expect(page.getByTestId("practitioner-name")).toContainText(practitioner.name)
   })
