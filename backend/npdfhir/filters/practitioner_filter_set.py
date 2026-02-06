@@ -1,4 +1,4 @@
-from django.contrib.postgres.search import SearchVector
+from django.contrib.postgres.search import SearchVector, SearchQuery
 from django.db.models import Q
 from django_filters import rest_framework as filters
 
@@ -104,9 +104,10 @@ class PractitionerFilterSet(filters.FilterSet):
                 "individual__individualtoaddress__address__address_us__delivery_line_2",
                 "individual__individualtoaddress__address__address_us__city_name",
                 "individual__individualtoaddress__address__address_us__state_code__abbreviation",
+                "individual__individualtoaddress__address__address_us__zipcode",
             )
-        ).filter(Q(search=value) |
-            Q(individual__individualtoaddress__address__address_us__zipcode=value)
+        ).filter(
+            search=SearchQuery(value, search_type="websearch")
         )
 
 

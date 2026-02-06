@@ -1,7 +1,7 @@
 import re
 from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import D
-from django.contrib.postgres.search import SearchVector
+from django.contrib.postgres.search import SearchVector, SearchQuery
 from django.db.models import Q
 from django_filters import rest_framework as filters
 
@@ -228,9 +228,10 @@ class PractitionerRoleFilterSet(filters.FilterSet):
                 "location__address__address_us__delivery_line_2",
                 "location__address__address_us__city_name",
                 "location__address__address_us__state_code__abbreviation",
+                "location__address__address_us__zipcode",
             )
-        ).filter(Q(search=value) |
-            Q(location__address__address_us__zipcode=value)
+        ).filter(
+            search=SearchQuery(value, search_type="websearch")
         )
 
     def filter_address_city(self, queryset, name, value):

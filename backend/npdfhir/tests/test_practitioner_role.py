@@ -63,7 +63,7 @@ class PractitionerRoleViewSetTestCase(APITestCase):
                 organization_name=cls.orgs[0],
                 city="San Diego",
                 state="CA",
-                zipcode="55555",
+                zipcode="05555",
                 addr_line_1="404 Great Amazing Avenue",
                 x=32.824056,
                 y=-117.437397,
@@ -524,6 +524,28 @@ class PractitionerRoleViewSetTestCase(APITestCase):
 
     def test_list_filter_by_address_zip(self):
         zip_search = "90001"
+        url = reverse("fhir-practitionerrole-list")
+        response = self.client.get(url, {"location_zip_code": zip_search})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert_has_results(self, response)
+
+        bundle = response.data["results"]
+
+        for entry in bundle["entry"]:
+            location_id = entry["resource"]["location"][0]["reference"].split("/")[-1]
+            self.assertIn("resource", entry)
+            location_entry = entry["resource"]
+
+            self.assertEqual(location_entry["resourceType"], "PractitionerRole")
+            self.assertIn("id", location_entry)
+            self.assertIn("active", location_entry)
+
+            location_obj = Location.objects.get(pk=location_id)
+
+            self.assertEqual(zip_search, location_obj.address.address_us.zipcode)
+    
+    def test_list_filter_by_address_zip_leading_zero(self):
+        zip_search = "05555"
         url = reverse("fhir-practitionerrole-list")
         response = self.client.get(url, {"location_zip_code": zip_search})
         self.assertEqual(response.status_code, status.HTTP_200_OK)

@@ -1,5 +1,5 @@
 import re
-from django.contrib.postgres.search import SearchVector
+from django.contrib.postgres.search import SearchVector, SearchQuery
 from django_filters import rest_framework as filters
 from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import D
@@ -67,9 +67,10 @@ class LocationFilterSet(filters.FilterSet):
                 "address__address_us__delivery_line_2",
                 "address__address_us__city_name",
                 "address__address_us__state_code__abbreviation",
+                "address__address_us__zipcode",
             )
-        ).filter(Q(search=value) |
-            Q(address__address_us__zipcode=value)
+        ).filter(
+            search=SearchQuery(value, search_type="websearch")
         )
 
     def filter_address_city(self, queryset, name, value):

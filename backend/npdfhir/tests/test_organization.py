@@ -57,7 +57,7 @@ class OrganizationViewSetTestCase(APITestCase):
                 name="ABACUS BUSINESS CORPORATION GROUP INC.", organization=cls.orgs[3],
                 city="Sandiego",
                 state="CA",
-                zipcode="55555",
+                zipcode="05555",
                 addr_line_1="404 Great Amazing Avenue"
             )
         ]
@@ -251,6 +251,12 @@ class OrganizationViewSetTestCase(APITestCase):
         response = self.client.get(url, {"address": "Main"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
+    
+    def test_list_filter_by_address_zipcode_leading_zero(self):
+        url = reverse("fhir-organization-list")
+        response = self.client.get(url, {"address": "404 Great Amazing Avenue Sandiego CA 05555"})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert_has_results(self, response)
 
     def test_list_filter_by_address_city(self):
         url = reverse("fhir-organization-list")
@@ -267,6 +273,12 @@ class OrganizationViewSetTestCase(APITestCase):
     def test_list_filter_by_address_postalcode(self):
         url = reverse("fhir-organization-list")
         response = self.client.get(url, {"address_postalcode": "10001"})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert_has_results(self, response)
+    
+    def test_list_filter_by_address_zipcode_filter_leading_zero(self):
+        url = reverse("fhir-organization-list")
+        response = self.client.get(url, {"address_postalcode": "05555"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
 
