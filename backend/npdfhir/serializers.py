@@ -611,7 +611,7 @@ class PractitionerRoleSerializer(serializers.Serializer):
 
     def to_representation(self, instance):
         request = self.context.get("request")
-        representation = super().to_representation(instance)
+        # representation = super().to_representation(instance)
         practitioner_role = PractitionerRole()
         practitioner_role.id = str(instance.id)
         practitioner_role.active = instance.active
