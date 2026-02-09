@@ -31,6 +31,7 @@ from .models import (
     Provider,
     ProviderToLocation,
     OrganizationToAddress,
+    OrganizationToName
 )
 
 from .serializers import (
@@ -315,7 +316,14 @@ class FHIROrganizationViewSet(viewsets.GenericViewSet):
     ViewSet for FHIR Organization resources
     """
 
-    queryset = Organization.objects.all().prefetch_related(
+    queryset = Organization.objects.annotate(
+        primary_name=Subquery(
+            OrganizationToName.objects.filter(
+                organization_id=OuterRef("pk"),
+                is_primary=True,
+            ).values("name")[:1]
+        )
+    ).all().prefetch_related(
         "authorized_official",
         "ein",
         "organizationtoname_set",
@@ -345,8 +353,8 @@ class FHIROrganizationViewSet(viewsets.GenericViewSet):
     filterset_class = OrganizationFilterSet
     pagination_class = CustomPaginator
     lookup_url_kwarg = "id"
-    ordering = ["organizationtoname__name"]
-    ordering_fields = ["organizationtoname__name"]
+    ordering = ["primary_name"]
+    ordering_fields = ["primary_name"]
 
     # permission_classes = [permissions.IsAuthenticated]
     @extend_schema(
