@@ -68,30 +68,30 @@ class PractitionerRoleFilterSet(filters.FilterSet):
     endpoint_status = filters.CharFilter(
         method="filter_endpoint_status", help_text="Filter providers by endpoint status"
     )
-
-    endpoint_organization_id = filters.UUIDFilter(
-        method="filter_endpoint_organization_id",
-        help_text="Filter by the UUID of the organization associated with endpoints",
-    )
-
-    endpoint_organization_name = filters.CharFilter(
-        method="filter_endpoint_organization_name",
-        help_text="Filter by the name of the organization associated with endpoints",
-    )
+    # We don't have a concept of endpoint organizations at the moment
+    # endpoint_organization_id = filters.UUIDFilter(
+    #    method="filter_endpoint_organization_id",
+    #    help_text="Filter by the UUID of the organization associated with endpoints",
+    # )
+    #
+    # endpoint_organization_name = filters.CharFilter(
+    #    method="filter_endpoint_organization_name",
+    #    help_text="Filter by the name of the organization associated with endpoints",
+    # )
 
     location_address = filters.CharFilter(
         method="filter_address", help_text="Filter by the location address"
     )
 
-    location_city = filters.CharFilter(
+    location_address_city = filters.CharFilter(
         method="filter_address_city", help_text="Filter by the location city"
     )
 
-    location_state = filters.CharFilter(
+    location_address_state = filters.CharFilter(
         method="filter_address_state", help_text="Filter by the location state"
     )
 
-    location_zip_code = filters.CharFilter(
+    location_address_postalcode = filters.CharFilter(
         method="filter_address_postalcode", help_text="Filter by the location postal code"
     )
 
@@ -110,12 +110,10 @@ class PractitionerRoleFilterSet(filters.FilterSet):
             "specialty",
             "endpoint_connection_type",
             "endpoint_payload_type",
-            "endpoint_organization_id",
-            "endpoint_organization_name",
             "location_address",
-            "location_city",
-            "location_state",
-            "location_zip_code",
+            "location_address_city",
+            "location_address_state",
+            "location_address_postalcode",
         ]
 
     def filter_practitioner_name(self, queryset, name, value):
@@ -169,7 +167,7 @@ class PractitionerRoleFilterSet(filters.FilterSet):
     def filter_organization_type(self, queryset, name, value):
         return queryset.filter(
             Q(
-                provider_to_organization__organization__clinicalorganization__organizationtotaxonomy__nucc_code__code=value
+                provider_to_organization__organization__clinicalorganization__organizationtotaxonomy__nucc_code__display_name=value
             )
         ).distinct()
 
@@ -199,16 +197,14 @@ class PractitionerRoleFilterSet(filters.FilterSet):
         return queryset.filter(Q(specialty_id__iexact=value)).distinct()
 
     def filter_connection_type(self, queryset, name, value):
-        return queryset.annotate(
-            search=SearchVector(
-                "location__locationtoendpointinstance__endpoint_instance__endpoint_connection_type_id"
-            )
-        ).filter(search=value)
+        return queryset.filter(
+            location__locationtoendpointinstance__endpoint_instance__endpoint_connection_type_id=value
+        )
 
     def filter_endpoint_status(self, queryset, name, value):
-        return queryset.annotate(
-            search=SearchVector("location__locationtoendpointinstance__endpoint_instance__status")
-        ).filter(search=value)
+        return queryset.filter(
+            location__locationtoendpointinstance__endpoint_instance__status=value
+        )
 
     def filter_payload_type(self, queryset, name, value):
         return queryset.filter(
