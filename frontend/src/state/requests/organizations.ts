@@ -7,11 +7,11 @@ import type { SortOption } from "../../@types/search"
 export const ORGANIZATION_SORT_OPTIONS: Record<string, SortOption> = {
   "name-asc": {
     labelKey: "organizations.sort.name-asc",
-    apiValue: "organizationtoname__name",
+    apiValue: "primary_name",
   },
   "name-desc": {
     labelKey: "organizations.sort.name-desc",
-    apiValue: "-organizationtoname__name",
+    apiValue: "-primary_name",
   },
 } as const
 
