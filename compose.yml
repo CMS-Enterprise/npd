@@ -29,7 +29,7 @@ services:
       - ./backend/artifacts:/app/artifacts:rw
       - ./backend/provider_directory/static:/app/provider_directory/static:rw
     depends_on:
-      - db
+      - db-migrations
 
   db:
     image: 'postgis/postgis:17-3.5'
