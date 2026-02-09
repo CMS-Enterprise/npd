@@ -18,8 +18,9 @@
       - [One-off commands](#one-off-commands)
     - [Troubleshooting](#troubleshooting)
       - [1. PostgreSQL collation version mismatch](#1-postgresql-collation-version-mismatch)
-      - [2. Port already in use](#2-port-already-in-use)
-      - [3. Updated elements do not appear on the frontend after build](#3-updated-elements-do-not-appear-on-the-frontend-after-build)
+      - [2. Docker versions mismatch](#2-docker-versions-mismatch)
+      - [3. Port already in use](#3-port-already-in-use)
+      - [4. Updated elements do not appear on the frontend after build](#4-updated-elements-do-not-appear-on-the-frontend-after-build)
     - [Workflow and Branching](#workflow-and-branching)
     - [Testing Conventions](#testing-conventions)
       - [Backend Tests](#backend-tests)
@@ -152,7 +153,24 @@ make setup
 ```
 ⚠️ _This deletes local development database data_
 
-#### 2. Port already in use
+#### 2. Docker versions mismatch 
+
+**Error**
+```
+ERROR: extension "postgis" already exists
+```
+
+**Cause**
+```
+Mismatch of docker volumes library version
+```
+**Fix**
+```
+make reset-db
+make setup
+```
+
+#### 3. Port already in use
 
 **Error**
 ```
@@ -169,7 +187,7 @@ sudo lsof -i :{port}
 sudo kill <PID>
 ```
 
-#### 3. Updated elements do not appear on the frontend after build
+#### 4. Updated elements do not appear on the frontend after build
 
 **Error**
 ```
