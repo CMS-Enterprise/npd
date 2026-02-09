@@ -621,9 +621,29 @@ class PractitionerRoleSerializer(serializers.Serializer):
         practitioner_role.organization = genReference(
             "fhir-organization-detail", instance.provider_to_organization.organization_id, request
         )
+        if hasattr(instance, "specialty_id") and instance.specialty_id is not None:
+            practitioner_role.specialty = (
+                CodeableConcept(
+                    coding=[
+                        Coding(
+                            system="http://snomed.info/sct",
+                            code=str(instance.specialty_id),
+                        )
+                    ]
+                ),
+            )
         practitioner_role.location = [
             genReference("fhir-location-detail", instance.location.id, request)
         ]
+        if len(instance.location.locationtoendpointinstance_set.all()) > 0:
+            endpoints = []
+            for loc_to_endpoint in instance.location.locationtoendpointinstance_set.all():
+                endpoints.append(
+                    genReference(
+                        "fhir-endpoint-detail", loc_to_endpoint.endpoint_instance_id, request
+                    )
+                )
+            practitioner_role.endpoint = endpoints
         # These lines rely on the fhir.resources.R4B representation of PractitionerRole to be expanded to match the ndh FHIR definition. This is a TODO with an open ticket.
         # if 'other_phone' in representation.keys():
         #    practitioner_role.telecom = representation['other_phone']
@@ -651,7 +671,6 @@ class EndpointSerializer(serializers.Serializer):
         ]
 
     def to_representation(self, instance):
-        # request = self.context.get("request")
         representation = super().to_representation(instance)
 
         if instance.endpoint_connection_type:
@@ -690,8 +709,11 @@ class EndpointSerializer(serializers.Serializer):
             name=instance.name,
             # TODO extend base fhir spec to ndh spec description=instance.description,
             # TODO extend base fhir spec to ndh spec environmentType=environment_type,
+            # We don't currently have a concept of managing organization for endpoint_instance
+            # request = self.context.get("request")
             # managingOrganization=genReference(
-            #    'fhir-organization-detail', instance.location.organization_id, request),
+            #    "fhir-organization-detail", representation['location_to_endpoint_instance'][0]['organization_id'], request
+            # ),
             # contact=ContactPoint(contact),
             # period=Period(period),
             payloadType=representation["payload"],

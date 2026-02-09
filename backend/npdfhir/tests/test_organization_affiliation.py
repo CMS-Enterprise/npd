@@ -11,7 +11,7 @@ from ..models import (
     OtherIdType,
 )
 from .api_test_case import APITestCase
-from .fixtures.endpoint import create_endpoint
+from .fixtures.endpoint import create_endpoint_instance
 from .fixtures.location import create_location
 from .fixtures.organization import create_organization, create_legal_entity
 from .helpers import (
@@ -75,7 +75,7 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
             name="Good Location 1",
         )
 
-        endpoint_good_1 = create_endpoint(
+        endpoint_instance = create_endpoint_instance(
             organization=cls.org_good_1,
             name="Good Endpoint 1",
             ehr=ehr_vendor3,
@@ -83,7 +83,7 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
 
         LocationToEndpointInstance.objects.create(
             location=loc_good_1,
-            endpoint_instance=endpoint_good_1.endpoint_instance,
+            endpoint_instance=endpoint_instance,
         )
 
         # =========================================================
@@ -99,13 +99,13 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
         loc_good_2a = create_location(organization=cls.org_good_2, name="Location A")
         loc_good_2b = create_location(organization=cls.org_good_2, name="Location B")
 
-        endpoint_good_2a = create_endpoint(
+        endpoint_good_2a = create_endpoint_instance(
             organization=cls.org_good_2,
             name="Endpoint A",
             ehr=ehr_vendor,
         )
 
-        endpoint_good_2b = create_endpoint(
+        endpoint_good_2b = create_endpoint_instance(
             organization=cls.org_good_2,
             name="Endpoint B",
             ehr=ehr_vendor,
@@ -113,11 +113,11 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
 
         LocationToEndpointInstance.objects.create(
             location=loc_good_2a,
-            endpoint_instance=endpoint_good_2a.endpoint_instance,
+            endpoint_instance=endpoint_good_2a,
         )
         LocationToEndpointInstance.objects.create(
             location=loc_good_2b,
-            endpoint_instance=endpoint_good_2b.endpoint_instance,
+            endpoint_instance=endpoint_good_2b,
         )
 
         # =========================================================
@@ -133,13 +133,13 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
         loc_good_3a = create_location(organization=cls.org_good_3, name="Location C")
         loc_good_3b = create_location(organization=cls.org_good_3, name="Location D")
 
-        endpoint_good_3a = create_endpoint(
+        endpoint_good_3a = create_endpoint_instance(
             organization=cls.org_good_3,
             name="Endpoint A",
             ehr=ehr_vendor2,
         )
 
-        endpoint_good_3b = create_endpoint(
+        endpoint_good_3b = create_endpoint_instance(
             organization=cls.org_good_3,
             name="Endpoint B",
             ehr=ehr_vendor2,
@@ -147,11 +147,11 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
 
         LocationToEndpointInstance.objects.create(
             location=loc_good_3a,
-            endpoint_instance=endpoint_good_3a.endpoint_instance,
+            endpoint_instance=endpoint_good_3a,
         )
         LocationToEndpointInstance.objects.create(
             location=loc_good_3b,
-            endpoint_instance=endpoint_good_3b.endpoint_instance,
+            endpoint_instance=endpoint_good_3b,
         )
 
         # =========================================================
@@ -174,7 +174,7 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
         cls.org_unlinked = create_organization(name="Unlinked Endpoint Org")
         create_location(organization=cls.org_unlinked)
 
-        create_endpoint(
+        create_endpoint_instance(
             organization=cls.org_unlinked,
             name="Dangling Endpoint",
             ehr=ehr_vendor,
