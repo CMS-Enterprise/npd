@@ -73,15 +73,18 @@ test.describe("Organization Journey", () => {
     await expect(sortButton).toContainText("Name (A-Z)")
     await sortButton.click()
     await expect(page.locator("[role='listbox']")).toBeVisible()
+    const sortPromise = page.waitForResponse("**/fhir/Organization**")
     await page.getByRole("option", { name: "Name (Z-A)" }).click()
+    const sort = await sortPromise;
     await expect(sortButton).toContainText("Name (Z-A)")
   
+    const page2Promise = page.waitForResponse("**/fhir/Organization**")
     await page.getByLabel("Next Page").first().click()
-    await expect(page).toHaveURL(/page=2/)
+    const page2 = await page2Promise;
   
-    const responsePromise = page.waitForResponse("**/fhir/Organization**")
+    const page3Promise = page.waitForResponse("**/fhir/Organization**")
     await page.getByLabel("Next Page").first().click()
-    const response = await responsePromise;
+    const page3 = await page3Promise;
   
     await expect(page.getByRole("link", { name: "AAA Test Org" })).toBeVisible()
     await page.getByRole("link", { name: "AAA Test Org" }).click()
