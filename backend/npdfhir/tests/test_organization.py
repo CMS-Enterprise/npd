@@ -256,10 +256,31 @@ class OrganizationViewSetTestCase(APITestCase):
         assert_has_results(self, response)
 
     def test_list_filter_by_address_zipcode_leading_zero(self):
+        address_search = "404 Great Amazing Avenue Sandiego CA 05555"
         url = reverse("fhir-organization-list")
-        response = self.client.get(url, {"address": "404 Great Amazing Avenue Sandiego CA 05555"})
+        response = self.client.get(url, {"address": address_search})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
+
+        bundle = response.data["results"]
+
+        for entry in bundle["entry"]:
+            self.assertIn("resource", entry)
+            location_entry = entry["resource"]
+            self.assertIn("id", location_entry)
+            self.assertIn("contact", location_entry)
+            # self.assertIn("name", location_entry)
+
+            search_in_location_list = []
+
+            for address in location_entry["contact"]:
+                self.assertIn("address", address)
+                address_string = concat_address_string(address["address"])
+                search_in_location_list.append(address_search in address_string)
+
+            self.assertTrue(any(search_in_location_list))
+
+            self.assertEqual(location_entry["resourceType"], "Organization")
 
     def test_list_filter_by_address_city(self):
         url = reverse("fhir-organization-list")
@@ -280,10 +301,30 @@ class OrganizationViewSetTestCase(APITestCase):
         assert_has_results(self, response)
 
     def test_list_filter_by_address_zipcode_filter_leading_zero(self):
+        address_search = "05555"
         url = reverse("fhir-organization-list")
-        response = self.client.get(url, {"address_postalcode": "05555"})
+        response = self.client.get(url, {"address_postalcode": address_search})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
+
+        bundle = response.data["results"]
+
+        for entry in bundle["entry"]:
+            self.assertIn("resource", entry)
+            location_entry = entry["resource"]
+            self.assertIn("id", location_entry)
+            self.assertIn("contact", location_entry)
+            # self.assertIn("name", location_entry)
+
+            search_in_location_list = []
+
+            for address in location_entry["contact"]:
+                self.assertIn("address", address)
+                search_in_location_list.append(address_search in address["address"]["postalCode"])
+
+            self.assertTrue(any(search_in_location_list))
+
+            self.assertEqual(location_entry["resourceType"], "Organization")
 
     def test_list_filter_by_address_use(self):
         url = reverse("fhir-organization-list")
