@@ -10,6 +10,7 @@ from .helpers import (
     assert_has_results,
     assert_pagination_limit,
     extract_resource_names,
+    concat_address_string,
 )
 
 
