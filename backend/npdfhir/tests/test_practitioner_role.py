@@ -585,7 +585,11 @@ class PractitionerRoleViewSetTestCase(APITestCase):
 
             location_obj = Location.objects.get(pk=location_id)
 
-            self.assertEqual(zip_search, location_obj.address.address_us.zipcode)
+            self.assertEqual(zip_search.split()[-1], location_obj.address.address_us.zipcode)
+            self.assertEqual("404 Great Amazing Avenue", location_obj.address.address_us.delivery_line_1)
+            self.assertEqual("San Diego", location_obj.address.address_us.city_name)
+            self.assertEqual("CA", location_obj.address.address_us.state_code.abbreviation)
+
 
     def test_list_filter_by_endpoint_connection_type(self):
         connection_type_id = self.endpoint.endpoint_instance.endpoint_connection_type.id
