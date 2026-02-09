@@ -138,13 +138,13 @@ class TaxonomySerializer(serializers.Serializer):
             ]
         )
         qualification = PractitionerQualification(
-            identifier=[
-                Identifier(
-                    value="test",
-                    type=code,  # TODO: Replace
-                    period=Period(),
-                )
-            ],
+            # identifier=[
+            #    Identifier(
+            #        value="test",
+            #        type=code,  # TODO: Replace
+            #        period=Period(),
+            #    )
+            # ],
             code=code,
         )
         return qualification.model_dump()
@@ -467,7 +467,9 @@ class OrganizationAffiliationSerializer(serializers.Serializer):
 
         organization_affiliation.organization = Reference(display=str(instance.ehr_vendor_name))
 
-        organization_affiliation.participatingOrganization = genReference("fhir-organization-detail", instance.id, request)
+        organization_affiliation.participatingOrganization = genReference(
+            "fhir-organization-detail", instance.id, request
+        )
         organization_affiliation.participatingOrganization.display = str(instance.organization_name)
 
         # NOTE: Period for OrganizationAffiliation cannot currently be fetched so its blank
