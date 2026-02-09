@@ -417,7 +417,7 @@ class OrganizationSerializer(serializers.Serializer):
             if len(names) > 1:
                 aliases = names[1:]
         if aliases:
-            organization.alias = aliases
+            organization.alias = [n['name'] for n in aliases]
 
         if instance.parent_id is not None:
             organization.partOf = genReference(
