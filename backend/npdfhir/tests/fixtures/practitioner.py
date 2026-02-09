@@ -128,7 +128,7 @@ def create_full_practitionerrole(
     location_id=None,
     role_code="PRV",
     role_display="Provider Role",
-    nucc_types=None
+    nucc_types=None,
 ):
     """
     Creates:
@@ -143,7 +143,7 @@ def create_full_practitionerrole(
         last_name=last_name,
         gender=gender,
         npi_value=npi_value,
-        practitioner_types=nucc_types
+        practitioner_types=nucc_types,
     )
 
     org = create_organization(name=org_name)

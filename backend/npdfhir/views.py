@@ -31,6 +31,7 @@ from .models import (
     Provider,
     ProviderToLocation,
     OrganizationToAddress,
+    IndividualToAddress,
     OrganizationToName
 )
 
@@ -150,14 +151,16 @@ class FHIRPractitionerViewSet(viewsets.GenericViewSet):
     queryset = Provider.objects.all().prefetch_related(
         "npi",
         "individual",
-        "individual__individualtoaddress_set",
-        "individual__individualtoaddress_set__address__address_us",
-        "individual__individualtoaddress_set__address__address_us__state_code",
-        "individual__individualtoaddress_set__address_use",
+        Prefetch(
+            "individual__individualtoaddress_set",
+            queryset=IndividualToAddress.objects.select_related(
+                "address_use", "address__address_us", "address__address_us__state_code"
+            ),
+        ),
         "individual__individualtophone_set",
         "individual__individualtoemail_set",
         "individual__individualtoname_set",
-        "providertootherid_set__other_id_type",
+        "providertootherid_set",
         "providertotaxonomy_set",
     )
     if DEBUG:
