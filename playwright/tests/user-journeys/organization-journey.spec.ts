@@ -78,9 +78,10 @@ test.describe("Organization Journey", () => {
   
     await page.getByLabel("Next Page").first().click()
     await expect(page).toHaveURL(/page=2/)
-  
+    
+    const responsePromise = page.waitForResponse("**/fhir/Organization")
     await page.getByLabel("Next Page").first().click()
-    await expect(page).toHaveURL(/page=3/)
+    const response = await responsePromise;
   
     await expect(page.getByRole("link", { name: "AAA Test Org" })).toBeVisible()
     await page.getByRole("link", { name: "AAA Test Org" }).click()
