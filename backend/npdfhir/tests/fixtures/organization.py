@@ -34,6 +34,7 @@ def create_organization(
     other_state_code="NY",
     other_issuer="New York State Medicaid",
     organization_type="193200000X",
+    aliases=None
 ):
     """
     Creates an Organization + OrganizationToName.
@@ -86,5 +87,13 @@ def create_organization(
         name=name,
         is_primary=True,
     )
+
+    if aliases:
+        for alias in aliases:
+            OrganizationToName.objects.create(
+                organization=org,
+                name=alias,
+                is_primary=False,
+            )
 
     return org

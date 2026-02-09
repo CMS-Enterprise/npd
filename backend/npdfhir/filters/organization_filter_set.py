@@ -1,4 +1,4 @@
-from django.contrib.postgres.search import SearchVector
+from django.contrib.postgres.search import SearchVector, SearchQuery
 from django.db.models import Q
 from django_filters import rest_framework as filters
 
@@ -52,8 +52,10 @@ class OrganizationFilterSet(filters.FilterSet):
 
     def filter_name(self, queryset, name, value):
         return (
-            queryset.annotate(search=SearchVector("organizationtoname__name"))
-            .filter(search=value)
+            queryset.annotate(
+                search=SearchVector("organizationtoname__name"),
+            )
+            .filter(search=SearchQuery(value, search_type="plain"))
             .distinct()
         )
 

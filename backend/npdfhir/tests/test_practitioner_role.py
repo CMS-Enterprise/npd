@@ -188,7 +188,7 @@ class PractitionerRoleViewSetTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_pagination_limit(self, response)
 
-    # Filter tests
+    # Filter tests.
     def test_list_filter_by_name(self):
         sample_name = "Charlie"
         url = reverse("fhir-practitionerrole-list")
