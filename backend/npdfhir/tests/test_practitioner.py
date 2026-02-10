@@ -117,11 +117,6 @@ class PractitionerViewSetTestCase(APITestCase):
         response = self.client.get(url)
         assert_fhir_response(self, response)
 
-        # print(response.data["results"]["entry"][0]['resource']['name'][0])
-
-        # for name in response.data["results"]["entry"]:
-        #    print(name['resource']['name'][-1])
-
         # Extract names
         names = extract_practitioner_names(response)
 
@@ -151,11 +146,6 @@ class PractitionerViewSetTestCase(APITestCase):
             {"_sort": "first_name,last_name"},
         )
         assert_fhir_response(self, response)
-
-        # print(response.data["results"]["entry"][0]['resource']['name'][0])
-
-        # for name in response.data["results"]["entry"]:
-        #    print(name['resource']['name'][-1])
 
         # Extract names
         names = extract_practitioner_names(response)
@@ -314,7 +304,6 @@ class PractitionerViewSetTestCase(APITestCase):
         for entry in response.data["results"]["entry"]:
             present_checks = []
             for address in entry["resource"]["address"]:
-                # print(address)
                 address_string = concat_address_string(address)
 
                 # self.assertIn(test_search, address_string)

@@ -20,6 +20,6 @@ left join npd.organization_view o on o.id = po.organization_id
 left join npd.location l on l.id = pl.location_id;
 
 
-create index on npd.provider_to_location_view(last_name, first_name);
+create index on npd.provider_to_location_view(practitioner_last_name, practitioner_first_name);
 create index on npd.provider_to_location_view(organization_name);
 create index on npd.provider_to_location_view(location_name);

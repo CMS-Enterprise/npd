@@ -245,7 +245,7 @@ class FHIRPractitionerRoleViewSet(viewsets.GenericViewSet):
     queryset = (
         ProviderToLocationView.objects.all()
         .select_related("location")
-        .prefetch_related("provider_to_organization", "location__location_to_endpoint_instance")
+        .prefetch_related("provider_to_organization", "location__locationtoendpointinstance_set")
     )
     if DEBUG:
         renderer_classes = [FHIRRenderer, BrowsableAPIRenderer]

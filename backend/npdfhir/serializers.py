@@ -528,7 +528,6 @@ class PractitionerSerializer(serializers.Serializer):
         fields = ["npi", "name", "email", "phone", "identifier", "taxonomy"]
 
     def to_representation(self, instance):
-        print(super().to_representation(instance))
         representation = super().to_representation(instance)["provider"]
         instance = instance.provider
         practitioner = Practitioner()
