@@ -13,7 +13,7 @@ from .helpers import (
     # extract_resource_ids,
 )
 
-from ..models import OrganizationToName, Provider, IndividualToName, Organization
+from ..models import OrganizationToName, Provider, IndividualToName, Organization, OrganizationView
 
 from .fixtures.location import create_location
 from .fixtures.practitioner import (
@@ -148,6 +148,8 @@ class PractitionerRoleViewSetTestCase(APITestCase):
         cls.organization_id = pr.location.organization_id
 
         cls.roles_with_params.append(pr)
+
+        OrganizationView.refresh_materialized_view()
 
         return super().setUpTestData()
 
@@ -387,6 +389,7 @@ class PractitionerRoleViewSetTestCase(APITestCase):
         for entry in bundle["entry"]:
             organization_url = entry["resource"]["organization"]["reference"]
             returned_organization = self.client.get(organization_url).data
+            print(returned_organization)
             # We are not currently exposing "qualification" at the Organization endpoint
             # taxonomies = [
             #    {
