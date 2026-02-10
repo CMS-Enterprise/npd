@@ -149,13 +149,6 @@ A PostgreSQL Docker volume was created using a different system library version
 ```
 **Fix**
 This should automatically be resolved by the Flyway migration `R__refresh_collation_version.sql`.
-However, if the migration fails to resolve the issue, fall back to recreating the volume:
-
-```
-docker compose down -v
-make setup
-```
-⚠️ _This deletes local development database data_
 
 #### 2. Docker volume image mismatch 
 
