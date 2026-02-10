@@ -6,6 +6,7 @@
 | Updated | 2029-10-15 | @abachman-dsac | addressing feedback from #108                 |
 | Updated | 2029-12-03 | @abachman-dsac | adding notes on `make` and `bin/npr`          |
 | Updated | 2026-01-28 | @sachin-panayil| updating links with new path                  |
+| Updated | 2026-02-10 | @spopelka-dsac | updating testing documentation                |
 
 - [How to Contribute](#how-to-contribute)
   - [Getting Started](#getting-started)
