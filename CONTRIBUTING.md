@@ -74,6 +74,7 @@ The following tools **must be installed on your machine** before running any pro
 
 - Python 3.10 or later
 - Docker
+- colima (if using macOS)
 - Docker Compose  
 - GNU Make  
 
