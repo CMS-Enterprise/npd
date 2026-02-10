@@ -351,8 +351,8 @@ class FHIROrganizationViewSet(viewsets.GenericViewSet):
     filterset_class = OrganizationFilterSet
     pagination_class = CustomPaginator
     lookup_url_kwarg = "id"
-    ordering = ["primary_name"]
-    ordering_fields = ["primary_name"]
+    ordering = ["name"]
+    ordering_fields = ["name"]
 
     # permission_classes = [permissions.IsAuthenticated]
     @extend_schema(

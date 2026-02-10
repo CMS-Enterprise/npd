@@ -141,7 +141,7 @@ class OrganizationViewSetTestCase(APITestCase):
 
     def test_list_in_descending_order(self):
         url = reverse("fhir-organization-list")
-        response = self.client.get(url, {"_sort": "-primary_name"})
+        response = self.client.get(url, {"_sort": "-name"})
         assert_fhir_response(self, response)
 
         # Extract names

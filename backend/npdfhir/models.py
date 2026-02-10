@@ -658,7 +658,7 @@ class OrganizationView(models.Model):
     ein = models.ForeignKey(LegalEntity, models.DO_NOTHING, blank=True, null=True)
     parent = models.ForeignKey("self", models.DO_NOTHING, blank=True, null=True)
     # the sorting field from organization_to_name
-    primary_name = models.CharField(max_length=1000)
+    name = models.CharField(max_length=1000)
 
     @classmethod
     def refresh_materialized_view(cls):
