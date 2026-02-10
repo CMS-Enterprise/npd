@@ -17,7 +17,7 @@ from ..models import (
     OrganizationToName,
     Provider,
     IndividualToName,
-    IndividualView,
+    ProviderView,
     Organization,
     OrganizationView,
 )
@@ -157,7 +157,7 @@ class PractitionerRoleViewSetTestCase(APITestCase):
         cls.roles_with_params.append(pr)
 
         OrganizationView.refresh_materialized_view()
-        IndividualView.refresh_materialized_view()
+        ProviderView.refresh_materialized_view()
 
         return super().setUpTestData()
 

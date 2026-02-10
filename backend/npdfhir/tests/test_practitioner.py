@@ -12,7 +12,7 @@ from .helpers import (
     get_female_npis,
     concat_address_string,
 )
-from ..models import IndividualView
+from ..models import ProviderView
 
 
 class PractitionerViewSetTestCase(APITestCase):
@@ -100,7 +100,7 @@ class PractitionerViewSetTestCase(APITestCase):
             cls.nurse_prac,
         ]
 
-        IndividualView.refresh_materialized_view()
+        ProviderView.refresh_materialized_view()
 
         return super().setUpTestData()
 

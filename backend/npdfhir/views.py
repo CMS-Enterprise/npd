@@ -149,18 +149,18 @@ class FHIRPractitionerViewSet(viewsets.GenericViewSet):
     """
 
     queryset = ProviderView.objects.all().prefetch_related(
-        "npi",
-        "individual",
+        "provider__individual",
+        "provider__npi",
         "provider",
         Prefetch(
-            "individual__individualtoaddress_set",
+            "provider__individual__individualtoaddress_set",
             queryset=IndividualToAddress.objects.select_related(
                 "address_use", "address__address_us", "address__address_us__state_code"
             ),
         ),
-        "individual__individualtophone_set",
-        "individual__individualtoemail_set",
-        "individual__individualtoname_set",
+        "provider__individual__individualtophone_set",
+        "provider__individual__individualtoemail_set",
+        "provider__individual__individualtoname_set",
         "provider__providertootherid_set",
         "provider__providertotaxonomy_set",
     )
@@ -225,7 +225,7 @@ class FHIRPractitionerViewSet(viewsets.GenericViewSet):
 
         provider = get_object_or_404(
             self.queryset,
-            individual_id=id,
+            provider_id=id,
         )
 
         serialized_practitioner = PractitionerSerializer(provider)
