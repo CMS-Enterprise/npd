@@ -28,7 +28,7 @@ from .models import (
     Location,
     LocationToEndpointInstance,
     Organization,
-    Provider,
+    ProviderView,
     ProviderToLocation,
     OrganizationToAddress,
     OrganizationView,
@@ -148,9 +148,10 @@ class FHIRPractitionerViewSet(viewsets.GenericViewSet):
     ViewSet for FHIR Practitioner resources
     """
 
-    queryset = Provider.objects.all().prefetch_related(
+    queryset = ProviderView.objects.all().prefetch_related(
         "npi",
         "individual",
+        "provider",
         Prefetch(
             "individual__individualtoaddress_set",
             queryset=IndividualToAddress.objects.select_related(
@@ -160,8 +161,8 @@ class FHIRPractitionerViewSet(viewsets.GenericViewSet):
         "individual__individualtophone_set",
         "individual__individualtoemail_set",
         "individual__individualtoname_set",
-        "providertootherid_set",
-        "providertotaxonomy_set",
+        "provider__providertootherid_set",
+        "provider__providertotaxonomy_set",
     )
     if DEBUG:
         renderer_classes = [FHIRRenderer, BrowsableAPIRenderer]
@@ -173,13 +174,13 @@ class FHIRPractitionerViewSet(viewsets.GenericViewSet):
     lookup_url_kwarg = "id"
 
     ordering = [
-        "individual__individualtoname__last_name",
-        "individual__individualtoname__first_name",
+        "last_name",
+        "first_name",
     ]
 
     ordering_fields = [
-        "individual__individualtoname__last_name",
-        "individual__individualtoname__first_name",
+        "last_name",
+        "first_name",
         "npi_value",
     ]
 

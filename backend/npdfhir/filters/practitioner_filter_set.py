@@ -3,7 +3,7 @@ from django.db.models import Q
 from django_filters import rest_framework as filters
 
 from ..mappings import addressUseMapping, genderMapping
-from ..models import Provider
+from ..models import ProviderView
 from ..utils import parse_identifier_query
 
 
@@ -51,7 +51,7 @@ class PractitionerFilterSet(filters.FilterSet):
     )
 
     class Meta:
-        model = Provider
+        model = ProviderView
         fields = [
             "identifier",
             "name",
@@ -86,7 +86,7 @@ class PractitionerFilterSet(filters.FilterSet):
             except (ValueError, TypeError):
                 pass
 
-            queries |= Q(providertootherid__other_id=identifier_id)
+            queries |= Q(provider__providertootherid__other_id=identifier_id)
 
         return queryset.filter(queries).distinct()
 
@@ -96,7 +96,7 @@ class PractitionerFilterSet(filters.FilterSet):
 
     def filter_practitioner_type(self, queryset, name, value):
         query = SearchQuery(value, search_type="websearch")
-        return queryset.filter(providertotaxonomy__nucc_code__search_vector=query)
+        return queryset.filter(provider__providertotaxonomy__nucc_code__search_vector=query)
 
     def filter_address(self, queryset, name, value):
         query = SearchQuery(value, search_type="websearch")

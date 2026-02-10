@@ -513,15 +513,18 @@ class PractitionerSerializer(serializers.Serializer):
     npi = NPISerializer()
     individual = IndividualSerializer(read_only=True)
     identifier = OtherIdentifierSerializer(
-        source="providertootherid_set", many=True, read_only=True
+        source="provider__providertootherid_set", many=True, read_only=True
     )
-    taxonomy = TaxonomySerializer(source="providertotaxonomy_set", many=True, read_only=True)
+    taxonomy = TaxonomySerializer(
+        source="provider__providertotaxonomy_set", many=True, read_only=True
+    )
 
     class Meta:
         fields = ["npi", "name", "email", "phone", "identifier", "taxonomy"]
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
+        instance = instance.provider
         practitioner = Practitioner()
         practitioner.id = str(instance.individual.id)
         practitioner.meta = Meta(

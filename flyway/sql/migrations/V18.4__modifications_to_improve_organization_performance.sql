@@ -1,4 +1,4 @@
-create materialized view npd.organization_view as select id, authorized_official_id, ein_id, parent_id, name as primary_name 
+create materialized view npd.organization_view as select id, authorized_official_id, ein_id, parent_id, name 
 from npd.organization 
 left join (select CASE
         -- Check if any row in the group has the boolean as TRUE
@@ -10,7 +10,7 @@ left join (select CASE
             MIN(name)
     END AS name, organization_id from npd.organization_to_name group by organization_id) on organization_id = id;
 
-create index on npd.organization_view(primary_name);
+create index on npd.organization_view(name);
 
 alter table npd.organization_to_name add column search_vector tsvector 
 GENERATED ALWAYS AS (to_tsvector('english', name)) STORED;

@@ -10,8 +10,9 @@ from .helpers import (
     assert_pagination_limit,
     extract_practitioner_names,
     get_female_npis,
-    concat_address_string
+    concat_address_string,
 )
+from ..models import IndividualView
 
 
 class PractitionerViewSetTestCase(APITestCase):
@@ -99,6 +100,8 @@ class PractitionerViewSetTestCase(APITestCase):
             cls.nurse_prac,
         ]
 
+        IndividualView.refresh_materialized_view()
+
         return super().setUpTestData()
 
     # Basic tests
@@ -145,9 +148,7 @@ class PractitionerViewSetTestCase(APITestCase):
         url = reverse("fhir-practitioner-list")
         response = self.client.get(
             url,
-            {
-                "_sort": "individual__individualtoname__first_name,individual__individualtoname__last_name"
-            },
+            {"_sort": "first_name,last_name"},
         )
         assert_fhir_response(self, response)
 
@@ -182,9 +183,7 @@ class PractitionerViewSetTestCase(APITestCase):
         url = reverse("fhir-practitioner-list")
         response = self.client.get(
             url,
-            {
-                "_sort": "-individual__individualtoname__last_name,-individual__individualtoname__first_name"
-            },
+            {"_sort": "-last_name,-first_name"},
         )
         assert_fhir_response(self, response)
 
@@ -238,7 +237,7 @@ class PractitionerViewSetTestCase(APITestCase):
         for practitioner_entry in response.data["results"]["entry"]:
             self.assertIn("resource", practitioner_entry)
             self.assertIn("id", practitioner_entry["resource"])
-            npi_id = practitioner_entry["resource"]['identifier'][0]['value']
+            npi_id = practitioner_entry["resource"]["identifier"][0]["value"]
             npi_ids.append(int(npi_id))
 
         # Check to make sure no female practitioners were fetched by mistake

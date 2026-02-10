@@ -9,19 +9,19 @@ import type { SortOption } from "../../@types/search"
 export const PRACTITIONER_SORT_OPTIONS: Record<string, SortOption> = {
   "first-name-asc": {
     labelKey: "practitioners.sort.first-asc",
-    apiValue: "individual__individualtoname__first_name",
+    apiValue: "first_name",
   },
   "first-name-desc": {
     labelKey: "practitioners.sort.first-desc",
-    apiValue: "-individual__individualtoname__first_name",
+    apiValue: "-first_name",
   },
   "last-name-asc": {
     labelKey: "practitioners.sort.last-asc",
-    apiValue: "individual__individualtoname__last_name",
+    apiValue: "last_name",
   },
   "last-name-desc": {
     labelKey: "practitioners.sort.last-desc",
-    apiValue: "-individual__individualtoname__last_name",
+    apiValue: "-last_name",
   },
 } as const
 
