@@ -18,7 +18,7 @@
       - [One-off commands](#one-off-commands)
     - [Troubleshooting](#troubleshooting)
       - [1. PostgreSQL collation version mismatch](#1-postgresql-collation-version-mismatch)
-      - [2. Docker versions mismatch](#2-docker-versions-mismatch)
+      - [2. Docker volume image mismatch](#2-docker-volume-image-mismatch)
       - [3. Port already in use](#3-port-already-in-use)
       - [4. Updated elements do not appear on the frontend after build](#4-updated-elements-do-not-appear-on-the-frontend-after-build)
     - [Workflow and Branching](#workflow-and-branching)
@@ -156,7 +156,7 @@ make setup
 ```
 ⚠️ _This deletes local development database data_
 
-#### 2. Docker versions mismatch 
+#### 2. Docker volume image mismatch 
 
 **Error**
 ```
@@ -165,7 +165,7 @@ ERROR: extension "postgis" already exists
 
 **Cause**
 ```
-Mismatch of docker volumes library version
+Mismatch of Docker database images due to deprecated older code or a partially completed migration
 ```
 **Fix**
 ```
