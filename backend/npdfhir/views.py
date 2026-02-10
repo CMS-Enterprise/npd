@@ -29,7 +29,7 @@ from .models import (
     LocationToEndpointInstance,
     Organization,
     ProviderView,
-    ProviderToLocation,
+    ProviderToLocationView,
     OrganizationToAddress,
     OrganizationView,
     IndividualToAddress,
@@ -243,10 +243,9 @@ class FHIRPractitionerRoleViewSet(viewsets.GenericViewSet):
     """
 
     queryset = (
-        ProviderToLocation.objects.all()
+        ProviderToLocationView.objects.all()
         .select_related("location")
-        .prefetch_related("provider_to_organization")
-        .annotate(location_name=F("location__name"))
+        .prefetch_related("provider_to_organization", "location__location_to_endpoint_instance")
     )
     if DEBUG:
         renderer_classes = [FHIRRenderer, BrowsableAPIRenderer]
@@ -257,8 +256,13 @@ class FHIRPractitionerRoleViewSet(viewsets.GenericViewSet):
     pagination_class = CustomPaginator
     lookup_url_kwarg = "id"
 
-    ordering = ["location__name"]
-    ordering_fields = ["location__name", "practitioner_first_name", "practitioner_last_name"]
+    ordering = ["location_name"]
+    ordering_fields = [
+        "location_name",
+        "practitioner_first_name",
+        "practitioner_last_name",
+        "organization_name",
+    ]
 
     # permission_classes = [permissions.IsAuthenticated]
     @extend_schema(
