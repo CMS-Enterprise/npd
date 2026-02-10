@@ -18,6 +18,8 @@
     - [Workflow and Branching](#workflow-and-branching)
     - [Testing Conventions](#testing-conventions)
       - [Backend Tests](#backend-tests)
+      - [Frontend Tests](#frontend-tests)
+      - [End to End Tests](#end-to-end-tests)
     - [Coding Style and Linters](#coding-style-and-linters)
     - [Writing Issues](#writing-issues)
     - [Creating Commits](#creating-commits)
@@ -173,7 +175,7 @@ The frontend tests can be found throughout the [frontend folder](/frontend/src),
 
 The full frontend test suite can be run by executing the command `make test-frontend`, which also spins up a test server for mocked requests. 
 
-### End-to-End Tests
+#### End-to-End Tests
 NPD utilizes Playwright for automated end-to-end testing. Any modifications that change either frontend or backend behavior should have an associated end-to-end test for that specific change, as well as a new or updated user journey test that validates the change in the context of user flows throughout the app. Note: we will continue to add user journey tests and associated documentation as we flesh out our user stories.
 
 Eventually, we intend to add automated User Acceptance Tests (UATs) to the end-to-end test suite, which will be similar to the user journey tests, but will further verify that NPD meets the business requirements and user needs defined for each software stage. These are intended to support a test-driven development strategy, in which the business requirements are defined as code and the implementation is validated against those codified requirements. The automated UATs will not be required to be passing with each PR, but rather will give an indication of progress toward fulfilling feature, release, and/or product goals.
