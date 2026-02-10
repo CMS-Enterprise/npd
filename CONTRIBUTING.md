@@ -135,25 +135,51 @@ We follow the [GitHub Flow Workflow](https://guides.github.com/introduction/flow
 
 ### Testing Conventions
 
-It is an expectation of this project that each feature will have new automated
-tests prior to opening a pull request and that all the tests in the repo are
-passing.
+With each pull request against main, automated GitHub actions will run the full NPD test suite (including Django unit tests, React unit tests, and end-to-end tests) against the codebase. Branch protections prevent pull requests from being merged unless all tests are passing.
 
-We do not expect 100% test coverage but we will be unlikely to accept Pull
-Requests which reduce test coverage or new features which do not include
-updates to the test suite.
+It is an expectation of this project that every pull request for a new feature will include unit tests and end-to-end tests that appropriately flex the edge cases of the feature being implemented or the change being made. 
+
+It is also an expectation of this project that any bug fixes will begin with the addition of new unit and/or end-to-end tests that demonstrates the bug conditions. The test(s) should pass after the bug fix is complete.
+
+We do not expect 100% test coverage, but we will be unlikely to accept pull requests that reduce test coverage or pull requests for new features/ bug fixes that do not also introduce appropriate tests.
 
 We recommend starting new feature work with a new Playwright end-to-end test and going from there.
 
 #### Backend Tests
 
-The backend test suite can be found in the `tests.py` file currently in
-`backend/npdfhir/tests.py`. The test suite can be run by navigating to the
-`backend` folder and running `make test` or `python manage.py test`.
+Any modifications that change the underlying data model, behavior of the API, or authentication should include Django unit tests that create appropriate test records and assertions to flex the main conditions and edge cases associated with the change. 
+
+Currently, the backend tests fall into three main categories:
+* [Overall application tests, including routing](/backend/app/tests/)
+* [Static content delivery tests, including feature flag settings](/backend/provider_directory/tests/)
+* [Data model and API tests, separated by FHIR endpoint](/backend/npdfhir/tests/)
+
+The full backend test suite can be run by executing the command `make test-backend` or by navigating to the
+`backend` folder and running `python manage.py test`.
+
+Best Practices:
+* Test methods should be clearly named to describe the scenarios that they are testing
+* Test data should be generated to support flexing edge cases (with comments to describe the test cases)
+* Filter tests should verify both the intended inclusion and exclusion established by the filter
 
 Please refer to the [Django
 documentation](https://docs.djangoproject.com/en/5.2/topics/testing/overview/)
 on testing for additional details.
+
+#### Frontend Tests
+Any modifications that change the React components or introduce new pages should include react unit tests that validate that the new components and pages are rendering correctly undes the expected logical conditions.
+
+The frontend tests can be found throughout the [frontend folder](/frontend/src), denoted by `.test` in the filename.
+
+The full frontend test suite can be run by executing the command `make test-frontend`, which also spins up a test server for mocked requests. 
+
+### End-to-End Tests
+NPD utilizes Playwright for automated end-to-end testing. Any modifications that change either frontend or backend behavior should have an associated end-to-end test for that specific change, as well as a new or updated user journey test that validates the change in the context of user flows throughout the app. Note: we will continue to add user journey tests and associated documentation as we flesh out our user stories.
+
+Eventually, we intend to add automated User Acceptance Tests (UATs) to the end-to-end test suite, which will be similar to the user journey tests, but will further verify that NPD meets the business requirements and user needs defined for each software stage. These are intended to support a test-driven development strategy, in which the business requirements are defined as code and the implementation is validated against those codified requirements. The automated UATs will not be required to be passing with each PR, but rather will give an indication of progress toward fulfilling feature, release, and/or product goals.
+
+For additional information on our implementation of playwright and getting started with Playwright tests, please refer to the [README](/playwright/README.md) in the `playwright/` directory.
+
 
 ### Coding Style and Linters
 
