@@ -10,6 +10,8 @@
     - [Team Mission](#team-mission)
   - [Core Team](#core-team)
   - [Repository Structure](#repository-structure)
+    - [Branching Strategy](#branching-strategy)
+    - [Release Strategy](#release-strategy)
 - [Development and Software Delivery Lifecycle](#development-and-software-delivery-lifecycle)
   - [Project Setup and Development](#project-setup-and-development)
   - [Community](#community)
@@ -81,6 +83,47 @@ This is the main repository for the National Provider Directory (NPD) workstream
 - [playwright](./playwright/): End-to-end test suite
 
 The [CMS-Enterprise/npd_etl](https://github.com/CMS-Enterprise/npd_etl) project on GitHub, which is currently a private repository, provides data ingestion for this system.
+
+### Branching Strategy
+
+There are two long-lived branches:
+
+- `main`
+- `release`
+
+main:
+
+- `main` is the default branch; this is the branch engineers interact with in day-to-day work
+- Changes to `main` are automatically deployed to the `dev` environment in AWS
+- `main` is a protected branch and can only be updated using a pull request
+- It's OK if `main` breaks, but we want to minimize the time that it is broken
+- We minimize the amount of time that `main` is broken by requiring pull requests to be reviewed and all applicable GitHub Action checks to pass before merging is allowed
+
+release:
+
+- `release` contains work that the team considers to be ready for production (release candidate)
+- Changes to `release` are automatically deployed to the `prod-test` environment in AWS
+- `release` is a protected branch and can only be updated using a pull request
+- `release` should rarely break. If `release` breaks fixing it is high priority because `release` being broken prevents production releases.
+- We minimize the time that `release` is broken by requiring pull requests to be peer reviewed and for applicable checks to pass before merging is allowed
+  - **caveat**: Work that is in `main` has already been reviewed. Reviewing that work again, especially if a lot of work has been done since the last update, is often not a good use of time.
+  - We instead rely on automated testing to help ensure code quality
+  - A PR that is opened against `release` can only be merged after unit and integration tests pass
+- Most of the time, `release` is updated by pull request from `main`
+- Under extraordinary circumstances, a `hotfix` branch can be merged into `release` directly
+- End-to-end tests must run after any change to `release`. If end-to-end tests fail, the release is considered broken and we cannot release to production until the tests pass.
+
+#### Feature Branches
+
+Aside from `main` and `release`, most other branches are short-lived (goal: days) feature branches in which developers implement discrete units of ticketed work. Feature branches follow this naming scheme:
+
+```
+<contributor>/<ticket-number>-<description-of-the-work>
+```
+
+### Release Strategy
+
+Release guidelines can be found [here](./release-guidelines.md).
 
 # Development and Software Delivery Lifecycle
 
