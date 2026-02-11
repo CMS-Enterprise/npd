@@ -2,52 +2,39 @@ from django.contrib.postgres.search import SearchVector, SearchQuery
 from django.db.models import Q
 from django_filters import rest_framework as filters
 
-from ..documentation_content import docs
 from ..mappings import addressUseMapping
 from ..models import OrganizationView
 from ..utils import parse_identifier_query
 
 
 class OrganizationFilterSet(filters.FilterSet):
-    name = filters.CharFilter(
-        method="filter_name",
-        help_text=docs.filters.organization.name,
-    )
+    name = filters.CharFilter(method="filter_name", help_text="Filter by organization name")
 
     identifier = filters.CharFilter(
         method="filter_identifier",
-        help_text=docs.filters.organization.identifier,
+        help_text="Filter by identifier (NPI, EIN, or other). Format: value or system|value",
     )
 
     organization_type = filters.CharFilter(
-        method="filter_organization_type",
-        help_text=docs.filters.organization.type,
+        method="filter_organization_type", help_text="Filter by organization type/taxonomy"
     )
 
-    address = filters.CharFilter(
-        method="filter_address",
-        help_text=docs.filters.address.full,
-    )
+    address = filters.CharFilter(method="filter_address", help_text="Filter by any part of address")
 
-    address_city = filters.CharFilter(
-        method="filter_address_city",
-        help_text=docs.filters.address.city,
-    )
+    address_city = filters.CharFilter(method="filter_address_city", help_text="Filter by city name")
 
     address_state = filters.CharFilter(
-        method="filter_address_state",
-        help_text=docs.filters.address.state,
+        method="filter_address_state", help_text="Filter by state (2-letter abbreviation)"
     )
 
     address_postalcode = filters.CharFilter(
-        method="filter_address_postalcode",
-        help_text=docs.filters.address.postalcode,
+        method="filter_address_postalcode", help_text="Filter by postal code/zip code"
     )
 
     address_use = filters.ChoiceFilter(
         method="filter_address_use",
         choices=addressUseMapping.to_choices(),
-        help_text=docs.filters.address.use,
+        help_text="Filter by address use type",
     )
 
     class Meta:
@@ -64,7 +51,7 @@ class OrganizationFilterSet(filters.FilterSet):
         ]
 
     def filter_name(self, queryset, name, value):
-        query = SearchQuery(f"{value.upper()}", search_type="websearch", config="english")
+        query = SearchQuery(f"{value.upper()}", search_type="websearch")
         return queryset.filter(organization__organizationtoname__search_vector=query)
 
     def filter_identifier(self, queryset, name, value):
@@ -113,7 +100,7 @@ class OrganizationFilterSet(filters.FilterSet):
                 "organization__organizationtoaddress__address__address_us__state_code__abbreviation",
                 "organization__organizationtoaddress__address__address_us__zipcode",
             )
-        ).filter(search=SearchQuery(value, search_type="websearch", config="english"))
+        ).filter(search=SearchQuery(value, search_type="websearch"))
 
     def filter_address_city(self, queryset, name, value):
         return queryset.annotate(
