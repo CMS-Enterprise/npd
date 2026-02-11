@@ -1,4 +1,4 @@
-from django.contrib.postgres.search import SearchQuery
+from django.contrib.postgres.search import SearchVector, SearchQuery
 from django.db.models import Q
 from django_filters import rest_framework as filters
 
@@ -99,10 +99,15 @@ class PractitionerFilterSet(filters.FilterSet):
         return queryset.filter(providertotaxonomy__nucc_code__search_vector=query)
 
     def filter_address(self, queryset, name, value):
-        query = SearchQuery(value, search_type="websearch")
-        return queryset.filter(
-            individual__individualtoaddress__address__address_us__search_vector=query
-        )
+        return queryset.annotate(
+            search=SearchVector(
+                "individual__individualtoaddress__address__address_us__delivery_line_1",
+                "individual__individualtoaddress__address__address_us__delivery_line_2",
+                "individual__individualtoaddress__address__address_us__city_name",
+                "individual__individualtoaddress__address__address_us__state_code__abbreviation",
+                "individual__individualtoaddress__address__address_us__zipcode",
+            )
+        ).filter(search=SearchQuery(value, search_type="websearch"))
 
     def filter_address_city(self, queryset, name, value):
         return queryset.filter(

@@ -10,7 +10,7 @@ from .helpers import (
     assert_pagination_limit,
     extract_practitioner_names,
     get_female_npis,
-    concat_address_string
+    concat_address_string,
 )
 
 
@@ -29,7 +29,7 @@ class PractitionerViewSetTestCase(APITestCase):
                 name="California Location B",
                 city="Sacramento",
                 state="CA",
-                zipcode="54321",
+                zipcode="04321",
                 addr_line_1="333 Rocky Road.",
             ),
             create_location(
@@ -238,7 +238,7 @@ class PractitionerViewSetTestCase(APITestCase):
         for practitioner_entry in response.data["results"]["entry"]:
             self.assertIn("resource", practitioner_entry)
             self.assertIn("id", practitioner_entry["resource"])
-            npi_id = practitioner_entry["resource"]['identifier'][0]['value']
+            npi_id = practitioner_entry["resource"]["identifier"][0]["value"]
             npi_ids.append(int(npi_id))
 
         # Check to make sure no female practitioners were fetched by mistake
@@ -322,6 +322,23 @@ class PractitionerViewSetTestCase(APITestCase):
                 present_checks.append(test_search in address_string)
             self.assertTrue(any(present_checks))
 
+    def test_list_filter_by_address_leading_zero(self):
+        url = reverse("fhir-practitioner-list")
+        test_search = "333 Rocky Road. Sacramento CA 04321"
+        response = self.client.get(url, {"address": test_search})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert_has_results(self, response)
+
+        for entry in response.data["results"]["entry"]:
+            present_checks = []
+            for address in entry["resource"]["address"]:
+                # print(address)
+                address_string = concat_address_string(address)
+
+                # self.assertIn(test_search, address_string)
+                present_checks.append(test_search in address_string)
+            self.assertTrue(any(present_checks))
+
     def test_list_filter_by_address_city(self):
         url = reverse("fhir-practitioner-list")
         city_string = self.locs[0].address.address_us.city_name
@@ -352,6 +369,19 @@ class PractitionerViewSetTestCase(APITestCase):
     def test_list_filter_by_address_postalcode(self):
         url = reverse("fhir-practitioner-list")
         postal_code_string = self.locs[0].address.address_us.zipcode
+        response = self.client.get(url, {"address_postalcode": postal_code_string})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert_has_results(self, response)
+
+        for entry in response.data["results"]["entry"]:
+            zips = []
+            for address in entry["resource"]["address"]:
+                zips.append(address["postalCode"])
+            self.assertIn(postal_code_string, zips)
+
+    def test_list_filter_by_address_postalcode_leading_zero(self):
+        url = reverse("fhir-practitioner-list")
+        postal_code_string = "04321"
         response = self.client.get(url, {"address_postalcode": postal_code_string})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
