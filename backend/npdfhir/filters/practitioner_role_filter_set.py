@@ -220,13 +220,21 @@ class PractitionerRoleFilterSet(filters.FilterSet):
         return queryset.filter(location__organization__organizationtoname__name=value)
 
     def filter_address(self, queryset, name, value):
-        query = SearchQuery(value, search_type="websearch")
-        return queryset.filter(location__address__address_us__search_vector=query)
+        return queryset.annotate(
+            search=SearchVector(
+                "location__address__address_us__delivery_line_1",
+                "location__address__address_us__delivery_line_2",
+                "location__address__address_us__city_name",
+                "location__address__address_us__state_code__abbreviation",
+                "location__address__address_us__zipcode",
+            )
+        ).filter(search=SearchQuery(value, search_type="websearch"))
 
+    
     def filter_address_city(self, queryset, name, value):
         return queryset.annotate(
             search=SearchVector("location__address__address_us__city_name")
-        ).filter(search=value)
+        ).filter(search=SearchQuery(value))
 
     def filter_address_state(self, queryset, name, value):
         return queryset.annotate(
@@ -234,6 +242,4 @@ class PractitionerRoleFilterSet(filters.FilterSet):
         ).filter(search=value)
 
     def filter_address_postalcode(self, queryset, name, value):
-        return queryset.annotate(
-            search=SearchVector("location__address__address_us__zipcode")
-        ).filter(search=value)
+        return queryset.filter(location__address__address_us__zipcode=value)

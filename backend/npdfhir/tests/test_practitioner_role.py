@@ -51,7 +51,7 @@ class PractitionerRoleViewSetTestCase(APITestCase):
                 organization_name=cls.orgs[0],
                 city="San Diego",
                 state="CA",
-                zipcode="55555",
+                zipcode="05555",
                 addr_line_1="404 Great Amazing Avenue",
                 x=32.824056,
                 y=-117.437397,
@@ -557,3 +557,125 @@ class PractitionerRoleViewSetTestCase(APITestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["id"], str(id))
+
+    def test_list_filter_by_address_city(self):
+        city_search = "Sunnyville"
+        url = reverse("fhir-practitionerrole-list")
+        response = self.client.get(url, {"location_address_city": city_search})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert_has_results(self, response)
+
+        bundle = response.data["results"]
+
+        for entry in bundle["entry"]:
+            self.assertIn("resource", entry)
+            location_entry = entry["resource"]
+
+            self.assertEqual(location_entry["resourceType"], "PractitionerRole")
+            self.assertIn("id", location_entry)
+            self.assertIn("active", location_entry)
+
+            for entry in bundle["entry"]:
+                self.assertEqual(1, len(entry["resource"]["location"]))
+                location_url = entry["resource"]["location"][0]["reference"]
+                returned_location = self.client.get(location_url).data
+                self.assertEqual(city_search, returned_location["address"]["city"])
+
+    def test_list_filter_by_address_state(self):
+        state_search = "CA"
+        url = reverse("fhir-practitionerrole-list")
+        response = self.client.get(url, {"location_address_state": state_search})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert_has_results(self, response)
+
+        bundle = response.data["results"]
+
+        for entry in bundle["entry"]:
+            self.assertIn("resource", entry)
+            location_entry = entry["resource"]
+
+            self.assertEqual(location_entry["resourceType"], "PractitionerRole")
+            self.assertIn("id", location_entry)
+            self.assertIn("active", location_entry)
+
+            for entry in bundle["entry"]:
+                self.assertEqual(1, len(entry["resource"]["location"]))
+                location_url = entry["resource"]["location"][0]["reference"]
+                returned_location = self.client.get(location_url).data
+                self.assertEqual(state_search, returned_location["address"]["state"])
+
+    def test_list_filter_by_address_zip(self):
+        zip_search = "90001"
+        url = reverse("fhir-practitionerrole-list")
+        response = self.client.get(url, {"location_address_postalcode": zip_search})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert_has_results(self, response)
+
+        bundle = response.data["results"]
+
+        for entry in bundle["entry"]:
+            self.assertIn("resource", entry)
+            location_entry = entry["resource"]
+
+            self.assertEqual(location_entry["resourceType"], "PractitionerRole")
+            self.assertIn("id", location_entry)
+            self.assertIn("active", location_entry)
+
+            for entry in bundle["entry"]:
+                self.assertEqual(1, len(entry["resource"]["location"]))
+                location_url = entry["resource"]["location"][0]["reference"]
+                returned_location = self.client.get(location_url).data
+                self.assertEqual(zip_search, returned_location["address"]["postalCode"])
+
+    def test_list_filter_by_address_zip_leading_zero(self):
+        zip_search = "05555"
+        url = reverse("fhir-practitionerrole-list")
+        response = self.client.get(url, {"location_address_postalcode": zip_search})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert_has_results(self, response)
+
+        bundle = response.data["results"]
+
+        for entry in bundle["entry"]:
+            self.assertIn("resource", entry)
+            location_entry = entry["resource"]
+
+            self.assertEqual(location_entry["resourceType"], "PractitionerRole")
+            self.assertIn("id", location_entry)
+            self.assertIn("active", location_entry)
+
+            for entry in bundle["entry"]:
+                self.assertEqual(1, len(entry["resource"]["location"]))
+                location_url = entry["resource"]["location"][0]["reference"]
+                returned_location = self.client.get(location_url).data
+                self.assertEqual(zip_search, returned_location["address"]["postalCode"])
+
+    def test_list_filter_by_address_general_zip_leading_zero(self):
+        address_line_1 = "404 Great Amazing Avenue"
+        city = "San Diego"
+        state = "CA"
+        zip_code = "05555"
+        address_search = " ".join([address_line_1, city, state, zip_code])
+        url = reverse("fhir-practitionerrole-list")
+        response = self.client.get(url, {"location_address": address_search})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert_has_results(self, response)
+
+        bundle = response.data["results"]
+
+        for entry in bundle["entry"]:
+            self.assertIn("resource", entry)
+            location_entry = entry["resource"]
+
+            self.assertEqual(location_entry["resourceType"], "PractitionerRole")
+            self.assertIn("id", location_entry)
+            self.assertIn("active", location_entry)
+
+            for entry in bundle["entry"]:
+                self.assertEqual(1, len(entry["resource"]["location"]))
+                location_url = entry["resource"]["location"][0]["reference"]
+                returned_location = self.client.get(location_url).data
+                self.assertEqual(zip_code, returned_location["address"]["postalCode"])
+                self.assertEqual(state, returned_location["address"]["state"])
+                self.assertEqual(city, returned_location["address"]["city"])
+                self.assertIn(address_line_1, returned_location["address"]["line"])
