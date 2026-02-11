@@ -6,7 +6,7 @@ from django.db.models import Q
 from django_filters import rest_framework as filters
 
 from ..mappings import genderMapping
-from ..models import ProviderToLocation
+from ..models import ProviderToLocationView
 from ..utils import parse_identifier_query
 
 
@@ -96,7 +96,7 @@ class PractitionerRoleFilterSet(filters.FilterSet):
     )
 
     class Meta:
-        model = ProviderToLocation
+        model = ProviderToLocationView
         fields = [
             "practitioner_name",
             "practitioner_gender",
@@ -162,7 +162,7 @@ class PractitionerRoleFilterSet(filters.FilterSet):
                 )
             )
         else:
-            return ProviderToLocation.objects.none()
+            return ProviderToLocationView.objects.none()
 
     def filter_organization_type(self, queryset, name, value):
         return queryset.filter(
