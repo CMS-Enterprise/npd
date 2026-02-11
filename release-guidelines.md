@@ -85,18 +85,7 @@ The following steps outline the process to prepare a Release Candidate of NPD. T
 
 1. Create a Pull Request from the tip of `main` named into the `release` branch. This branch will be used to prepare the Release Candidate. Undergo revisions if needed.
 
-2. Deploy the release candidate to prod-test server. Carefully validate through automated and manual checks.
-
-3. Create a tag like `x.y.z` for this Release. For example, for the first `0.5.0` Release Candidate:
-
-   ```bash
-   git fetch
-   git checkout origin/release
-   git tag 0.5.0
-   git push --tags
-   ```
-  
-  Tagged releases are not automatically deployed to production.
+2. Automatically deploy the release candidate to prod-test server. Carefully validate through automated and manual checks. The automatic deploy is implemented by GitHub Actions polling for changes on the release branch.
 
 ## Making a Release
 
@@ -114,7 +103,7 @@ The following steps describe how to make an approved [Release Candidate](#prepar
    - Description: copy in Release Notes created earlier
    - This is a pre-release: DO NOT check
 
-5. **Branch**. Finally, keep the release branch and don't delete it. This allows easy access to a browsable spec.
+5. **Branch**. Finally, the release branch persists and is protected. This allows easy access to a browsable spec.
 
 ## Auto Changelog
 
