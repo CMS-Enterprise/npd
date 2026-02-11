@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.gis.db import models as geomodels
+from django.contrib.postgres.search import SearchVectorField
 
 
 class Address(models.Model):
@@ -126,10 +127,16 @@ class AddressUs(models.Model):
     suitelink_match = models.CharField(max_length=5, blank=True, null=True)
     enhanced_match = models.CharField(max_length=64, blank=True, null=True)
     geolocation = geomodels.PointField(srid=4326)
+    search_vector = SearchVectorField(blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = "address_us"
+
+    def _do_insert(self, manager, using, fields, update_pk, raw):
+        # Prevents the model from attempting to insert values into the generated search_vector field
+        fields = [f for f in fields if f.attname != "search_vector"]
+        return super()._do_insert(manager, using, fields, update_pk, raw)
 
 
 class ClinicalOrganization(models.Model):
@@ -388,19 +395,25 @@ class IndividualToLanguageSpoken(models.Model):
 
 class IndividualToName(models.Model):
     pk = models.CompositePrimaryKey("individual_id", "first_name", "last_name", "name_use_id")
-    individual = models.ForeignKey(Individual, models.DO_NOTHING)
+    individual = models.ForeignKey(Individual, models.DO_NOTHING, db_index=True)
     prefix = models.CharField(max_length=10, blank=True, null=True)
-    first_name = models.CharField(max_length=50)
+    first_name = models.CharField(max_length=50, db_index=True)
     middle_name = models.CharField(max_length=50, blank=True, null=True)
-    last_name = models.CharField(max_length=200)
+    last_name = models.CharField(max_length=200, db_index=True)
     start_date = models.DateField(blank=True, null=True)
     end_date = models.DateField(blank=True, null=True)
     name_use = models.ForeignKey(FhirNameUse, models.DO_NOTHING)
     suffix = models.CharField(max_length=10, blank=True, null=True)
+    search_vector = SearchVectorField(blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = "individual_to_name"
+
+    def _do_insert(self, manager, using, fields, update_pk, raw):
+        # Prevents the model from attempting to insert values into the generated search_vector field
+        fields = [f for f in fields if f.attname != "search_vector"]
+        return super()._do_insert(manager, using, fields, update_pk, raw)
 
 
 class IndividualToPhone(models.Model):
@@ -505,10 +518,16 @@ class Nucc(models.Model):
     notes = models.TextField(blank=True, null=True)
     certifying_board_name = models.TextField(blank=True, null=True)
     certifying_board_url = models.TextField(blank=True, null=True)
+    search_vector = SearchVectorField(blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = "nucc"
+
+    def _do_insert(self, manager, using, fields, update_pk, raw):
+        # Prevents the model from attempting to insert values into the generated search_vector field
+        fields = [f for f in fields if f.attname != "search_vector"]
+        return super()._do_insert(manager, using, fields, update_pk, raw)
 
 
 class NuccClassification(models.Model):
@@ -644,7 +663,7 @@ class PayloadType(models.Model):
 
 
 class Provider(models.Model):
-    npi = models.OneToOneField(Npi, models.DO_NOTHING, db_column="npi")
+    npi = models.OneToOneField(Npi, models.DO_NOTHING, db_column="npi", db_index=True)
     individual = models.OneToOneField(Individual, models.DO_NOTHING, primary_key=True)
 
     class Meta:

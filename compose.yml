@@ -29,7 +29,7 @@ services:
       - ./backend/artifacts:/app/artifacts:rw
       - ./backend/provider_directory/static:/app/provider_directory/static:rw
     depends_on:
-      - db
+      - db-migrations
 
   db:
     image: 'postgis/postgis:17-3.5'
@@ -66,6 +66,7 @@ services:
       FLYWAY_DEFAULT_SCHEMA: public
       FLYWAY_PLACEHOLDERS_npdReadonlyUserPassword: ${NPD_READONLY_PASSWORD:-test-password-123}
       FLYWAY_PLACEHOLDERS_loadTesterPassword: ${NPD_LOAD_TESTER_PASSWORD:-""}
+      FLYWAY_PLACEHOLDERS_NPD_DB_NAME: ${NPD_DB_NAME:-npd_development}
     volumes:
       - ./flyway/sql:/flyway/sql
     depends_on:
