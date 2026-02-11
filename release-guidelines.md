@@ -141,11 +141,11 @@ If a production issue is identified that requires a quick turnaround, we follow 
 <contributor>/hotfix-<ticket-number?>-<description-of-the-work>
 ```
 
-After completing work, the developer opens pull requests against `release` and `main`
+After completing work, the developer opens pull requests against `release`. Make sure to tag this PR with the 'hotfix' label. This will activate the (hotfix sync)[.github/workflows/hotfix-sync.yml] workflow to automatically create a PR from `release` into `main`.
 
 1. Create hotfix branch from release
 
-2. PR from branch into `release`
+2. PR from branch into `release` with the 'hotfix' label. 
 
 3. Merge PR
 
