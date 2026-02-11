@@ -754,6 +754,34 @@ class ProviderToLocation(models.Model):
         db_table = "provider_to_location"
 
 
+class ProviderToLocationView(models.Model):
+    location = models.ForeignKey(Location, models.DO_NOTHING)
+    other_address = models.ForeignKey(Address, models.DO_NOTHING, blank=True, null=True)
+    nucc_code = models.IntegerField(blank=True, null=True)
+    specialty_id = models.IntegerField(blank=True, null=True)
+    id = models.UUIDField(primary_key=True)
+    provider_role_code = models.CharField(max_length=10, blank=True, null=True)
+    other_phone = models.ForeignKey(IndividualToPhone, models.DO_NOTHING, blank=True, null=True)
+    other_endpoint = models.ForeignKey(Endpoint, models.DO_NOTHING, blank=True, null=True)
+    active = models.BooleanField(blank=True, null=True)
+    provider_to_organization = models.ForeignKey(
+        "ProviderToOrganization", models.DO_NOTHING, blank=True, null=True
+    )
+    practitioner_first_name = models.CharField(max_length=50, db_index=True)
+    practitioner_last_name = models.CharField(max_length=200, db_index=True)
+    organization_name = models.CharField(max_length=1000)
+    location_name = models.CharField(max_length=200, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = "provider_to_location_view"
+
+    @classmethod
+    def refresh_materialized_view(cls):
+        with connection.cursor() as cursor:
+            cursor.execute(f"REFRESH MATERIALIZED VIEW {cls._meta.db_table};")
+
+
 class ProviderToOrganization(models.Model):
     individual = models.ForeignKey(Provider, models.DO_NOTHING)
     organization = models.ForeignKey(Organization, models.DO_NOTHING)
