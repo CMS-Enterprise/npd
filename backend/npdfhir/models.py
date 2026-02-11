@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import connection, models
 from django.contrib.gis.db import models as geomodels
 from django.contrib.postgres.search import SearchVectorField
 
@@ -601,10 +601,16 @@ class OrganizationToName(models.Model):
     organization = models.ForeignKey(Organization, models.DO_NOTHING)
     name = models.CharField(max_length=1000)
     is_primary = models.BooleanField(blank=True, null=True)
+    search_vector = SearchVectorField(blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = "organization_to_name"
+
+    def _do_insert(self, manager, using, fields, update_pk, raw):
+        # Prevents the model from attempting to insert values into the generated search_vector field
+        fields = [f for f in fields if f.attname != "search_vector"]
+        return super()._do_insert(manager, using, fields, update_pk, raw)
 
 
 class OrganizationToOtherId(models.Model):
@@ -642,6 +648,26 @@ class OrganizationToTaxonomy(models.Model):
     class Meta:
         managed = False
         db_table = "organization_to_taxonomy"
+
+
+class OrganizationView(models.Model):
+    organization = models.OneToOneField(
+        Organization, models.DO_NOTHING, primary_key=True, db_column="id"
+    )
+    authorized_official = models.ForeignKey(Individual, models.DO_NOTHING, blank=True, null=True)
+    ein = models.ForeignKey(LegalEntity, models.DO_NOTHING, blank=True, null=True)
+    parent = models.ForeignKey("self", models.DO_NOTHING, blank=True, null=True)
+    # the sorting field from organization_to_name
+    name = models.CharField(max_length=1000)
+
+    @classmethod
+    def refresh_materialized_view(cls):
+        with connection.cursor() as cursor:
+            cursor.execute(f"REFRESH MATERIALIZED VIEW {cls._meta.db_table};")
+
+    class Meta:
+        managed = False
+        db_table = "organization_view"
 
 
 class OtherIdType(models.Model):

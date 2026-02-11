@@ -10,6 +10,8 @@ from npdfhir.tests.fixtures.endpoint import create_endpoint_instance
 from npdfhir.tests.fixtures.organization import create_organization
 from npdfhir.tests.fixtures.practitioner import create_practitioner
 
+from npdfhir.models import OrganizationView
+
 
 class Command(BaseCommand):
     help = "Create test data for end-to-end specs"
@@ -128,4 +130,5 @@ class Command(BaseCommand):
             self.stdout.write(f"created Endpoint: {self.to_json(id=endpoint.id)}")
 
         self.generate_sample_organizations(25)
+        OrganizationView.refresh_materialized_view()
         self.generate_sample_practitioners(25)

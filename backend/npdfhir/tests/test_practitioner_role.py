@@ -13,13 +13,7 @@ from .helpers import (
     # extract_resource_ids,
 )
 
-from ..models import (
-    OrganizationToName,
-    Provider,
-    Location,
-    IndividualToName,
-    Organization
-)
+from ..models import OrganizationToName, Provider, IndividualToName, Organization, OrganizationView
 
 from .fixtures.location import create_location
 from .fixtures.practitioner import (
@@ -154,6 +148,8 @@ class PractitionerRoleViewSetTestCase(APITestCase):
         cls.organization_id = pr.location.organization_id
 
         cls.roles_with_params.append(pr)
+
+        OrganizationView.refresh_materialized_view()
 
         return super().setUpTestData()
 
@@ -563,7 +559,6 @@ class PractitionerRoleViewSetTestCase(APITestCase):
         bundle = response.data["results"]
 
         for entry in bundle["entry"]:
-            location_id = entry["resource"]["location"][0]["reference"].split("/")[-1]
             self.assertIn("resource", entry)
             location_entry = entry["resource"]
 
@@ -571,9 +566,11 @@ class PractitionerRoleViewSetTestCase(APITestCase):
             self.assertIn("id", location_entry)
             self.assertIn("active", location_entry)
 
-            location_obj = Location.objects.get(pk=location_id)
-
-            self.assertEqual(city_search, location_obj.address.address_us.city_name)
+            for entry in bundle["entry"]:
+                self.assertEqual(1, len(entry["resource"]["location"]))
+                location_url = entry["resource"]["location"][0]["reference"]
+                returned_location = self.client.get(location_url).data
+                self.assertEqual(city_search, returned_location["address"]["city"])
 
     def test_list_filter_by_address_state(self):
         state_search = "CA"
@@ -585,7 +582,6 @@ class PractitionerRoleViewSetTestCase(APITestCase):
         bundle = response.data["results"]
 
         for entry in bundle["entry"]:
-            location_id = entry["resource"]["location"][0]["reference"].split("/")[-1]
             self.assertIn("resource", entry)
             location_entry = entry["resource"]
 
@@ -593,9 +589,11 @@ class PractitionerRoleViewSetTestCase(APITestCase):
             self.assertIn("id", location_entry)
             self.assertIn("active", location_entry)
 
-            location_obj = Location.objects.get(pk=location_id)
-
-            self.assertEqual(state_search, location_obj.address.address_us.state_code.abbreviation)
+            for entry in bundle["entry"]:
+                self.assertEqual(1, len(entry["resource"]["location"]))
+                location_url = entry["resource"]["location"][0]["reference"]
+                returned_location = self.client.get(location_url).data
+                self.assertEqual(state_search, returned_location["address"]["state"])
 
     def test_list_filter_by_address_zip(self):
         zip_search = "90001"
@@ -607,7 +605,6 @@ class PractitionerRoleViewSetTestCase(APITestCase):
         bundle = response.data["results"]
 
         for entry in bundle["entry"]:
-            location_id = entry["resource"]["location"][0]["reference"].split("/")[-1]
             self.assertIn("resource", entry)
             location_entry = entry["resource"]
 
@@ -615,9 +612,11 @@ class PractitionerRoleViewSetTestCase(APITestCase):
             self.assertIn("id", location_entry)
             self.assertIn("active", location_entry)
 
-            location_obj = Location.objects.get(pk=location_id)
-
-            self.assertEqual(zip_search, location_obj.address.address_us.zipcode)
+            for entry in bundle["entry"]:
+                self.assertEqual(1, len(entry["resource"]["location"]))
+                location_url = entry["resource"]["location"][0]["reference"]
+                returned_location = self.client.get(location_url).data
+                self.assertEqual(zip_search, returned_location["address"]["postalCode"])
 
     def test_list_filter_by_address_zip_leading_zero(self):
         zip_search = "05555"
@@ -629,7 +628,6 @@ class PractitionerRoleViewSetTestCase(APITestCase):
         bundle = response.data["results"]
 
         for entry in bundle["entry"]:
-            location_id = entry["resource"]["location"][0]["reference"].split("/")[-1]
             self.assertIn("resource", entry)
             location_entry = entry["resource"]
 
@@ -637,21 +635,26 @@ class PractitionerRoleViewSetTestCase(APITestCase):
             self.assertIn("id", location_entry)
             self.assertIn("active", location_entry)
 
-            location_obj = Location.objects.get(pk=location_id)
+            for entry in bundle["entry"]:
+                self.assertEqual(1, len(entry["resource"]["location"]))
+                location_url = entry["resource"]["location"][0]["reference"]
+                returned_location = self.client.get(location_url).data
+                self.assertEqual(zip_search, returned_location["address"]["postalCode"])
 
-            self.assertEqual(zip_search, location_obj.address.address_us.zipcode)
-    
     def test_list_filter_by_address_general_zip_leading_zero(self):
-        zip_search = "404 Great Amazing Avenue San Diego CA 05555"
+        address_line_1 = "404 Great Amazing Avenue"
+        city = "San Diego"
+        state = "CA"
+        zip_code = "05555"
+        address_search = " ".join([address_line_1, city, state, zip_code])
         url = reverse("fhir-practitionerrole-list")
-        response = self.client.get(url, {"location_address": zip_search})
+        response = self.client.get(url, {"location_address": address_search})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
 
         bundle = response.data["results"]
 
         for entry in bundle["entry"]:
-            location_id = entry["resource"]["location"][0]["reference"].split("/")[-1]
             self.assertIn("resource", entry)
             location_entry = entry["resource"]
 
@@ -659,9 +662,11 @@ class PractitionerRoleViewSetTestCase(APITestCase):
             self.assertIn("id", location_entry)
             self.assertIn("active", location_entry)
 
-            location_obj = Location.objects.get(pk=location_id)
-
-            self.assertEqual(zip_search.split()[-1], location_obj.address.address_us.zipcode)
-            self.assertEqual("404 Great Amazing Avenue", location_obj.address.address_us.delivery_line_1)
-            self.assertEqual("San Diego", location_obj.address.address_us.city_name)
-            self.assertEqual("CA", location_obj.address.address_us.state_code.abbreviation)
+            for entry in bundle["entry"]:
+                self.assertEqual(1, len(entry["resource"]["location"]))
+                location_url = entry["resource"]["location"][0]["reference"]
+                returned_location = self.client.get(location_url).data
+                self.assertEqual(zip_code, returned_location["address"]["postalCode"])
+                self.assertEqual(state, returned_location["address"]["state"])
+                self.assertEqual(city, returned_location["address"]["city"])
+                self.assertIn(address_line_1, returned_location["address"]["line"])

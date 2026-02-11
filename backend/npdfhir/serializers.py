@@ -311,6 +311,7 @@ class OrganizationSerializer(serializers.Serializer):
 
     def to_representation(self, instance):
         request = self.context.get("request")
+        instance = instance.organization
         representation = super().to_representation(instance)
 
         organization = FHIROrganization()
@@ -417,7 +418,7 @@ class OrganizationSerializer(serializers.Serializer):
             if len(names) > 1:
                 aliases = names[1:]
         if aliases:
-            organization.alias = [n['name'] for n in aliases]
+            organization.alias = [n["name"] for n in aliases]
 
         if instance.parent_id is not None:
             organization.partOf = genReference(

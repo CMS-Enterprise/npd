@@ -1,7 +1,7 @@
 from django.urls import reverse
 from rest_framework import status
 
-from ..models import Organization, OtherIdType
+from ..models import Organization, OtherIdType, OrganizationView
 from .api_test_case import APITestCase
 from .fixtures.organization import create_legal_entity, create_organization
 from .fixtures.location import create_location
@@ -90,13 +90,17 @@ class OrganizationViewSetTestCase(APITestCase):
         cls.org_cumberland = create_organization(name="Cumberland")
         cls.orgs.append(cls.org_cumberland)
 
+        OrganizationView.refresh_materialized_view()
+
         return super().setUpTestData()
 
     def setUp(self):
         super().setUp()
         self.org_without_authorized_official = Organization.objects.create(
-            id="26708690-19d6-499e-b481-cebe05b98f08", authorized_official_id=None
+            id="26708690-19d6-499e-b481-cebe05b98f08",
+            authorized_official_id=None,
         )
+        OrganizationView.refresh_materialized_view()
 
     # Basic tests
     def test_list_default(self):
@@ -137,7 +141,7 @@ class OrganizationViewSetTestCase(APITestCase):
 
     def test_list_in_descending_order(self):
         url = reverse("fhir-organization-list")
-        response = self.client.get(url, {"_sort": "-primary_name"})
+        response = self.client.get(url, {"_sort": "-name"})
         assert_fhir_response(self, response)
 
         # Extract names
