@@ -792,6 +792,24 @@ class ProviderToTaxonomy(models.Model):
         unique_together = (("npi", "nucc_code"),)
 
 
+class ProviderView(models.Model):
+    provider = models.OneToOneField(
+        Provider, models.DO_NOTHING, primary_key=True, db_column="individual_id"
+    )
+    npi = models.OneToOneField(Npi, models.DO_NOTHING, db_column="npi", db_index=True)
+    first_name = models.CharField(max_length=50, db_index=True)
+    last_name = models.CharField(max_length=200, db_index=True)
+
+    class Meta:
+        managed = False
+        db_table = "provider_view"
+
+    @classmethod
+    def refresh_materialized_view(cls):
+        with connection.cursor() as cursor:
+            cursor.execute(f"REFRESH MATERIALIZED VIEW {cls._meta.db_table};")
+
+
 class RelationshipType(models.Model):
     value = models.CharField(unique=True, max_length=20, blank=True, null=True)
 

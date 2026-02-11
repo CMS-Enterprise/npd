@@ -10,7 +10,7 @@ from npdfhir.tests.fixtures.endpoint import create_endpoint_instance
 from npdfhir.tests.fixtures.organization import create_organization
 from npdfhir.tests.fixtures.practitioner import create_practitioner
 
-from npdfhir.models import OrganizationView
+from npdfhir.models import OrganizationView, ProviderView
 
 
 class Command(BaseCommand):
@@ -132,3 +132,4 @@ class Command(BaseCommand):
         self.generate_sample_organizations(25)
         OrganizationView.refresh_materialized_view()
         self.generate_sample_practitioners(25)
+        ProviderView.refresh_materialized_view()

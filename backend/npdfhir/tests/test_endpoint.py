@@ -52,8 +52,6 @@ class EndpointViewSetTestCase(APITestCase):
         response = self.client.get(url)
         assert_fhir_response(self, response)
 
-        # print(response.data["results"]["entry"][0]['resource']['name'])
-
         # Extract names
         # Note: have to normalize the names to have python sorting match sql
         names = extract_resource_names(response)
