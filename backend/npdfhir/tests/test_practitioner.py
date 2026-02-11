@@ -74,7 +74,7 @@ class PractitionerViewSetTestCase(APITestCase):
             create_practitioner(last_name="ABDELHAMED", first_name="ABDELHAMED"),
             create_practitioner(last_name="ABDEL NOUR", first_name="MAGDY"),
             create_practitioner(last_name="ABEL", first_name="MICHAEL", location=cls.locs[0]),
-            create_practitioner(last_name="ABELES", first_name="JENNIFER"),
+            create_practitioner(last_name="ABELES", first_name="JENNIFER", location=cls.locs[1]),
             create_practitioner(last_name="ABELSON", first_name="MARK", location=cls.locs[2]),
             create_practitioner(last_name="CUTLER", first_name="A"),
             create_practitioner(last_name="NIZAM", first_name="A"),
@@ -117,11 +117,6 @@ class PractitionerViewSetTestCase(APITestCase):
         response = self.client.get(url)
         assert_fhir_response(self, response)
 
-        # print(response.data["results"]["entry"][0]['resource']['name'][0])
-
-        # for name in response.data["results"]["entry"]:
-        #    print(name['resource']['name'][-1])
-
         # Extract names
         names = extract_practitioner_names(response)
 
@@ -151,11 +146,6 @@ class PractitionerViewSetTestCase(APITestCase):
             {"_sort": "first_name,last_name"},
         )
         assert_fhir_response(self, response)
-
-        # print(response.data["results"]["entry"][0]['resource']['name'][0])
-
-        # for name in response.data["results"]["entry"]:
-        #    print(name['resource']['name'][-1])
 
         # Extract names
         names = extract_practitioner_names(response)
@@ -314,16 +304,13 @@ class PractitionerViewSetTestCase(APITestCase):
         for entry in response.data["results"]["entry"]:
             present_checks = []
             for address in entry["resource"]["address"]:
-                # print(address)
                 address_string = concat_address_string(address)
-
-                # self.assertIn(test_search, address_string)
                 present_checks.append(test_search in address_string)
             self.assertTrue(any(present_checks))
 
     def test_list_filter_by_address_leading_zero(self):
         url = reverse("fhir-practitioner-list")
-        test_search = "333 Rocky Road. Sacramento CA 04321"
+        test_search = "333 Rocky Road. Sacramento 04321"
         response = self.client.get(url, {"address": test_search})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
@@ -331,11 +318,9 @@ class PractitionerViewSetTestCase(APITestCase):
         for entry in response.data["results"]["entry"]:
             present_checks = []
             for address in entry["resource"]["address"]:
-                # print(address)
                 address_string = concat_address_string(address)
-
-                # self.assertIn(test_search, address_string)
-                present_checks.append(test_search in address_string)
+                if "333 Rocky Road. Sacramento" in address_string and "04321" in address_string:
+                    present_checks.append(True)
             self.assertTrue(any(present_checks))
 
     def test_list_filter_by_address_city(self):

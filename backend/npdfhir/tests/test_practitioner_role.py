@@ -397,7 +397,6 @@ class PractitionerRoleViewSetTestCase(APITestCase):
         for entry in bundle["entry"]:
             organization_url = entry["resource"]["organization"]["reference"]
             returned_organization = self.client.get(organization_url).data
-            print(returned_organization)
             # We are not currently exposing "qualification" at the Organization endpoint
             # taxonomies = [
             #    {

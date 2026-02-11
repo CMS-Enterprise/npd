@@ -115,8 +115,6 @@ class OrganizationViewSetTestCase(APITestCase):
         response = self.client.get(url)
         assert_fhir_response(self, response)
 
-        # print(response.data["results"]["entry"][0]['resource']['name'])
-
         # Extract names
         names = extract_resource_names(response)
 
