@@ -31,6 +31,8 @@ from .models import (
     Provider,
     ProviderToLocation,
     OrganizationToAddress,
+    OrganizationToName,
+    IndividualToAddress,
 )
 
 from .serializers import (
@@ -149,14 +151,16 @@ class FHIRPractitionerViewSet(viewsets.GenericViewSet):
     queryset = Provider.objects.all().prefetch_related(
         "npi",
         "individual",
-        "individual__individualtoaddress_set",
-        "individual__individualtoaddress_set__address__address_us",
-        "individual__individualtoaddress_set__address__address_us__state_code",
-        "individual__individualtoaddress_set__address_use",
+        Prefetch(
+            "individual__individualtoaddress_set",
+            queryset=IndividualToAddress.objects.select_related(
+                "address_use", "address__address_us", "address__address_us__state_code"
+            ),
+        ),
         "individual__individualtophone_set",
         "individual__individualtoemail_set",
         "individual__individualtoname_set",
-        "providertootherid_set__other_id_type",
+        "providertootherid_set",
         "providertotaxonomy_set",
     )
     if DEBUG:
@@ -315,27 +319,38 @@ class FHIROrganizationViewSet(viewsets.GenericViewSet):
     ViewSet for FHIR Organization resources
     """
 
-    queryset = Organization.objects.all().prefetch_related(
-        "authorized_official",
-        "ein",
-        "organizationtoname_set",
-        "organizationtoaddress_set",
-        "organizationtoaddress_set__address",
-        "organizationtoaddress_set__address__address_us",
-        "organizationtoaddress_set__address__address_us__state_code",
-        "organizationtoaddress_set__address_use",
-        "authorized_official__individualtophone_set",
-        "authorized_official__individualtoname_set",
-        "authorized_official__individualtoemail_set",
-        "authorized_official__individualtoaddress_set",
-        "authorized_official__individualtoaddress_set__address__address_us",
-        "authorized_official__individualtoaddress_set__address__address_us__state_code",
-        "clinicalorganization",
-        "clinicalorganization__npi",
-        "clinicalorganization__organizationtootherid_set",
-        "clinicalorganization__organizationtootherid_set__other_id_type",
-        "clinicalorganization__organizationtotaxonomy_set",
-        "clinicalorganization__organizationtotaxonomy_set__nucc_code",
+    queryset = (
+        Organization.objects.annotate(
+            primary_name=Subquery(
+                OrganizationToName.objects.filter(
+                    organization_id=OuterRef("pk"),
+                    is_primary=True,
+                ).values("name")[:1]
+            )
+        )
+        .all()
+        .prefetch_related(
+            "authorized_official",
+            "ein",
+            "organizationtoname_set",
+            "organizationtoaddress_set",
+            "organizationtoaddress_set__address",
+            "organizationtoaddress_set__address__address_us",
+            "organizationtoaddress_set__address__address_us__state_code",
+            "organizationtoaddress_set__address_use",
+            "authorized_official__individualtophone_set",
+            "authorized_official__individualtoname_set",
+            "authorized_official__individualtoemail_set",
+            "authorized_official__individualtoaddress_set",
+            "authorized_official__individualtoaddress_set__address__address_us",
+            "authorized_official__individualtoaddress_set__address__address_us__state_code",
+            "clinicalorganization",
+            "clinicalorganization__npi",
+            "clinicalorganization__organizationtootherid_set",
+            "clinicalorganization__organizationtootherid_set__other_id_type",
+            "clinicalorganization__organizationtotaxonomy_set",
+            "clinicalorganization__organizationtotaxonomy_set__nucc_code",
+        )
     )
     if DEBUG:
         renderer_classes = [FHIRRenderer, BrowsableAPIRenderer]
@@ -345,8 +360,8 @@ class FHIROrganizationViewSet(viewsets.GenericViewSet):
     filterset_class = OrganizationFilterSet
     pagination_class = CustomPaginator
     lookup_url_kwarg = "id"
-    ordering = ["organizationtoname__name"]
-    ordering_fields = ["organizationtoname__name"]
+    ordering = ["primary_name"]
+    ordering_fields = ["primary_name"]
 
     # permission_classes = [permissions.IsAuthenticated]
     @extend_schema(

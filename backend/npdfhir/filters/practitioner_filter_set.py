@@ -8,13 +8,16 @@ from ..utils import parse_identifier_query
 
 
 class PractitionerFilterSet(filters.FilterSet):
+    practitioner_table = None
+
     identifier = filters.CharFilter(
         method="filter_identifier",
         help_text="Filter by identifier (NPI or other). Format: value or system|value",
     )
 
     name = filters.CharFilter(
-        method="filter_name", help_text="Filter by practitioner name (first, last, or full name)"
+        method="filter_practitioner_name",
+        help_text="Filter by practitioner name (first, middle, last, or full name). Name filter accepts websearch syntax.",
     )
 
     gender = filters.ChoiceFilter(
@@ -22,10 +25,14 @@ class PractitionerFilterSet(filters.FilterSet):
     )
 
     practitioner_type = filters.CharFilter(
-        method="filter_practitioner_type", help_text="Filter by practitioner type/taxonomy"
+        method="filter_practitioner_type",
+        help_text="Filter by practitioner type. Practitioner type filter accepts websearch syntax.",
     )
 
-    address = filters.CharFilter(method="filter_address", help_text="Filter by any part of address")
+    address = filters.CharFilter(
+        method="filter_address",
+        help_text="Filter by any part of address. Address filter accepts websearch syntax.",
+    )
 
     address_city = filters.CharFilter(method="filter_address_city", help_text="Filter by city name")
 
@@ -83,19 +90,13 @@ class PractitionerFilterSet(filters.FilterSet):
 
         return queryset.filter(queries).distinct()
 
-    def filter_name(self, queryset, name, value):
-        return queryset.annotate(
-            search=SearchVector(
-                "individual__individualtoname__first_name",
-                "individual__individualtoname__last_name",
-                "individual__individualtoname__middle_name",
-            )
-        ).filter(search=value)
+    def filter_practitioner_name(self, queryset, name, value):
+        query = SearchQuery(f"{value.upper()}", search_type="websearch")
+        return queryset.filter(individual__individualtoname__search_vector=query).distinct()
 
     def filter_practitioner_type(self, queryset, name, value):
-        return queryset.annotate(
-            search=SearchVector("providertotaxonomy__nucc_code__display_name")
-        ).filter(search=value)
+        query = SearchQuery(value, search_type="websearch")
+        return queryset.filter(providertotaxonomy__nucc_code__search_vector=query)
 
     def filter_address(self, queryset, name, value):
         return queryset.annotate(
@@ -109,16 +110,14 @@ class PractitionerFilterSet(filters.FilterSet):
         ).filter(search=SearchQuery(value, search_type="websearch"))
 
     def filter_address_city(self, queryset, name, value):
-        return queryset.annotate(
-            search=SearchVector("individual__individualtoaddress__address__address_us__city_name")
-        ).filter(search=value)
+        return queryset.filter(
+            individual__individualtoaddress__address__address_us__city_name=value
+        )
 
     def filter_address_state(self, queryset, name, value):
-        return queryset.annotate(
-            search=SearchVector(
-                "individual__individualtoaddress__address__address_us__state_code__abbreviation"
-            )
-        ).filter(search=value)
+        return queryset.filter(
+            individual__individualtoaddress__address__address_us__state_code__abbreviation=value
+        )
 
     def filter_address_postalcode(self, queryset, name, value):
         return queryset.filter(individual__individualtoaddress__address__address_us__zipcode=value)
