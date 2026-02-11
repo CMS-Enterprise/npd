@@ -1,9 +1,9 @@
-from django.contrib.postgres.search import SearchVector, SearchQuery
+from django.contrib.postgres.search import SearchQuery
 from django.db.models import Q
 from django_filters import rest_framework as filters
 
 from ..mappings import addressUseMapping, genderMapping
-from ..models import Provider
+from ..models import ProviderView
 from ..utils import parse_identifier_query
 
 
@@ -51,7 +51,7 @@ class PractitionerFilterSet(filters.FilterSet):
     )
 
     class Meta:
-        model = Provider
+        model = ProviderView
         fields = [
             "identifier",
             "name",
@@ -68,7 +68,7 @@ class PractitionerFilterSet(filters.FilterSet):
         if value in genderMapping.keys():
             value = genderMapping.toNPD(value)
 
-        return queryset.filter(individual__gender=value)
+        return queryset.filter(provider__individual__gender=value)
 
     def filter_identifier(self, queryset, name, value):
         system, identifier_id = parse_identifier_query(value)
@@ -86,45 +86,44 @@ class PractitionerFilterSet(filters.FilterSet):
             except (ValueError, TypeError):
                 pass
 
-            queries |= Q(providertootherid__other_id=identifier_id)
+            queries |= Q(provider__providertootherid__other_id=identifier_id)
 
         return queryset.filter(queries).distinct()
 
     def filter_practitioner_name(self, queryset, name, value):
         query = SearchQuery(f"{value.upper()}", search_type="websearch")
-        return queryset.filter(individual__individualtoname__search_vector=query).distinct()
+        return queryset.filter(
+            provider__individual__individualtoname__search_vector=query
+        ).distinct()
 
     def filter_practitioner_type(self, queryset, name, value):
         query = SearchQuery(value, search_type="websearch")
-        return queryset.filter(providertotaxonomy__nucc_code__search_vector=query)
+        return queryset.filter(provider__providertotaxonomy__nucc_code__search_vector=query)
 
     def filter_address(self, queryset, name, value):
-        return queryset.annotate(
-            search=SearchVector(
-                "individual__individualtoaddress__address__address_us__delivery_line_1",
-                "individual__individualtoaddress__address__address_us__delivery_line_2",
-                "individual__individualtoaddress__address__address_us__city_name",
-                "individual__individualtoaddress__address__address_us__state_code__abbreviation",
-                "individual__individualtoaddress__address__address_us__zipcode",
-            )
-        ).filter(search=SearchQuery(value, search_type="websearch"))
+        query = SearchQuery(value, search_type="websearch")
+        return queryset.filter(
+            provider__individual__individualtoaddress__address__address_us__search_vector=query
+        )
 
     def filter_address_city(self, queryset, name, value):
         return queryset.filter(
-            individual__individualtoaddress__address__address_us__city_name=value
+            provider__individual__individualtoaddress__address__address_us__city_name=value
         )
 
     def filter_address_state(self, queryset, name, value):
         return queryset.filter(
-            individual__individualtoaddress__address__address_us__state_code__abbreviation=value
+            provider__individual__individualtoaddress__address__address_us__state_code__abbreviation=value
         )
 
     def filter_address_postalcode(self, queryset, name, value):
-        return queryset.filter(individual__individualtoaddress__address__address_us__zipcode=value)
+        return queryset.filter(
+            provider__individual__individualtoaddress__address__address_us__zipcode=value
+        )
 
     def filter_address_use(self, queryset, name, value):
         if value in addressUseMapping.keys():
             value = addressUseMapping.toNPD(value)
         else:
             value = -1
-        return queryset.filter(individual__individualtoaddress__address_use_id=value)
+        return queryset.filter(provider__individual__individualtoaddress__address_use_id=value)

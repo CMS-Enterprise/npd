@@ -13,7 +13,14 @@ from .helpers import (
     # extract_resource_ids,
 )
 
-from ..models import OrganizationToName, Provider, IndividualToName, Organization, OrganizationView
+from ..models import (
+    OrganizationToName,
+    Provider,
+    IndividualToName,
+    ProviderView,
+    Organization,
+    OrganizationView,
+)
 
 from .fixtures.location import create_location
 from .fixtures.practitioner import (
@@ -150,6 +157,7 @@ class PractitionerRoleViewSetTestCase(APITestCase):
         cls.roles_with_params.append(pr)
 
         OrganizationView.refresh_materialized_view()
+        ProviderView.refresh_materialized_view()
 
         return super().setUpTestData()
 

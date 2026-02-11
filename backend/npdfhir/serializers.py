@@ -509,7 +509,7 @@ class OrganizationAffiliationSerializer(serializers.Serializer):
         return organization_affiliation.model_dump()
 
 
-class PractitionerSerializer(serializers.Serializer):
+class ProviderSerializer(serializers.Serializer):
     npi = NPISerializer()
     individual = IndividualSerializer(read_only=True)
     identifier = OtherIdentifierSerializer(
@@ -520,8 +520,16 @@ class PractitionerSerializer(serializers.Serializer):
     class Meta:
         fields = ["npi", "name", "email", "phone", "identifier", "taxonomy"]
 
+
+class PractitionerSerializer(serializers.Serializer):
+    provider = ProviderSerializer(read_only=True)
+
+    class Meta:
+        fields = ["npi", "name", "email", "phone", "identifier", "taxonomy"]
+
     def to_representation(self, instance):
-        representation = super().to_representation(instance)
+        representation = super().to_representation(instance)["provider"]
+        instance = instance.provider
         practitioner = Practitioner()
         practitioner.id = str(instance.individual.id)
         practitioner.meta = Meta(
