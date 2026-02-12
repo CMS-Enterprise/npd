@@ -273,6 +273,36 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
         self.assertNotIn(str(self.invalid_1.id), ids)
         self.assertNotIn(str(self.org_no_endpoint.id), ids)
         self.assertNotIn(str(self.org_unlinked.id), ids)
+    
+    def test_org_name_filter(self):
+        name_search = "Epic"
+        url = reverse("fhir-organizationaffiliation-list")
+        response = self.client.get(url, {"org_name": name_search})
+
+        bundle = response.data["results"]
+
+        for entry in bundle["entry"]:
+            self.assertIn("resource", entry)
+            org_affil = entry["resource"]
+            self.assertIn("id", org_affil)
+
+            entry_org_name = org_affil['organization']['display']
+            self.assertIn(name_search,entry_org_name)
+    
+    def test_participating_org_name_filter(self):
+        name_search = "A Good Clinical Org"
+        url = reverse("fhir-organizationaffiliation-list")
+        response = self.client.get(url, {"participating_org_name": name_search})
+
+        bundle = response.data["results"]
+
+        for entry in bundle["entry"]:
+            self.assertIn("resource", entry)
+            org_affil = entry["resource"]
+            self.assertIn("id", org_affil)
+
+            entry_org_name = org_affil['participatingOrganization']['display']
+            self.assertIn(name_search,entry_org_name)
 
     def test_retrieve_single_organization_affil(self):
         url = reverse("fhir-organizationaffiliation-detail", args=[self.orgs[0].id])

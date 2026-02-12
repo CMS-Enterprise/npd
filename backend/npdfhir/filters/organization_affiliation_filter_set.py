@@ -33,12 +33,17 @@ class OrganizationAffiliationFilterSet(filters.FilterSet):
     )
 
     def filter_name(self, queryset, name, value):
-        query = SearchQuery(f"{value.upper()}", search_type="websearch")
-        return queryset.filter(ehr_vendor_name=query)
+        query = SearchQuery(f"{value}", search_type="phrase")
+        return queryset.annotate(
+            ehr_vendor_search=SearchVector("ehr_vendor_name")
+        ).filter(
+            ehr_vendor_search=query
+        )
 
     def filter_participating_name(self, queryset, name, value):
-        query = SearchQuery(f"{value.upper()}", search_type="websearch")
-        return queryset.filter(organization_name=query)
+        return queryset.filter(
+            organization_name__icontains=value
+        )
 
     def filter_identifier(self, queryset, name, value):
         from uuid import UUID

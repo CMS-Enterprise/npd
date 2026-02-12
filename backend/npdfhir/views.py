@@ -624,8 +624,8 @@ class FHIROrganizationAffiliationViewSet(viewsets.GenericViewSet):
 
         Default sort order: ascending by organization name
         """
-
-        paginated_organization_affiliations = self.paginate_queryset(self.queryset)
+        organization_affiliation = self.filter_queryset(self.queryset)
+        paginated_organization_affiliations = self.paginate_queryset(organization_affiliation)
 
         serialized_organization_affiliations = OrganizationAffiliationSerializer(
             paginated_organization_affiliations, many=True, context={"request": request}
