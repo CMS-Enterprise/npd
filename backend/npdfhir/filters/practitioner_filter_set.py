@@ -2,6 +2,7 @@ from django.contrib.postgres.search import SearchQuery
 from django.db.models import Q
 from django_filters import rest_framework as filters
 
+from ..documentation_content import docs
 from ..mappings import addressUseMapping, genderMapping
 from ..models import ProviderView
 from ..utils import parse_identifier_query
@@ -12,42 +13,49 @@ class PractitionerFilterSet(filters.FilterSet):
 
     identifier = filters.CharFilter(
         method="filter_identifier",
-        help_text="Filter by identifier (NPI or other). Format: value or system|value",
+        help_text=docs.filters.practitioner.identifier,
     )
 
     name = filters.CharFilter(
         method="filter_practitioner_name",
-        help_text="Filter by practitioner name (first, middle, last, or full name). Name filter accepts websearch syntax.",
+        help_text=docs.filters.practitioner.name,
     )
 
     gender = filters.ChoiceFilter(
-        method="filter_gender", choices=genderMapping.to_choices(), help_text="Filter by gender"
+        method="filter_gender",
+        choices=genderMapping.to_choices(),
+        help_text=docs.filters.practitioner.gender,
     )
 
     practitioner_type = filters.CharFilter(
         method="filter_practitioner_type",
-        help_text="Filter by practitioner type. Practitioner type filter accepts websearch syntax.",
+        help_text=docs.filters.practitioner.type,
     )
 
     address = filters.CharFilter(
         method="filter_address",
-        help_text="Filter by any part of address. Address filter accepts websearch syntax.",
+        help_text=docs.filters.address.full,
     )
 
-    address_city = filters.CharFilter(method="filter_address_city", help_text="Filter by city name")
+    address_city = filters.CharFilter(
+        method="filter_address_city",
+        help_text=docs.filters.address.city,
+    )
 
     address_state = filters.CharFilter(
-        method="filter_address_state", help_text="Filter by state (2-letter abbreviation)"
+        method="filter_address_state",
+        help_text=docs.filters.address.state,
     )
 
     address_postalcode = filters.CharFilter(
-        method="filter_address_postalcode", help_text="Filter by postal code/zip code"
+        method="filter_address_postalcode",
+        help_text=docs.filters.address.postalcode,
     )
 
     address_use = filters.ChoiceFilter(
         method="filter_address_use",
         choices=addressUseMapping.to_choices(),
-        help_text="Filter by address use type",
+        help_text=docs.filters.address.use,
     )
 
     class Meta:
