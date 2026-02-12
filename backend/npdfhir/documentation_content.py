@@ -1,5 +1,10 @@
 class docs:
-    # Centralized namespace for all NPD API documentation content.
+    # Centralized namespace for all NPD API documentation content
+
+    class constants:
+        # Constant strings that appear throughout content building
+
+        sort_order_text = "Default sort order: "
 
     class filters:
         # Help text for filter parameters, organized by FHIR resource
