@@ -268,7 +268,6 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
     def test_list_does_not_have_incorrect_orgs(self):
         url = reverse("fhir-organizationaffiliation-list")
         response = self.client.get(url)
-
         ids = extract_resource_ids(response)
 
         self.assertNotIn(str(self.invalid_1.id), ids)
