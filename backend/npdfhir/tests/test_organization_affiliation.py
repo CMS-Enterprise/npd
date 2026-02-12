@@ -303,6 +303,20 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
 
             entry_org_name = org_affil['participatingOrganization']['display']
             self.assertIn(name_search,entry_org_name)
+    
+    def test_org_type_filter(self):
+        org_type_search = "Clinic/Center"
+        url = reverse("fhir-organizationaffiliation-list")
+        response = self.client.get(url, {"participating_organization_type": org_type_search})
+        bundle = response.data["results"]
+
+        for entry in bundle["entry"]:
+            self.assertIn("resource", entry)
+            org_affil = entry["resource"]
+            self.assertIn("id", org_affil)
+
+            entry_org_id = org_affil["participatingOrganization"]['reference'].split('/')[-1]
+            self.assertEqual(str(self.org_good_1.id), entry_org_id)
 
     def test_retrieve_single_organization_affil(self):
         url = reverse("fhir-organizationaffiliation-detail", args=[self.orgs[0].id])

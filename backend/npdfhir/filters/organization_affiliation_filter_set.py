@@ -76,11 +76,15 @@ class OrganizationAffiliationFilterSet(filters.FilterSet):
         return queryset.filter(queries).distinct()
 
     def filter_organization_type(self, queryset, name, value):
+        query = SearchQuery(value, search_type="phrase")
+
         return queryset.annotate(
-            search=SearchVector(
-                "organization__clinicalorganization__organizationtotaxonomy__nucc_code__display_name"
+            taxonomy_search=SearchVector(
+                "clinicalorganization__organizationtotaxonomy__nucc_code__display_name"
             )
-        ).filter(search=value)
+        ).filter(
+            taxonomy_search=query
+        ).distinct()
 
     def filter_location(self, queryset, name, value):
         return queryset.annotate(
