@@ -2,14 +2,14 @@ from django.contrib.postgres.search import SearchVector, SearchQuery
 from django.db.models import Q
 from django_filters import rest_framework as filters
 
-from ..mappings import addressUseMapping
-from ..models import OrganizationView
 from ..utils import parse_identifier_query
 
 
 class OrganizationAffiliationFilterSet(filters.FilterSet):
     org_name = filters.CharFilter(method="filter_name", help_text="Filter by organization name")
-    participating_org_name  = filters.CharFilter(method="filter_participating_name", help_text= "Filter by pariticipating organization name")
+    participating_org_name = filters.CharFilter(
+        method="filter_participating_name", help_text="Filter by pariticipating organization name"
+    )
 
     participating_organization_identifier = filters.CharFilter(
         method="filter_identifier",
@@ -20,7 +20,9 @@ class OrganizationAffiliationFilterSet(filters.FilterSet):
         method="filter_organization_type", help_text="Filter by organization type/taxonomy"
     )
 
-    address = filters.CharFilter(method="filter_location", help_text="Filter by any part of address")
+    address = filters.CharFilter(
+        method="filter_location", help_text="Filter by any part of address"
+    )
 
     address_city = filters.CharFilter(method="filter_address_city", help_text="Filter by city name")
 
@@ -34,16 +36,12 @@ class OrganizationAffiliationFilterSet(filters.FilterSet):
 
     def filter_name(self, queryset, name, value):
         query = SearchQuery(f"{value}", search_type="phrase")
-        return queryset.annotate(
-            ehr_vendor_search=SearchVector("ehr_vendor_name")
-        ).filter(
+        return queryset.annotate(ehr_vendor_search=SearchVector("ehr_vendor_name")).filter(
             ehr_vendor_search=query
         )
 
     def filter_participating_name(self, queryset, name, value):
-        return queryset.filter(
-            organization_name__icontains=value
-        )
+        return queryset.filter(organization_name__icontains=value)
 
     def filter_identifier(self, queryset, name, value):
         from uuid import UUID
@@ -78,43 +76,41 @@ class OrganizationAffiliationFilterSet(filters.FilterSet):
     def filter_organization_type(self, queryset, name, value):
         query = SearchQuery(value, search_type="phrase")
 
-        return queryset.annotate(
-            taxonomy_search=SearchVector(
-                "clinicalorganization__organizationtotaxonomy__nucc_code__display_name"
+        return (
+            queryset.annotate(
+                taxonomy_search=SearchVector(
+                    "clinicalorganization__organizationtotaxonomy__nucc_code__display_name"
+                )
             )
-        ).filter(
-            taxonomy_search=query
-        ).distinct()
-    
+            .filter(taxonomy_search=query)
+            .distinct()
+        )
+
     def filter_location(self, queryset, name, value):
-        return queryset.annotate(
-            location_search=SearchVector(
-                "location__name",
-                "location__address__address_us__delivery_line_1",
-                "location__address__address_us__delivery_line_2",
-                "location__address__address_us__city_name",
-                "location__address__address_us__state_code__abbreviation",
-                "location__address__address_us__zipcode",
+        return (
+            queryset.annotate(
+                location_search=SearchVector(
+                    "location__name",
+                    "location__address__address_us__delivery_line_1",
+                    "location__address__address_us__delivery_line_2",
+                    "location__address__address_us__city_name",
+                    "location__address__address_us__state_code__abbreviation",
+                    "location__address__address_us__zipcode",
+                )
             )
-        ).filter(
-            location_search=SearchQuery(value, search_type="websearch")
-        ).distinct()
+            .filter(location_search=SearchQuery(value, search_type="websearch"))
+            .distinct()
+        )
 
     def filter_address_city(self, queryset, name, value):
         return queryset.annotate(
-            search=SearchVector(
-                "location__address__address_us__city_name"
-            )
+            search=SearchVector("location__address__address_us__city_name")
         ).filter(search=value)
 
     def filter_address_state(self, queryset, name, value):
         return queryset.annotate(
-            search=SearchVector(
-                "location__address__address_us__state_code__abbreviation"
-            )
+            search=SearchVector("location__address__address_us__state_code__abbreviation")
         ).filter(search=value)
 
     def filter_address_postalcode(self, queryset, name, value):
-        return queryset.filter(
-            location__address__address_us__zipcode=value
-        )
+        return queryset.filter(location__address__address_us__zipcode=value)

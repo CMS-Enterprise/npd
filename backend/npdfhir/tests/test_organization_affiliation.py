@@ -77,7 +77,7 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
             city="Albuquerque",
             state="NM",
             zipcode="87101",
-            addr_line_1="807 Dusty Ln"
+            addr_line_1="807 Dusty Ln",
         )
 
         endpoint_instance = create_endpoint_instance(
@@ -107,9 +107,11 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
             city="Springfield",
             state="MO",
             zipcode="65203",
-            addr_line_1="403 Spring Ln"
+            addr_line_1="403 Spring Ln",
         )
-        loc_good_2b = create_location(organization=cls.org_good_2, name="Location B", zipcode="01234")
+        loc_good_2b = create_location(
+            organization=cls.org_good_2, name="Location B", zipcode="01234"
+        )
 
         endpoint_good_2a = create_endpoint_instance(
             organization=cls.org_good_2,
@@ -285,7 +287,7 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
         self.assertNotIn(str(self.invalid_1.id), ids)
         self.assertNotIn(str(self.org_no_endpoint.id), ids)
         self.assertNotIn(str(self.org_unlinked.id), ids)
-    
+
     def test_org_name_filter(self):
         name_search = "Epic"
         url = reverse("fhir-organizationaffiliation-list")
@@ -298,9 +300,9 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
             org_affil = entry["resource"]
             self.assertIn("id", org_affil)
 
-            entry_org_name = org_affil['organization']['display']
-            self.assertIn(name_search,entry_org_name)
-    
+            entry_org_name = org_affil["organization"]["display"]
+            self.assertIn(name_search, entry_org_name)
+
     def test_participating_org_name_filter(self):
         name_search = "A Good Clinical Org"
         url = reverse("fhir-organizationaffiliation-list")
@@ -313,9 +315,9 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
             org_affil = entry["resource"]
             self.assertIn("id", org_affil)
 
-            entry_org_name = org_affil['participatingOrganization']['display']
-            self.assertIn(name_search,entry_org_name)
-    
+            entry_org_name = org_affil["participatingOrganization"]["display"]
+            self.assertIn(name_search, entry_org_name)
+
     def test_org_type_filter(self):
         org_type_search = "Clinic/Center"
         url = reverse("fhir-organizationaffiliation-list")
@@ -327,7 +329,7 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
             org_affil = entry["resource"]
             self.assertIn("id", org_affil)
 
-            entry_org_id = org_affil["participatingOrganization"]['reference'].split('/')[-1]
+            entry_org_id = org_affil["participatingOrganization"]["reference"].split("/")[-1]
             self.assertEqual(str(self.org_good_1.id), entry_org_id)
 
     def test_retrieve_single_organization_affil(self):
@@ -344,7 +346,7 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
         self.assertIn("organization", org_affiliation_entry)
         self.assertIn("participatingOrganization", org_affiliation_entry)
         self.assertIn("endpoint", org_affiliation_entry)
-    
+
     def test_list_filter_by_address(self):
         address_search = "807 Dusty Ln"
         url = reverse("fhir-organizationaffiliation-list")
@@ -359,15 +361,13 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
             location_entry = entry["resource"]
 
             address_lines = []
-            for location in location_entry['location']:
-                loc_id = location['reference'].split('/')[-1]
-                loc_obj = (
-                    Location.objects.filter(pk=loc_id).first()
-                )
+            for location in location_entry["location"]:
+                loc_id = location["reference"].split("/")[-1]
+                loc_obj = Location.objects.filter(pk=loc_id).first()
                 address_lines.append(loc_obj.address.address_us.delivery_line_1)
 
             self.assertIn(address_search, address_lines)
-    
+
     def test_list_filter_by_address_city(self):
         address_search = "Springfield"
         url = reverse("fhir-organizationaffiliation-list")
@@ -382,15 +382,13 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
             location_entry = entry["resource"]
 
             address_lines = []
-            for location in location_entry['location']:
-                loc_id = location['reference'].split('/')[-1]
-                loc_obj = (
-                    Location.objects.filter(pk=loc_id).first()
-                )
+            for location in location_entry["location"]:
+                loc_id = location["reference"].split("/")[-1]
+                loc_obj = Location.objects.filter(pk=loc_id).first()
                 address_lines.append(loc_obj.address.address_us.city_name)
 
             self.assertIn(address_search, address_lines)
-    
+
     def test_list_filter_by_address_state(self):
         address_search = "NY"
         url = reverse("fhir-organizationaffiliation-list")
@@ -405,15 +403,13 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
             location_entry = entry["resource"]
 
             address_lines = []
-            for location in location_entry['location']:
-                loc_id = location['reference'].split('/')[-1]
-                loc_obj = (
-                    Location.objects.filter(pk=loc_id).first()
-                )
+            for location in location_entry["location"]:
+                loc_id = location["reference"].split("/")[-1]
+                loc_obj = Location.objects.filter(pk=loc_id).first()
                 address_lines.append(loc_obj.address.address_us.state_code.abbreviation)
 
             self.assertIn(address_search, address_lines)
-    
+
     def test_list_filter_by_address_zipcode(self):
         address_search = "87101"
         url = reverse("fhir-organizationaffiliation-list")
@@ -428,15 +424,13 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
             location_entry = entry["resource"]
 
             address_lines = []
-            for location in location_entry['location']:
-                loc_id = location['reference'].split('/')[-1]
-                loc_obj = (
-                    Location.objects.filter(pk=loc_id).first()
-                )
+            for location in location_entry["location"]:
+                loc_id = location["reference"].split("/")[-1]
+                loc_obj = Location.objects.filter(pk=loc_id).first()
                 address_lines.append(loc_obj.address.address_us.zipcode)
 
             self.assertIn(address_search, address_lines)
-    
+
     def test_list_filter_by_address_zipcode_leading_zero(self):
         address_search = "01234"
         url = reverse("fhir-organizationaffiliation-list")
@@ -451,11 +445,9 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
             location_entry = entry["resource"]
 
             address_lines = []
-            for location in location_entry['location']:
-                loc_id = location['reference'].split('/')[-1]
-                loc_obj = (
-                    Location.objects.filter(pk=loc_id).first()
-                )
+            for location in location_entry["location"]:
+                loc_id = location["reference"].split("/")[-1]
+                loc_obj = Location.objects.filter(pk=loc_id).first()
                 address_lines.append(loc_obj.address.address_us.zipcode)
 
             self.assertIn(address_search, address_lines)
