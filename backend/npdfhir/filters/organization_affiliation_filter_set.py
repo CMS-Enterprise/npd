@@ -85,16 +85,16 @@ class OrganizationAffiliationFilterSet(filters.FilterSet):
         ).filter(
             taxonomy_search=query
         ).distinct()
-
+    
     def filter_location(self, queryset, name, value):
         return queryset.annotate(
             location_search=SearchVector(
-                "location_set__name",
-                "location_set__address__address_us__delivery_line_1",
-                "location_set__address__address_us__delivery_line_2",
-                "location_set__address__address_us__city_name",
-                "location_set__address__address_us__state_code__abbreviation",
-                "location_set__address__address_us__zipcode",
+                "location__name",
+                "location__address__address_us__delivery_line_1",
+                "location__address__address_us__delivery_line_2",
+                "location__address__address_us__city_name",
+                "location__address__address_us__state_code__abbreviation",
+                "location__address__address_us__zipcode",
             )
         ).filter(
             location_search=SearchQuery(value, search_type="websearch")
@@ -103,18 +103,18 @@ class OrganizationAffiliationFilterSet(filters.FilterSet):
     def filter_address_city(self, queryset, name, value):
         return queryset.annotate(
             search=SearchVector(
-                "location_set__address__address_us__city_name"
+                "location__address__address_us__city_name"
             )
         ).filter(search=value)
 
     def filter_address_state(self, queryset, name, value):
         return queryset.annotate(
             search=SearchVector(
-                "location_set__address__address_us__state_code__abbreviation"
+                "location__address__address_us__state_code__abbreviation"
             )
         ).filter(search=value)
 
     def filter_address_postalcode(self, queryset, name, value):
         return queryset.filter(
-            location_set__address__address_us__zipcode=value
+            location__address__address_us__zipcode=value
         )
