@@ -26,7 +26,6 @@ services:
       - ./flyway/sql/reference_data:/flyway/sql/reference_data
 
   django-web:
-    environment:
     build:
       context: ./backend
     container_name: npd
