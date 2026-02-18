@@ -42,7 +42,6 @@ services:
       DJANGO_LOGLEVEL: ${DJANGO_LOGLEVEL:-INFO}
       DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1,0.0.0.0}
       NPD_DB_ENGINE: ${NPD_DB_ENGINE:-django.contrib.gis.db.backends.postgis}
-      NPD_DB_NAME: ${NPD_DB_NAME:-npd_development}
       NPD_DB_USER: ${NPD_DB_USER:-postgres}
       NPD_DB_PASSWORD: ${NPD_DB_PASSWORD:-postgres}
       NPD_DB_HOST: ${NPD_DB_HOST:-db}
