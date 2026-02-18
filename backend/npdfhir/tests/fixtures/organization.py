@@ -1,99 +1,94 @@
-import datetime
 import uuid
 
 from ...models import (
     ClinicalOrganization,
-    Individual,
-    IndividualToName,
-    LegalEntity,
-    Npi,
     Organization,
     OrganizationToName,
     OrganizationToOtherId,
     OrganizationToTaxonomy,
+    OrganizationToAddress,
+    Location,
 )
 
-
-def create_legal_entity(dba_name="Sample Legal Entity"):
-    legal_entity = LegalEntity.objects.create(ein_id=uuid.uuid4(), dba_name=dba_name)
-
-    return legal_entity
+from typing import TypeDict, List
+from practitioner import DefaultIndividual, DefaultNPI, DefaultOtherIDs
+from practitioner import DefaultAddress
 
 
-def create_organization(
-    id=None,
-    name="Test Org",
-    parent_id=None,
-    authorized_official_first_name="Alice",
-    authorized_official_last_name="Smith",
-    legal_entity=None,
-    other_id_type=None,
-    other_id_value=None,
-    npi_value=None,
-    other_id_name="testMBI",
-    other_state_code="NY",
-    other_issuer="New York State Medicaid",
-    organization_type="193200000X",
-    aliases=None
-):
-    """
-    Creates an Organization + OrganizationToName.
-    """
-    # authorized_official cannot be null → create a dummy individual
-    ind = Individual.objects.create(
-        id=uuid.uuid4(),
-        gender="U",
-        birth_date=datetime.date(1980, 1, 1),
-    )
+class DefaultLocation(TypeDict):
+    address: DefaultAddress
+    name: str = "Location A"
+    id: uuid = None
 
-    IndividualToName.objects.create(
-        individual=ind,
-        first_name=authorized_official_first_name,
-        last_name=authorized_official_last_name,
-        name_use_id=1,
-    )
 
-    if id is None:
-        id = uuid.uuid4()
+class DefaultOrganization:
+    def __init__(
+        self,
+        npi: DefaultNPI,
+        authorized_official: DefaultIndividual,
+        other_ids: DefaultOtherIDs,
+        locations: List[DefaultLocation],
+        id: uuid = None,
+        names: List[str] = ["ABC Organization"],
+        taxonomies: list[str] = ["193200000X"],
+        is_clinical: bool = True,
+    ):
+        if self.id is None:
+            self.id = uuid.uuid4()
+        else:
+            self.id = id
+        if is_clinical and npi is None:
+            self.npi = npi.create_if_not_exists()
+        self.names = names
+        self.taxonomies = taxonomies
+        self.authorized_official = authorized_official.create_if_not_exists()
+        self.other_ids = other_ids
+        self.locations = [location.create_if_not_exists() for location in locations]
 
-    org = Organization.objects.create(
-        id=id, authorized_official=ind, ein=legal_entity, parent_id=parent_id
-    )
-
-    if other_id_type or organization_type or npi_value:
-        npi = Npi.objects.create(
-            npi=npi_value or int(str(uuid.uuid4().int)[:10]),
-            entity_type_code=1,
-            enumeration_date=datetime.date(2000, 1, 1),
-            last_update_date=datetime.date(2020, 1, 1),
-        )
-
-        clinical_organization = ClinicalOrganization.objects.create(organization=org, npi=npi)
-
-        if other_id_type:
-            OrganizationToOtherId.objects.create(
-                npi=clinical_organization,
-                other_id=other_id_name,
-                other_id_type=other_id_type,
-                state_code=other_state_code,
-                issuer=other_issuer,
+    def create_if_not_exists(self):
+        organization = Organization.objects.filter(id=self.id)
+        if organization.exists():
+            self.organization = organization
+        else:
+            organization = Organization.objects.create(
+                id=self.id, authorized_official=self.authorized_official
             )
-        OrganizationToTaxonomy.objects.create(
-            npi=clinical_organization, nucc_code_id=organization_type
-        )
+            for i, name in enumerate(self.names):
+                OrganizationToName.objects.create(
+                    organization=organization,
+                    name=name,
+                    is_primary=i == 0,
+                )
 
-    OrganizationToName.objects.create(
-        organization=org,
-        name=name,
-        is_primary=True,
-    )
+            for address in self.locations:
+                OrganizationToAddress.objects.create(
+                    organization=organization, address=address, address_use_id=2
+                )
 
-    if aliases:
-        for alias in aliases:
-            OrganizationToName.objects.create(
-                organization=org,
-                name=alias,
-                is_primary=False,
-            )
+            if self.is_clinical:
+                clinical_organization = ClinicalOrganization.objects.create(
+                    organization=organization, npi=self.npi
+                )
 
-    return org
+                for id in self.other_ids:
+                    OrganizationToOtherId.objects.create(
+                        npi=clinical_organization,
+                        other_id=id.other_id_name,
+                        other_id_type=id.other_id_type,
+                        state_code__abbreviation=id.state,
+                    )
+                for taxonomy in self.taxonomies:
+                    OrganizationToTaxonomy.objects.create(
+                        npi=clinical_organization, nucc_code_id=taxonomy
+                    )
+
+                for address in self.locations:
+                    Location.objects.create(
+                        id=id,
+                        name=name,
+                        organization=organization,
+                        address=address,
+                        active=True,
+                    )
+
+            return organization
