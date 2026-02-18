@@ -26,34 +26,13 @@ services:
       - ./flyway/sql/reference_data:/flyway/sql/reference_data
 
   django-web:
-    build:
-      context: ./backend
-    container_name: npd
-    env_file:
-      - path: .env
-        required: false
-    entrypoint: [] # Don't run collectstatic in entrypoint.sh
-    command: python manage.py runserver --insecure 0.0.0.0:8000
+    extends:
+      file: compose.yml
+      service: django-web
     environment:
       NPD_DB_NAME: npd_test
       TESTING: True
-      NPD_DJANGO_SECRET: ${NPD_DJANGO_SECRET:-_pth2#=k8-wf-_^t%2))it+3..8la^@@97^#ock7.v=@792w7}
-      DEBUG: ${DEBUG:-True}
-      DJANGO_LOGLEVEL: ${DJANGO_LOGLEVEL:-INFO}
-      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1,0.0.0.0}
-      NPD_DB_ENGINE: ${NPD_DB_ENGINE:-django.contrib.gis.db.backends.postgis}
-      NPD_DB_USER: ${NPD_DB_USER:-postgres}
-      NPD_DB_PASSWORD: ${NPD_DB_PASSWORD:-postgres}
-      NPD_DB_HOST: ${NPD_DB_HOST:-db}
-      NPD_DB_PORT: ${NPD_DB_PORT:-5432}
-      NPD_REQUIRE_AUTHENTICATION: False
-    ports:
-      - '8000:8000'
-    volumes:
-      - './backend/:/app'
-      - ./backend/artifacts:/app/artifacts:rw
-      - ./backend/provider_directory/static:/app/provider_directory/static:rw
-    depends_on:
+    depends_on: !override
       - db
       - db-migrations
 
