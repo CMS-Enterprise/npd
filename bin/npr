@@ -8,7 +8,7 @@ import sys
 """
 npr is an NPd Runner
 
-Run docker compose commands in the npd project directory (https://github.com/DSACMS/npd)
+Run docker compose commands in the npd project directory (https://github.com/CMS-Enterprise/npd)
 """
 
 EPILOG_TEXT = """

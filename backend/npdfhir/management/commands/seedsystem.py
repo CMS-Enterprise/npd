@@ -6,9 +6,11 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.db import IntegrityError
 from faker import Faker
 
-from npdfhir.tests.fixtures.endpoint import create_endpoint
+from npdfhir.tests.fixtures.endpoint import create_endpoint_instance
 from npdfhir.tests.fixtures.organization import create_organization
 from npdfhir.tests.fixtures.practitioner import create_practitioner
+
+from npdfhir.models import OrganizationView, ProviderView
 
 
 class Command(BaseCommand):
@@ -23,7 +25,7 @@ class Command(BaseCommand):
     def generate_sample_organizations(self, qty: int = 25):
         fake = Faker()
         for i in range(qty):
-            name = fake.company()
+            name = f"TEST {fake.company()}"  # adding TEST here so that we can query results with the same name
             org = create_organization(
                 name=name,
                 # not bothering with checksum here
@@ -34,11 +36,11 @@ class Command(BaseCommand):
                 other_issuer=fake.company(),
             )
             self.stdout.write(f"created Organization: {org.id} {name}")
-    
+
     def generate_sample_practitioners(self, qty: int = 25):
         fake = Faker()
         for i in range(qty):
-            first_name = fake.first_name()
+            first_name = f"TEST {fake.first_name()}"  # adding TEST here so that we can query results with the same name
             last_name = fake.last_name()
             practitioner = create_practitioner(
                 first_name=first_name,
@@ -46,7 +48,9 @@ class Command(BaseCommand):
                 npi_value=self.generate_npi(),
                 gender=random.choice(["M", "F"]),
             )
-            self.stdout.write(f"created Practitioner: {practitioner.individual.id} {first_name} {last_name}")
+            self.stdout.write(
+                f"created Practitioner: {practitioner.individual.id} {first_name} {last_name}"
+            )
 
     def handle(self, *args, **options):
         if options.get("seed", None):
@@ -122,8 +126,10 @@ class Command(BaseCommand):
             self.stdout.write("(organization with other_id 1234567893 already exists)")
 
         if organization:
-            endpoint = create_endpoint(organization=organization)
+            endpoint = create_endpoint_instance(organization=organization)
             self.stdout.write(f"created Endpoint: {self.to_json(id=endpoint.id)}")
 
         self.generate_sample_organizations(25)
+        OrganizationView.refresh_materialized_view()
         self.generate_sample_practitioners(25)
+        ProviderView.refresh_materialized_view()

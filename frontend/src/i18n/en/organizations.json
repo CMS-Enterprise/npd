@@ -22,7 +22,8 @@
 
   "search": {
     "title": "Organization search",
-    "inputLabel": "Name or NPI"
+    "inputLabel": "Name or NPI",
+    "button": "Search organizations"
   },
 
   "sort": {
@@ -34,5 +35,5 @@
   "alert": {
     "heading": "Are you looking for an practitioner?",
     "body": "Visit the [Practitioner search](/practitioners/search) page."
-}
+  }
 }

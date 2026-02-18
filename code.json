@@ -8,7 +8,7 @@
     "licenses": [
       {
         "name": "CC0-1.0",
-        "URL": "https://github.com/DSACMS/npd/blob/main/LICENSE"
+        "URL": "https://github.com/CMS-Enterprise/npd/blob/main/LICENSE"
       }
     ],
     "usageType": [
@@ -17,8 +17,8 @@
     "exemptionText": ""
   },
   "organization": "Centers for Medicare & Medicaid Services",
-  "repositoryURL": "https://github.com/DSACMS/npd",
-  "repositoryHost": "github.com/DSACMS",
+  "repositoryURL": "https://github.com/CMS-Enterprise/npd",
+  "repositoryHost": "github.com/CMS-Enterprise",
   "repositoryVisibility": "public",
   "homepageURL": "",
   "downloadURL": "",
@@ -52,7 +52,7 @@
   "contractNumber": [
     "0"
   ],
-  "SBOM": "https://github.com/DSACMS/npd/network/dependencies",
+  "SBOM": "https://github.com/CMS-Enterprise/npd/network/dependencies",
   "relatedCode": [
     {
       "name": "Puffin",
@@ -134,7 +134,7 @@
     "email": "opensource@cms.hhs.gov",
     "name": "CMS Open Source Program Office"
   },
-  "feedbackMechanism": "https://github.com/DSACMS/npd/issues",
+  "feedbackMechanism": "https://github.com/CMS-Enterprise/npd/issues",
   "AIUseCaseID": "0",
   "localisation": false,
   "repositoryType": "tools",
