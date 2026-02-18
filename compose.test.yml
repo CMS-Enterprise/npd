@@ -32,9 +32,23 @@ services:
     environment:
       NPD_DB_NAME: npd_test
       TESTING: True
-    depends_on:
-      - db
-      - db-migrations
+
+  datadog-agent:
+    image: datadog/agent:latest
+    environment:
+      - DD_API_KEY=${DATADOG_API_KEY:-dummy-api-key}
+      - DD_SITE=ddog-gov.com
+      - DD_APM_ENABLED=true
+      - DD_APM_NON_LOCAL_TRAFFIC=true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /proc/:/host/proc/:ro
+      - /sys/fs/cgroup/:/host/sys/fs/cgroup:ro
+    healthcheck:
+      test: ["CMD", "agent", "status"]
+      interval: 30s
+      retries: 3
+      timeout: 10s
 
 volumes:
   postgres_data:
