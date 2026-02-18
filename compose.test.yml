@@ -32,6 +32,9 @@ services:
     environment:
       NPD_DB_NAME: npd_test
       TESTING: True
+    depends_on:
+      - db
+      - db-migrations
 
 volumes:
   postgres_data:
