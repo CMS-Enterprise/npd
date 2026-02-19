@@ -541,18 +541,7 @@ class FHIROrganizationAffiliationViewSet(viewsets.GenericViewSet):
     ViewSet for FHIR EHR Vendor to Organizaton relationships
     """
 
-    queryset = Organization.objects.none()
-    if DEBUG:
-        renderer_classes = [FHIRRenderer, BrowsableAPIRenderer]
-    else:
-        renderer_classes = [FHIRRenderer]
-    filter_backends = [DjangoFilterBackend, ParamOrderingFilter]
-    # filterset_class = OrganizationFilterSet
-    pagination_class = CustomPaginator
-
-    ordering = ["organization_name"]
-    ordering_fields = ["ehr_vendor_name", "organization_name", "endpoint_name"]
-    lookup_url_kwarg = "id"
+    #queryset = Organization.objects.none()
 
     endpoint_subquery = LocationToEndpointInstance.objects.filter(
         location__organization=OuterRef("pk"), endpoint_instance__ehr_vendor__isnull=False
@@ -606,8 +595,19 @@ class FHIROrganizationAffiliationViewSet(viewsets.GenericViewSet):
             participating_npi=F("clinicalorganization__npi__npi"),
         )
         .distinct()
-        .order_by("organization_name")
     )
+
+    if DEBUG:
+        renderer_classes = [FHIRRenderer, BrowsableAPIRenderer]
+    else:
+        renderer_classes = [FHIRRenderer]
+    filter_backends = [DjangoFilterBackend, ParamOrderingFilter]
+    # filterset_class = OrganizationFilterSet
+    pagination_class = CustomPaginator
+
+    ordering = ["organization_name"]
+    ordering_fields = ["ehr_vendor_name", "organization_name"]
+    lookup_url_kwarg = "id"
 
     # permission_classes = [permissions.IsAuthenticated]
     @extend_schema(
@@ -624,7 +624,8 @@ class FHIROrganizationAffiliationViewSet(viewsets.GenericViewSet):
         Default sort order: ascending by organization name
         """
 
-        paginated_organization_affiliations = self.paginate_queryset(self.queryset)
+        organization_affiliation = self.filter_queryset(self.queryset)
+        paginated_organization_affiliations = self.paginate_queryset(organization_affiliation)
 
         serialized_organization_affiliations = OrganizationAffiliationSerializer(
             paginated_organization_affiliations, many=True, context={"request": request}
