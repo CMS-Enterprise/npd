@@ -20,6 +20,12 @@ from decouple import config
 
 from app.logging import sql_trace_formatter
 
+LANGUAGE_CODE = "en-us"
+
+LANGUAGES = [
+    ("en", ("English")),
+]
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -40,6 +46,10 @@ else:
     ALLOWED_HOSTS = config("DJANGO_ALLOWED_HOSTS").split(",")
 
 INTERNAL_APIS = config("DJANGO_ALLOWED_HOSTS").split(",")
+
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, "locale"),
+]
 
 # Application definition
 
@@ -73,6 +83,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
