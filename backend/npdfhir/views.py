@@ -127,9 +127,7 @@ class FHIREndpointViewSet(viewsets.GenericViewSet):
         f"{docs.endpoints.endpoint.list_description}\n\n"
         f"{docs.constants.sort_order_text}{docs.endpoints.endpoint.default_sort}"
     )  # shows as GET /Endpoint/ description
-    retrieve.__doc__ = (
-        docs.endpoints.endpoint.retrieve_description
-    )  # shows as GET /Endpoint/{id}/ description
+    retrieve.__doc__ = f"{docs.endpoints.endpoint.retrieve_description}"  # shows as GET /Endpoint/{id}/ description
 
 
 class FHIRPractitionerViewSet(viewsets.GenericViewSet):
@@ -208,9 +206,7 @@ class FHIRPractitionerViewSet(viewsets.GenericViewSet):
         f"{docs.endpoints.practitioner.list_description}\n\n"
         f"{docs.constants.sort_order_text}{docs.endpoints.practitioner.default_sort}"
     )  # shows as GET /Practitioner/ description
-    retrieve.__doc__ = (
-        docs.endpoints.practitioner.retrieve_description
-    )  # shows as GET /Practitioner/{id}/ description
+    retrieve.__doc__ = f"{docs.endpoints.practitioner.retrieve_description}"  # shows as GET /Practitioner/{id}/ description
 
 
 class FHIRPractitionerRoleViewSet(viewsets.GenericViewSet):
@@ -278,9 +274,7 @@ class FHIRPractitionerRoleViewSet(viewsets.GenericViewSet):
         f"{docs.endpoints.practitioner_role.list_description}\n\n"
         f"{docs.constants.sort_order_text}{docs.endpoints.practitioner_role.default_sort}"
     )  # shows as GET /PractitionerRole/ description
-    retrieve.__doc__ = (
-        docs.endpoints.practitioner_role.retrieve_description
-    )  # shows as GET /PractitionerRole/{id}/ description
+    retrieve.__doc__ = f"{docs.endpoints.practitioner_role.retrieve_description}"  # shows as GET /PractitionerRole/{id}/ description
 
 
 class FHIROrganizationViewSet(viewsets.GenericViewSet):
@@ -359,9 +353,7 @@ class FHIROrganizationViewSet(viewsets.GenericViewSet):
         f"{docs.endpoints.organization.list_description}\n\n"
         f"{docs.constants.sort_order_text}{docs.endpoints.organization.default_sort}"
     )  # shows as GET /Organization/ description
-    retrieve.__doc__ = (
-        docs.endpoints.organization.retrieve_description
-    )  # shows as GET /Organization/{id}/ description
+    retrieve.__doc__ = f"{docs.endpoints.organization.retrieve_description}"  # shows as GET /Organization/{id}/ description
 
 
 class FHIRLocationViewSet(viewsets.GenericViewSet):
@@ -444,9 +436,7 @@ class FHIRLocationViewSet(viewsets.GenericViewSet):
         f"{docs.endpoints.location.list_description}\n\n"
         f"{docs.constants.sort_order_text}{docs.endpoints.location.default_sort}"
     )  # shows as GET /Location/ description
-    retrieve.__doc__ = (
-        docs.endpoints.location.retrieve_description
-    )  # shows as GET /Location/{id}/ description
+    retrieve.__doc__ = f"{docs.endpoints.location.retrieve_description}"  # shows as GET /Location/{id}/ description
 
 
 class FHIRCapabilityStatementView(APIView):
@@ -470,9 +460,7 @@ class FHIRCapabilityStatementView(APIView):
 
     # drf-spectacular content
     __doc__ = docs.endpoints.capability_statement.viewset  # shows as endpoint group description
-    get.__doc__ = (
-        docs.endpoints.capability_statement.get_description
-    )  # shows as GET /metadata description
+    get.__doc__ = f"{docs.endpoints.capability_statement.get_description}"  # shows as GET /metadata description
 
 
 class FHIROrganizationAffiliationViewSet(viewsets.GenericViewSet):
@@ -594,6 +582,4 @@ class FHIROrganizationAffiliationViewSet(viewsets.GenericViewSet):
         f"{docs.endpoints.organization_affiliation.list_description}\n\n"
         f"{docs.constants.sort_order_text}{docs.endpoints.organization_affiliation.default_sort}"
     )  # shows as GET /OrganizationAffiliation/ description
-    retrieve.__doc__ = (
-        docs.endpoints.organization_affiliation.retrieve_description
-    )  # shows as GET /OrganizationAffiliation/{id}/ description
+    retrieve.__doc__ = f"{docs.endpoints.organization_affiliation.retrieve_description}"  # shows as GET /OrganizationAffiliation/{id}/ description
