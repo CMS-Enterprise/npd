@@ -5,6 +5,7 @@ from django.contrib.postgres.search import SearchVector, SearchQuery
 from django.db.models import Q
 from django_filters import rest_framework as filters
 
+from ..documentation_content import docs
 from ..mappings import genderMapping
 from ..models import ProviderToLocationView
 from ..utils import parse_identifier_query
@@ -12,87 +13,92 @@ from ..utils import parse_identifier_query
 
 class PractitionerRoleFilterSet(filters.FilterSet):
     practitioner_table = "provider_to_organization"
-    # practitioner_name = PractitionerFilterSet.name
+
     practitioner_name = filters.CharFilter(
         method="filter_practitioner_name",
-        help_text="Filter by practitioner name (first, middle, last, or full name). Name filter accepts websearch syntax.",
+        help_text=docs.filters.practitioner.name,
     )
 
     practitioner_gender = filters.ChoiceFilter(
         method="filter_practitioner_gender",
         choices=genderMapping.to_choices(),
-        help_text="Filter by practitioner gender",
+        help_text=docs.filters.practitioner.gender,
     )
 
     practitioner_type = filters.CharFilter(
-        method="filter_practitioner_type", help_text="Filter by practitioner type/taxonomy"
+        method="filter_practitioner_type",
+        help_text=docs.filters.practitioner.type,
+    )
+
+    practitioner_identifier = filters.CharFilter(
+        method="filter_practitioner_identifier",
+        help_text=docs.filters.practitioner.identifier,
     )
 
     organization_name = filters.CharFilter(
-        method="filter_organization_name", help_text="Filter by organization name"
+        method="filter_organization_name",
+        help_text=docs.filters.organization.name,
+    )
+
+    organization_type = filters.CharFilter(
+        method="filter_organization_type",
+        help_text=docs.filters.organization.type,
     )
 
     location_near = filters.CharFilter(
         method="filter_distance",
-        help_text="Filter location by distance from a point expressed as [latitude]|[longitude]|[distance]|[units]. If no units are provided, km is assumed.",
+        help_text=docs.filters.location.near,
     )
 
-    organization_type = filters.CharFilter(
-        method="filter_organization_type", help_text="Filter by organization type"
+    location_address = filters.CharFilter(
+        method="filter_address",
+        help_text=docs.filters.address.full,
     )
 
-    active = filters.BooleanFilter(field_name="active", help_text="Filter by active status")
+    location_address_city = filters.CharFilter(
+        method="filter_address_city",
+        help_text=docs.filters.address.city,
+    )
 
-    practitioner_identifier = filters.CharFilter(
-        method="filter_practitioner_identifier", help_text="Filter by practitioner identifier"
+    location_address_state = filters.CharFilter(
+        method="filter_address_state",
+        help_text=docs.filters.address.state,
+    )
+
+    location_address_postalcode = filters.CharFilter(
+        method="filter_address_postalcode",
+        help_text=docs.filters.address.postalcode,
+    )
+
+    active = filters.BooleanFilter(
+        field_name="active",
+        help_text=docs.filters.practitioner_role.active,
     )
 
     role = filters.CharFilter(
         field_name="provider_role_code",
         lookup_expr="iexact",
-        help_text="Filter by provider role code",
+        help_text=docs.filters.practitioner_role.role,
     )
 
     specialty = filters.CharFilter(
-        method="filter_specialty", help_text="Filter by Nucc/Snomed specialty code"
+        method="filter_specialty",
+        help_text=docs.filters.practitioner_role.specialty,
     )
 
     endpoint_connection_type = filters.CharFilter(
-        method="filter_connection_type", help_text="Filter providers by endpoint connection type"
+        method="filter_connection_type",
+        help_text=docs.filters.endpoint.connection_type,
     )
 
     endpoint_payload_type = filters.CharFilter(
-        method="filter_payload_type", help_text="Filter providers by endpoint payload type"
+        method="filter_payload_type",
+        help_text=docs.filters.endpoint.payload_type,
     )
 
     endpoint_status = filters.CharFilter(
-        method="filter_endpoint_status", help_text="Filter providers by endpoint status"
-    )
-    # We don't have a concept of endpoint organizations at the moment
-    # endpoint_organization_id = filters.UUIDFilter(
-    #    method="filter_endpoint_organization_id",
-    #    help_text="Filter by the UUID of the organization associated with endpoints",
-    # )
-    #
-    # endpoint_organization_name = filters.CharFilter(
-    #    method="filter_endpoint_organization_name",
-    #    help_text="Filter by the name of the organization associated with endpoints",
-    # )
-
-    location_address = filters.CharFilter(
-        method="filter_address", help_text="Filter by the location address"
-    )
-
-    location_address_city = filters.CharFilter(
-        method="filter_address_city", help_text="Filter by the location city"
-    )
-
-    location_address_state = filters.CharFilter(
-        method="filter_address_state", help_text="Filter by the location state"
-    )
-
-    location_address_postalcode = filters.CharFilter(
-        method="filter_address_postalcode", help_text="Filter by the location postal code"
+        method="filter_endpoint_status",
+        help_text=docs.filters.endpoint.status,
     )
 
     class Meta:
@@ -230,7 +236,6 @@ class PractitionerRoleFilterSet(filters.FilterSet):
             )
         ).filter(search=SearchQuery(value, search_type="websearch"))
 
-    
     def filter_address_city(self, queryset, name, value):
         return queryset.annotate(
             search=SearchVector("location__address__address_us__city_name")
