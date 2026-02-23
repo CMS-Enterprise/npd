@@ -2,7 +2,7 @@ from django.urls import reverse
 from rest_framework import status
 
 from .api_test_case import APITestCase
-from .fixtures.location import create_location
+from .fixtures.address import create_location
 from .fixtures.practitioner import create_practitioner
 from .helpers import (
     assert_fhir_response,
@@ -57,11 +57,11 @@ class PractitionerViewSetTestCase(APITestCase):
             practitioner_types=[cls.transplant_code],
         )
 
-        cls.counselor = "101Y00000X"
+        cls.emergency = "207PE0004X"
         cls.non_nurse_prac = create_practitioner(
             last_name="TROY",
             first_name="DIANA",
-            practitioner_types=[cls.counselor],
+            practitioner_types=[cls.emergency],
         )
 
         cls.sample_last_name = "SOLOMON"
@@ -248,6 +248,35 @@ class PractitionerViewSetTestCase(APITestCase):
 
             self.assertIn(self.sample_last_name, names)
 
+    def test_filter_by_y_name(self):
+        y_name = "Stacy"
+        url = reverse("fhir-practitioner-list")
+        response = self.client.get(url, {"name": y_name})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert_has_results(self, response)
+
+        for entry in response.data["results"]["entry"]:
+            names = []
+            for name in entry["resource"]["name"]:
+                names.append(name["family"])
+                names.append(name["given"])
+
+            self.assertIn(y_name, names)
+
+    def test_filter_by_full_name(self):
+        full_name = "Stacy Miller"
+        url = reverse("fhir-practitioner-list")
+        response = self.client.get(url, {"name": full_name})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert_has_results(self, response)
+
+        for entry in response.data["results"]["entry"]:
+            names = []
+            for name in entry["resource"]["name"]:
+                names.append(" ".join([name["given"], name["family"]]).lower())
+
+            self.assertIn(full_name.lower(), names)
+
     def test_list_filter_by_practitioner_type(self):
         url = reverse("fhir-practitioner-list")
         response = self.client.get(url, {"practitioner_type": "Nurse"})
@@ -260,6 +289,15 @@ class PractitionerViewSetTestCase(APITestCase):
             ]
             self.assertIn(self.nurse_code, nurse_codes)
             self.assertNotIn(self.transplant_code, nurse_codes)
+
+    def test_list_filter_by_y_practitioner_type(self):
+        url = reverse("fhir-practitioner-list")
+        response = self.client.get(url, {"practitioner_type": "Emergency"})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert_has_results(self, response)
+
+        for entry in response.data["results"]["entry"]:
+            self.assertIn(self.emergency, entry["resource"]["qualification"])
 
     # Identifiers Filter tests
     def test_list_filter_by_identifier_general(self):
