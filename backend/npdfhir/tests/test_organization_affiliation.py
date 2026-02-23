@@ -453,7 +453,7 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
 
             self.assertIn(address_search, address_lines)
 
-    def test_retrieve_non_existant_organization_affil(self):
+    def test_retrieve_non_existent_organization_affil(self):
         url = reverse(
             "fhir-organizationaffiliation-detail", args=["12300000-0000-0000-0000-000000000123"]
         )
