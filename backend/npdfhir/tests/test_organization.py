@@ -4,7 +4,7 @@ from rest_framework import status
 from ..models import Organization, OtherIdType, OrganizationView
 from .api_test_case import APITestCase
 from .fixtures.organization import create_legal_entity, create_organization
-from .fixtures.address import create_location
+from .fixtures.location import create_location
 from .helpers import (
     assert_fhir_response,
     assert_has_results,
@@ -272,7 +272,9 @@ class OrganizationViewSetTestCase(APITestCase):
             self.assertIn("resource", entry)
 
             org_entry = entry["resource"]
-            names = org_entry["name"] + org_entry["alias"]
+            names = org_entry["name"]
+            if "alias" in org_entry.keys():
+                names += org_entry["alias"]
 
             self.assertIn(y_name, names)
 

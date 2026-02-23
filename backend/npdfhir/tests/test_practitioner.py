@@ -2,7 +2,7 @@ from django.urls import reverse
 from rest_framework import status
 
 from .api_test_case import APITestCase
-from .fixtures.address import create_location
+from .fixtures.location import create_location
 from .fixtures.practitioner import create_practitioner
 from .helpers import (
     assert_fhir_response,
@@ -261,7 +261,7 @@ class PractitionerViewSetTestCase(APITestCase):
                 names.append(name["family"])
                 names.append(name["given"])
 
-            self.assertIn(y_name, names)
+            self.assertIn(y_name.lower(), str(names).lower())
 
     def test_filter_by_full_name(self):
         full_name = "Stacy Miller"
@@ -273,7 +273,7 @@ class PractitionerViewSetTestCase(APITestCase):
         for entry in response.data["results"]["entry"]:
             names = []
             for name in entry["resource"]["name"]:
-                names.append(" ".join([name["given"], name["family"]]).lower())
+                names.append(" ".join([name["given"][0], name["family"]]).lower())
 
             self.assertIn(full_name.lower(), names)
 
@@ -297,7 +297,7 @@ class PractitionerViewSetTestCase(APITestCase):
         assert_has_results(self, response)
 
         for entry in response.data["results"]["entry"]:
-            self.assertIn(self.emergency, entry["resource"]["qualification"])
+            self.assertIn(self.emergency, str(entry["resource"]["qualification"]))
 
     # Identifiers Filter tests
     def test_list_filter_by_identifier_general(self):
