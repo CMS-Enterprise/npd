@@ -139,71 +139,38 @@ You can review the use of those tools by running `make` or `bin/npr --help` at t
 `bin/npr` is a runner for managing complex `docker compose run` commands across the various services that make up this project.
 
 ### Troubleshooting
+
 #### 1. PostgreSQL collation version mismatch
 
-**Error**
-```
-ERROR: template database "template1" has a collation version mismatch
-```
+| | |
+|---|---|
+| **Error** | `template database "template1" has a collation version mismatch` |
+| **Cause** | A PostgreSQL Docker volume was created using a different system library version. |
+| **Fix** | Automatically resolved by the Flyway migration `R__refresh_collation_version.sql`. |
 
-**Cause**
-```
-A PostgreSQL Docker volume was created using a different system library version
-```
-**Fix**
-This should automatically be resolved by the Flyway migration `R__refresh_collation_version.sql`.
+#### 2. Docker volume image mismatch
 
-#### 2. Docker volume image mismatch 
-
-**Error**
-```
-ERROR: extension "postgis" already exists
-```
-
-**Cause**
-```
-Mismatch of Docker database images due to deprecated older code or a partially completed migration
-```
-**Fix**
-```
-make reset-db
-make setup
-```
+| | |
+|---|---|
+| **Error** | `extension "postgis" already exists` |
+| **Cause** | Mismatch of Docker database images due to deprecated older code or a partially completed migration. |
+| **Fix** | Run `make reset-db` then `make setup`. |
 
 #### 3. Port already in use
 
-**Error**
-```
-bind: address already in use
-```
-
-**Cause**
-```
-Another local service is already using a required port
-```
-**Fix**
-```
-sudo lsof -i :{port}
-sudo kill <PID>
-```
+| | |
+|---|---|
+| **Error** | `bind: address already in use` |
+| **Cause** | Another local service is already using a required port. |
+| **Fix** | Run `sudo lsof -i :{port}` to find the process, then `sudo kill <PID>`. |
 
 #### 4. Updated elements do not appear on the frontend after build
 
-**Error**
-```
-Elements do not appear after either pulling a branch or creating new code
-```
-
-**Cause**
-```
-Cached frontend assets or stale build artifacts are being served by the browser or container
-```
-**Fix**
-```
-CMD + Shift + R
-make clean-frontend
-make build-frontend-assets
-```
+| | |
+|---|---|
+| **Error** | Elements do not appear after either pulling a branch or creating new code. |
+| **Cause** | Cached frontend assets or stale build artifacts are being served by the browser or container. |
+| **Fix** | Hard refresh with `Cmd + Shift + R`, or run `make clean-frontend` then `make build-frontend-assets`. |
 
 ### Workflow and Branching
 
