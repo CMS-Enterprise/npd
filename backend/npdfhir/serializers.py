@@ -1,7 +1,11 @@
 import sys
 from datetime import datetime, timezone
+import typing
+
+from pydantic import Field
 
 from django.urls import reverse
+from fhir.resources import fhirtypes
 from fhir.resources.R4B.address import Address
 from fhir.resources.R4B.bundle import Bundle
 from fhir.resources.R4B.capabilitystatement import (
@@ -12,19 +16,24 @@ from fhir.resources.R4B.capabilitystatement import (
     CapabilityStatementRestResourceSearchParam,
 )
 from fhir.resources.R4B.codeableconcept import CodeableConcept
+from fhir.resources.codeableconcept import CodeableConcept as R5CodeableConcept
 from fhir.resources.R4B.coding import Coding
+from fhir.resources.coding import Coding as R5Coding
 from fhir.resources.R4B.contactdetail import ContactDetail
 from fhir.resources.R4B.contactpoint import ContactPoint
 from fhir.resources.R4B.endpoint import Endpoint
 from fhir.resources.R4B.humanname import HumanName
 from fhir.resources.R4B.identifier import Identifier
+from fhir.resources.identifier import Identifier as R5Identifier
 from fhir.resources.R4B.location import Location as FHIRLocation, LocationPosition
 from fhir.resources.R4B.meta import Meta
-from fhir.resources.R4B.organization import Organization as FHIROrganization
+from fhir.resources.R4B.organization import Organization as OrganizationBase# as FHIROrganization
+from fhir.resources.organization import OrganizationQualification
 from fhir.resources.R4B.organizationaffiliation import (
     OrganizationAffiliation as FHIROrganizationAffiliation,
 )
 from fhir.resources.R4B.period import Period
+from fhir.resources.period import Period as R5Period
 from fhir.resources.R4B.practitioner import Practitioner, PractitionerQualification
 from fhir.resources.R4B.practitionerrole import PractitionerRole
 from fhir.resources.R4B.reference import Reference
@@ -45,6 +54,29 @@ if "runserver" or "test" in sys.argv:
         fhir_name_use,
         fhir_phone_use,
         nucc_taxonomy_codes,
+    )
+
+#Extend the Organization class
+class FHIROrganization(OrganizationBase):
+    __resource_type__ = "Organization"
+
+    qualification: typing.List[fhirtypes.OrganizationQualificationType] | None = Field(
+        default=None,
+        alias="qualification",
+        title=(
+            "Qualifications, certifications, accreditations, licenses, training, "
+            "etc. pertaining to the provision of care"
+        ),
+        description=(
+            "The official certifications, accreditations, training, designations "
+            "and licenses that authorize and/or otherwise endorse the provision of "
+            "care by the organization.  For example, an approval to provide a type "
+            "of services issued by a certifying body (such as the US Joint "
+            "Commission) to an organization."
+        ),
+        json_schema_extra={
+            "element_property": True,
+        },
     )
 
 
@@ -319,6 +351,26 @@ class OrganizationSerializer(serializers.Serializer):
         organization.meta = Meta(
             profile=["http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"]
         )
+
+        code = R5CodeableConcept(
+            coding=[
+                R5Coding(
+                    system="http://nucc.org/provider-taxonomy",
+                    code="TEST",
+                    display=str("TEST"),
+                )
+            ]
+        )
+        organization.qualification = [OrganizationQualification(
+            identifier=[
+                R5Identifier(
+                    value="test",
+                    type=code,  # TODO: Replace
+                    period=R5Period(),
+                )
+            ],
+            code=code,
+        )]
         identifiers = []
 
         taxonomies = []
