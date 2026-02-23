@@ -465,18 +465,11 @@ class FHIRCapabilityStatementView(APIView):
 
 
 class FHIROrganizationAffiliationViewSet(viewsets.GenericViewSet):
-    queryset = Organization.objects.none()
-    if DEBUG:
-        renderer_classes = [FHIRRenderer, BrowsableAPIRenderer]
-    else:
-        renderer_classes = [FHIRRenderer]
-    filter_backends = [DjangoFilterBackend, ParamOrderingFilter]
-    filterset_class = OrganizationAffiliationFilterSet
-    pagination_class = CustomPaginator
+    """
+    ViewSet for FHIR EHR Vendor to Organizaton relationships
+    """
 
-    ordering = ["organization_name"]
-    ordering_fields = ["ehr_vendor_name", "organization_name", "endpoint_name"]
-    lookup_url_kwarg = "id"
+    #queryset = Organization.objects.none()
 
     endpoint_subquery = LocationToEndpointInstance.objects.filter(
         location__organization=OuterRef("pk"), endpoint_instance__ehr_vendor__isnull=False
@@ -530,9 +523,21 @@ class FHIROrganizationAffiliationViewSet(viewsets.GenericViewSet):
             participating_npi=F("clinicalorganization__npi__npi"),
         )
         .distinct()
-        .order_by("organization_name")
     )
 
+    if DEBUG:
+        renderer_classes = [FHIRRenderer, BrowsableAPIRenderer]
+    else:
+        renderer_classes = [FHIRRenderer]
+    filter_backends = [DjangoFilterBackend, ParamOrderingFilter]
+    filterset_class = OrganizationAffiliationFilterSet
+    pagination_class = CustomPaginator
+
+    ordering = ["organization_name"]
+    ordering_fields = ["ehr_vendor_name", "organization_name"]
+    lookup_url_kwarg = "id"
+
+    # permission_classes = [permissions.IsAuthenticated]
     @extend_schema(
         responses={
             200: OpenApiResponse(description=docs.endpoints.organization_affiliation.list_response)
