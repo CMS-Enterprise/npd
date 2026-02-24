@@ -123,7 +123,7 @@ class PractitionerRoleFilterSet(filters.FilterSet):
         ]
 
     def filter_practitioner_name(self, queryset, name, value):
-        query = SearchQuery(f"{value.upper()}", search_type="websearch")
+        query = SearchQuery(f"{value.upper()}", search_type="websearch", config="english")
         return queryset.filter(
             provider_to_organization__individual__individual__individualtoname__search_vector=query
         ).distinct()
@@ -135,7 +135,7 @@ class PractitionerRoleFilterSet(filters.FilterSet):
         return queryset
 
     def filter_practitioner_type(self, queryset, name, value):
-        query = SearchQuery(value, search_type="websearch")
+        query = SearchQuery(value, search_type="websearch", config="english")
         return queryset.filter(
             provider_to_organization__individual__providertotaxonomy__nucc_code__search_vector=query
         )
@@ -234,7 +234,7 @@ class PractitionerRoleFilterSet(filters.FilterSet):
                 "location__address__address_us__state_code__abbreviation",
                 "location__address__address_us__zipcode",
             )
-        ).filter(search=SearchQuery(value, search_type="websearch"))
+        ).filter(search=SearchQuery(value, search_type="websearch", config="english"))
 
     def filter_address_city(self, queryset, name, value):
         return queryset.annotate(
