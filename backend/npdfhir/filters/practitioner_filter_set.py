@@ -99,17 +99,17 @@ class PractitionerFilterSet(filters.FilterSet):
         return queryset.filter(queries).distinct()
 
     def filter_practitioner_name(self, queryset, name, value):
-        query = SearchQuery(f"{value.upper()}", search_type="websearch")
+        query = SearchQuery(value, search_type="websearch", config="english")
         return queryset.filter(
             provider__individual__individualtoname__search_vector=query
         ).distinct()
 
     def filter_practitioner_type(self, queryset, name, value):
-        query = SearchQuery(value, search_type="websearch")
+        query = SearchQuery(value, search_type="websearch", config="english")
         return queryset.filter(provider__providertotaxonomy__nucc_code__search_vector=query)
 
     def filter_address(self, queryset, name, value):
-        query = SearchQuery(value, search_type="websearch")
+        query = SearchQuery(value, search_type="websearch", config="english")
         return queryset.filter(
             provider__individual__individualtoaddress__address__address_us__search_vector=query
         )
