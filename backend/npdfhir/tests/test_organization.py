@@ -110,7 +110,6 @@ class OrganizationViewSetTestCase(APITestCase):
         response = self.client.get(url)
         assert_fhir_response(self, response)
         assert_has_results(self, response)
-        print(response.data)
 
     # Sorting tests
     def test_list_in_default_order(self):

@@ -432,8 +432,14 @@ class OrganizationSerializer(serializers.Serializer):
 
                 for taxonomy in clinical_org.organizationtotaxonomy_set.all():
                     qualification_ext = build_org_qualification_extension(
-                        code=CodeableConcept.construct(
-                            coding=[{"system": "http://nucc.org/provider-taxonomy", "code": taxonomy.nucc_code_id, "display": nucc_taxonomy_codes[str(taxonomy.nucc_code_id)]}]
+                        code=CodeableConcept(
+                            coding=[
+                                Coding(
+                                    system="http://nucc.org/provider-taxonomy",
+                                    code=taxonomy.nucc_code_id,
+                                    display=nucc_taxonomy_codes[str(taxonomy.nucc_code_id)]
+                                )
+                            ]
                         )
                     )
                     taxonomies.append(qualification_ext)
