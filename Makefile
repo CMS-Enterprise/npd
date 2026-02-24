@@ -251,3 +251,8 @@ setup: build create-db migrate
 # bring local working copy up to date
 .PHONY: update
 update: build migrate build-frontend-assets
+
+# run the app locally with datadog
+.PHONY: datadog-up
+datadog-up: 
+	@docker compose -f compose.datadog.yml up --build
