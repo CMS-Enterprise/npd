@@ -1,11 +1,7 @@
 import sys
 from datetime import datetime, timezone
-import typing
-
-from pydantic import Field
 
 from django.urls import reverse
-from fhir.resources import fhirtypes
 from fhir.resources.R4B.address import Address
 from fhir.resources.R4B.bundle import Bundle
 from fhir.resources.R4B.capabilitystatement import (
@@ -76,7 +72,7 @@ def build_org_qualification_extension(
 
     sub_extensions.append(
         Extension(
-            url="code",
+            url=ORG_QUALIFICATION_URL,
             valueCodeableConcept=code,
         )
     )

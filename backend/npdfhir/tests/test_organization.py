@@ -111,6 +111,16 @@ class OrganizationViewSetTestCase(APITestCase):
         assert_fhir_response(self, response)
         assert_has_results(self, response)
 
+        bundle = response.data["results"]
+
+        for entry in bundle["entry"]:
+            self.assertIn("resource", entry)
+
+            org_entry = entry["resource"]
+            org_type_extension = org_entry['extension'][0]['extension'][0]
+
+            self.assertIn("valueCodeableConcept", org_type_extension)
+
     # Sorting tests
     def test_list_in_default_order(self):
         url = reverse("fhir-organization-list")
@@ -273,7 +283,9 @@ class OrganizationViewSetTestCase(APITestCase):
             self.assertIn("resource", entry)
 
             org_entry = entry["resource"]
-
+            nucc_display_name = org_entry['extension'][0]['extension'][0]['valueCodeableConcept']['coding'][0]['display']
+            
+            self.assertIn(filter_param_value, nucc_display_name)
             self.assertEqual(org_entry["id"], str(self.hospital_nucc_org.id))
 
     # Identifiers Filter tests
