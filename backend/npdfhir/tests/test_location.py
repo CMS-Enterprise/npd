@@ -4,7 +4,7 @@ from rest_framework import status
 from geopy.distance import geodesic
 
 from .api_test_case import APITestCase
-from .fixtures.location import create_location
+from .fixtures.address import create_location
 from .fixtures.organization import create_organization
 from .helpers import (
     assert_fhir_response,

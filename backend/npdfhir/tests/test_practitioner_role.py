@@ -23,7 +23,7 @@ from ..models import (
     OrganizationView,
 )
 
-from .fixtures.location import create_location
+from .fixtures.address import create_location
 from .fixtures.practitioner import (
     create_full_practitionerrole,
 )

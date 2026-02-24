@@ -5,12 +5,14 @@ import uuid
 from ...models import (
     Individual,
     IndividualToName,
+    IndividualToAddress,
     Npi,
     Provider,
     ProviderToOtherId,
     ProviderToTaxonomy,
 )
 from .utils import random_date
+from .address import DefaultAddress
 from typing import TypedDict, List
 
 
@@ -47,9 +49,10 @@ class DefaultNPI:
             self.last_update_date = random_date(start_date=enumeration_date)
         else:
             self.last_update_date = last_update_date
+        self.create_if_not_exists()
 
     def create_if_not_exists(self):
-        npi = Npi.filter(npi=self.npi)
+        npi = Npi.filter(npi=self.npi).first()
         if not npi.exists():
             Npi.objects.create(
                 npi=self.npi,
@@ -64,6 +67,7 @@ class DefaultIndividual:
     def __init__(
         self,
         names: List[DefaultName],
+        addresses: List[DefaultAddress],
         id: uuid = None,
         gender: str = "F",
     ):
@@ -73,11 +77,13 @@ class DefaultIndividual:
             self.id = id
         self.names = names
         self.gender = gender
+        self.addresses = addresses
+        self.create_if_not_exists()
 
     def create_if_not_exists(self):
         individual = Individual.objects.filter(id=self.id)
         if individual.exists():
-            self.individual = individual
+            self.individual = individual.first()
         else:
             self.individual = Individual.objects.create(
                 id=self.id,
@@ -86,10 +92,14 @@ class DefaultIndividual:
 
             for name in self.names:
                 IndividualToName.objects.create(
-                    individual=self.individual,
+                    individual_id=self.id,
                     first_name=name.first_name,
                     last_name=name.last_name,
                     name_us_id=name.name_use_id,
+                )
+            for address in self.addresses:
+                IndividualToAddress.objects.create(
+                    individual_id=self.id, address_id=address.id, address_use_id=2
                 )
         return self.individual
 
@@ -106,15 +116,20 @@ class DefaultPractitioner:
             self.id = uuid.uuid4()
         else:
             self.id = id
-
-        self.individual = individual.create_if_not_exists()
+        if individual is None:
+            individual = DefaultIndividual()
+        self.individual = individual
         self.taxonomies = taxonomies
-        self.npi = npi.create_if_not_exists()
+        if npi is None:
+            npi = DefaultNPI()
+        self.npi = npi
+        self.other_ids = other_ids
+        self.create_if_not_exists()
 
     def create_if_not_exists(self):
         provider = Provider.filter(id=self.id)
         if provider.exists():
-            self.provider = provider
+            self.provider = provider.first()
         else:
             self.provider = Provider.objects.create(
                 npi=self.npi,

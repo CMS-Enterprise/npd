@@ -2,8 +2,8 @@ from django.urls import reverse
 from rest_framework import status
 
 from .api_test_case import APITestCase
-from .fixtures.location import create_location
-from .fixtures.practitioner import create_practitioner
+from .fixtures.address import create_location
+from .fixtures.practitioner import DefaultPractitioner, DefaultIndividual
 from .helpers import (
     assert_fhir_response,
     assert_has_results,
@@ -13,6 +13,8 @@ from .helpers import (
     concat_address_string,
 )
 from ..models import ProviderView
+
+practitioners = [{}]
 
 
 class PractitionerViewSetTestCase(APITestCase):
@@ -42,37 +44,57 @@ class PractitionerViewSetTestCase(APITestCase):
             ),
         ]
 
-        cls.nurse_code = "363L00000X"
-        cls.non_nurse_code = "364SP0200X"
-        cls.nurse_prac = create_practitioner(
-            last_name="ZOLLER",
-            first_name="DAVID",
-            practitioner_types=[cls.nurse_code, cls.non_nurse_code],
+        #Practitioner with the NUCC Codes 363L00000X (Nurse) and 364SP0200X (Non-nurse)
+        cls.nurse_prac = DefaultPractitioner(
+            taxonomies=["363L00000X", "364SP0200X"],
         )
 
-        cls.transplant_code = "204F00000X"
-        cls.non_nurse_prac = create_practitioner(
-            last_name="MILLER",
-            first_name="STACY",
-            practitioner_types=[cls.transplant_code],
+        # Practitioner with the NUCC Code "204F00000X" (Transplant)
+        cls.non_nurse_prac = DefaultPractitioner(
+            taxonomies=["204F00000X"],
         )
 
-        cls.counselor = "101Y00000X"
-        cls.non_nurse_prac = create_practitioner(
-            last_name="TROY",
-            first_name="DIANA",
-            practitioner_types=[cls.counselor],
+        # Practitioner with the NUCC Code "101Y00000X" (Counselor)
+        cls.non_nurse_prac = DefaultPractitioner(
+            taxonomies=["101Y00000X"],
         )
-
-        cls.sample_last_name = "SOLOMON"
-        cls.pracs = [
-            create_practitioner(last_name="AADALEN", first_name="KIRK", npi_value=1234567890),
-            create_practitioner(last_name="ABBAS", first_name="ASAD", other_id=1234567890),
-            create_practitioner(last_name="ABBOTT", first_name="BRUCE"),
-            create_practitioner(last_name="ABBOTT", first_name="PHILIP"),
-            create_practitioner(last_name="ABDELHALIM", first_name="AHMED"),
-            create_practitioner(last_name="ABDELHAMED", first_name="ABDELHAMED"),
-            create_practitioner(last_name="ABDEL NOUR", first_name="MAGDY"),
+        names_for_sorting = [
+            ("AADALEN", "KIRK"),
+            ("ABBAS", "ASAD"),
+            ("ABBOTT", "BRUCE"),
+            ("ABBOTT", "PHILIP"),
+            ("ABDELHALIM", "AHMED"),
+            ("ABDELHAMED", "ABDELHAMED"),
+            ("ABDEL NOUR", "MAGDY"),
+            ("ABEL", "MICHAEL"),
+            ("ABELES", "JENNIFER"),
+            ("ABELSON", "MARK"),
+            ("CUTLER", "A"),
+            ("NIZAM", "A"),
+            ("SALAIS", "A"),
+            ("JANOS", "AARON"),
+            ("NOONBERG", "AARON"),
+            ("PITNEY", "AARON"),
+            ("SOLOMON", "AARON"),
+            ("STEIN", "AARON"),
+            ("ALI", "ABBAS"),
+            ("JAFRI", "ABBAS"),
+            ("ZWERLING", "HAYWARD"),
+            ("ZUROSKE", "GLEN"),
+            ("ZUCKERBERG", "EDWARD"),
+            ("ZUCKER", "WILLIAM"),
+            ("ZUCCALA", "SCOTT"),
+            ("ZOVE", "DANIEL"),
+            ("ZORN", "GUNNAR"),
+            ("ZOOG", "EUGENE"),
+            ("ZOLMAN", "MARK"),
+            ("ZOLLER", "DAVID"),
+        ]
+        for name in names_for_sorting:
+            DefaultPractitioner(
+                individual=DefaultIndividual(last_name=name[0], first_name=name[1])
+            ),
+        
             create_practitioner(last_name="ABEL", first_name="MICHAEL", location=cls.locs[0]),
             create_practitioner(last_name="ABELES", first_name="JENNIFER", location=cls.locs[1]),
             create_practitioner(last_name="ABELSON", first_name="MARK", location=cls.locs[2]),
@@ -113,25 +135,13 @@ class PractitionerViewSetTestCase(APITestCase):
 
     # Sorting tests
     def test_list_in_default_order(self):
+        sorted_names = self.names_for_sorting[0:10]
         url = reverse("fhir-practitioner-list")
         response = self.client.get(url)
         assert_fhir_response(self, response)
 
         # Extract names
         names = extract_practitioner_names(response)
-
-        sorted_names = [
-            ("AADALEN", "KIRK"),
-            ("ABBAS", "ASAD"),
-            ("ABBOTT", "BRUCE"),
-            ("ABBOTT", "PHILIP"),
-            ("ABDELHALIM", "AHMED"),
-            ("ABDELHAMED", "ABDELHAMED"),
-            ("ABDEL NOUR", "MAGDY"),
-            ("ABEL", "MICHAEL"),
-            ("ABELES", "JENNIFER"),
-            ("ABELSON", "MARK"),
-        ]
 
         self.assertEqual(
             names,
@@ -140,6 +150,7 @@ class PractitionerViewSetTestCase(APITestCase):
         )
 
     def test_list_in_alternate_order(self):
+        sorted_names = self.names_for_sorting[10:20]
         url = reverse("fhir-practitioner-list")
         response = self.client.get(
             url,
@@ -150,19 +161,6 @@ class PractitionerViewSetTestCase(APITestCase):
         # Extract names
         names = extract_practitioner_names(response)
 
-        sorted_names = [
-            ("CUTLER", "A"),
-            ("NIZAM", "A"),
-            ("SALAIS", "A"),
-            ("JANOS", "AARON"),
-            ("NOONBERG", "AARON"),
-            ("PITNEY", "AARON"),
-            ("SOLOMON", "AARON"),
-            ("STEIN", "AARON"),
-            ("ALI", "ABBAS"),
-            ("JAFRI", "ABBAS"),
-        ]
-
         self.assertEqual(
             names,
             sorted_names,
@@ -170,6 +168,7 @@ class PractitionerViewSetTestCase(APITestCase):
         )
 
     def test_list_in_descending_order(self):
+        sorted_names = self.names_for_sorting[20:]
         url = reverse("fhir-practitioner-list")
         response = self.client.get(
             url,
@@ -180,19 +179,6 @@ class PractitionerViewSetTestCase(APITestCase):
         # Extract names
         # Note: have to normalize the names to have python sorting match sql
         names = extract_practitioner_names(response)
-
-        sorted_names = [
-            ("ZWERLING", "HAYWARD"),
-            ("ZUROSKE", "GLEN"),
-            ("ZUCKERBERG", "EDWARD"),
-            ("ZUCKER", "WILLIAM"),
-            ("ZUCCALA", "SCOTT"),
-            ("ZOVE", "DANIEL"),
-            ("ZORN", "GUNNAR"),
-            ("ZOOG", "EUGENE"),
-            ("ZOLMAN", "MARK"),
-            ("ZOLLER", "DAVID"),
-        ]
 
         self.assertEqual(
             names,

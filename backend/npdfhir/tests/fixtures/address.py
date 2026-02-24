@@ -29,6 +29,7 @@ class DefaultAddress:
         self.zip_code = zip_code
         self.x = x
         self.y = y
+        self.create()
 
     def create(self):
         point = Point(self.x, self.y)

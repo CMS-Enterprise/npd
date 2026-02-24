@@ -8,15 +8,18 @@ from ...models import (
     OrganizationToTaxonomy,
     OrganizationToAddress,
     Location,
+    LocationToEndpointInstance,
 )
 
 from typing import TypeDict, List
 from practitioner import DefaultIndividual, DefaultNPI, DefaultOtherIDs
-from practitioner import DefaultAddress
+from address import DefaultAddress
+from endpoint import DefaultEndpointInstance
 
 
 class DefaultLocation(TypeDict):
     address: DefaultAddress
+    endpoint_instance: DefaultEndpointInstance
     name: str = "Location A"
     id: uuid = None
 
@@ -27,28 +30,35 @@ class DefaultOrganization:
         npi: DefaultNPI,
         authorized_official: DefaultIndividual,
         other_ids: DefaultOtherIDs,
-        locations: List[DefaultLocation],
+        locations: list[DefaultLocation],
         id: uuid = None,
         names: List[str] = ["ABC Organization"],
         taxonomies: list[str] = ["193200000X"],
         is_clinical: bool = True,
     ):
-        if self.id is None:
+        if id is None:
             self.id = uuid.uuid4()
         else:
             self.id = id
         if is_clinical and npi is None:
-            self.npi = npi.create_if_not_exists()
+            self.npi = DefaultNPI().create_if_not_exists()
         self.names = names
         self.taxonomies = taxonomies
+        if authorized_official is None:
+            authorized_official = DefaultIndividual()
         self.authorized_official = authorized_official.create_if_not_exists()
+        if not other_ids:
+            other_ids = [DefaultOtherIDs()]
         self.other_ids = other_ids
-        self.locations = [location.create_if_not_exists() for location in locations]
+        if not locations:
+            locations = [DefaultLocation()]
+        self.locations = locations
+        self.create_if_not_exists()
 
     def create_if_not_exists(self):
         organization = Organization.objects.filter(id=self.id)
         if organization.exists():
-            self.organization = organization
+            self.organization = organization.first()
         else:
             organization = Organization.objects.create(
                 id=self.id, authorized_official=self.authorized_official
@@ -81,14 +91,23 @@ class DefaultOrganization:
                     OrganizationToTaxonomy.objects.create(
                         npi=clinical_organization, nucc_code_id=taxonomy
                     )
+                self.add_locations()
 
-                for address in self.locations:
-                    Location.objects.create(
-                        id=id,
-                        name=name,
-                        organization=organization,
-                        address=address,
-                        active=True,
-                    )
+        return organization
 
-            return organization
+    def add_locations(self, locations: List[DefaultLocation]):
+        if self.locations is None:
+            self.locations = locations
+        else:
+            self.locations += locations
+        for address in self.locations:
+            location = Location.objects.create(
+                id=address.id,
+                name=address.name,
+                organization_id=self.id,
+                address=address.address,
+                active=True,
+            )
+            LocationToEndpointInstance.objects.create(
+                location_id=location.id, endpoint_instance=address.endpoint_instance
+            )
