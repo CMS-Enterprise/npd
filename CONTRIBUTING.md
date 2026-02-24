@@ -22,11 +22,12 @@
       - [2. Docker volume image mismatch](#2-docker-volume-image-mismatch)
       - [3. Port already in use](#3-port-already-in-use)
       - [4. Updated elements do not appear on the frontend after build](#4-updated-elements-do-not-appear-on-the-frontend-after-build)
+      - [5. API endpoint returns empty results but database has data](#5-api-endpoint-returns-empty-results-but-database-has-data)
     - [Workflow and Branching](#workflow-and-branching)
     - [Testing Conventions](#testing-conventions)
       - [Backend Tests](#backend-tests)
       - [Frontend Tests](#frontend-tests)
-      - [End to End Tests](#end-to-end-tests)
+      - [End-to-End Tests](#end-to-end-tests)
     - [Coding Style and Linters](#coding-style-and-linters)
     - [Writing Issues](#writing-issues)
     - [Creating Commits](#creating-commits)
@@ -171,6 +172,24 @@ You can review the use of those tools by running `make` or `bin/npr --help` at t
 | **Error** | Elements do not appear after either pulling a branch or creating new code. |
 | **Cause** | Cached frontend assets or stale build artifacts are being served by the browser or container. |
 | **Fix** | Hard refresh with `Cmd + Shift + R`, or run `make clean-frontend` then `make build-frontend-assets`. |
+
+#### 5. API endpoint returns empty results but database has data
+
+| | |
+|---|---|
+| **Error** | A FHIR endpoint (e.g. `/fhir/Organization/`) returns an empty count. |
+| **Cause** | The API queries a materialized view, not the base table. Materialized views are snapshots that can become stale — if the view was created or last refreshed before seed data was loaded, it will be empty. |
+| **Fix** | Run `make refresh-views`, or manually: `REFRESH MATERIALIZED VIEW npd.<view_name>;` |
+
+**How to confirm this is the issue:**
+```bash
+# run the following command
+bin/npr -e PGPASSWORD={password} -s db psql -U postgres -h db -d npd
+```
+```sql
+-- The materialized view is empty or not accurate
+SELECT COUNT(*) FROM npd.organization_view;
+```
 
 ### Workflow and Branching
 

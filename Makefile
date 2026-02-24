@@ -17,6 +17,7 @@ help:
 	@echo ""
 	@echo "  create-db      Start postgres, create and populate a development DB"
 	@echo "  migrate        Apply pending migrations to the development database"
+	@echo "  refresh-views  Refresh all materialized views in the development database"
 	@echo ""
 	@echo "  up             Start the NPD application at http://localhost:8000"
 	@echo "  down           Stop all running docker compose services"
@@ -108,12 +109,24 @@ create-db:
 	# create development database only if it doesn't already exist
 	@docker compose run --rm db sh -c 'echo "creating $$POSTGRES_DB"; PGPASSWORD=$$POSTGRES_PASSWORD psql -h db -U $$POSTGRES_USER -d postgres -c "CREATE DATABASE $$POSTGRES_DB" || echo "$$POSTGRES_DB already exists"'
 	
+# refresh all materialized views in the development database 
+.PHONY: refresh-views
+refresh-views:
+	@echo "Refreshing materialized views..."
+	@docker compose exec db psql -U postgres -d $${NPD_DB_NAME:-npd} -c "\
+		REFRESH MATERIALIZED VIEW npd.organization_view; \
+		REFRESH MATERIALIZED VIEW npd.provider_to_location_view; \
+		REFRESH MATERIALIZED VIEW npd.provider_view; \
+	"
+	@echo "Materialized views refreshed."
+
 # run all flyway migrations for the development environment
 .PHONY: migrate
 migrate:
 	@echo "Migrating the development database..."
 	@docker compose up -d db
 	@bin/npr migrate
+	@$(MAKE) refresh-views
 
 # drop, create, and then run all flyway migrations for the development environment
 .PHONY: reset-db
