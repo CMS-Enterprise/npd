@@ -7,7 +7,7 @@
 | Updated | 2029-12-03 | @abachman-dsac | adding notes on `make` and `bin/npr`          |
 | Updated | 2026-01-28 | @sachin-panayil| updating links with new path                  |
 | Updated | 2026-02-10 | @spopelka-dsac | updating testing documentation                |
-| Updated | 2026-02-24 | @sachin-panayil| adding new troubleshooting sectio             |
+| Updated | 2026-02-24 | @sachin-panayil| adding new troubleshooting section            |
 
 - [How to Contribute](#how-to-contribute)
   - [Getting Started](#getting-started)
