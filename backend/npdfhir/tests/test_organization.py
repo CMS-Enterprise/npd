@@ -270,6 +270,26 @@ class OrganizationViewSetTestCase(APITestCase):
             self.assertTrue(any(param_in_name))
             self.assertNotIn(ensure_not_in_results, org_entry["name"])
 
+    def test_list_filter_by_y_name(self):
+        y_name = "SUPPLY"
+
+        url = reverse("fhir-organization-list")
+        response = self.client.get(url, {"name": y_name})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert_has_results(self, response)
+
+        bundle = response.data["results"]
+
+        for entry in bundle["entry"]:
+            self.assertIn("resource", entry)
+
+            org_entry = entry["resource"]
+            names = org_entry["name"]
+            if "alias" in org_entry.keys():
+                names += org_entry["alias"]
+
+            self.assertIn(y_name, names)
+
     def test_list_filter_by_organization_type(self):
         filter_param_value = "Hospital"
         url = reverse("fhir-organization-list")

@@ -7,6 +7,7 @@
 | Updated | 2029-12-03 | @abachman-dsac | adding notes on `make` and `bin/npr`          |
 | Updated | 2026-01-28 | @sachin-panayil| updating links with new path                  |
 | Updated | 2026-02-10 | @spopelka-dsac | updating testing documentation                |
+| Updated | 2026-02-24 | @sachin-panayil| adding new troubleshooting section            |
 
 - [How to Contribute](#how-to-contribute)
   - [Getting Started](#getting-started)
@@ -22,11 +23,12 @@
       - [2. Docker volume image mismatch](#2-docker-volume-image-mismatch)
       - [3. Port already in use](#3-port-already-in-use)
       - [4. Updated elements do not appear on the frontend after build](#4-updated-elements-do-not-appear-on-the-frontend-after-build)
+      - [5. API endpoint returns empty results but database has data](#5-api-endpoint-returns-empty-results-but-database-has-data)
     - [Workflow and Branching](#workflow-and-branching)
     - [Testing Conventions](#testing-conventions)
       - [Backend Tests](#backend-tests)
       - [Frontend Tests](#frontend-tests)
-      - [End to End Tests](#end-to-end-tests)
+      - [End-to-End Tests](#end-to-end-tests)
     - [Coding Style and Linters](#coding-style-and-linters)
     - [Writing Issues](#writing-issues)
     - [Creating Commits](#creating-commits)
@@ -139,70 +141,55 @@ You can review the use of those tools by running `make` or `bin/npr --help` at t
 `bin/npr` is a runner for managing complex `docker compose run` commands across the various services that make up this project.
 
 ### Troubleshooting
+
 #### 1. PostgreSQL collation version mismatch
 
-**Error**
-```
-ERROR: template database "template1" has a collation version mismatch
-```
+| | |
+|---|---|
+| **Error** | `template database "template1" has a collation version mismatch` |
+| **Cause** | A PostgreSQL Docker volume was created using a different system library version. |
+| **Fix** | Automatically resolved by the Flyway migration `R__refresh_collation_version.sql`. |
 
-**Cause**
-```
-A PostgreSQL Docker volume was created using a different system library version
-```
-**Fix**
-This should automatically be resolved by the Flyway migration `R__refresh_collation_version.sql`.
+#### 2. Docker volume image mismatch
 
-#### 2. Docker volume image mismatch 
-
-**Error**
-```
-ERROR: extension "postgis" already exists
-```
-
-**Cause**
-```
-Mismatch of Docker database images due to deprecated older code or a partially completed migration
-```
-**Fix**
-```
-make reset-db
-make setup
-```
+| | |
+|---|---|
+| **Error** | `extension "postgis" already exists` |
+| **Cause** | Mismatch of Docker database images due to deprecated older code or a partially completed migration. |
+| **Fix** | Run `make reset-db` then `make setup`. |
 
 #### 3. Port already in use
 
-**Error**
-```
-bind: address already in use
-```
-
-**Cause**
-```
-Another local service is already using a required port
-```
-**Fix**
-```
-sudo lsof -i :{port}
-sudo kill <PID>
-```
+| | |
+|---|---|
+| **Error** | `bind: address already in use` |
+| **Cause** | Another local service is already using a required port. |
+| **Fix** | Run `sudo lsof -i :{port}` to find the process, then `sudo kill <PID>`. |
 
 #### 4. Updated elements do not appear on the frontend after build
 
-**Error**
-```
-Elements do not appear after either pulling a branch or creating new code
-```
+| | |
+|---|---|
+| **Error** | Elements do not appear after either pulling a branch or creating new code. |
+| **Cause** | Cached frontend assets or stale build artifacts are being served by the browser or container. |
+| **Fix** | Hard refresh with `Cmd + Shift + R`, or run `make clean-frontend` then `make build-frontend-assets`. |
 
-**Cause**
+#### 5. API endpoint returns empty results but database has data
+
+| | |
+|---|---|
+| **Error** | A FHIR endpoint (e.g. `/fhir/Organization/`) returns an empty count. |
+| **Cause** | The API queries a materialized view, not the base table. Materialized views are snapshots that can become stale — if the view was created or last refreshed before seed data was loaded, it will be empty. |
+| **Fix** | Run `make refresh-views`, or manually: `REFRESH MATERIALIZED VIEW npd.<view_name>;` |
+
+**How to confirm this is the issue:**
+```bash
+# run the following command
+bin/npr -e PGPASSWORD={password} -s db psql -U postgres -h db -d npd
 ```
-Cached frontend assets or stale build artifacts are being served by the browser or container
-```
-**Fix**
-```
-CMD + Shift + R
-make clean-frontend
-make build-frontend-assets
+```sql
+-- The materialized view is empty or not accurate
+SELECT COUNT(*) FROM npd.organization_view;
 ```
 
 ### Workflow and Branching
