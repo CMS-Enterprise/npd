@@ -44,11 +44,15 @@ class OrganizationViewSetTestCase(APITestCase):
         DefaultOrganization(names=["YARMOUTH AUDIOLOGY", "ABC YARMOUTH"])
 
         # Generate test data for organization hierarchies
-        DefaultOrganization(id="c591bfc5-b4ed-49af-926f-569056b5b1aa")
+        DefaultOrganization(names=["Parent Org"], id="c591bfc5-b4ed-49af-926f-569056b5b1aa")
         DefaultOrganization(
+            names=["Child Org"],
             id="5f56f3f0-3bd6-42ce-b275-f12f92a4ba40",
             parent_id="c591bfc5-b4ed-49af-926f-569056b5b1aa",
         )
+
+        # Generate test data for a non-clinical organization
+        DefaultOrganization(names=["Joe Health Incorporated"], is_clinical=False)
 
         cls.locs = [
             create_location(name="Main Clinic", organization=cls.orgs[0]),
@@ -71,13 +75,6 @@ class OrganizationViewSetTestCase(APITestCase):
                 addr_line_1="404 Great Amazing Avenue",
             ),
         ]
-
-        cls.joe_legal_entity = create_legal_entity(dba_name="Joe Administrative Services LLC")
-        cls.joe_name = "Joe Health Incorporated"
-        cls.joe_health_org = create_organization(
-            name=cls.joe_name, legal_entity=cls.joe_legal_entity
-        )
-        cls.orgs.append(cls.joe_health_org)
 
         cls.other_id = OtherIdType.objects.first()
         cls.other_id_org = create_organization(name="Beaver Clinicals", other_id_type=cls.other_id)
