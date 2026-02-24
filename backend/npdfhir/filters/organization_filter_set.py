@@ -64,7 +64,7 @@ class OrganizationFilterSet(filters.FilterSet):
         ]
 
     def filter_name(self, queryset, name, value):
-        query = SearchQuery(f"{value.upper()}", search_type="websearch")
+        query = SearchQuery(f"{value.upper()}", search_type="websearch", config="english")
         return queryset.filter(organization__organizationtoname__search_vector=query)
 
     def filter_identifier(self, queryset, name, value):
@@ -113,7 +113,7 @@ class OrganizationFilterSet(filters.FilterSet):
                 "organization__organizationtoaddress__address__address_us__state_code__abbreviation",
                 "organization__organizationtoaddress__address__address_us__zipcode",
             )
-        ).filter(search=SearchQuery(value, search_type="websearch"))
+        ).filter(search=SearchQuery(value, search_type="websearch", config="english"))
 
     def filter_address_city(self, queryset, name, value):
         return queryset.annotate(

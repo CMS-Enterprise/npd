@@ -81,7 +81,7 @@ class LocationFilterSet(filters.FilterSet):
                 "address__address_us__state_code__abbreviation",
                 "address__address_us__zipcode",
             )
-        ).filter(search=SearchQuery(value, search_type="websearch"))
+        ).filter(search=SearchQuery(value, search_type="websearch", config="english"))
 
     def filter_address_city(self, queryset, name, value):
         return queryset.annotate(search=SearchVector("address__address_us__city_name")).filter(
