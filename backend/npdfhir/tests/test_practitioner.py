@@ -2,7 +2,6 @@ from django.urls import reverse
 from rest_framework import status
 
 from .api_test_case import APITestCase
-from .fixtures.address import create_location
 from .fixtures.practitioner import DefaultPractitioner, DefaultIndividual
 from .helpers import (
     assert_fhir_response,
@@ -20,44 +19,42 @@ practitioners = [{}]
 class PractitionerViewSetTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.locs = [
-            create_location(
-                name="California Location A",
-                city="Springfield",
-                state="CA",
-                zipcode="12345",
-                addr_line_1="113 Stadium Blvd.",
-            ),
-            create_location(
-                name="California Location B",
-                city="Sacramento",
-                state="CA",
-                zipcode="04321",
-                addr_line_1="333 Rocky Road.",
-            ),
-            create_location(
-                name="New York Location A",
-                city="Rochester",
-                state="NY",
-                zipcode="33333",
-                addr_line_1="123 Street R.",
-            ),
+        addresses = [
+            {
+                "city": "Springfield",
+                "state": "CA",
+                "zip_code": "12345",
+                "line_1": "113 Stadium Blvd.",
+            },
+            {
+                "city": "Sacramento",
+                "state": "CA",
+                "zip_code": "04321",
+                "line_1": "333 Rocky Road.",
+            },
+            {
+                "city": "Rochester",
+                "state": "NY",
+                "zip_code": "33333",
+                "line_1": "123 Street R.",
+            },
         ]
 
-        #Practitioner with the NUCC Codes 363L00000X (Nurse) and 364SP0200X (Non-nurse)
+        # Test NUCC Code filtering
+        # Practitioner with the NUCC Codes 363L00000X (Nurse) and 364SP0200X (Non-nurse)
         cls.nurse_prac = DefaultPractitioner(
             taxonomies=["363L00000X", "364SP0200X"],
         )
-
         # Practitioner with the NUCC Code "204F00000X" (Transplant)
         cls.non_nurse_prac = DefaultPractitioner(
             taxonomies=["204F00000X"],
         )
-
         # Practitioner with the NUCC Code "101Y00000X" (Counselor)
         cls.non_nurse_prac = DefaultPractitioner(
             taxonomies=["101Y00000X"],
         )
+
+        # Test name sorting
         names_for_sorting = [
             ("AADALEN", "KIRK"),
             ("ABBAS", "ASAD"),
@@ -91,36 +88,14 @@ class PractitionerViewSetTestCase(APITestCase):
             ("ZOLLER", "DAVID"),
         ]
         for name in names_for_sorting:
-            DefaultPractitioner(
-                individual=DefaultIndividual(last_name=name[0], first_name=name[1])
-            ),
-        
-            create_practitioner(last_name="ABEL", first_name="MICHAEL", location=cls.locs[0]),
-            create_practitioner(last_name="ABELES", first_name="JENNIFER", location=cls.locs[1]),
-            create_practitioner(last_name="ABELSON", first_name="MARK", location=cls.locs[2]),
-            create_practitioner(last_name="CUTLER", first_name="A"),
-            create_practitioner(last_name="NIZAM", first_name="A"),
-            create_practitioner(last_name="SALAIS", first_name="A"),
-            create_practitioner(
-                last_name="JANOS", first_name="AARON", location=cls.locs[1], address_use="home"
-            ),
-            create_practitioner(last_name="NOONBERG", first_name="AARON"),
-            create_practitioner(last_name="PITNEY", first_name="AARON"),
-            create_practitioner(last_name=cls.sample_last_name, first_name="AARON"),
-            create_practitioner(last_name="STEIN", first_name="AARON"),
-            create_practitioner(last_name="ALI", first_name="ABBAS"),
-            create_practitioner(last_name="JAFRI", first_name="ABBAS"),
-            create_practitioner(last_name="ZWERLING", first_name="HAYWARD"),
-            create_practitioner(last_name="ZUROSKE", first_name="GLEN"),
-            create_practitioner(last_name="ZUCKERBERG", first_name="EDWARD"),
-            create_practitioner(last_name="ZUCKER", first_name="WILLIAM"),
-            create_practitioner(last_name="ZUCCALA", first_name="SCOTT", gender="M"),
-            create_practitioner(last_name="ZOVE", first_name="DANIEL"),
-            create_practitioner(last_name="ZORN", first_name="GUNNAR"),
-            create_practitioner(last_name="ZOOG", first_name="EUGENE"),
-            create_practitioner(last_name="ZOLMAN", first_name="MARK"),
-            cls.nurse_prac,
-        ]
+            DefaultPractitioner(individual=DefaultIndividual(last_name=name[0], first_name=name[1]))
+
+        # Test Practitioners with addresses
+        for address in addresses:
+            DefaultPractitioner(individual=DefaultIndividual(addresses=[address]))
+
+        # Test gender filtering with a male practitioner
+        DefaultPractitioner(individual=DefaultIndividual(gender="M"))
 
         ProviderView.refresh_materialized_view()
 

@@ -3,7 +3,7 @@ from rest_framework import status
 
 from ..models import Organization, OtherIdType, OrganizationView
 from .api_test_case import APITestCase
-from .fixtures.organization import create_legal_entity, create_organization
+from .fixtures.organization import create_legal_entity, DefaultOrganization
 from .fixtures.address import create_location
 from .helpers import (
     assert_fhir_response,
@@ -17,34 +17,38 @@ from .helpers import (
 class OrganizationViewSetTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.orgs = [
-            create_organization(
-                name="1ST CHOICE HOME HEALTH CARE INC", id="c591bfc5-b4ed-49af-926f-569056b5b1aa"
-            ),
-            create_organization(
-                name="1ST CHOICE MEDICAL DISTRIBUTORS, LLC",
-                id="5f56f3f0-3bd6-42ce-b275-f12f92a4ba40",
-                parent_id="c591bfc5-b4ed-49af-926f-569056b5b1aa",
-            ),
-            create_organization(
-                name="986 INFUSION PHARMACY #1 INC.", aliases=["INFUSION INC.", "ABC Infusion"]
-            ),
-            create_organization(name="A & A MEDICAL SUPPLY COMPANY"),
-            create_organization(name="ABACUS BUSINESS CORPORATION GROUP INC."),
-            create_organization(name="ABBY D CENTER, INC."),
-            create_organization(name="ABC DURABLE MEDICAL EQUIPMENT INC"),
-            create_organization(name="ABC HOME MEDICAL SUPPLY, INC."),
-            create_organization(name="A BEAUTIFUL SMILE DENTISTRY, L.L.C."),
-            create_organization(name="A & B HEALTH CARE, INC."),
-            create_organization(name="ZUNI HOME HEALTH CARE AGENCY"),
-            create_organization(name="ZEELAND COMMUNITY HOSPITAL"),
-            create_organization(name="YOUNGSTOWN ORTHOPAEDIC ASSOCIATES LTD"),
-            create_organization(name="YOUNG C. BAE, M.D."),
-            create_organization(name="YORKTOWN EMERGENCY MEDICAL SERVICE"),
-            create_organization(name="YODORINCMISSIONPLAZAPHARMACY"),
-            create_organization(name="YOAKUM COMMUNITY HOSPITAL"),
-            create_organization(name="YARMOUTH AUDIOLOGY", aliases=["ABC YARMOUTH"]),
+        # Generate test data to test sorting
+        names_for_sorting = [
+            "1ST CHOICE HOME HEALTH CARE INC",
+            "1ST CHOICE MEDICAL DISTRIBUTORS, LLC",
+            "986 INFUSION PHARMACY #1 INC.",
+            "A & A MEDICAL SUPPLY COMPANY",
+            "ABACUS BUSINESS CORPORATION GROUP INC.",
+            "ABBY D CENTER, INC.",
+            "ABC DURABLE MEDICAL EQUIPMENT INC",
+            "ABC HOME MEDICAL SUPPLY, INC.",
+            "A BEAUTIFUL SMILE DENTISTRY, L.L.C.",
+            "A & B HEALTH CARE, INC.",
+            "ZUNI HOME HEALTH CARE AGENCY",
+            "ZEELAND COMMUNITY HOSPITAL",
+            "YOUNGSTOWN ORTHOPAEDIC ASSOCIATES LTD",
+            "YOUNG C. BAE, M.D.",
+            "YORKTOWN EMERGENCY MEDICAL SERVICE",
+            "YODORINCMISSIONPLAZAPHARMACY",
+            "YOAKUM COMMUNITY HOSPITAL",
         ]
+        for name in names_for_sorting:
+            DefaultOrganization(names=[name])
+
+        # Generate test data for an organization with an alias
+        DefaultOrganization(names=["YARMOUTH AUDIOLOGY", "ABC YARMOUTH"])
+
+        # Generate test data for organization hierarchies
+        DefaultOrganization(id="c591bfc5-b4ed-49af-926f-569056b5b1aa")
+        DefaultOrganization(
+            id="5f56f3f0-3bd6-42ce-b275-f12f92a4ba40",
+            parent_id="c591bfc5-b4ed-49af-926f-569056b5b1aa",
+        )
 
         cls.locs = [
             create_location(name="Main Clinic", organization=cls.orgs[0]),

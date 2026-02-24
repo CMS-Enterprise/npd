@@ -32,7 +32,8 @@ class DefaultOrganization:
         other_ids: DefaultOtherIDs,
         locations: list[DefaultLocation],
         id: uuid = None,
-        names: List[str] = ["ABC Organization"],
+        parent_id: uuid = None,
+        names: List[str] = ["Organization ABC"],
         taxonomies: list[str] = ["193200000X"],
         is_clinical: bool = True,
     ):
@@ -40,13 +41,14 @@ class DefaultOrganization:
             self.id = uuid.uuid4()
         else:
             self.id = id
+        self.parent_id = parent_id
         if is_clinical and npi is None:
-            self.npi = DefaultNPI().create_if_not_exists()
+            self.npi = DefaultNPI()
         self.names = names
         self.taxonomies = taxonomies
         if authorized_official is None:
             authorized_official = DefaultIndividual()
-        self.authorized_official = authorized_official.create_if_not_exists()
+        self.authorized_official = authorized_official
         if not other_ids:
             other_ids = [DefaultOtherIDs()]
         self.other_ids = other_ids
@@ -61,7 +63,7 @@ class DefaultOrganization:
             self.organization = organization.first()
         else:
             organization = Organization.objects.create(
-                id=self.id, authorized_official=self.authorized_official
+                id=self.id, parent_id=self.parent_id, authorized_official=self.authorized_official
             )
             for i, name in enumerate(self.names):
                 OrganizationToName.objects.create(
