@@ -48,10 +48,11 @@ if "runserver" or "test" in sys.argv:
         nucc_taxonomy_codes,
     )
 
-#Extend the Organization class
+# Extend the Organization class
 ORG_QUALIFICATION_URL = (
     "https://build.fhir.org/organization-definitions.html#Organization.qualification"
 )
+
 
 def build_org_qualification_extension(
     code: CodeableConcept,
@@ -97,6 +98,7 @@ def build_org_qualification_extension(
         url=ORG_QUALIFICATION_URL,
         extension=sub_extensions,
     )
+
 
 class AddressSerializer(serializers.Serializer):
     delivery_line_1 = serializers.CharField(source="addressus__delivery_line_1", read_only=True)
@@ -433,7 +435,7 @@ class OrganizationSerializer(serializers.Serializer):
                                 Coding(
                                     system="http://nucc.org/provider-taxonomy",
                                     code=taxonomy.nucc_code_id,
-                                    display=nucc_taxonomy_codes[str(taxonomy.nucc_code_id)]
+                                    display=nucc_taxonomy_codes[str(taxonomy.nucc_code_id)],
                                 )
                             ]
                         )

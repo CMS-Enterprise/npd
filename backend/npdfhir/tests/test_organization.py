@@ -44,7 +44,7 @@ class OrganizationViewSetTestCase(APITestCase):
             create_organization(name="YOUNG C. BAE, M.D."),
             create_organization(name="YORKTOWN EMERGENCY MEDICAL SERVICE"),
             create_organization(name="YODORINCMISSIONPLAZAPHARMACY"),
-            create_organization(name="YOAKUM COMMUNITY HOSPITAL",other_id_type=medicaid_id_type),
+            create_organization(name="YOAKUM COMMUNITY HOSPITAL", other_id_type=medicaid_id_type),
             create_organization(name="YARMOUTH AUDIOLOGY", aliases=["ABC YARMOUTH"]),
         ]
 
@@ -117,7 +117,7 @@ class OrganizationViewSetTestCase(APITestCase):
             self.assertIn("resource", entry)
 
             org_entry = entry["resource"]
-            org_type_extension = org_entry['extension'][0]['extension'][0]
+            org_type_extension = org_entry["extension"][0]["extension"][0]
 
             self.assertIn("valueCodeableConcept", org_type_extension)
 
@@ -283,8 +283,10 @@ class OrganizationViewSetTestCase(APITestCase):
             self.assertIn("resource", entry)
 
             org_entry = entry["resource"]
-            nucc_display_name = org_entry['extension'][0]['extension'][0]['valueCodeableConcept']['coding'][0]['display']
-            
+            nucc_display_name = org_entry["extension"][0]["extension"][0]["valueCodeableConcept"][
+                "coding"
+            ][0]["display"]
+
             self.assertIn(filter_param_value, nucc_display_name)
             self.assertEqual(org_entry["id"], str(self.hospital_nucc_org.id))
 
