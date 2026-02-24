@@ -17,6 +17,8 @@ from .helpers import (
 class OrganizationViewSetTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
+        medicaid_id_type = OtherIdType.objects.get(value="MEDICAID")
+
         cls.orgs = [
             create_organization(
                 name="1ST CHOICE HOME HEALTH CARE INC", id="c591bfc5-b4ed-49af-926f-569056b5b1aa"
@@ -42,7 +44,7 @@ class OrganizationViewSetTestCase(APITestCase):
             create_organization(name="YOUNG C. BAE, M.D."),
             create_organization(name="YORKTOWN EMERGENCY MEDICAL SERVICE"),
             create_organization(name="YODORINCMISSIONPLAZAPHARMACY"),
-            create_organization(name="YOAKUM COMMUNITY HOSPITAL"),
+            create_organization(name="YOAKUM COMMUNITY HOSPITAL",other_id_type=medicaid_id_type),
             create_organization(name="YARMOUTH AUDIOLOGY", aliases=["ABC YARMOUTH"]),
         ]
 
@@ -108,6 +110,7 @@ class OrganizationViewSetTestCase(APITestCase):
         response = self.client.get(url)
         assert_fhir_response(self, response)
         assert_has_results(self, response)
+        print(response.data)
 
     # Sorting tests
     def test_list_in_default_order(self):

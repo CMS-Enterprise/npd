@@ -16,27 +16,23 @@ from fhir.resources.R4B.capabilitystatement import (
     CapabilityStatementRestResourceSearchParam,
 )
 from fhir.resources.R4B.codeableconcept import CodeableConcept
-from fhir.resources.codeableconcept import CodeableConcept as R5CodeableConcept
 from fhir.resources.R4B.coding import Coding
-from fhir.resources.coding import Coding as R5Coding
 from fhir.resources.R4B.contactdetail import ContactDetail
 from fhir.resources.R4B.contactpoint import ContactPoint
 from fhir.resources.R4B.endpoint import Endpoint
 from fhir.resources.R4B.humanname import HumanName
 from fhir.resources.R4B.identifier import Identifier
-from fhir.resources.identifier import Identifier as R5Identifier
 from fhir.resources.R4B.location import Location as FHIRLocation, LocationPosition
 from fhir.resources.R4B.meta import Meta
-from fhir.resources.R4B.organization import Organization as OrganizationBase# as FHIROrganization
-from fhir.resources.organization import OrganizationQualification
+from fhir.resources.R4B.organization import Organization as FHIROrganization
 from fhir.resources.R4B.organizationaffiliation import (
     OrganizationAffiliation as FHIROrganizationAffiliation,
 )
 from fhir.resources.R4B.period import Period
-from fhir.resources.period import Period as R5Period
 from fhir.resources.R4B.practitioner import Practitioner, PractitionerQualification
 from fhir.resources.R4B.practitionerrole import PractitionerRole
 from fhir.resources.R4B.reference import Reference
+from fhir.resources.R4B.extension import Extension
 from rest_framework import serializers
 
 from .models import (
@@ -57,28 +53,54 @@ if "runserver" or "test" in sys.argv:
     )
 
 #Extend the Organization class
-class FHIROrganization(OrganizationBase):
-    __resource_type__ = "Organization"
+ORG_QUALIFICATION_URL = (
+    "https://build.fhir.org/organization-definitions.html#Organization.qualification"
+)
 
-    qualification: typing.List[fhirtypes.OrganizationQualificationType] | None = Field(
-        default=None,
-        alias="qualification",
-        title=(
-            "Qualifications, certifications, accreditations, licenses, training, "
-            "etc. pertaining to the provision of care"
-        ),
-        description=(
-            "The official certifications, accreditations, training, designations "
-            "and licenses that authorize and/or otherwise endorse the provision of "
-            "care by the organization.  For example, an approval to provide a type "
-            "of services issued by a certifying body (such as the US Joint "
-            "Commission) to an organization."
-        ),
-        json_schema_extra={
-            "element_property": True,
-        },
+def build_org_qualification_extension(
+    code: CodeableConcept,
+    identifiers: list[Identifier] | None = None,
+    period: Period | None = None,
+    issuer: Reference | None = None,
+) -> Extension:
+    sub_extensions = []
+
+    if identifiers:
+        for identifier in identifiers:
+            sub_extensions.append(
+                Extension(
+                    url="identifier",
+                    valueIdentifier=identifier,
+                )
+            )
+
+    sub_extensions.append(
+        Extension(
+            url="code",
+            valueCodeableConcept=code,
+        )
     )
 
+    if period:
+        sub_extensions.append(
+            Extension(
+                url="period",
+                valuePeriod=period,
+            )
+        )
+
+    if issuer:
+        sub_extensions.append(
+            Extension(
+                url="issuer",
+                valueReference=issuer,
+            )
+        )
+
+    return Extension(
+        url=ORG_QUALIFICATION_URL,
+        extension=sub_extensions,
+    )
 
 class AddressSerializer(serializers.Serializer):
     delivery_line_1 = serializers.CharField(source="addressus__delivery_line_1", read_only=True)
@@ -352,25 +374,6 @@ class OrganizationSerializer(serializers.Serializer):
             profile=["http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"]
         )
 
-        code = R5CodeableConcept(
-            coding=[
-                R5Coding(
-                    system="http://nucc.org/provider-taxonomy",
-                    code="TEST",
-                    display=str("TEST"),
-                )
-            ]
-        )
-        organization.qualification = [OrganizationQualification(
-            identifier=[
-                R5Identifier(
-                    value="test",
-                    type=code,  # TODO: Replace
-                    period=R5Period(),
-                )
-            ],
-            code=code,
-        )]
         identifiers = []
 
         taxonomies = []
@@ -428,29 +431,15 @@ class OrganizationSerializer(serializers.Serializer):
                     identifiers.append(other_identifier)
 
                 for taxonomy in clinical_org.organizationtotaxonomy_set.all():
-                    code = CodeableConcept(
-                        coding=[
-                            Coding(
-                                system="http://nucc.org/provider-taxonomy",
-                                code=taxonomy.nucc_code_id,
-                                display=nucc_taxonomy_codes[str(taxonomy.nucc_code_id)],
-                            )
-                        ]
+                    qualification_ext = build_org_qualification_extension(
+                        code=CodeableConcept.construct(
+                            coding=[{"system": "http://nucc.org/provider-taxonomy", "code": taxonomy.nucc_code_id, "display": nucc_taxonomy_codes[str(taxonomy.nucc_code_id)]}]
+                        )
                     )
-                    qualification = PractitionerQualification(
-                        identifier=[
-                            Identifier(
-                                value="test",
-                                type=code,  # TODO: Replace
-                                period=Period(),
-                            )
-                        ],
-                        code=code,
-                    )
-                    taxonomies.append(qualification.model_dump())
-                # TODO extend based on US core
-                # if taxonomies:
-                #    organization.qualification = taxonomies
+                    taxonomies.append(qualification_ext)
+
+                if taxonomies:
+                    organization.extension = taxonomies
 
         organization.identifier = identifiers
 
