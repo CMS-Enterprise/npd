@@ -49,6 +49,7 @@ if "runserver" or "test" in sys.argv:
     )
 
 # Extend the Organization class
+#NOTE: fhir.resources really doesn't like when you try to subclass their Pydantic models
 ORG_QUALIFICATION_URL = (
     "https://build.fhir.org/organization-definitions.html#Organization.qualification"
 )
