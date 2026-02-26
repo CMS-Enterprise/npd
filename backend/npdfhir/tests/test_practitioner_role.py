@@ -106,17 +106,17 @@ class PractitionerRoleViewSetTestCase(APITestCase):
 
         # Generate test data for a practitioner role with specific details
 
-        # Optimetrist practitioner
+        # Optimetrist practitioner with y names
         pr = DefaultPractitionerRole(
             practitioner=DefaultPractitioner(
                 individual=DefaultIndividual(
-                    names=[DefaultName({"first_name": "Charlie", "last_name": "Brown"})], gender="M"
+                    names=[DefaultName({"first_name": "Charly", "last_name": "Brown"})], gender="M"
                 ),
                 npi=DefaultNPI(npi=3000000001),
                 taxonomies=["152W00000X"],
             ),
             organization=DefaultOrganization(
-                names=["Charlie Brown M.D."], taxonomies=["261Q00000X"]
+                names=["Charly Brown M.D."], taxonomies=["261Q00000X"]
             ),
             location=DefaultLocation(
                 address=DefaultAddress(city="Sunnyville", state="CA", zip_code="90001"),
@@ -127,6 +127,12 @@ class PractitionerRoleViewSetTestCase(APITestCase):
             specialty=777,
         )
         cls.organization_id = pr.organization.id
+
+        # Generate test data for a Practitioner role involving a practitioner that practices emergency medicine at a facility that practices endoscopy
+        DefaultPractitionerRole(
+            practitioner=DefaultPractitioner(taxonomies=["207PE0004X"]),
+            organization=DefaultOrganization(taxonomies=["261QE0800X"]),
+        )
 
         # Generate test data to retrieve specific practitioner role
         DefaultPractitionerRole(id="cad156c0-87fb-489b-bf5e-f15c95ee771e")

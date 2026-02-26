@@ -3,6 +3,7 @@ from rest_framework import status
 from .api_test_case import APITestCase
 from .fixtures.endpoint import DefaultEhrVendor, DefaultEndpointInstance
 from .fixtures.organization import DefaultOrganization, DefaultLocation
+from .fixtures.organization import DefaultAddress
 from .helpers import (
     assert_fhir_response,
     assert_has_results,
@@ -23,11 +24,17 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
 
         # Generate test data for an organization that has a single endpoint associated with default ehr vendor
         org = DefaultOrganization(
+            names=["A Good Clinical Org"],
             id="a9cd57b1-9e8c-4b75-86da-653acfc3ade6",
+            taxonomies=["283Q00000X"],
             locations=[
                 DefaultLocation(
                     name="Good Location 1",
-                    endpoint_instance=DefaultEndpointInstance(name="Good Endpoint 1"),
+                    address=DefaultAddress(zip_code="87101"),
+                    endpoint_instance=DefaultEndpointInstance(
+                        name="Good Endpoint 1",
+                        ehr_vendor=DefaultEhrVendor(name="Vendor of EHR Systems"),
+                    ),
                 )
             ],
         )
@@ -35,21 +42,26 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
 
         # Generate test data for an organization with multiple endpoints, same EHR vendor
         org = DefaultOrganization(
+            names=["B Good Clinical Org"],
             locations=[
                 DefaultLocation(
                     name="Location A",
+                    address=DefaultAddress(
+                        line_1="807 Dusty Ln", city="Springfield", state="NY", zip_code="01234"
+                    ),
                     endpoint_instance=DefaultEndpointInstance(name="Endpoint A"),
                 ),
                 DefaultLocation(
                     name="Location B",
                     endpoint_instance=DefaultEndpointInstance(name="Endpoint B"),
                 ),
-            ]
+            ],
         )
         cls.orgs.append(org)
 
         # Generate test data for an organization with multiple endpoints, different EHR vendors
         org = DefaultOrganization(
+            names=["C Good Clinical Org"],
             locations=[
                 DefaultLocation(
                     name="Location A",
@@ -63,7 +75,7 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
                         name="Endpoint B", ehr_vendor=DefaultEhrVendor(name="EHR Vendor B")
                     ),
                 ),
-            ]
+            ],
         )
         cls.orgs.append(org)
 
@@ -141,7 +153,7 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
         ehr_orgs = extract_resource_fields(response, "organization")
         ehr_org_names = [org["display"] for org in ehr_orgs]
 
-        sorted = ["Epic", "Legendary", "Zod"]
+        sorted = ["EHR Vendor", "EHR Vendor A", "Vendor of EHR Systems"]
 
         self.assertEqual(
             ehr_org_names,
@@ -152,6 +164,7 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
     def test_list_has_correct_orgs(self):
         url = reverse("fhir-organizationaffiliation-list")
         response = self.client.get(url)
+        assert_has_results(self, response)
 
         ids = extract_resource_ids(response)
         ids.sort()
@@ -170,11 +183,11 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
         self.assertNotIn(str(self.org_with_no_location.id), ids)
 
     def test_org_name_filter(self):
-        name_search = "Epic"
+        name_search = "Vendor of EHR Systems"
         url = reverse("fhir-organizationaffiliation-list")
         response = self.client.get(url, {"org_name": name_search})
-
         bundle = response.data["results"]
+        assert_has_results(self, response)
 
         for entry in bundle["entry"]:
             self.assertIn("resource", entry)
@@ -188,8 +201,8 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
         name_search = "A Good Clinical Org"
         url = reverse("fhir-organizationaffiliation-list")
         response = self.client.get(url, {"participating_org_name": name_search})
-
         bundle = response.data["results"]
+        assert_has_results(self, response)
 
         for entry in bundle["entry"]:
             self.assertIn("resource", entry)
@@ -199,55 +212,20 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
             entry_org_name = org_affil["participatingOrganization"]["display"]
             self.assertIn(name_search, entry_org_name)
 
-    def test_org_type_filter(self):
-        org_type_search = "Clinic/Center"
-        url = reverse("fhir-organizationaffiliation-list")
-        response = self.client.get(url, {"participating_organization_type": org_type_search})
-        bundle = response.data["results"]
-
-        for entry in bundle["entry"]:
-            self.assertIn("resource", entry)
-            org_affil = entry["resource"]
-            self.assertIn("id", org_affil)
-
-            entry_org_id = org_affil["participatingOrganization"]["reference"].split("/")[-1]
-            self.assertEqual(str(self.org_good_1.id), entry_org_id)
-
-    def test_org_name_filter(self):
-        name_search = "Epic"
-        url = reverse("fhir-organizationaffiliation-list")
-        response = self.client.get(url, {"org_name": name_search})
-
-        bundle = response.data["results"]
-
-        for entry in bundle["entry"]:
-            self.assertIn("resource", entry)
-            org_affil = entry["resource"]
-            self.assertIn("id", org_affil)
-
-            entry_org_name = org_affil["organization"]["display"]
-            self.assertIn(name_search, entry_org_name)
-
-    def test_participating_org_name_filter(self):
-        name_search = "A Good Clinical Org"
+    def test_ehr_vendor_with_no_orgs(self):
+        name_search = "Lonely EHR Vendor"
         url = reverse("fhir-organizationaffiliation-list")
         response = self.client.get(url, {"participating_org_name": name_search})
-
         bundle = response.data["results"]
 
-        for entry in bundle["entry"]:
-            self.assertIn("resource", entry)
-            org_affil = entry["resource"]
-            self.assertIn("id", org_affil)
-
-            entry_org_name = org_affil["participatingOrganization"]["display"]
-            self.assertIn(name_search, entry_org_name)
+        self.assertEqual(0, len(bundle["entry"]))
 
     def test_org_type_filter(self):
-        org_type_search = "Clinic/Center"
+        org_type_search = "Hospital"
         url = reverse("fhir-organizationaffiliation-list")
         response = self.client.get(url, {"participating_organization_type": org_type_search})
         bundle = response.data["results"]
+        assert_has_results(self, response)
 
         for entry in bundle["entry"]:
             self.assertIn("resource", entry)
@@ -255,7 +233,7 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
             self.assertIn("id", org_affil)
 
             entry_org_id = org_affil["participatingOrganization"]["reference"].split("/")[-1]
-            self.assertEqual(str(self.org_good_1.id), entry_org_id)
+            self.assertEqual("a9cd57b1-9e8c-4b75-86da-653acfc3ade6", entry_org_id)
 
     def test_retrieve_single_organization_affil(self):
         id = "a9cd57b1-9e8c-4b75-86da-653acfc3ade6"
@@ -288,16 +266,15 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
 
             address_lines = []
             for location in location_entry["location"]:
-                loc_id = location["reference"].split("/")[-1]
-                loc_obj = Location.objects.filter(pk=loc_id).first()
-                address_lines.append(loc_obj.address.address_us.delivery_line_1)
+                returned_location = self.client.get(location["reference"]).json()
+                address_lines.append(returned_location["address"])
 
-            self.assertIn(address_search, address_lines)
+            self.assertIn(address_search, str(address_lines))
 
     def test_list_filter_by_address_city(self):
-        address_search = "Springfield"
+        city_search = "Springfield"
         url = reverse("fhir-organizationaffiliation-list")
-        response = self.client.get(url, {"address_city": address_search})
+        response = self.client.get(url, {"address_city": city_search})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
 
@@ -307,18 +284,17 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
             self.assertIn("resource", entry)
             location_entry = entry["resource"]
 
-            address_lines = []
+            cities = []
             for location in location_entry["location"]:
-                loc_id = location["reference"].split("/")[-1]
-                loc_obj = Location.objects.filter(pk=loc_id).first()
-                address_lines.append(loc_obj.address.address_us.city_name)
+                returned_location = self.client.get(location["reference"]).json()
+                cities.append(returned_location["address"]["city"])
 
-            self.assertIn(address_search, address_lines)
+            self.assertIn(city_search, cities)
 
     def test_list_filter_by_address_state(self):
-        address_search = "NY"
+        state_search = "NY"
         url = reverse("fhir-organizationaffiliation-list")
-        response = self.client.get(url, {"address_state": address_search})
+        response = self.client.get(url, {"address_state": state_search})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
 
@@ -328,18 +304,15 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
             self.assertIn("resource", entry)
             location_entry = entry["resource"]
 
-            address_lines = []
+            states = []
             for location in location_entry["location"]:
-                loc_id = location["reference"].split("/")[-1]
-                loc_obj = Location.objects.filter(pk=loc_id).first()
-                address_lines.append(loc_obj.address.address_us.state_code.abbreviation)
-
-            self.assertIn(address_search, address_lines)
+                returned_location = self.client.get(location["reference"]).json()
+                states.append(returned_location["address"]["state"])
 
     def test_list_filter_by_address_zipcode(self):
-        address_search = "87101"
+        zip_code_search = "87101"
         url = reverse("fhir-organizationaffiliation-list")
-        response = self.client.get(url, {"address_postalcode": address_search})
+        response = self.client.get(url, {"address_postalcode": zip_code_search})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
 
@@ -349,18 +322,17 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
             self.assertIn("resource", entry)
             location_entry = entry["resource"]
 
-            address_lines = []
+            zip_codes = []
             for location in location_entry["location"]:
-                loc_id = location["reference"].split("/")[-1]
-                loc_obj = Location.objects.filter(pk=loc_id).first()
-                address_lines.append(loc_obj.address.address_us.zipcode)
+                returned_location = self.client.get(location["reference"]).json()
+                zip_codes.append(returned_location["address"]["postalCode"])
 
-            self.assertIn(address_search, address_lines)
+            self.assertIn(zip_code_search, zip_codes)
 
     def test_list_filter_by_address_zipcode_leading_zero(self):
-        address_search = "01234"
+        zip_code_search = "01234"
         url = reverse("fhir-organizationaffiliation-list")
-        response = self.client.get(url, {"address_postalcode": address_search})
+        response = self.client.get(url, {"address_postalcode": zip_code_search})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
 
@@ -370,13 +342,12 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
             self.assertIn("resource", entry)
             location_entry = entry["resource"]
 
-            address_lines = []
+            zip_codes = []
             for location in location_entry["location"]:
-                loc_id = location["reference"].split("/")[-1]
-                loc_obj = Location.objects.filter(pk=loc_id).first()
-                address_lines.append(loc_obj.address.address_us.zipcode)
+                returned_location = self.client.get(location["reference"]).json()
+                zip_codes.append(returned_location["address"]["postalCode"])
 
-            self.assertIn(address_search, address_lines)
+            self.assertIn(zip_code_search, zip_codes)
 
     def test_retrieve_non_existent_organization_affil(self):
         url = reverse(

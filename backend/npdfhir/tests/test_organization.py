@@ -83,7 +83,7 @@ class OrganizationViewSetTestCase(APITestCase):
         # Generate test data for locations with an other ids
         DefaultOrganization(other_ids=[DefaultOtherID(other_id="testMBI")])
 
-        # Generate test data for an organization with a different NUCC code
+        # Generate test data for an organization with a different NUCC code (283Q00000X - Psychiatric Hospital)
         DefaultOrganization(id="cc9d6beb-992f-47f6-8f41-a10d4cf13694", taxonomies=["283Q00000X"])
 
         # Generate test data for an organization with a custom NPI
