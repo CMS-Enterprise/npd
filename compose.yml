@@ -64,7 +64,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./flyway/db-init:/docker-entrypoint-initdb.d/
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -d ${POSTGRES_DB:-postgres}"]
+      test: ["CMD-SHELL", "pg_isready -d ${NPD_DB_NAME:-npd_development}"]
       interval: 10s
       timeout: 5s
       retries: 5
