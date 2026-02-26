@@ -1,6 +1,6 @@
 name: datadog
 
-# by using `compose.test.yml` alone with `docker compose -f compose.test.yml and
+# by using `compose.datadog.yml` alone with `docker compose -f compose.datadog.yml and
 # the `extends:` settings for each of the named services, we can merge these
 # service definitions cleanly with the ones that already exist in the base
 # compose.yml file
@@ -10,16 +10,22 @@ services:
     extends:
       file: compose.yml
       service: db
+    env_file: !override
+      - path: backend/.env
 
   db-migrations:
     extends:
       file: compose.yml
       service: db-migrations
+    env_file: !override
+      - path: backend/.env
 
   django-web:
     extends:
       file: compose.yml
       service: django-web
+    env_file: !override
+      - path: .env
     environment:
       DD_AGENT_HOST: datadog-agent
       DD_ENV: "${ENV_KEY:-dev}"
