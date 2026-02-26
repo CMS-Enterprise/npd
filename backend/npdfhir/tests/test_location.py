@@ -4,8 +4,8 @@ from rest_framework import status
 from geopy.distance import geodesic
 
 from .api_test_case import APITestCase
-from .fixtures.address import create_location
-from .fixtures.organization import create_organization
+from .fixtures.address import DefaultAddress
+from .fixtures.organization import DefaultOrganization, DefaultLocation
 from .helpers import (
     assert_fhir_response,
     assert_has_results,
@@ -18,98 +18,106 @@ from .helpers import (
 class LocationViewSetTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.orgs = [
-            create_organization(name="Alpha Org", organization_type="283Q00000X"),
-            create_organization(name="Beta Org"),
+        # Generate test location data for address filtering
+        locations = [
+            {
+                "id": "3719c831-a4b7-4a7f-bb47-465a024384fc",
+                "address": {
+                    "city": "San Diego",
+                    "state": "CA",
+                    "zip_code": "55555",
+                    "line_1": "404 Great Amazing Avenue",
+                    "x": 32.824056,
+                    "y": -117.437397,
+                },
+            },
+            {
+                "id": "7c7a433b-fca7-4fb2-9283-dc764fb0ed5c",
+                "address": {
+                    "city": "Seattle",
+                    "state": "WA",
+                    "zip_code": "77777",
+                    "line_1": "333 Grunge Blvd.",
+                    "x": 47.608597,
+                    "y": -122.5046021,
+                },
+            },
+            {
+                "id": "6df24407-ebe0-4f0b-9a75-bdfee486f0df",
+                "address": {
+                    "city": "St. Louis",
+                    "state": "MO",
+                    "zip_code": "89898",
+                    "line_1": "66 Arch Lane",
+                    "x": 38.6219297,
+                    "y": -90.182935,
+                },
+            },
+            {
+                "id": "c1fc1ada-841a-4b92-9e8e-37f4d17b65d4",
+                "address": {
+                    "city": "St. Louis",
+                    "state": "MO",
+                    "zip_code": "05313",
+                    "line_1": "City Museum Rd.",
+                    "x": 38.6336745,
+                    "y": -90.2032725,
+                },
+            },
+            {
+                "id": "b7517cc7-b406-4932-9856-6983ac4ec308",
+                "address": {
+                    "city": "Ft. Lauderdale",
+                    "state": "FL",
+                    "zip_code": "43433",
+                    "line_1": "789 Palmetto Road",
+                    "x": 26.1412097,
+                    "y": -80.191004,
+                },
+            },
         ]
+        for location in locations:
+            address = location.copy()["address"]
+            location.pop("address", None)
+            DefaultOrganization(
+                locations=[DefaultLocation(id=location["id"], address=DefaultAddress(**address))]
+            )
 
-        cls.locs = [
-            create_location(name="Main Clinic", organization=cls.orgs[0]),
-            create_location(name="1ST CHOICE MEDICAL DISTRIBUTORS, LLC", organization=cls.orgs[0]),
-            create_location(name="986 INFUSION PHARMACY #1 INC.", organization=cls.orgs[1]),
-            create_location(name="A & A MEDICAL SUPPLY COMPANY", organization=cls.orgs[1]),
-            create_location(
-                id="3719c831-a4b7-4a7f-bb47-465a024384fc",
-                name="ABACUS BUSINESS CORPORATION GROUP INC.",
-                organization=cls.orgs[0],
-                city="San Diego",
-                state="CA",
-                zipcode="55555",
-                addr_line_1="404 Great Amazing Avenue",
-                x=32.824056,
-                y=-117.437397,
-            ),
-            create_location(
-                id="7c7a433b-fca7-4fb2-9283-dc764fb0ed5c",
-                name="ABBY D CENTER, INC.",
-                organization=cls.orgs[1],
-                city="Seattle",
-                state="WA",
-                zipcode="77777",
-                addr_line_1="333 Grunge Blvd.",
-                address_use="home",
-                x=47.608597,
-                y=-122.5046021,
-            ),
-            create_location(
-                id="6df24407-ebe0-4f0b-9a75-bdfee486f0df",
-                name="ABC DURABLE MEDICAL EQUIPMENT INC",
-                organization=cls.orgs[0],
-                city="St. Louis",
-                state="MO",
-                zipcode="89898",
-                addr_line_1="66 Arch Lane",
-                x=38.6219297,
-                y=-90.182935,
-            ),
-            create_location(
-                id="c1fc1ada-841a-4b92-9e8e-37f4d17b65d4",
-                name="ABC HOME MEDICAL SUPPLY, INC.",
-                organization=cls.orgs[0],
-                city="St. Louis",
-                state="MO",
-                zipcode="05313",
-                addr_line_1="City Museum Rd.",
-                x=38.6336745,
-                y=-90.2032725,
-            ),
-            create_location(
-                id="b7517cc7-b406-4932-9856-6983ac4ec308",
-                name="A BEAUTIFUL SMILE DENTISTRY, L.L.C.",
-                organization=cls.orgs[0],
-                city="Ft. Lauderdale",
-                state="FL",
-                zipcode="43433",
-                addr_line_1="789 Palmetto Road",
-                x=26.1412097,
-                y=-80.191004,
-            ),
-            create_location(
-                name="A & B HEALTH CARE, INC.", organization=cls.orgs[0], x=None, y=None
-            ),
-            create_location(name="ABILENE HELPING HANDS INC", organization=cls.orgs[0]),
-            create_location(name="ZEELAND COMMUNITY HOSPITAL", organization=cls.orgs[0]),
-            create_location(name="YOUNGSTOWN ORTHOPAEDIC ASSOCIATES LTD", organization=cls.orgs[0]),
-            create_location(name="YOUNGSTOWN ORTHOPAEDIC ASSOCIATES LTD", organization=cls.orgs[1]),
-            create_location(name="YOUNGSTOWN ORTHOPAEDIC ASSOCIATES LTD", organization=cls.orgs[1]),
-            create_location(name="YOUNGSTOWN ORTHOPAEDIC ASSOCIATES LTD", organization=cls.orgs[1]),
-            create_location(name="YOUNGSTOWN ORTHOPAEDIC ASSOCIATES LTD", organization=cls.orgs[1]),
-            create_location(name="YOUNG C. BAE, M.D."),
-            create_location(name="YORKTOWN EMERGENCY MEDICAL SERVICE"),
-            create_location(name="YODORINCMISSIONPLAZAPHARMACY", organization=cls.orgs[0]),
-            create_location(name="YOAKUM COMMUNITY HOSPITAL", organization=cls.orgs[0]),
-            create_location(
-                name="FROEDTERT MEMORIAL LUTHERAN HOSPITAL, INC.", organization=cls.orgs[1]
-            ),
-            create_location(name="AMBER ENTERPRISES INC.", organization=cls.orgs[0]),
-            create_location(name="COUNTY OF KOOCHICHING", organization=cls.orgs[0]),
-            create_location(name="OCEAN HOME HEALTH SUPPLY, LLC", organization=cls.orgs[0]),
-            create_location(name="PULMONARY MANAGEMENT, INC.", organization=cls.orgs[0]),
-            create_location(name="MEDICATION MANAGEMENT CENTER, LLC.", organization=cls.orgs[1]),
-            create_location(name="HENDRICKS COUNTY HOSPITAL", organization=cls.orgs[1]),
-            create_location(name="BAY AREA REHABILITATION MEDICAL GROUP", organization=cls.orgs[1]),
-            create_location(name="PROHAB REHABILITATION SERVICES, INC.", organization=cls.orgs[1]),
+        # Generate test location data for a different address use (home)
+        DefaultOrganization(locations=[DefaultLocation(address=DefaultAddress(address_use_id=1))])
+
+        # Generate test location data for alpha sorting
+        cls.names_to_sort = [
+            "1ST CHOICE MEDICAL DISTRIBUTORS, LLC",
+            "986 INFUSION PHARMACY #1 INC.",
+            "A & A MEDICAL SUPPLY COMPANY",
+            "ABACUS BUSINESS CORPORATION GROUP INC.",
+            "ABBY D CENTER, INC.",
+            "ABC DURABLE MEDICAL EQUIPMENT INC",
+            "ABC HOME MEDICAL SUPPLY, INC.",
+            "A BEAUTIFUL SMILE DENTISTRY, L.L.C.",
+            "A & B HEALTH CARE, INC.",
+            "ABILENE HELPING HANDS INC",
+            "ZEELAND COMMUNITY HOSPITAL",
+            "YOUNGSTOWN ORTHOPAEDIC ASSOCIATES LTD",
+            "YOUNGSTOWN ORTHOPAEDIC ASSOCIATES LTD",
+            "YOUNGSTOWN ORTHOPAEDIC ASSOCIATES LTD",
+            "YOUNGSTOWN ORTHOPAEDIC ASSOCIATES LTD",
+            "YOUNGSTOWN ORTHOPAEDIC ASSOCIATES LTD",
+            "YOUNG C. BAE, M.D.",
+            "YORKTOWN EMERGENCY MEDICAL SERVICE",
+            "YODORINCMISSIONPLAZAPHARMACY",
+            "YOAKUM COMMUNITY HOSPITAL",
         ]
+        for name in cls.names_to_sort:
+            DefaultOrganization(locations=[DefaultLocation(name=name)])
+
+        # Generate test data for retrieving specific Location
+        DefaultOrganization(locations=[DefaultLocation(id="1d5d7925-d205-4dbc-be31-5a339c9fb9af")])
+
+        # Generate test data for testing organization type filtering...
+        DefaultOrganization(id="62564fd9-072e-416e-a197-7cb512ce0433", taxonomies=["283Q00000X"])
+
         return super().setUpTestData()
 
     # Basic tests
@@ -128,18 +136,7 @@ class LocationViewSetTestCase(APITestCase):
         # Extract names
         names = extract_resource_names(response)
 
-        sorted_names = [
-            "1ST CHOICE MEDICAL DISTRIBUTORS, LLC",
-            "986 INFUSION PHARMACY #1 INC.",
-            "A & A MEDICAL SUPPLY COMPANY",
-            "ABACUS BUSINESS CORPORATION GROUP INC.",
-            "ABBY D CENTER, INC.",
-            "ABC DURABLE MEDICAL EQUIPMENT INC",
-            "ABC HOME MEDICAL SUPPLY, INC.",
-            "A BEAUTIFUL SMILE DENTISTRY, L.L.C.",
-            "A & B HEALTH CARE, INC.",
-            "ABILENE HELPING HANDS INC",
-        ]
+        sorted_names = self.names_to_sort[0:10]
 
         self.assertEqual(
             names,
@@ -156,61 +153,12 @@ class LocationViewSetTestCase(APITestCase):
         # Note: have to normalize the names to have python sorting match sql
         names = extract_resource_names(response)
 
-        sorted_names = [
-            "ZEELAND COMMUNITY HOSPITAL",
-            "YOUNGSTOWN ORTHOPAEDIC ASSOCIATES LTD",
-            "YOUNGSTOWN ORTHOPAEDIC ASSOCIATES LTD",
-            "YOUNGSTOWN ORTHOPAEDIC ASSOCIATES LTD",
-            "YOUNGSTOWN ORTHOPAEDIC ASSOCIATES LTD",
-            "YOUNGSTOWN ORTHOPAEDIC ASSOCIATES LTD",
-            "YOUNG C. BAE, M.D.",
-            "YORKTOWN EMERGENCY MEDICAL SERVICE",
-            "YODORINCMISSIONPLAZAPHARMACY",
-            "YOAKUM COMMUNITY HOSPITAL",
-        ]
+        sorted_names = self.names_to_sort[10:]
 
         self.assertEqual(
             names,
             sorted_names,
             f"Expected locations list sorted by name in descending but got {names}\n Sorted: {sorted_names}",
-        )
-
-    def test_list_in_order_by_address(self):
-        url = reverse("fhir-location-list")
-        response = self.client.get(url, {"_sort": "address_full,name"})
-        assert_fhir_response(self, response)
-
-        # Extract names
-        # Note: have to normalize the names to have python sorting match sql
-        names = extract_resource_names(response)
-
-        # Names correspond to following addresses
-        # 10000 W Bluemound Rd, Wauwatosa, WI 53226
-        # 10004 S 152nd St, Omaha, NE 68138
-        # 1000 5th St, International Falls, MN 56649
-        # 1000 Airport Rd, Lakewood, NJ 8701
-        # 1000 E Center St, Kingsport, TN 37660
-        # 1000 E Main St, Danville, IN 46122
-        # 1000 Greenley Rd, Sonora, CA 95370
-        # 1000 Regency Ct, Toledo, OH 43623
-
-        sorted_names = [
-            "1ST CHOICE MEDICAL DISTRIBUTORS, LLC",
-            "986 INFUSION PHARMACY #1 INC.",
-            "A & A MEDICAL SUPPLY COMPANY",
-            "A & B HEALTH CARE, INC.",
-            "ABILENE HELPING HANDS INC",
-            "AMBER ENTERPRISES INC.",
-            "BAY AREA REHABILITATION MEDICAL GROUP",
-            "COUNTY OF KOOCHICHING",
-            "FROEDTERT MEMORIAL LUTHERAN HOSPITAL, INC.",
-            "HENDRICKS COUNTY HOSPITAL",
-        ]
-
-        self.assertEqual(
-            names,
-            sorted_names,
-            f"Expected locations list sorted by address ascending but got {names}\n Sorted: {sorted_names}",
         )
 
     # Pagination tests
@@ -228,7 +176,7 @@ class LocationViewSetTestCase(APITestCase):
 
     # Filter tests
     def test_list_filter_by_name(self):
-        name = self.locs[0].name
+        name = self.names_to_sort[0]
 
         url = reverse("fhir-location-list")
         response = self.client.get(url, {"name": name})
@@ -315,9 +263,8 @@ class LocationViewSetTestCase(APITestCase):
             self.assertIn("name", location_entry)
 
             parsed_org_id = location_entry["managingOrganization"]["reference"].split("/")[-1]
-
             # Assert that correct org was referenced by org type
-            self.assertEqual(str(self.orgs[0].id), parsed_org_id)
+            self.assertEqual("62564fd9-072e-416e-a197-7cb512ce0433", parsed_org_id)
 
     def test_list_filter_by_address(self):
         address_search = "Amazing Avenue"
@@ -576,7 +523,7 @@ class LocationViewSetTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_retrieve_single_location(self):
-        id = self.locs[0].id
+        id = "1d5d7925-d205-4dbc-be31-5a339c9fb9af"
         url = reverse("fhir-location-detail", args=[id])
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)

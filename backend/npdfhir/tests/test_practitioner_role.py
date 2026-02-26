@@ -1,5 +1,3 @@
-import math
-
 from django.urls import reverse
 from rest_framework import status
 
@@ -23,139 +21,115 @@ from ..models import (
     OrganizationView,
 )
 
-from .fixtures.address import create_location
-from .fixtures.practitioner import (
-    create_full_practitionerrole,
-)
+from .fixtures.address import DefaultAddress
+from .fixtures.organization import DefaultLocation, DefaultOrganization
+from .fixtures.practitioner_role import DefaultPractitionerRole
+from .fixtures.practitioner import DefaultPractitioner, DefaultIndividual, DefaultName, DefaultNPI
+from .fixtures.endpoint import DefaultEndpointInstance
 
 
 class PractitionerRoleViewSetTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        # (location_name, uuid)
-        cls.orgs = [
-            "A BEAUTIFUL SMILE DENTISTRY, L.L.C.",
-            "ADIRONDACK MEDICAL HEALTH CARE ASSOCIATES PLLC",
-            "ADIRONDACK MEDICAL HEALTH CARE ASSOCIATES PLLC",
-            "ADIRONDACK MEDICAL HEALTH CARE ASSOCIATES PLLC",
-            "ADIRONDACK MEDICAL HEALTH CARE ASSOCIATES PLLC",
-            "ADIRONDACK MEDICAL HEALTH CARE ASSOCIATES PLLC",
-            "ADR LLC",
-            "ADR LLC",
-            "ADR LLC",
-            "ADR LLC",
-        ]
-        cls.locations = [
-            create_location(
-                id="3719c831-a4b7-4a7f-bb47-465a024384fc",
-                name="ABACUS BUSINESS CORPORATION GROUP INC.",
-                organization_name=cls.orgs[0],
-                city="San Diego",
-                state="CA",
-                zipcode="05555",
-                addr_line_1="404 Great Amazing Avenue",
-                x=32.824056,
-                y=-117.437397,
-            ),
-            create_location(
-                id="7c7a433b-fca7-4fb2-9283-dc764fb0ed5c",
-                name="ABBY D CENTER, INC.",
-                organization_name=cls.orgs[1],
-                city="Seattle",
-                state="WA",
-                zipcode="77777",
-                addr_line_1="333 Grunge Blvd.",
-                address_use="home",
-                x=47.608597,
-                y=-122.5046021,
-            ),
-            create_location(
-                id="6df24407-ebe0-4f0b-9a75-bdfee486f0df",
-                name="ABC DURABLE MEDICAL EQUIPMENT INC",
-                organization_name=cls.orgs[0],
-                city="St. Louis",
-                state="MO",
-                zipcode="89898",
-                addr_line_1="66 Arch Lane",
-                x=38.6219297,
-                y=-90.182935,
-            ),
-            create_location(
-                id="c1fc1ada-841a-4b92-9e8e-37f4d17b65d4",
-                name="ABC HOME MEDICAL SUPPLY, INC.",
-                organization_name=cls.orgs[0],
-                city="St. Louis",
-                state="MO",
-                zipcode="65313",
-                addr_line_1="City Museum Rd.",
-                x=38.6336745,
-                y=-90.2032725,
-            ),
-            create_location(
-                id="b7517cc7-b406-4932-9856-6983ac4ec308",
-                name="A BEAUTIFUL SMILE DENTISTRY, L.L.C.",
-                organization_name=cls.orgs[0],
-                city="Ft. Lauderdale",
-                state="FL",
-                zipcode="43433",
-                addr_line_1="789 Palmetto Road",
-                x=26.1412097,
-                y=-80.1910040,
-            ),
+        # Generate test data for various locations
+        locations = [
+            {
+                "id": "3719c831-a4b7-4a7f-bb47-465a024384fc",
+                "name": "ABACUS BUSINESS CORPORATION GROUP INC.",
+                "address": {
+                    "city": "San Diego",
+                    "state": "CA",
+                    "zip_code": "05555",
+                    "line_1": "404 Great Amazing Avenue",
+                    "x": 32.824056,
+                    "y": -117.437397,
+                },
+            },
+            {
+                "id": "7c7a433b-fca7-4fb2-9283-dc764fb0ed5c",
+                "name": "ABBY D CENTER, INC.",
+                "address": {
+                    "city": "Seattle",
+                    "state": "WA",
+                    "zip_code": "77777",
+                    "line_1": "333 Grunge Blvd.",
+                    "x": 47.608597,
+                    "y": -122.5046021,
+                },
+            },
+            {
+                "id": "6df24407-ebe0-4f0b-9a75-bdfee486f0df",
+                "name": "ABC DURABLE MEDICAL EQUIPMENT INC",
+                "address": {
+                    "city": "St. Louis",
+                    "state": "MO",
+                    "zip_code": "89898",
+                    "line_1": "66 Arch Lane",
+                    "x": 38.6219297,
+                    "y": -90.182935,
+                },
+            },
+            {
+                "id": "c1fc1ada-841a-4b92-9e8e-37f4d17b65d4",
+                "name": "ABC HOME MEDICAL SUPPLY, INC.",
+                "address": {
+                    "city": "St. Louis",
+                    "state": "MO",
+                    "zip_code": "65313",
+                    "line_1": "City Museum Rd.",
+                    "x": 38.6336745,
+                    "y": -90.2032725,
+                },
+            },
+            {
+                "id": "b7517cc7-b406-4932-9856-6983ac4ec308",
+                "name": "A BEAUTIFUL SMILE DENTISTRY, L.L.C.",
+                "address": {
+                    "city": "Ft. Lauderdale",
+                    "state": "FL",
+                    "zip_code": "43433",
+                    "line_1": "789 Palmetto Road",
+                    "x": 26.1412097,
+                    "y": -80.1910040,
+                },
+            },
         ]
 
-        locs = cls.locations + cls.locations
-        cls.roles = []
-
-        for i, loc_name in enumerate(cls.orgs):
-            # You can vary practitioner data a bit to avoid collisions
-            first = f"Test{i}"
-            last = f"Practitioner{i}"
-            npi = 1000000000 + i
-
-            location = locs[i]
-
-            role = create_full_practitionerrole(
-                first_name=first,
-                last_name=last,
-                gender="M" if i % 2 == 0 else "F",
-                npi_value=npi,
-                location_id=location.id,
-                org_name=cls.orgs[math.floor(i / 2)],
-                role_display="Clinician",
-                role_code="MD",
-                practitioner_nucc_types=["101200000X"],
+        for location in locations:
+            DefaultPractitionerRole(
+                location=DefaultLocation(
+                    id=location["id"],
+                    name=location["name"],
+                    address=DefaultAddress(**location["address"]),
+                )
             )
 
-            cls.roles.append(role)
-
-        cls.first_prac_id = cls.roles[0].id
-
-        cls.roles_with_params = []
+        # Generate test data for a practitioner role with specific details
 
         # Optimetrist practitioner
-
-        pr = create_full_practitionerrole(
-            first_name="Charlie",
-            last_name="Brown",
-            gender="M",
-            npi_value=3000000001,
-            org_name="Charlie Brown M.D.",
-            role_display="Clinician",
-            role_code="MD",
-            practitioner_nucc_types=["152W00000X"],
-            organization_nucc_type="261Q00000X",
-            location_city="Sunnyville",
-            location_state="CA",
-            location_zip="90001",
-            endpoint_payload_type="urn:ihe:pcc:xphr:2007",
-            endpoint_connection_type="secure-email",
-            specialty_id=777,
+        pr = DefaultPractitionerRole(
+            practitioner=DefaultPractitioner(
+                individual=DefaultIndividual(
+                    names=[DefaultName({"first_name": "Charlie", "last_name": "Brown"})], gender="M"
+                ),
+                npi=DefaultNPI(npi=3000000001),
+                taxonomies=["152W00000X"],
+            ),
+            organization=DefaultOrganization(
+                names=["Charlie Brown M.D."], taxonomies=["261Q00000X"]
+            ),
+            location=DefaultLocation(
+                address=DefaultAddress(city="Sunnyville", state="CA", zip_code="90001"),
+                endpoint_instance=DefaultEndpointInstance(
+                    payload_type="urn:ihe:pcc:xphr:2007", connection_type="secure-email"
+                ),
+            ),
+            specialty=777,
         )
+        cls.organization_id = pr.organization.id
 
-        cls.organization_id = pr.location.organization_id
-
-        cls.roles_with_params.append(pr)
+        # Generate test data to retrieve specific practitioner role
+        DefaultPractitionerRole(id="cad156c0-87fb-489b-bf5e-f15c95ee771e")
 
         OrganizationView.refresh_materialized_view()
         ProviderView.refresh_materialized_view()
@@ -553,7 +527,7 @@ class PractitionerRoleViewSetTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_retrieve_single_pracitionerrole(self):
-        id = self.first_prac_id
+        id = "cad156c0-87fb-489b-bf5e-f15c95ee771e"
         url = reverse("fhir-practitionerrole-detail", args=[id])
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)

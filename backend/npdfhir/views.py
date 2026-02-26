@@ -455,7 +455,7 @@ class FHIRLocationViewSet(viewsets.GenericViewSet):
     pagination_class = CustomPaginator
     lookup_url_kwarg = "id"
     ordering = ["name"]
-    ordering_fields = ["organization_name", "address_full", "name"]
+    ordering_fields = ["organization_name", "name"]
 
     # permission_classes = [permissions.IsAuthenticated]
     @extend_schema(

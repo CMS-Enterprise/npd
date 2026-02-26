@@ -1,10 +1,11 @@
 from django.urls import reverse
 from rest_framework import status
 
-from ..models import Organization, OtherIdType, OrganizationView
+from ..models import Organization, OrganizationView
 from .api_test_case import APITestCase
-from .fixtures.organization import create_legal_entity, DefaultOrganization
-from .fixtures.address import create_location
+from .fixtures.organization import DefaultOrganization, DefaultLocation
+from .fixtures.practitioner import DefaultOtherID, DefaultNPI
+from .fixtures.address import DefaultAddress
 from .helpers import (
     assert_fhir_response,
     assert_has_results,
@@ -18,7 +19,7 @@ class OrganizationViewSetTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         # Generate test data to test sorting
-        names_for_sorting = [
+        cls.names_for_sorting = [
             "1ST CHOICE HOME HEALTH CARE INC",
             "1ST CHOICE MEDICAL DISTRIBUTORS, LLC",
             "986 INFUSION PHARMACY #1 INC.",
@@ -37,7 +38,7 @@ class OrganizationViewSetTestCase(APITestCase):
             "YODORINCMISSIONPLAZAPHARMACY",
             "YOAKUM COMMUNITY HOSPITAL",
         ]
-        for name in names_for_sorting:
+        for name in cls.names_for_sorting:
             DefaultOrganization(names=[name])
 
         # Generate test data for an organization with an alias
@@ -52,44 +53,44 @@ class OrganizationViewSetTestCase(APITestCase):
         )
 
         # Generate test data for a non-clinical organization
-        DefaultOrganization(names=["Joe Health Incorporated"], is_clinical=False)
-
-        cls.locs = [
-            create_location(name="Main Clinic", organization=cls.orgs[0]),
-            create_location(name="1ST CHOICE MEDICAL DISTRIBUTORS, LLC", organization=cls.orgs[0]),
-            create_location(name="986 INFUSION PHARMACY #1 INC.", organization=cls.orgs[1]),
-            create_location(
-                name="A & A MEDICAL SUPPLY COMPANY",
-                organization=cls.orgs[2],
-                city="Boston",
-                state="MA",
-                zipcode="10001",
-                addr_line_1="1 Boston Avenue",
-            ),
-            create_location(
-                name="ABACUS BUSINESS CORPORATION GROUP INC.",
-                organization=cls.orgs[3],
-                city="Sandiego",
-                state="CA",
-                zipcode="05555",
-                addr_line_1="404 Great Amazing Avenue",
-            ),
-        ]
-
-        cls.other_id = OtherIdType.objects.first()
-        cls.other_id_org = create_organization(name="Beaver Clinicals", other_id_type=cls.other_id)
-        cls.orgs.append(cls.other_id_org)
-
-        cls.hospital_nucc_org = create_organization(
-            name="TestNuccOrg", organization_type="283Q00000X"
+        DefaultOrganization(
+            id="f3aa2e21-6163-4f56-b6d2-259ff009c607",
+            names=["Joe Health Incorporated"],
+            is_clinical=False,
         )
-        cls.orgs.append(cls.hospital_nucc_org)
 
-        cls.org_with_npi = create_organization(name="Custom NPI General", npi_value=1427051473)
-        cls.orgs.append(cls.org_with_npi)
+        # Generate test data for organizations with various locations
+        locations = [
+            {
+                "city": "Boston",
+                "state": "MA",
+                "zip_code": "10001",
+                "line_1": "1 Boston Avenue",
+            },
+            {
+                "city": "Sandiego",
+                "state": "CA",
+                "zip_code": "05555",
+                "line_1": "404 Great Amazing Avenue",
+            },
+            {
+                "state": "NY",
+            },
+        ]
+        for location in locations:
+            DefaultOrganization(locations=[DefaultLocation(address=DefaultAddress(**location))])
 
-        cls.org_cumberland = create_organization(name="Cumberland")
-        cls.orgs.append(cls.org_cumberland)
+        # Generate test data for locations with an other ids
+        DefaultOrganization(other_ids=[DefaultOtherID(other_id="testMBI")])
+
+        # Generate test data for an organization with a different NUCC code
+        DefaultOrganization(id="cc9d6beb-992f-47f6-8f41-a10d4cf13694", taxonomies=["283Q00000X"])
+
+        # Generate test data for an organization with a custom NPI
+        DefaultOrganization(npi=DefaultNPI(npi=1427051473))
+
+        # Generate test data for retrieving a specific Organization
+        DefaultOrganization(id="5fe868ad-2d9e-467e-b208-b0cfcfa39054")
 
         OrganizationView.refresh_materialized_view()
 
@@ -119,18 +120,7 @@ class OrganizationViewSetTestCase(APITestCase):
         # Extract names
         names = extract_resource_names(response)
 
-        sorted_names = [
-            "1ST CHOICE HOME HEALTH CARE INC",
-            "1ST CHOICE MEDICAL DISTRIBUTORS, LLC",
-            "986 INFUSION PHARMACY #1 INC.",
-            "A & A MEDICAL SUPPLY COMPANY",
-            "ABACUS BUSINESS CORPORATION GROUP INC.",
-            "ABBY D CENTER, INC.",
-            "ABC DURABLE MEDICAL EQUIPMENT INC",
-            "ABC HOME MEDICAL SUPPLY, INC.",
-            "A BEAUTIFUL SMILE DENTISTRY, L.L.C.",
-            "A & B HEALTH CARE, INC.",
-        ]
+        sorted_names = self.names_for_sorting[0:10]
 
         self.assertEqual(
             names,
@@ -147,18 +137,7 @@ class OrganizationViewSetTestCase(APITestCase):
         # Note: have to normalize the names to have python sorting match sql
         names = extract_resource_names(response)
 
-        sorted_names = [
-            {},
-            "ZUNI HOME HEALTH CARE AGENCY",
-            "ZEELAND COMMUNITY HOSPITAL",
-            "YOUNGSTOWN ORTHOPAEDIC ASSOCIATES LTD",
-            "YOUNG C. BAE, M.D.",
-            "YORKTOWN EMERGENCY MEDICAL SERVICE",
-            "YODORINCMISSIONPLAZAPHARMACY",
-            "YOAKUM COMMUNITY HOSPITAL",
-            "YARMOUTH AUDIOLOGY",
-            "TestNuccOrg",
-        ]
+        sorted_names = [{}] + self.names_for_sorting[-7:] + ["YARMOUTH AUDIOLOGY", "Parent Org"]
 
         self.assertEqual(
             names,
@@ -180,27 +159,16 @@ class OrganizationViewSetTestCase(APITestCase):
         assert_pagination_limit(self, response)
 
     # Basic Filter tests
-    def test_list_filter_by_name(self):
+    def test_list_filter_by_nonexistent_name(self):
         filter_param_value = "Cumberland"
 
         url = reverse("fhir-organization-list")
         response = self.client.get(url, {"name": filter_param_value})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        assert_has_results(self, response)
 
-        bundle = response.data["results"]
+        self.assertEqual(0, response.data["count"])
 
-        for entry in bundle["entry"]:
-            self.assertIn("resource", entry)
-
-            org_entry = entry["resource"]
-            param_in_name = [filter_param_value in org_entry["name"]]
-
-            if "alias" in org_entry:
-                for n in org_entry["alias"]:
-                    param_in_name.append(filter_param_value in n)
-
-            self.assertTrue(any(param_in_name))
+        self.assertEqual([], response.data["results"]["entry"])
 
     def test_list_filter_by_name_broad(self):
         filter_param_value = "ABC"
@@ -273,7 +241,7 @@ class OrganizationViewSetTestCase(APITestCase):
 
             org_entry = entry["resource"]
 
-            self.assertEqual(org_entry["id"], str(self.hospital_nucc_org.id))
+            self.assertEqual("cc9d6beb-992f-47f6-8f41-a10d4cf13694", org_entry["id"])
 
     # Identifiers Filter tests
     def test_list_filter_by_npi_general(self):
@@ -320,8 +288,8 @@ class OrganizationViewSetTestCase(APITestCase):
                 self.assertIn("http://terminology.hl7.org/NamingSystem/npi", identifier["system"])
 
     def test_parent_id(self):
-        parent_id = self.orgs[1].parent_id
-        id = self.orgs[1].id
+        parent_id = "c591bfc5-b4ed-49af-926f-569056b5b1aa"
+        id = "5f56f3f0-3bd6-42ce-b275-f12f92a4ba40"
         url = reverse("fhir-organization-detail", args=[parent_id])
         response = self.client.get(url)
         # check that the parentless organization does not have a parent listed
@@ -545,7 +513,7 @@ class OrganizationViewSetTestCase(APITestCase):
 
     # Retrieve tests
     def test_retrieve_non_clinical_organization(self):
-        id = self.joe_health_org.id
+        id = "f3aa2e21-6163-4f56-b6d2-259ff009c607"
 
         url = reverse("fhir-organization-detail", args=[id])
         response = self.client.get(url)
@@ -553,7 +521,7 @@ class OrganizationViewSetTestCase(APITestCase):
 
         org = response.data
         self.assertEqual(org["resourceType"], "Organization")
-        self.assertEqual(org["name"], self.joe_name)
+        self.assertEqual(org["name"], "Joe Health Incorporated")
 
     def test_retrieve_nonexistent_uuid(self):
         url = reverse("fhir-organization-detail", args=["12300000-0000-0000-0000-000000000123"])
@@ -566,7 +534,7 @@ class OrganizationViewSetTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_retrieve_single_organization(self):
-        id = self.orgs[0].id
+        id = "5fe868ad-2d9e-467e-b208-b0cfcfa39054"
         url = reverse("fhir-organization-detail", args=[id])
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)

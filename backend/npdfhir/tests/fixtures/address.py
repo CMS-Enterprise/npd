@@ -3,7 +3,7 @@ import uuid
 
 from django.contrib.gis.geos import Point
 
-from ...models import Address, AddressUs
+from ...models import Address, AddressUs, FipsState
 
 
 class DefaultAddress:
@@ -17,6 +17,7 @@ class DefaultAddress:
         zip_code: str = "00000",
         x: float = 42.6680771,
         y: float = 73.8518804,
+        address_use_id: int = 2,
     ):
         if id is None:
             self.id = uuid.uuid4()
@@ -29,16 +30,18 @@ class DefaultAddress:
         self.zip_code = zip_code
         self.x = x
         self.y = y
+        self.address_use_id = address_use_id
         self.create()
 
     def create(self):
         point = Point(self.x, self.y)
         self.address_us_id = random.randint(-100000000000, 100000000000)
+        state_code = FipsState.objects.filter(abbreviation=self.state).first()
         self.address_us = AddressUs.objects.create(
             id=self.address_us_id,
-            delivery_line_1=self.addr_line_1,
+            delivery_line_1=self.line_1,
             city_name=self.city,
-            state_code__abbreviation=self.state,
+            state_code=state_code,
             zipcode=self.zip_code,
             latitude=self.y,
             longitude=self.x,
@@ -48,4 +51,4 @@ class DefaultAddress:
             id=self.id,
             address_us=self.address_us,
         )
-        return self.address
+        return self

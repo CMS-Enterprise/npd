@@ -2,7 +2,14 @@ from django.urls import reverse
 from rest_framework import status
 
 from .api_test_case import APITestCase
-from .fixtures.practitioner import DefaultPractitioner, DefaultIndividual
+from .fixtures.practitioner import (
+    DefaultPractitioner,
+    DefaultIndividual,
+    DefaultName,
+    DefaultNPI,
+    DefaultOtherID,
+)
+from .fixtures.address import DefaultAddress
 from .helpers import (
     assert_fhir_response,
     assert_has_results,
@@ -19,28 +26,7 @@ practitioners = [{}]
 class PractitionerViewSetTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        addresses = [
-            {
-                "city": "Springfield",
-                "state": "CA",
-                "zip_code": "12345",
-                "line_1": "113 Stadium Blvd.",
-            },
-            {
-                "city": "Sacramento",
-                "state": "CA",
-                "zip_code": "04321",
-                "line_1": "333 Rocky Road.",
-            },
-            {
-                "city": "Rochester",
-                "state": "NY",
-                "zip_code": "33333",
-                "line_1": "123 Street R.",
-            },
-        ]
-
-        # Test NUCC Code filtering
+        # Generate test data for NUCC Code filtering
         # Practitioner with the NUCC Codes 363L00000X (Nurse) and 364SP0200X (Non-nurse)
         cls.nurse_prac = DefaultPractitioner(
             taxonomies=["363L00000X", "364SP0200X"],
@@ -54,8 +40,8 @@ class PractitionerViewSetTestCase(APITestCase):
             taxonomies=["101Y00000X"],
         )
 
-        # Test name sorting
-        names_for_sorting = [
+        # Generate test data for alpha sorting
+        cls.names_for_sorting = [
             ("AADALEN", "KIRK"),
             ("ABBAS", "ASAD"),
             ("ABBOTT", "BRUCE"),
@@ -87,15 +73,59 @@ class PractitionerViewSetTestCase(APITestCase):
             ("ZOLMAN", "MARK"),
             ("ZOLLER", "DAVID"),
         ]
-        for name in names_for_sorting:
-            DefaultPractitioner(individual=DefaultIndividual(last_name=name[0], first_name=name[1]))
+        for name in cls.names_for_sorting:
+            DefaultPractitioner(
+                individual=DefaultIndividual(
+                    names=[DefaultName(last_name=name[0], first_name=name[1])]
+                )
+            )
 
-        # Test Practitioners with addresses
+        # Generate test data for address filtering
+        addresses = [
+            {
+                "city": "Springfield",
+                "state": "CA",
+                "zip_code": "12345",
+                "line_1": "113 Stadium Blvd.",
+            },
+            {
+                "city": "Sacramento",
+                "state": "CA",
+                "zip_code": "04321",
+                "line_1": "333 Rocky Road.",
+            },
+            {
+                "city": "Rochester",
+                "state": "NY",
+                "zip_code": "33333",
+                "line_1": "123 Street R.",
+            },
+        ]
         for address in addresses:
-            DefaultPractitioner(individual=DefaultIndividual(addresses=[address]))
+            DefaultPractitioner(individual=DefaultIndividual(addresses=[DefaultAddress(**address)]))
 
-        # Test gender filtering with a male practitioner
+        # Generate test data for an address that is a home address
+        DefaultPractitioner(
+            individual=DefaultIndividual(addresses=[DefaultAddress(address_use_id=1)])
+        )
+
+        # Generate test data for gender filtering
         DefaultPractitioner(individual=DefaultIndividual(gender="M"))
+
+        # Generate test data for NPI filtering
+        DefaultPractitioner(
+            individual=DefaultIndividual(id="5d0ef58e-0dab-4274-902f-387f61f7c76d"),
+            npi=DefaultNPI(npi=1234567890),
+        )
+
+        # Generate test data for other identifier filtering
+        DefaultPractitioner(
+            individual=DefaultIndividual(id="eef22b6f-4548-44fb-9d96-69328df19810"),
+            other_ids=[DefaultOtherID(other_id=1234567890)],
+        )
+
+        # Generate test data for retrieving specific Practitioner
+        DefaultPractitioner(individual=DefaultIndividual(id="6c6a26af-9d9d-447f-b03f-22bda49675c6"))
 
         ProviderView.refresh_materialized_view()
 
@@ -196,8 +226,9 @@ class PractitionerViewSetTestCase(APITestCase):
         self.assertFalse(should_be_empty)
 
     def test_list_filter_by_name(self):
+        test_name = "Solomon"
         url = reverse("fhir-practitioner-list")
-        response = self.client.get(url, {"name": self.sample_last_name})
+        response = self.client.get(url, {"name": test_name})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
 
@@ -205,9 +236,9 @@ class PractitionerViewSetTestCase(APITestCase):
             names = []
             for name in entry["resource"]["name"]:
                 names.append(name["family"])
-                names.append(name["given"])
+                names += name["given"]
 
-            self.assertIn(self.sample_last_name, names)
+            self.assertIn(test_name.upper(), names)
 
     def test_list_filter_by_practitioner_type(self):
         url = reverse("fhir-practitioner-list")
@@ -219,8 +250,8 @@ class PractitionerViewSetTestCase(APITestCase):
             nurse_codes = [
                 nc["code"] for nc in entry["resource"]["qualification"][0]["code"]["coding"]
             ]
-            self.assertIn(self.nurse_code, nurse_codes)
-            self.assertNotIn(self.transplant_code, nurse_codes)
+            self.assertIn("363L00000X", nurse_codes)
+            self.assertNotIn("204F00000X", nurse_codes)
 
     # Identifiers Filter tests
     def test_list_filter_by_identifier_general(self):
@@ -231,28 +262,34 @@ class PractitionerViewSetTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
 
-        all_values = []
+        ids = []
         for entry in response.data["results"]["entry"]:
-            values = [int(v["value"]) for v in entry["resource"]["identifier"]]
-            all_values.extend(values)
-            self.assertIn(int(identifier), values)
+            ids.append(entry["resource"]["id"])
+            values = [str(v["value"]) for v in entry["resource"]["identifier"]]
+            self.assertIn(str(identifier), values)
 
-        # assert that Kirk Aadalen is in the data
-        self.assertIn(self.pracs[0].npi.npi, all_values)
-        # assert that Asad Abbas is in the data
-        self.assertIn(self.pracs[1].npi.npi, all_values)
+        # assert that the Practitioner with the npi 1234567890 is present
+        self.assertIn("5d0ef58e-0dab-4274-902f-387f61f7c76d", ids)
+        # assert that the Practitioner with the other identifier 1234567890 is present
+        self.assertIn("eef22b6f-4548-44fb-9d96-69328df19810", ids)
 
     def test_list_filter_by_npi_specific(self):
+        npi = "1234567890"
         url = reverse("fhir-practitioner-list")
-        response = self.client.get(url, {"identifier": "NPI|1234567890"})
+        response = self.client.get(url, {"identifier": f"NPI|{npi}"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
 
+        ids = []
         for entry in response.data["results"]["entry"]:
-            values = [int(v["value"]) for v in entry["resource"]["identifier"]]
-            self.assertIn(self.pracs[0].npi.npi, values)
+            ids.append(entry["resource"]["id"])
+            values = [str(v["value"]) for v in entry["resource"]["identifier"]]
+            self.assertIn(npi, values)
 
-        self.assertEqual(len(response.data["results"]["entry"]), 1)
+        # assert that the Practitioner with the npi 1234567890 is present
+        self.assertIn("5d0ef58e-0dab-4274-902f-387f61f7c76d", ids)
+        # assert that the Practitioner with the other identifier 1234567890 is not present
+        self.assertNotIn("eef22b6f-4548-44fb-9d96-69328df19810", ids)
 
     # Address Filter tests
     def test_list_filter_by_address(self):
@@ -286,7 +323,7 @@ class PractitionerViewSetTestCase(APITestCase):
 
     def test_list_filter_by_address_city(self):
         url = reverse("fhir-practitioner-list")
-        city_string = self.locs[0].address.address_us.city_name
+        city_string = "Springfield"
         response = self.client.get(url, {"address_city": city_string})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
@@ -313,7 +350,7 @@ class PractitionerViewSetTestCase(APITestCase):
 
     def test_list_filter_by_address_postalcode(self):
         url = reverse("fhir-practitioner-list")
-        postal_code_string = self.locs[0].address.address_us.zipcode
+        postal_code_string = "12345"
         response = self.client.get(url, {"address_postalcode": postal_code_string})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
@@ -364,7 +401,7 @@ class PractitionerViewSetTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_retrieve_single_pracitioner(self):
-        id = self.pracs[0].individual.id
+        id = "6c6a26af-9d9d-447f-b03f-22bda49675c6"
         url = reverse("fhir-practitioner-detail", args=[id])
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)

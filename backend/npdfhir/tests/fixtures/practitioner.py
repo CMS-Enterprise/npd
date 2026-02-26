@@ -10,28 +10,41 @@ from ...models import (
     Provider,
     ProviderToOtherId,
     ProviderToTaxonomy,
+    FipsState,
 )
 from .utils import random_date
 from .address import DefaultAddress
-from typing import TypedDict, List
+from typing import List
 
 
-class DefaultName(TypedDict):
-    first_name: str = "Jane"
-    middle_name: str = "C."
-    last_name: str = "Doe"
-    name_use_id: int = 1
+class DefaultName:
+    def __init__(
+        self,
+        first_name: str = "Jane",
+        middle_name: str = "C.",
+        last_name: str = "Doe",
+        name_use_id: int = 1,
+    ):
+        self.first_name = first_name
+        self.middle_name = middle_name
+        self.last_name = last_name
+        self.name_use_id = name_use_id
 
 
-class DefaultOtherIDs(TypedDict):
-    other_id: str = "123"
-    other_id_type: int = 2
-    state: str = "DC"
+class DefaultOtherID:
+    def __init__(self, other_id: str = "123", other_id_type: int = 2, state: str = "DC"):
+        self.other_id = other_id
+        self.other_id_type = other_id_type
+        self.state = state
 
 
 class DefaultNPI:
     def __init__(
-        self, npi: int, entity_type_code: int, enumeration_date: date, last_update_date: date
+        self,
+        npi: int = None,
+        entity_type_code: int = 1,
+        enumeration_date: date = None,
+        last_update_date: date = None,
     ):
         if npi is None:
             self.npi = random.randint(1000000000, 9999999999)
@@ -52,22 +65,25 @@ class DefaultNPI:
         self.create_if_not_exists()
 
     def create_if_not_exists(self):
-        npi = Npi.filter(npi=self.npi).first()
-        if not npi.exists():
-            Npi.objects.create(
+        npi_obj = Npi.objects.filter(npi=self.npi)
+        if npi_obj.exists():
+            npi = npi_obj.first()
+        else:
+            npi = Npi.objects.create(
                 npi=self.npi,
                 entity_type_code=1,
                 enumeration_date=self.enumeration_date,
                 last_update_date=self.last_update_date,
             )
+        self.npi = npi
         return self
 
 
 class DefaultIndividual:
     def __init__(
         self,
-        names: List[DefaultName],
-        addresses: List[DefaultAddress],
+        names: List[DefaultName] = None,
+        addresses: List[DefaultAddress] = None,
         id: uuid = None,
         gender: str = "F",
     ):
@@ -75,8 +91,12 @@ class DefaultIndividual:
             self.id = uuid.uuid4()
         else:
             self.id = id
+        if names is None:
+            names = [DefaultName()]
         self.names = names
         self.gender = gender
+        if addresses is None:
+            addresses = [DefaultAddress()]
         self.addresses = addresses
         self.create_if_not_exists()
 
@@ -95,11 +115,13 @@ class DefaultIndividual:
                     individual_id=self.id,
                     first_name=name.first_name,
                     last_name=name.last_name,
-                    name_us_id=name.name_use_id,
+                    name_use_id=name.name_use_id,
                 )
             for address in self.addresses:
                 IndividualToAddress.objects.create(
-                    individual_id=self.id, address_id=address.id, address_use_id=2
+                    individual_id=self.id,
+                    address_id=address.id,
+                    address_use_id=address.address_use_id,
                 )
         return self.individual
 
@@ -107,15 +129,11 @@ class DefaultIndividual:
 class DefaultPractitioner:
     def __init__(
         self,
-        individual: DefaultIndividual,
-        taxonomies: List[str],
-        other_ids: List[DefaultOtherIDs],
-        npi: DefaultNPI,
+        individual: DefaultIndividual = None,
+        taxonomies: List[str] = [],
+        other_ids: List[DefaultOtherID] = [],
+        npi: DefaultNPI = None,
     ):
-        if id is None:
-            self.id = uuid.uuid4()
-        else:
-            self.id = id
         if individual is None:
             individual = DefaultIndividual()
         self.individual = individual
@@ -127,22 +145,25 @@ class DefaultPractitioner:
         self.create_if_not_exists()
 
     def create_if_not_exists(self):
-        provider = Provider.filter(id=self.id)
+        provider = Provider.objects.filter(individual_id=self.individual.id)
         if provider.exists():
             self.provider = provider.first()
         else:
             self.provider = Provider.objects.create(
-                npi=self.npi,
-                individual=self.individual,
+                npi=self.npi.npi,
+                individual_id=self.individual.id,
             )
             for taxonomy in self.taxonomies:
-                ProviderToTaxonomy.objects.create(npi=provider, nucc_code=taxonomy, id=uuid.uuid4())
+                ProviderToTaxonomy.objects.create(
+                    npi=self.provider, nucc_code_id=taxonomy, id=uuid.uuid4()
+                )
 
             for id in self.other_ids:
+                state_code = FipsState.objects.filter(abbreviation=id.state).first()
                 ProviderToOtherId.objects.create(
-                    npi=provider,
+                    npi=self.provider,
                     other_id=id.other_id,
-                    other_id_type_code=self.other_id_type_code,
-                    state_code__abbreviation=id.state,
+                    other_id_type_id=id.other_id_type,
+                    state_code=state_code,
                 )
         return self.provider

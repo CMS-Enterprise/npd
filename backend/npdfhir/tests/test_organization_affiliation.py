@@ -1,19 +1,8 @@
-import uuid
-
 from django.urls import reverse
 from rest_framework import status
-
-from ..models import (
-    EhrVendor,
-    LocationToEndpointInstance,
-    Nucc,
-    Organization,
-    OtherIdType,
-)
 from .api_test_case import APITestCase
-from .fixtures.endpoint import create_endpoint_instance
-from .fixtures.location import create_location
-from .fixtures.organization import create_organization, create_legal_entity
+from .fixtures.endpoint import DefaultEhrVendor, DefaultEndpointInstance
+from .fixtures.organization import DefaultOrganization, DefaultLocation
 from .helpers import (
     assert_fhir_response,
     assert_has_results,
@@ -29,164 +18,68 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
         - Some that SHOULD match the query
         - Some that SHOULD NOT match the query
         """
-
         cls.orgs = []
 
-        # -----------------------------
-        # Reference data
-        # -----------------------------
-        legal_entity = create_legal_entity("Good Health EIN")
-        other_id_type = OtherIdType.objects.get(value="MEDICAID")
+        # Generate test data for an organization that has a single endpoint associated with default ehr vendor
+        org = DefaultOrganization(
+            id="a9cd57b1-9e8c-4b75-86da-653acfc3ade6",
+            locations=[
+                DefaultLocation(
+                    name="Good Location 1",
+                    endpoint_instance=DefaultEndpointInstance(name="Good Endpoint 1"),
+                )
+            ],
+        )
+        cls.orgs.append(org)
 
-        nucc = Nucc.objects.get(code="261Q00000X")
+        # Generate test data for an organization with multiple endpoints, same EHR vendor
+        org = DefaultOrganization(
+            locations=[
+                DefaultLocation(
+                    name="Location A",
+                    endpoint_instance=DefaultEndpointInstance(name="Endpoint A"),
+                ),
+                DefaultLocation(
+                    name="Location B",
+                    endpoint_instance=DefaultEndpointInstance(name="Endpoint B"),
+                ),
+            ]
+        )
+        cls.orgs.append(org)
 
-        ehr_vendor = EhrVendor.objects.create(
-            id=uuid.uuid4(),
-            name="Epic",
-            is_cms_aligned_network=True,
+        # Generate test data for an organization with multiple endpoints, different EHR vendors
+        org = DefaultOrganization(
+            locations=[
+                DefaultLocation(
+                    name="Location A",
+                    endpoint_instance=DefaultEndpointInstance(
+                        name="Endpoint A", ehr_vendor=DefaultEhrVendor(name="EHR Vendor A")
+                    ),
+                ),
+                DefaultLocation(
+                    name="Location B",
+                    endpoint_instance=DefaultEndpointInstance(
+                        name="Endpoint B", ehr_vendor=DefaultEhrVendor(name="EHR Vendor B")
+                    ),
+                ),
+            ]
+        )
+        cls.orgs.append(org)
+
+        # Generate test data for an organization with no location
+        cls.org_with_no_location = DefaultOrganization(
+            names=["No Location Org"], has_locations=False
         )
 
-        ehr_vendor2 = EhrVendor.objects.create(
-            id=uuid.uuid4(),
-            name="Legendary",
-            is_cms_aligned_network=True,
+        # Generate test data for an organization with a location, but no endpoint
+        cls.org_with_no_affiliation = DefaultOrganization(
+            names=["No Endpoint Org"], locations=[DefaultLocation(has_endpoint=False)]
         )
 
-        ehr_vendor3 = EhrVendor.objects.create(
-            id=uuid.uuid4(),
-            name="Zod",
-            is_cms_aligned_network=True,
-        )
-
-        # =========================================================
-        # ✅ MATCHING ORGANIZATION #1 (FULLY QUALIFIED)
-        # =========================================================
-        cls.org_good_1 = create_organization(
-            name="A Good Clinical Org",
-            legal_entity=legal_entity,
-            other_id_type=other_id_type,
-            organization_type=nucc.code,
-        )
-
-        cls.orgs.append(cls.org_good_1)
-
-        loc_good_1 = create_location(
-            organization=cls.org_good_1,
-            name="Good Location 1",
-        )
-
-        endpoint_instance = create_endpoint_instance(
-            organization=cls.org_good_1,
-            name="Good Endpoint 1",
-            ehr=ehr_vendor3,
-        )
-
-        LocationToEndpointInstance.objects.create(
-            location=loc_good_1,
-            endpoint_instance=endpoint_instance,
-        )
-
-        # =========================================================
-        # ✅ MATCHING ORGANIZATION #2 (MULTIPLE LOCATIONS / ENDPOINTS)
-        # =========================================================
-        cls.org_good_2 = create_organization(
-            name="B Good Clinical Org",
-            legal_entity=legal_entity,
-        )
-
-        cls.orgs.append(cls.org_good_2)
-
-        loc_good_2a = create_location(organization=cls.org_good_2, name="Location A")
-        loc_good_2b = create_location(organization=cls.org_good_2, name="Location B")
-
-        endpoint_good_2a = create_endpoint_instance(
-            organization=cls.org_good_2,
-            name="Endpoint A",
-            ehr=ehr_vendor,
-        )
-
-        endpoint_good_2b = create_endpoint_instance(
-            organization=cls.org_good_2,
-            name="Endpoint B",
-            ehr=ehr_vendor,
-        )
-
-        LocationToEndpointInstance.objects.create(
-            location=loc_good_2a,
-            endpoint_instance=endpoint_good_2a,
-        )
-        LocationToEndpointInstance.objects.create(
-            location=loc_good_2b,
-            endpoint_instance=endpoint_good_2b,
-        )
-
-        # =========================================================
-        # ✅ MATCHING ORGANIZATION #3 (MULTIPLE LOCATIONS / ENDPOINTS)
-        # =========================================================
-        cls.org_good_3 = create_organization(
-            name="C Good Clinical Org",
-            legal_entity=legal_entity,
-        )
-
-        cls.orgs.append(cls.org_good_3)
-
-        loc_good_3a = create_location(organization=cls.org_good_3, name="Location C")
-        loc_good_3b = create_location(organization=cls.org_good_3, name="Location D")
-
-        endpoint_good_3a = create_endpoint_instance(
-            organization=cls.org_good_3,
-            name="Endpoint A",
-            ehr=ehr_vendor2,
-        )
-
-        endpoint_good_3b = create_endpoint_instance(
-            organization=cls.org_good_3,
-            name="Endpoint B",
-            ehr=ehr_vendor2,
-        )
-
-        LocationToEndpointInstance.objects.create(
-            location=loc_good_3a,
-            endpoint_instance=endpoint_good_3a,
-        )
-        LocationToEndpointInstance.objects.create(
-            location=loc_good_3b,
-            endpoint_instance=endpoint_good_3b,
-        )
-
-        # =========================================================
-        # ❌ NON-MATCHING #1 — NO LOCATION
-        # =========================================================
-        cls.invalid_1 = create_organization(
-            name="No Location Org",
-            legal_entity=legal_entity,
-        )
-
-        # =========================================================
-        # ❌ NON-MATCHING #2 — LOCATION BUT NO ENDPOINT
-        # =========================================================
-        cls.org_no_endpoint = create_organization(name="No Endpoint Org")
-        create_location(organization=cls.org_no_endpoint)
-
-        # =========================================================
-        # ❌ NON-MATCHING #4 — ENDPOINT NOT LINKED TO LOCATION
-        # =========================================================
-        cls.org_unlinked = create_organization(name="Unlinked Endpoint Org")
-        create_location(organization=cls.org_unlinked)
-
-        create_endpoint_instance(
-            organization=cls.org_unlinked,
-            name="Dangling Endpoint",
-            ehr=ehr_vendor,
-        )
+        # Generate test data for an EHR Vendor that has no organizations associated
+        DefaultEhrVendor(name="Lonely EHR Vendor")
 
         return super().setUpTestData()
-
-    def setUp(self):
-        super().setUp()
-        self.org_without_authorized_official = Organization.objects.create(
-            id="26708690-19d6-499e-b481-cebe05b98f08", authorized_official_id=None
-        )
 
     # Basic tests
     def test_list_default(self):
@@ -260,8 +153,10 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
         response = self.client.get(url)
 
         ids = extract_resource_ids(response)
+        ids.sort()
 
         valid_ids = [str(org.id) for org in self.orgs]
+        valid_ids.sort()
 
         self.assertEqual(ids, valid_ids)
 
@@ -271,15 +166,15 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
 
         ids = extract_resource_ids(response)
 
-        self.assertNotIn(str(self.invalid_1.id), ids)
-        self.assertNotIn(str(self.org_no_endpoint.id), ids)
-        self.assertNotIn(str(self.org_unlinked.id), ids)
+        self.assertNotIn(str(self.org_with_no_affiliation.id), ids)
+        self.assertNotIn(str(self.org_with_no_location.id), ids)
 
     def test_retrieve_single_organization_affil(self):
-        url = reverse("fhir-organizationaffiliation-detail", args=[self.orgs[0].id])
+        id = "a9cd57b1-9e8c-4b75-86da-653acfc3ade6"
+        url = reverse("fhir-organizationaffiliation-detail", args=[id])
         response = self.client.get(url)
 
-        self.assertEqual(str(self.orgs[0].id), response.data["id"])
+        self.assertEqual(id, response.data["id"])
 
         org_affiliation_entry = response.data
 
@@ -298,6 +193,6 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_retrieve_non_valid_organization_affil(self):
-        url = reverse("fhir-organizationaffiliation-detail", args=[self.invalid_1.id])
+        url = reverse("fhir-organizationaffiliation-detail", args=[self.org_with_no_affiliation.id])
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
