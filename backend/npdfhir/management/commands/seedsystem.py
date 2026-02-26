@@ -6,18 +6,20 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.db import IntegrityError
 from faker import Faker
 
-from npdfhir.tests.fixtures.endpoint import create_endpoint_instance
-from npdfhir.tests.fixtures.organization import create_organization
-from npdfhir.tests.fixtures.practitioner import create_practitioner
+
+from npdfhir.tests.fixtures.organization import DefaultOrganization
+from npdfhir.tests.fixtures.practitioner import (
+    DefaultPractitioner,
+    DefaultIndividual,
+    DefaultOtherID,
+    DefaultNPI,
+)
 
 from npdfhir.models import OrganizationView, ProviderView
 
 
 class Command(BaseCommand):
     help = "Create test data for end-to-end specs"
-
-    def generate_npi(self) -> int:
-        return random.randint(1123456789, 2987654321)
 
     def to_json(self, **record) -> str:
         return json.dumps(record, cls=DjangoJSONEncoder, indent=2)
@@ -26,14 +28,12 @@ class Command(BaseCommand):
         fake = Faker()
         for i in range(qty):
             name = f"TEST {fake.company()}"  # adding TEST here so that we can query results with the same name
-            org = create_organization(
-                name=name,
-                # not bothering with checksum here
-                npi_value=self.generate_npi(),
-                authorized_official_first_name=fake.first_name(),
-                authorized_official_last_name=fake.last_name(),
-                other_state_code=fake.state_abbr(),
-                other_issuer=fake.company(),
+            org = DefaultOrganization(
+                names=[name],
+                authorized_official=DefaultIndividual(
+                    first_name=fake.first_name(), last_name=fake.last_name()
+                ),
+                other_ids=[DefaultOtherID(state_code=fake.state_abbr())],
             )
             self.stdout.write(f"created Organization: {org.id} {name}")
 
@@ -42,11 +42,10 @@ class Command(BaseCommand):
         for i in range(qty):
             first_name = f"TEST {fake.first_name()}"  # adding TEST here so that we can query results with the same name
             last_name = fake.last_name()
-            practitioner = create_practitioner(
-                first_name=first_name,
-                last_name=last_name,
-                npi_value=self.generate_npi(),
-                gender=random.choice(["M", "F"]),
+            practitioner = DefaultPractitioner(
+                individual=DefaultIndividual(
+                    first_name=first_name, last_name=last_name, gender=random.choice(["M", "F"])
+                ),
             )
             self.stdout.write(
                 f"created Practitioner: {practitioner.individual.id} {first_name} {last_name}"
@@ -56,7 +55,7 @@ class Command(BaseCommand):
         if options.get("seed", None):
             Faker.seed(int(options["seed"]))
 
-        provider = create_practitioner()
+        provider = DefaultPractitioner()
         individualtoname = provider.individual.individualtoname_set.first()
 
         provider_report = self.to_json(
@@ -68,10 +67,9 @@ class Command(BaseCommand):
         self.stdout.write(f"created Provider: {provider_report}")
 
         try:
-            known_practitioner = create_practitioner(
-                first_name="AAA",
-                last_name="Test Practitioner",
-                npi_value=1234567894,
+            known_practitioner = DefaultPractitioner(
+                individual=DefaultIndividual(first_name="AAA", last_name="Test Practitioner"),
+                npi=DefaultNPI(npi=1234567894),
             )
             individualtoname = known_practitioner.individual.individualtoname_set.first()
             self.stdout.write(
@@ -83,11 +81,9 @@ class Command(BaseCommand):
         # Practitioner with the known NPI value as an "other_id" (not as NPI)
         # This tests that NPI-prefixed searches don't match other identifiers
         try:
-            other_id_practitioner = create_practitioner(
-                first_name="BBB",
-                last_name="Other ID Practitioner",
-                npi_value=self.generate_npi(),
-                other_id="1234567894",
+            other_id_practitioner = DefaultPractitioner(
+                individual=DefaultIndividual(first_name="BBB", last_name="Other ID Practitioner"),
+                other_ids=[DefaultOtherID(other_id="1234567894")],
             )
             individualtoname = other_id_practitioner.individual.individualtoname_set.first()
             self.stdout.write(
@@ -98,8 +94,8 @@ class Command(BaseCommand):
 
         try:
             # one known NPI
-            organization = create_organization(
-                name="AAA Test Org", npi_value=1234567893, organization_type="261QP2000X"
+            organization = DefaultOrganization(
+                namse=["AAA Test Org"], npi=DefaultNPI(npi=1234567893), taxonomies=["261QP2000X"]
             )
             organizationtoname = organization.organizationtoname_set.first()
             self.stdout.write(
@@ -112,11 +108,10 @@ class Command(BaseCommand):
         # Organization with the known NPI value as an "other_id" (not as NPI)
         # This tests that NPI-prefixed searches don't match other identifiers
         try:
-            other_id_organization = create_organization(
-                name="BBB Other ID Org",
-                npi_value=self.generate_npi(),
-                other_id_value="1234567893",
-                organization_type="261QP2000X",
+            other_id_organization = DefaultOrganization(
+                names=["BBB Other ID Org"],
+                other_ids=[DefaultOtherID(other_id="1234567893")],
+                taxonomies=["261QP2000X"],
             )
             organizationtoname = other_id_organization.organizationtoname_set.first()
             self.stdout.write(
@@ -124,10 +119,6 @@ class Command(BaseCommand):
             )
         except IntegrityError:
             self.stdout.write("(organization with other_id 1234567893 already exists)")
-
-        if organization:
-            endpoint = create_endpoint_instance(organization=organization)
-            self.stdout.write(f"created Endpoint: {self.to_json(id=endpoint.id)}")
 
         self.generate_sample_organizations(25)
         OrganizationView.refresh_materialized_view()
