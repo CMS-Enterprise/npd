@@ -29,11 +29,11 @@ from .models import (
     EndpointInstance,
     Location,
     LocationToEndpointInstance,
-    Organization,
     ProviderView,
     ProviderToLocationView,
     OrganizationToAddress,
     OrganizationView,
+    OrganizationAffiliationView,
     IndividualToAddress,
 )
 
@@ -469,26 +469,8 @@ class FHIROrganizationAffiliationViewSet(viewsets.GenericViewSet):
     ViewSet for FHIR EHR Vendor to Organizaton relationships
     """
 
-    #queryset = Organization.objects.none()
-
-    endpoint_subquery = LocationToEndpointInstance.objects.filter(
-        location__organization=OuterRef("pk"), endpoint_instance__ehr_vendor__isnull=False
-    )
-
-    # Subquery for endpoint name (take first matching)
-    endpoint_name_subquery = LocationToEndpointInstance.objects.filter(
-        location__organization=OuterRef("pk"), endpoint_instance__ehr_vendor__isnull=False
-    ).values("endpoint_instance__name")[:1]
-
-    # Subquery for ehr_vendor name (take first matching)
-    ehr_vendor_name_subquery = LocationToEndpointInstance.objects.filter(
-        location__organization=OuterRef("pk"), endpoint_instance__ehr_vendor__isnull=False
-    ).values("endpoint_instance__ehr_vendor__name")[:1]
-
     queryset = (
-        Organization.objects.all()
-        .filter(Exists(endpoint_subquery))
-        .prefetch_related(
+        OrganizationAffiliationView.objects.all().prefetch_related(
             # Clinical organization (participating org)
             "clinicalorganization",
             "clinicalorganization__npi",
@@ -515,14 +497,6 @@ class FHIROrganizationAffiliationViewSet(viewsets.GenericViewSet):
             "location_set__locationtoendpointinstance_set__endpoint_instance",
             "location_set__locationtoendpointinstance_set__endpoint_instance__ehr_vendor",
         )
-        .annotate(
-            # Organization name
-            organization_name=F("organizationtoname__name"),
-            endpoint_name=Subquery(endpoint_name_subquery),
-            ehr_vendor_name=Subquery(ehr_vendor_name_subquery),
-            participating_npi=F("clinicalorganization__npi__npi"),
-        )
-        .distinct()
     )
 
     if DEBUG:

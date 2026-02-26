@@ -117,6 +117,7 @@ refresh-views:
 		REFRESH MATERIALIZED VIEW npd.organization_view; \
 		REFRESH MATERIALIZED VIEW npd.provider_to_location_view; \
 		REFRESH MATERIALIZED VIEW npd.provider_view; \
+		REFRESH MATERIALIZED VIEW npd.organization_affiliation;
 	"
 	@echo "Materialized views refreshed."
 
