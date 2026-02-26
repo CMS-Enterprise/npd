@@ -98,7 +98,7 @@ class OrganizationAffiliationFilterSet(filters.FilterSet):
                     "location__address__address_us__zipcode",
                 )
             )
-            .filter(location_search=SearchQuery(value, search_type="websearch"))
+            .filter(location_search=SearchQuery(value, search_type="websearch", config="english"))
             .distinct()
         )
 

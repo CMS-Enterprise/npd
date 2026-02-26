@@ -136,15 +136,15 @@ class PractitionerRoleViewSetTestCase(APITestCase):
         # Optimetrist practitioner
 
         pr = create_full_practitionerrole(
-            first_name="Charlie",
+            first_name="Charly",
             last_name="Brown",
             gender="M",
             npi_value=3000000001,
-            org_name="Charlie Brown M.D.",
+            org_name="Charly Brown M.D.",
             role_display="Clinician",
             role_code="MD",
-            practitioner_nucc_types=["152W00000X"],
-            organization_nucc_type="261Q00000X",
+            practitioner_nucc_types=["152W00000X", "207PE0004X"],
+            organization_nucc_type="261QE0800X",
             location_city="Sunnyville",
             location_state="CA",
             location_zip="90001",
@@ -201,8 +201,8 @@ class PractitionerRoleViewSetTestCase(APITestCase):
         assert_pagination_limit(self, response)
 
     # Filter tests.
-    def test_list_filter_by_name(self):
-        sample_name = "Charlie"
+    def test_list_filter_by_y_name(self):
+        sample_name = "Charly"
         url = reverse("fhir-practitionerrole-list")
         response = self.client.get(url, {"practitioner_name": sample_name})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -247,7 +247,25 @@ class PractitionerRoleViewSetTestCase(APITestCase):
             self.assertEqual("F", provider.individual.gender)
 
     def test_list_filter_by_organization_name(self):
-        name_search = "Charlie Brown M.D."
+        name_search = "Charly Brown M.D."
+        url = reverse("fhir-practitionerrole-list")
+        response = self.client.get(url, {"organization_name": name_search})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert_has_results(self, response)
+
+        for entry in response.data["results"]["entry"]:
+            # Query the practitioner names based on the returned id
+            org_id = entry["resource"]["organization"]["reference"].split("/")[-1]
+            org_name = (
+                OrganizationToName.objects.filter(organization_id=org_id)
+                .values_list("name", flat=True)
+                .first()
+            )
+
+            self.assertIn(name_search, org_name)
+
+    def test_list_filter_by_organization_y_name(self):
+        name_search = "Charly"
         url = reverse("fhir-practitionerrole-list")
         response = self.client.get(url, {"organization_name": name_search})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -387,8 +405,30 @@ class PractitionerRoleViewSetTestCase(APITestCase):
 
             self.assertIn(taxonomy, taxonomies)
 
+    def test_filter_by_y_practitioner_type(self):
+        taxonomy = {"code": "207PE0004X", "display_name": "Emergency Medical Services"}
+        url = reverse("fhir-practitionerrole-list")
+        response = self.client.get(url, {"practitioner_type": "Emergency"})
+        self.assertEqual(response.status_code, 200)
+        assert_has_results(self, response)
+
+        bundle = response.data["results"]
+
+        for entry in bundle["entry"]:
+            practitioner_url = entry["resource"]["practitioner"]["reference"]
+            returned_practitioner = self.client.get(practitioner_url).data
+            taxonomies = [
+                {
+                    "code": tax["code"]["coding"][0]["code"],
+                    "display_name": tax["code"]["coding"][0]["display"],
+                }
+                for tax in returned_practitioner["qualification"]
+            ]
+
+            self.assertIn(taxonomy, taxonomies)
+
     def test_filter_by_organization_type(self):
-        org_taxonomy = {"code": "261Q00000X", "display_name": "Clinic/Center"}
+        org_taxonomy = {"code": "261QE0800X", "display_name": "Endoscopy"}
         url = reverse("fhir-practitionerrole-list")
         response = self.client.get(url, {"organization_type": org_taxonomy["display_name"]})
         self.assertEqual(response.status_code, 200)
