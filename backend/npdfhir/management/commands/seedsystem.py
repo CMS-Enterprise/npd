@@ -32,9 +32,8 @@ class Command(BaseCommand):
             org = DefaultOrganization(
                 names=[name],
                 authorized_official=DefaultIndividual(
-                    first_name=fake.first_name(), last_name=fake.last_name()
+                    names=[DefaultName(first_name=fake.first_name(), last_name=fake.last_name())]
                 ),
-                other_ids=[DefaultOtherID(state_code=fake.state_abbr())],
             )
             self.stdout.write(f"created Organization: {org.id} {name}")
 
@@ -69,7 +68,7 @@ class Command(BaseCommand):
                 npi=DefaultNPI(npi=1234567894),
             )
             self.stdout.write(
-                f"created known Practitioner: {self.to_json(id=known_practitioner.individual.id, npi=known_practitioner.npi.npi, name=' '.join(name.values()))}"
+                f"created known Practitioner: {self.to_json(id=known_practitioner.individual.id, npi=known_practitioner.npi.npi.npi, name=' '.join(name.values()))}"
             )
         except IntegrityError:
             self.stdout.write("(practitioner with NPI 1234567894 already exists)")
@@ -78,12 +77,13 @@ class Command(BaseCommand):
         # This tests that NPI-prefixed searches don't match other identifiers
         try:
             name = {"first_name": "BBB", "last_name": "Other ID Practitioner"}
+            other_id = "1234567894"
             other_id_practitioner = DefaultPractitioner(
-                individual=DefaultIndividual(names=DefaultName(**name)),
-                other_ids=[DefaultOtherID(other_id="1234567894")],
+                individual=DefaultIndividual(names=[DefaultName(**name)]),
+                other_ids=[DefaultOtherID(other_id=other_id)],
             )
             self.stdout.write(
-                f"created other_id Practitioner: {self.to_json(id=other_id_practitioner.individual.id, npi=other_id_practitioner.npi.npi, other_id='1234567894', name=' '.join(name.values()))}"
+                f"created other_id Practitioner: {self.to_json(id=other_id_practitioner.individual.id, npi=other_id_practitioner.npi.npi.npi, other_id=other_id, name=' '.join(name.values()))}"
             )
         except IntegrityError:
             self.stdout.write("(practitioner with other_id 1234567894 already exists)")
@@ -105,13 +105,14 @@ class Command(BaseCommand):
         # This tests that NPI-prefixed searches don't match other identifiers
         try:
             name = "BBB Other ID Org"
+            other_id = "1234567893"
             other_id_organization = DefaultOrganization(
                 names=[name],
-                other_ids=[DefaultOtherID(other_id="1234567893")],
+                other_ids=[DefaultOtherID(other_id=other_id)],
                 taxonomies=["261QP2000X"],
             )
             self.stdout.write(
-                f"created other_id Organization: {self.to_json(id=other_id_organization.id, other_id='1234567893', organizationtoname__name=name)}"
+                f"created other_id Organization: {self.to_json(id=other_id_organization.id, other_id=other_id, organizationtoname__name=name)}"
             )
         except IntegrityError:
             self.stdout.write("(organization with other_id 1234567893 already exists)")
