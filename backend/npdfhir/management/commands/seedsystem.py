@@ -13,6 +13,7 @@ from npdfhir.tests.fixtures.practitioner import (
     DefaultIndividual,
     DefaultOtherID,
     DefaultNPI,
+    DefaultName,
 )
 
 from npdfhir.models import OrganizationView, ProviderView
@@ -40,15 +41,17 @@ class Command(BaseCommand):
     def generate_sample_practitioners(self, qty: int = 25):
         fake = Faker()
         for i in range(qty):
-            first_name = f"TEST {fake.first_name()}"  # adding TEST here so that we can query results with the same name
-            last_name = fake.last_name()
+            name = {
+                "first_name": f"TEST {fake.first_name()}",  # adding TEST here so that we can query results with the same name
+                "last_name": fake.last_name(),
+            }
             practitioner = DefaultPractitioner(
                 individual=DefaultIndividual(
-                    first_name=first_name, last_name=last_name, gender=random.choice(["M", "F"])
+                    names=[DefaultName(**name)], gender=random.choice(["M", "F"])
                 ),
             )
             self.stdout.write(
-                f"created Practitioner: {practitioner.individual.id} {first_name} {last_name}"
+                f"created Practitioner: {practitioner.individual.id} {' '.join(name.values())}"
             )
 
     def handle(self, *args, **options):
@@ -56,24 +59,17 @@ class Command(BaseCommand):
             Faker.seed(int(options["seed"]))
 
         provider = DefaultPractitioner()
-        individualtoname = provider.individual.individualtoname_set.first()
 
-        provider_report = self.to_json(
-            individual__id=provider.individual.id,
-            individual__individualtoname__first_name=individualtoname.first_name,
-            individual__individualtoname__last_name=individualtoname.last_name,
-            npi__npi=provider.npi.npi,
-        )
-        self.stdout.write(f"created Provider: {provider_report}")
+        self.stdout.write(f"created Practitioner: {provider.individual.id}")
 
         try:
+            name = {"first_name": "AAA", "last_name": "Test Practitioner"}
             known_practitioner = DefaultPractitioner(
-                individual=DefaultIndividual(first_name="AAA", last_name="Test Practitioner"),
+                individual=DefaultIndividual(names=[DefaultName(**name)]),
                 npi=DefaultNPI(npi=1234567894),
             )
-            individualtoname = known_practitioner.individual.individualtoname_set.first()
             self.stdout.write(
-                f"created known Practitioner: {self.to_json(id=known_practitioner.individual.id, npi=known_practitioner.npi.npi, name=f'{individualtoname.first_name} {individualtoname.last_name}')}"
+                f"created known Practitioner: {self.to_json(id=known_practitioner.individual.id, npi=known_practitioner.npi.npi, name=' '.join(name.values()))}"
             )
         except IntegrityError:
             self.stdout.write("(practitioner with NPI 1234567894 already exists)")
@@ -81,25 +77,25 @@ class Command(BaseCommand):
         # Practitioner with the known NPI value as an "other_id" (not as NPI)
         # This tests that NPI-prefixed searches don't match other identifiers
         try:
+            name = {"first_name": "BBB", "last_name": "Other ID Practitioner"}
             other_id_practitioner = DefaultPractitioner(
-                individual=DefaultIndividual(first_name="BBB", last_name="Other ID Practitioner"),
+                individual=DefaultIndividual(names=DefaultName(**name)),
                 other_ids=[DefaultOtherID(other_id="1234567894")],
             )
-            individualtoname = other_id_practitioner.individual.individualtoname_set.first()
             self.stdout.write(
-                f"created other_id Practitioner: {self.to_json(id=other_id_practitioner.individual.id, npi=other_id_practitioner.npi.npi, other_id='1234567894', name=f'{individualtoname.first_name} {individualtoname.last_name}')}"
+                f"created other_id Practitioner: {self.to_json(id=other_id_practitioner.individual.id, npi=other_id_practitioner.npi.npi, other_id='1234567894', name=' '.join(name.values()))}"
             )
         except IntegrityError:
             self.stdout.write("(practitioner with other_id 1234567894 already exists)")
 
         try:
             # one known NPI
+            name = "AAA Test Org"
             organization = DefaultOrganization(
-                namse=["AAA Test Org"], npi=DefaultNPI(npi=1234567893), taxonomies=["261QP2000X"]
+                names=[name], npi=DefaultNPI(npi=1234567893), taxonomies=["261QP2000X"]
             )
-            organizationtoname = organization.organizationtoname_set.first()
             self.stdout.write(
-                f"created Organization: {self.to_json(id=organization.id, organizationtoname__name=organizationtoname.name)}"
+                f"created Organization: {self.to_json(id=organization.id, organizationtoname__name=name)}"
             )
         except IntegrityError:
             organization = None
@@ -108,14 +104,14 @@ class Command(BaseCommand):
         # Organization with the known NPI value as an "other_id" (not as NPI)
         # This tests that NPI-prefixed searches don't match other identifiers
         try:
+            name = "BBB Other ID Org"
             other_id_organization = DefaultOrganization(
-                names=["BBB Other ID Org"],
+                names=[name],
                 other_ids=[DefaultOtherID(other_id="1234567893")],
                 taxonomies=["261QP2000X"],
             )
-            organizationtoname = other_id_organization.organizationtoname_set.first()
             self.stdout.write(
-                f"created other_id Organization: {self.to_json(id=other_id_organization.id, other_id='1234567893', organizationtoname__name=organizationtoname.name)}"
+                f"created other_id Organization: {self.to_json(id=other_id_organization.id, other_id='1234567893', organizationtoname__name=name)}"
             )
         except IntegrityError:
             self.stdout.write("(organization with other_id 1234567893 already exists)")
