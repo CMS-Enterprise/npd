@@ -21,7 +21,19 @@
   },
 
   "search": {
-    "title": "Search Organizations",
-    "inputLabel": "Name or Identifier (NPI, EIN, or other)"
+    "title": "Organization search",
+    "inputLabel": "Name or NPI",
+    "button": "Search organizations"
+  },
+
+  "sort": {
+    "by": "Sort by",
+    "name-asc": "Name (A-Z)",
+    "name-desc": "Name (Z-A)"
+  },
+
+  "alert": {
+    "heading": "Are you looking for an practitioner?",
+    "body": "Visit the [Practitioner search](/practitioners/search) page."
   }
 }

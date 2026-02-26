@@ -24,6 +24,11 @@ const coercePaginationParams = (params: URLSearchParams): SupportedParams => {
     out.query = query
   }
 
+  const sort = params.get("sort")
+  if (sort !== null) {
+    out.sort = sort
+  }
+
   return out
 }
 

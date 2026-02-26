@@ -3,7 +3,7 @@ from fhir.resources.R4B.bundle import Bundle
 from rest_framework import status
 
 from .api_test_case import APITestCase
-from .fixtures.endpoint import create_endpoint
+from .fixtures.endpoint import create_endpoint_instance
 from .helpers import (
     assert_fhir_response,
     assert_has_results,
@@ -16,18 +16,21 @@ class EndpointViewSetTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.endpoints = [
-            create_endpoint(name="88 MEDICINE LLC"),
-            create_endpoint(name="AAIA of Tampa Bay, LLC"),
-            create_endpoint(name="ABC Healthcare Service Base URL"),
-            create_endpoint(name="A Better Way LLC"),
-            create_endpoint(name="Abington Surgical Center"),
-            create_endpoint(name="Access Mental Health Agency"),
-            create_endpoint(name="Abington Center Surgical"),
-            create_endpoint(name="ADHD & Autism Psychological Services PLLC"),
-            create_endpoint(name="Adolfo C FernandezObregon Md"),
-            create_endpoint(name="Advanced Anesthesia, LLC"),
-            create_endpoint(name="Advanced Cardiovascular Center"),
-            create_endpoint(name="Kansas City Psychiatric Group"),
+            create_endpoint_instance(name="88 MEDICINE LLC"),
+            create_endpoint_instance(name="AAIA of Tampa Bay, LLC"),
+            create_endpoint_instance(name="ABC Healthcare Service Base URL"),
+            create_endpoint_instance(name="A Better Way LLC"),
+            create_endpoint_instance(name="Abington Surgical Center"),
+            create_endpoint_instance(name="Access Mental Health Agency"),
+            create_endpoint_instance(name="Abington Center Surgical"),
+            create_endpoint_instance(name="ADHD & Autism Psychological Services PLLC"),
+            create_endpoint_instance(name="Adolfo C FernandezObregon Md"),
+            create_endpoint_instance(name="Advanced Anesthesia, LLC"),
+            create_endpoint_instance(name="Advanced Cardiovascular Center"),
+            create_endpoint_instance(
+                name="Kansas City Psychiatric Group",
+                payload_type="urn:ihe:pcc:360x:hl7:OMG:O19:2017",
+            ),
         ]
 
         return super().setUpTestData()
@@ -48,8 +51,6 @@ class EndpointViewSetTestCase(APITestCase):
         url = self.list_url
         response = self.client.get(url)
         assert_fhir_response(self, response)
-
-        # print(response.data["results"]["entry"][0]['resource']['name'])
 
         # Extract names
         # Note: have to normalize the names to have python sorting match sql
@@ -90,15 +91,15 @@ class EndpointViewSetTestCase(APITestCase):
         bundle = response.data["results"]
         self.assertGreater(len(bundle["entry"]), 0)
 
-        first_entry = bundle["entry"][0]
-        self.assertIn("resource", first_entry)
+        for entry in bundle["entry"]:
+            self.assertIn("resource", entry)
 
-        endpoint_resource = first_entry["resource"]
-        self.assertEqual(endpoint_resource["resourceType"], "Endpoint")
-        self.assertIn("id", endpoint_resource)
-        self.assertIn("status", endpoint_resource)
-        self.assertIn("connectionType", endpoint_resource)
-        self.assertIn("address", endpoint_resource)
+            endpoint_resource = entry["resource"]
+            self.assertEqual(endpoint_resource["resourceType"], "Endpoint")
+            self.assertIn("id", endpoint_resource)
+            self.assertIn("status", endpoint_resource)
+            self.assertIn("connectionType", endpoint_resource)
+            self.assertIn("address", endpoint_resource)
 
     # Pagination tests
     def test_pagination_custom_page_size(self):
@@ -124,10 +125,11 @@ class EndpointViewSetTestCase(APITestCase):
 
         self.assertGreater(len(bundle["entry"]), 0)
 
-        first_endpoint = bundle["entry"][0]["resource"]
+        for entry in bundle["entry"]:
+            endpoint = entry["resource"]
 
-        self.assertIn("name", first_endpoint)
-        self.assertIn("Kansas City", first_endpoint["name"])
+            self.assertIn("name", endpoint)
+            self.assertIn("Kansas City Psychiatric Group", endpoint["name"])
 
     def test_filter_by_connection_type(self):
         connection_type = "hl7-fhir-rest"
@@ -139,14 +141,16 @@ class EndpointViewSetTestCase(APITestCase):
         entries = bundle.get("entry", [])
         self.assertGreater(len(entries), 0)
 
-        first_endpoint = entries[0]["resource"]
-        self.assertIn("connectionType", first_endpoint)
+        for entry in bundle["entry"]:
+            endpoint = entry["resource"]
+            self.assertIn("connectionType", endpoint)
 
-        code = first_endpoint["connectionType"]["code"]
-        self.assertEqual(connection_type, code)
+            code = endpoint["connectionType"]["code"]
+            self.assertEqual(connection_type, code)
 
     def test_filter_by_payload_type(self):
-        payload_type = "ccda-structuredBody:1.1"
+        payload_type = "urn:ihe:pcc:360x:hl7:OMG:O19:2017"
+        payload_display = "PCC 360X Referral Request"
         response = self.client.get(self.list_url, {"payload_type": payload_type})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -155,11 +159,14 @@ class EndpointViewSetTestCase(APITestCase):
         entries = bundle.get("entry", [])
         self.assertGreater(len(entries), 0)
 
-        first_endpoint = entries[0]["resource"]
-        self.assertIn("payloadType", first_endpoint)
+        for entry in bundle["entry"]:
+            endpoint = entry["resource"]
+            self.assertIn("payloadType", endpoint)
 
-        code = first_endpoint["payloadType"][0]["coding"][0]["display"]
-        self.assertEqual(payload_type, code)
+            code = endpoint["payloadType"][0]["coding"][0]["code"]
+            display = endpoint["payloadType"][0]["coding"][0]["display"]
+            self.assertEqual(payload_type, code)
+            self.assertEqual(payload_display, display)
 
     def test_filter_returns_empty_for_nonexistent_name(self):
         response = self.client.get(self.list_url, {"name": "NonexistentEndpointName12345"})
@@ -171,10 +178,7 @@ class EndpointViewSetTestCase(APITestCase):
 
     # Retrieve tests
     def test_retrieve_specific_endpoint(self):
-        list_response = self.client.get(self.list_url, {"page_size": 1})
-        first_endpoint = list_response.data["results"]["entry"][0]["resource"]
-
-        endpoint_id = first_endpoint["id"]
+        endpoint_id = str(self.endpoints[0].id)
         detail_url = reverse("fhir-endpoint-detail", args=[endpoint_id])
 
         response = self.client.get(detail_url)
@@ -193,10 +197,3 @@ class EndpointViewSetTestCase(APITestCase):
         response = self.client.get(detail_url)
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
-    def test_retrieve_single_endpoint(self):
-        id = self.endpoints[0].endpoint_instance.id
-        url = reverse("fhir-endpoint-detail", args=[id])
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["id"], str(id))

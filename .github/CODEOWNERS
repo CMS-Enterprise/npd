@@ -3,15 +3,14 @@
 
 @spopelka-dsac
 @wbprice
+@rmillergv
 
 # Repo Domains
 # The Repo Domains section of your CODEOWNERS.md file helps manage code review responsibilities efficiently. Each domain represents a different aspect of the repository, such as documentation, frontend, backend, DevOps, testing, etc. In this section, list each domain and assign the appropriate GitHub usernames or teams responsible for that domain. This ensures that pull requests (PRs) are reviewed by the right experts, maintaining high code quality and relevance
 # Not every name on the list is required to review every change, but at least one person named should be review every PR making contributions.
 
-/frontend/ @sachin-panayil @sman-dsac @spopelka-dsac
+/frontend/ @sachin-panayil @sman-dsac @spopelka-dsac @wbprice @rmillergv
 
-/backend/ @spopelka-dsac @IsaacMilarky @sachin-panayil
+/backend/ @spopelka-dsac @IsaacMilarky @sachin-panayil @wbprice @rmillergv
 
-/infrastructure/ @wbprice
-
-/flyway/ @spopelka-dsac
+/flyway/ @spopelka-dsac @wbprice @rmillergv

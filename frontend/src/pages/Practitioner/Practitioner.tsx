@@ -70,35 +70,35 @@ export const Practitioner = () => {
         </FeatureFlag>
 
         <FeatureFlag name="PRACTITIONER_LOOKUP_DETAILS">
-          <Alert heading={t("practitioners.update.title")}>
-            {t("practitioners.update.subtitle")}{" "}
-            <a href="#">{t("practitioners.update.link")}</a>
+          <Alert heading={t("practitioners.detail.update.title")}>
+            {t("practitioners.detail.update.subtitle")}{" "}
+            <a href="#">{t("practitioners.detail.update.link")}</a>
           </Alert>
 
           <section className={layout.section}>
-            <h2>{t("practitioners.about.title")}</h2>
+            <h2>{t("practitioners.detail.about.title")}</h2>
             <div className="ds-l-row">
               <div className="ds-l-col--12 ds-l-md-col--3 ds-u-margin-bottom--2">
                 <InfoItem
-                  label={t("practitioners.about.name")}
+                  label={t("practitioners.detail.about.name")}
                   value={practitioner.name}
                 />
               </div>
               <div className="ds-l-col--12 ds-l-md-col--3 ds-u-margin-bottom--2">
                 <InfoItem
-                  label={t("practitioners.about.gender")}
+                  label={t("practitioners.detail.about.gender")}
                   value={practitioner.gender}
                 />
               </div>
               <div className="ds-l-col--12 ds-l-md-col--3 ds-u-margin-bottom--2">
                 <InfoItem
-                  label={t("practitioners.about.deceased")}
+                  label={t("practitioners.detail.about.deceased")}
                   value={practitioner.isDeceased}
                 />
               </div>
               <div className="ds-l-col--12 ds-l-md-col--3 ds-u-margin-bottom--2">
                 <InfoItem
-                  label={t("practitioners.about.status")}
+                  label={t("practitioners.detail.about.status")}
                   value={practitioner.isActive}
                 />
               </div>
@@ -106,23 +106,23 @@ export const Practitioner = () => {
           </section>
 
           <section className={layout.section}>
-            <h2>{t("practitioners.contact.title")}</h2>
+            <h2>{t("practitioners.detail.contact.title")}</h2>
             <div className="ds-l-row">
               <div className="ds-l-col--12 ds-l-md-col--3 ds-u-margin-bottom--2">
                 <InfoItem
-                  label={t("practitioners.contact.address")}
+                  label={t("practitioners.detail.contact.address")}
                   value={practitioner.address}
                 />
               </div>
               <div className="ds-l-col--12 ds-l-md-col--3 ds-u-margin-bottom--2">
                 <InfoItem
-                  label={t("practitioners.contact.phone")}
+                  label={t("practitioners.detail.contact.phone")}
                   value={practitioner.phone}
                 />
               </div>
               <div className="ds-l-col--12 ds-l-md-col--3 ds-u-margin-bottom--2">
                 <InfoItem
-                  label={t("practitioners.contact.fax")}
+                  label={t("practitioners.detail.contact.fax")}
                   value={practitioner.fax}
                 />
               </div>
@@ -130,18 +130,18 @@ export const Practitioner = () => {
           </section>
 
           <section className={layout.section}>
-            <h2>{t("practitioners.identifiers.title")}</h2>
+            <h2>{t("practitioners.detail.identifiers.title")}</h2>
             {/* TODO: look into modularizing table creation to reduce code duplication */}
             {practitioner.identifiers.length > 0 ? (
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell>{t("practitioners.identifiers.type")}</TableCell>
+                    <TableCell>{t("practitioners.detail.identifiers.type")}</TableCell>
                     <TableCell>
-                      {t("practitioners.identifiers.number")}
+                      {t("practitioners.detail.identifiers.number")}
                     </TableCell>
                     <TableCell>
-                      {t("practitioners.identifiers.details")}
+                      {t("practitioners.detail.identifiers.details")}
                     </TableCell>
                   </TableRow>
                 </TableHead>
@@ -159,7 +159,7 @@ export const Practitioner = () => {
               </Table>
             ) : (
               <p className="ds-u-color--gray">
-                {t("practitioners.identifiers.fallback")}
+                {t("practitioners.detail.identifiers.fallback")}
               </p>
             )}
           </section>

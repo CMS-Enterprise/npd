@@ -1,50 +1,65 @@
-from django.contrib.postgres.search import SearchVector
+from django.contrib.postgres.search import SearchQuery
 from django.db.models import Q
 from django_filters import rest_framework as filters
 
+from ..documentation_content import docs
 from ..mappings import addressUseMapping, genderMapping
-from ..models import Provider
+from ..models import ProviderView
 from ..utils import parse_identifier_query
 
 
 class PractitionerFilterSet(filters.FilterSet):
+    practitioner_table = None
+
     identifier = filters.CharFilter(
         method="filter_identifier",
-        help_text="Filter by identifier (NPI or other). Format: value or system|value",
+        help_text=docs.filters.practitioner.identifier,
     )
 
     name = filters.CharFilter(
-        method="filter_name", help_text="Filter by practitioner name (first, last, or full name)"
+        method="filter_practitioner_name",
+        help_text=docs.filters.practitioner.name,
     )
 
     gender = filters.ChoiceFilter(
-        method="filter_gender", choices=genderMapping.to_choices(), help_text="Filter by gender"
+        method="filter_gender",
+        choices=genderMapping.to_choices(),
+        help_text=docs.filters.practitioner.gender,
     )
 
     practitioner_type = filters.CharFilter(
-        method="filter_practitioner_type", help_text="Filter by practitioner type/taxonomy"
+        method="filter_practitioner_type",
+        help_text=docs.filters.practitioner.type,
     )
 
-    address = filters.CharFilter(method="filter_address", help_text="Filter by any part of address")
+    address = filters.CharFilter(
+        method="filter_address",
+        help_text=docs.filters.address.full,
+    )
 
-    address_city = filters.CharFilter(method="filter_address_city", help_text="Filter by city name")
+    address_city = filters.CharFilter(
+        method="filter_address_city",
+        help_text=docs.filters.address.city,
+    )
 
     address_state = filters.CharFilter(
-        method="filter_address_state", help_text="Filter by state (2-letter abbreviation)"
+        method="filter_address_state",
+        help_text=docs.filters.address.state,
     )
 
     address_postalcode = filters.CharFilter(
-        method="filter_address_postalcode", help_text="Filter by postal code/zip code"
+        method="filter_address_postalcode",
+        help_text=docs.filters.address.postalcode,
     )
 
     address_use = filters.ChoiceFilter(
         method="filter_address_use",
         choices=addressUseMapping.to_choices(),
-        help_text="Filter by address use type",
+        help_text=docs.filters.address.use,
     )
 
     class Meta:
-        model = Provider
+        model = ProviderView
         fields = [
             "identifier",
             "name",
@@ -61,7 +76,7 @@ class PractitionerFilterSet(filters.FilterSet):
         if value in genderMapping.keys():
             value = genderMapping.toNPD(value)
 
-        return queryset.filter(individual__gender=value)
+        return queryset.filter(provider__individual__gender=value)
 
     def filter_identifier(self, queryset, name, value):
         system, identifier_id = parse_identifier_query(value)
@@ -79,55 +94,44 @@ class PractitionerFilterSet(filters.FilterSet):
             except (ValueError, TypeError):
                 pass
 
-            queries |= Q(providertootherid__other_id=identifier_id)
+            queries |= Q(provider__providertootherid__other_id=identifier_id)
 
         return queryset.filter(queries).distinct()
 
-    def filter_name(self, queryset, name, value):
-        return queryset.annotate(
-            search=SearchVector(
-                "individual__individualtoname__first_name",
-                "individual__individualtoname__last_name",
-                "individual__individualtoname__middle_name",
-            )
-        ).filter(search=value)
+    def filter_practitioner_name(self, queryset, name, value):
+        query = SearchQuery(value, search_type="websearch", config="english")
+        return queryset.filter(
+            provider__individual__individualtoname__search_vector=query
+        ).distinct()
 
     def filter_practitioner_type(self, queryset, name, value):
-        return queryset.annotate(
-            search=SearchVector("providertotaxonomy__nucc_code__display_name")
-        ).filter(search=value)
+        query = SearchQuery(value, search_type="websearch", config="english")
+        return queryset.filter(provider__providertotaxonomy__nucc_code__search_vector=query)
 
     def filter_address(self, queryset, name, value):
-        return queryset.annotate(
-            search=SearchVector(
-                "individual__individualtoaddress__address__address_us__delivery_line_1",
-                "individual__individualtoaddress__address__address_us__delivery_line_2",
-                "individual__individualtoaddress__address__address_us__city_name",
-                "individual__individualtoaddress__address__address_us__state_code__abbreviation",
-                "individual__individualtoaddress__address__address_us__zipcode",
-            )
-        ).filter(search=value)
+        query = SearchQuery(value, search_type="websearch", config="english")
+        return queryset.filter(
+            provider__individual__individualtoaddress__address__address_us__search_vector=query
+        )
 
     def filter_address_city(self, queryset, name, value):
-        return queryset.annotate(
-            search=SearchVector("individual__individualtoaddress__address__address_us__city_name")
-        ).filter(search=value)
+        return queryset.filter(
+            provider__individual__individualtoaddress__address__address_us__city_name=value
+        )
 
     def filter_address_state(self, queryset, name, value):
-        return queryset.annotate(
-            search=SearchVector(
-                "individual__individualtoaddress__address__address_us__state_code__abbreviation"
-            )
-        ).filter(search=value)
+        return queryset.filter(
+            provider__individual__individualtoaddress__address__address_us__state_code__abbreviation=value
+        )
 
     def filter_address_postalcode(self, queryset, name, value):
-        return queryset.annotate(
-            search=SearchVector("individual__individualtoaddress__address__address_us__zipcode")
-        ).filter(search=value)
+        return queryset.filter(
+            provider__individual__individualtoaddress__address__address_us__zipcode=value
+        )
 
     def filter_address_use(self, queryset, name, value):
         if value in addressUseMapping.keys():
             value = addressUseMapping.toNPD(value)
         else:
             value = -1
-        return queryset.filter(individual__individualtoaddress__address_use_id=value)
+        return queryset.filter(provider__individual__individualtoaddress__address_use_id=value)

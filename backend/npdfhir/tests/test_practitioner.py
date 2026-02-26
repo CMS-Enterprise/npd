@@ -10,7 +10,9 @@ from .helpers import (
     assert_pagination_limit,
     extract_practitioner_names,
     get_female_npis,
+    concat_address_string,
 )
+from ..models import ProviderView
 
 
 class PractitionerViewSetTestCase(APITestCase):
@@ -28,7 +30,7 @@ class PractitionerViewSetTestCase(APITestCase):
                 name="California Location B",
                 city="Sacramento",
                 state="CA",
-                zipcode="54321",
+                zipcode="04321",
                 addr_line_1="333 Rocky Road.",
             ),
             create_location(
@@ -55,11 +57,11 @@ class PractitionerViewSetTestCase(APITestCase):
             practitioner_types=[cls.transplant_code],
         )
 
-        cls.counselor = "101Y00000X"
+        cls.emergency = "207PE0004X"
         cls.non_nurse_prac = create_practitioner(
             last_name="TROY",
             first_name="DIANA",
-            practitioner_types=[cls.counselor],
+            practitioner_types=[cls.emergency],
         )
 
         cls.sample_last_name = "SOLOMON"
@@ -72,7 +74,7 @@ class PractitionerViewSetTestCase(APITestCase):
             create_practitioner(last_name="ABDELHAMED", first_name="ABDELHAMED"),
             create_practitioner(last_name="ABDEL NOUR", first_name="MAGDY"),
             create_practitioner(last_name="ABEL", first_name="MICHAEL", location=cls.locs[0]),
-            create_practitioner(last_name="ABELES", first_name="JENNIFER"),
+            create_practitioner(last_name="ABELES", first_name="JENNIFER", location=cls.locs[1]),
             create_practitioner(last_name="ABELSON", first_name="MARK", location=cls.locs[2]),
             create_practitioner(last_name="CUTLER", first_name="A"),
             create_practitioner(last_name="NIZAM", first_name="A"),
@@ -90,13 +92,15 @@ class PractitionerViewSetTestCase(APITestCase):
             create_practitioner(last_name="ZUROSKE", first_name="GLEN"),
             create_practitioner(last_name="ZUCKERBERG", first_name="EDWARD"),
             create_practitioner(last_name="ZUCKER", first_name="WILLIAM"),
-            create_practitioner(last_name="ZUCCALA", first_name="SCOTT"),
+            create_practitioner(last_name="ZUCCALA", first_name="SCOTT", gender="M"),
             create_practitioner(last_name="ZOVE", first_name="DANIEL"),
             create_practitioner(last_name="ZORN", first_name="GUNNAR"),
             create_practitioner(last_name="ZOOG", first_name="EUGENE"),
             create_practitioner(last_name="ZOLMAN", first_name="MARK"),
             cls.nurse_prac,
         ]
+
+        ProviderView.refresh_materialized_view()
 
         return super().setUpTestData()
 
@@ -112,11 +116,6 @@ class PractitionerViewSetTestCase(APITestCase):
         url = reverse("fhir-practitioner-list")
         response = self.client.get(url)
         assert_fhir_response(self, response)
-
-        # print(response.data["results"]["entry"][0]['resource']['name'][0])
-
-        # for name in response.data["results"]["entry"]:
-        #    print(name['resource']['name'][-1])
 
         # Extract names
         names = extract_practitioner_names(response)
@@ -144,16 +143,9 @@ class PractitionerViewSetTestCase(APITestCase):
         url = reverse("fhir-practitioner-list")
         response = self.client.get(
             url,
-            {
-                "_sort": "individual__individualtoname__first_name,individual__individualtoname__last_name"
-            },
+            {"_sort": "first_name,last_name"},
         )
         assert_fhir_response(self, response)
-
-        # print(response.data["results"]["entry"][0]['resource']['name'][0])
-
-        # for name in response.data["results"]["entry"]:
-        #    print(name['resource']['name'][-1])
 
         # Extract names
         names = extract_practitioner_names(response)
@@ -181,9 +173,7 @@ class PractitionerViewSetTestCase(APITestCase):
         url = reverse("fhir-practitioner-list")
         response = self.client.get(
             url,
-            {
-                "_sort": "-individual__individualtoname__last_name,-individual__individualtoname__first_name"
-            },
+            {"_sort": "-last_name,-first_name"},
         )
         assert_fhir_response(self, response)
 
@@ -237,7 +227,7 @@ class PractitionerViewSetTestCase(APITestCase):
         for practitioner_entry in response.data["results"]["entry"]:
             self.assertIn("resource", practitioner_entry)
             self.assertIn("id", practitioner_entry["resource"])
-            npi_id = practitioner_entry["resource"]["id"]
+            npi_id = practitioner_entry["resource"]["identifier"][0]["value"]
             npi_ids.append(int(npi_id))
 
         # Check to make sure no female practitioners were fetched by mistake
@@ -255,8 +245,37 @@ class PractitionerViewSetTestCase(APITestCase):
             for name in entry["resource"]["name"]:
                 names.append(name["family"])
                 names.append(name["given"])
-            
+
             self.assertIn(self.sample_last_name, names)
+
+    def test_filter_by_y_name(self):
+        y_name = "Stacy"
+        url = reverse("fhir-practitioner-list")
+        response = self.client.get(url, {"name": y_name})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert_has_results(self, response)
+
+        for entry in response.data["results"]["entry"]:
+            names = []
+            for name in entry["resource"]["name"]:
+                names.append(name["family"])
+                names.append(name["given"])
+
+            self.assertIn(y_name.lower(), str(names).lower())
+
+    def test_filter_by_full_name(self):
+        full_name = "Stacy Miller"
+        url = reverse("fhir-practitioner-list")
+        response = self.client.get(url, {"name": full_name})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert_has_results(self, response)
+
+        for entry in response.data["results"]["entry"]:
+            names = []
+            for name in entry["resource"]["name"]:
+                names.append(" ".join([name["given"][0], name["family"]]).lower())
+
+            self.assertIn(full_name.lower(), names)
 
     def test_list_filter_by_practitioner_type(self):
         url = reverse("fhir-practitioner-list")
@@ -270,6 +289,15 @@ class PractitionerViewSetTestCase(APITestCase):
             ]
             self.assertIn(self.nurse_code, nurse_codes)
             self.assertNotIn(self.transplant_code, nurse_codes)
+
+    def test_list_filter_by_y_practitioner_type(self):
+        url = reverse("fhir-practitioner-list")
+        response = self.client.get(url, {"practitioner_type": "Emergency"})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert_has_results(self, response)
+
+        for entry in response.data["results"]["entry"]:
+            self.assertIn(self.emergency, str(entry["resource"]["qualification"]))
 
     # Identifiers Filter tests
     def test_list_filter_by_identifier_general(self):
@@ -285,11 +313,11 @@ class PractitionerViewSetTestCase(APITestCase):
             values = [int(v["value"]) for v in entry["resource"]["identifier"]]
             all_values.extend(values)
             self.assertIn(int(identifier), values)
-        
-        #assert that Kirk Aadalen is in the data
-        self.assertIn(self.pracs[0].npi.npi,all_values)
-        #assert that Asad Abbas is in the data
-        self.assertIn(self.pracs[1].npi.npi,all_values)
+
+        # assert that Kirk Aadalen is in the data
+        self.assertIn(self.pracs[0].npi.npi, all_values)
+        # assert that Asad Abbas is in the data
+        self.assertIn(self.pracs[1].npi.npi, all_values)
 
     def test_list_filter_by_npi_specific(self):
         url = reverse("fhir-practitioner-list")
@@ -314,18 +342,23 @@ class PractitionerViewSetTestCase(APITestCase):
         for entry in response.data["results"]["entry"]:
             present_checks = []
             for address in entry["resource"]["address"]:
-                # print(address)
-                address_string = ""
-
-                for line in address["line"]:
-                    address_string += line + " "
-
-                address_string += address["city"] + " "
-                address_string += address["state"] + " "
-                address_string += address["postalCode"]
-
-                #self.assertIn(test_search, address_string)
+                address_string = concat_address_string(address)
                 present_checks.append(test_search in address_string)
+            self.assertTrue(any(present_checks))
+
+    def test_list_filter_by_address_leading_zero(self):
+        url = reverse("fhir-practitioner-list")
+        test_search = "333 Rocky Road. Sacramento 04321"
+        response = self.client.get(url, {"address": test_search})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert_has_results(self, response)
+
+        for entry in response.data["results"]["entry"]:
+            present_checks = []
+            for address in entry["resource"]["address"]:
+                address_string = concat_address_string(address)
+                if "333 Rocky Road. Sacramento" in address_string and "04321" in address_string:
+                    present_checks.append(True)
             self.assertTrue(any(present_checks))
 
     def test_list_filter_by_address_city(self):
@@ -358,6 +391,19 @@ class PractitionerViewSetTestCase(APITestCase):
     def test_list_filter_by_address_postalcode(self):
         url = reverse("fhir-practitioner-list")
         postal_code_string = self.locs[0].address.address_us.zipcode
+        response = self.client.get(url, {"address_postalcode": postal_code_string})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert_has_results(self, response)
+
+        for entry in response.data["results"]["entry"]:
+            zips = []
+            for address in entry["resource"]["address"]:
+                zips.append(address["postalCode"])
+            self.assertIn(postal_code_string, zips)
+
+    def test_list_filter_by_address_postalcode_leading_zero(self):
+        url = reverse("fhir-practitioner-list")
+        postal_code_string = "04321"
         response = self.client.get(url, {"address_postalcode": postal_code_string})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)

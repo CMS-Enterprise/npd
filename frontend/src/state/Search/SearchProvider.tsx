@@ -1,44 +1,97 @@
-import React, { useState, type ReactNode } from "react"
+import React, { useEffect, useState, type ReactNode } from "react"
 import { usePagination, usePaginationParams } from "../../hooks/usePagination"
-import { useOrganizationsAPI } from "../requests/organizations"
 import {
   SearchContext,
   SearchDispatchContext,
   type SearchContextValue,
   type SearchDispatchContextValue,
 } from "./SearchContext"
+import type { FHIRCollection } from "../../@types/fhir"
+import type { UseQueryResult } from "@tanstack/react-query"
 
-interface SearchProviderProps {
+interface SearchProviderProps<T> {
   children: ReactNode
+  useSearchAPI: (
+    params: PaginationParams & SearchParams,
+    options?: { requireQuery?: boolean }
+  ) => UseQueryResult<FHIRCollection<T>>
+  defaultSort: string
 }
 
-export const SearchProvider: React.FC<SearchProviderProps> = ({ children }) => {
+export function SearchProvider<T>({ 
+  children, 
+  useSearchAPI,
+  defaultSort
+}: SearchProviderProps<T>) {
+  const [isBackgroundLoading, setIsBackgroundLoading] = useState(false)
   const [params, setParams] = usePaginationParams()
   const [query, setQueryValue] = useState<string>(params.query || "")
-  const { data, isLoading, error } = useOrganizationsAPI(params, {
-    requireQuery: true,
-  })
+
+  const currentSort = params.sort || defaultSort
+  
+  // the injected hook handles the actual fetching
+  const { data, isLoading, error } = useSearchAPI(
+    { ...params, sort: currentSort },
+    { requireQuery: true }
+  )
+  
   const pagination = usePagination(params, data)
 
+  const buildParams = (overrides: { page?: string; query?: string; sort?: string }) => {
+    const nextQuery = overrides.query ?? params.query ?? query
+    const nextSort = overrides.sort ?? currentSort
+    
+    const next: Record<string, string> = {
+      page: overrides.page ?? "1",
+      sort: nextSort
+    }
+    
+    if (nextQuery) {
+      next.query = nextQuery
+    }
+    
+    return next
+  }
+
   const setQuery = (nextQuery: string) => {
+    setIsBackgroundLoading(false)
     setQueryValue(nextQuery)
-    const next = { page: params.page.toString(), query: nextQuery }
+    const next = buildParams({ page: "1", query: nextQuery })
     setParams(next, { preventScrollReset: true })
   }
 
   const navigateToPage = (toPage: number) => {
-    const next = { page: toPage.toString(), query: query || params.query || "" }
-    setParams(next, {
-      preventScrollReset: true,
-    })
+    setIsBackgroundLoading(true)
+    const next = buildParams({ page: toPage.toString() })
+    setParams(next, { preventScrollReset: true })
   }
 
-  const state: SearchContextValue = {
+  const setSort = (nextSort: string) => {
+    setIsBackgroundLoading(true)
+    const next = buildParams({ page: "1", sort: nextSort })
+    setParams(next, { preventScrollReset: true })
+  }
+
+  const clearSearch = () => {
+    setQueryValue("")
+    setParams({})
+  }
+
+  useEffect(() => {
+    if (!isLoading) {
+      setIsBackgroundLoading(false)
+    }
+  }, [isLoading])
+
+  const hasActiveQuery = params.query && params.query.length > 0
+  
+  const state: SearchContextValue<T> = {
     initialQuery: query,
-    data: data?.results?.entry
+    data: hasActiveQuery && data?.results?.entry
       ? data.results.entry.map((entry) => entry.resource)
       : null,
     isLoading,
+    isBackgroundLoading,
     error: error
       ? error instanceof Error
         ? error.message
@@ -46,20 +99,21 @@ export const SearchProvider: React.FC<SearchProviderProps> = ({ children }) => {
       : null,
     pagination,
     query,
+    sort: currentSort
   }
 
   const dispatch: SearchDispatchContextValue = {
     setQuery,
     navigateToPage,
-    clearSearch: () => {
-      setQueryValue("")
-      setParams({})
-    },
+    setSort,
+    clearSearch,
   }
 
   return (
     <SearchContext value={state}>
-      <SearchDispatchContext value={dispatch}>{children}</SearchDispatchContext>
+      <SearchDispatchContext value={dispatch}>
+        {children}
+      </SearchDispatchContext>
     </SearchContext>
   )
 }

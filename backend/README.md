@@ -64,7 +64,8 @@ You can format all code in the project with `make format`, or rely on the pre-co
 
 ## Documentation
 
-API documentation can be viewed at `/fhir/docs`. If you make any changes to the Views, please update the swagger schema accordingly.
+
+API documentation can be viewed at `/fhir/docs`. If you make any changes to the Views, please update the swagger schema accordingly!
 
 ## Understanding the Flow of Data through the FHIR API
 

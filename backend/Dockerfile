@@ -4,8 +4,6 @@ FROM python:3.13-slim AS builder
 # Create the app directory
 RUN mkdir /app
 
-
-
 # Set the working directory inside the container
 WORKDIR /app
  
@@ -14,15 +12,32 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1
 #Prevents Python from buffering stdout and stderr
 ENV PYTHONUNBUFFERED=1 
- 
+
+
+RUN apt-get update \
+    && apt-get -y install binutils libproj-dev gdal-bin
+
+
 # Upgrade pip
 RUN pip install --upgrade pip
  
 # Copy the Django project  and install dependencies
 COPY requirements.txt  /app/
- 
-# run this command to install all dependencies 
+    
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    binutils \
+    libproj-dev \
+    gdal-bin
+
+# Set up a virtual environment in the builder stage
+ENV VIRTUAL_ENV=/opt/venv
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+# Install Python requirements into the virtual environment
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+
  
 # Stage 2: Production stage
 FROM python:3.13-slim
@@ -31,11 +46,17 @@ RUN useradd -m -r appuser && \
    mkdir /app && \
    chown -R appuser /app
 
- 
-# Copy the Python dependencies from the builder stage
-COPY --from=builder /usr/local/lib/python3.13/site-packages/ /usr/local/lib/python3.13/site-packages/
-COPY --from=builder /usr/local/bin/ /usr/local/bin/
- 
+# Install only the *runtime* system dependencies for GDAL
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gdal-bin \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy the virtual environment from the builder stage
+COPY --from=builder /opt/venv /opt/venv
+
+# Set the PATH to include the virtual environment's bin directory
+ENV PATH="/opt/venv/bin:$PATH"
+
 # Set the working directory
 WORKDIR /app
  
@@ -53,7 +74,11 @@ USER appuser
 EXPOSE 8000 
 
 # Run Django’s development server
-CMD ["python", "manage.py", "runserver", "--insecure", "0.0.0.0:8000"]
+# CMD ["ddtrace-run", "python", "manage.py", "runserver", "--insecure", "0.0.0.0:8000"]
 
 # Start the application using Gunicorn
 #CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "app.wsgi:application"]
+# In production, collect static assets then start gunicorn in entrypoint.sh
+# Note that this behavior is disabled for local dev by updating entrypoint in compose.yml
+ENTRYPOINT ["./entrypoint.sh"]
+CMD ["ddtrace-run", "gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "app.wsgi:application"]

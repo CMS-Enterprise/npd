@@ -5,18 +5,30 @@
 | Updated | 2029-09-30 | @abachman-dsac | clarification of coding styles and PR details |
 | Updated | 2029-10-15 | @abachman-dsac | addressing feedback from #108                 |
 | Updated | 2029-12-03 | @abachman-dsac | adding notes on `make` and `bin/npr`          |
+| Updated | 2026-01-28 | @sachin-panayil| updating links with new path                  |
+| Updated | 2026-02-10 | @spopelka-dsac | updating testing documentation                |
+| Updated | 2026-02-24 | @sachin-panayil| adding new troubleshooting section            |
 
 - [How to Contribute](#how-to-contribute)
   - [Getting Started](#getting-started)
     - [Team Specific Guidelines](#team-specific-guidelines)
+    - [Dependencies](#dependencies)
     - [Installing](#installing)
     - [Building the Project](#building-the-project)
       - [Database Setup](#database-setup)
       - [Running the Application](#running-the-application)
       - [One-off commands](#one-off-commands)
+    - [Troubleshooting](#troubleshooting)
+      - [1. PostgreSQL collation version mismatch](#1-postgresql-collation-version-mismatch)
+      - [2. Docker volume image mismatch](#2-docker-volume-image-mismatch)
+      - [3. Port already in use](#3-port-already-in-use)
+      - [4. Updated elements do not appear on the frontend after build](#4-updated-elements-do-not-appear-on-the-frontend-after-build)
+      - [5. API endpoint returns empty results but database has data](#5-api-endpoint-returns-empty-results-but-database-has-data)
     - [Workflow and Branching](#workflow-and-branching)
     - [Testing Conventions](#testing-conventions)
       - [Backend Tests](#backend-tests)
+      - [Frontend Tests](#frontend-tests)
+      - [End-to-End Tests](#end-to-end-tests)
     - [Coding Style and Linters](#coding-style-and-linters)
     - [Writing Issues](#writing-issues)
     - [Creating Commits](#creating-commits)
@@ -44,7 +56,7 @@ We encourage you to read this project's CONTRIBUTING policy (you are here), its
 [LICENSE](LICENSE.md), and its [README](README.md).
 
 These instructions are general and do not cover every scenario. [Create an
-issue](https://github.com/DSACMS/npd/issues) on this project or double check
+issue](https://github.com/CMS-Enterprise/npd/issues) on this project or double check
 current documentation if you run into a situation you are unable to solve by
 rebuilding the application from scratch.
 
@@ -55,18 +67,27 @@ rebuilding the application from scratch.
 While being fully developed in the open, this project is a hybrid project
 largely staffed by members of the [DSAC](https://www.cms.gov/digital-service)
 team, but not restricted to CMS team members. We welcome
-[issues](https://github.com/DSACMS/npd/issues) and
-[contributions](https://github.com/DSACMS/npd/pulls) from the open source and
+[issues](https://github.com/CMS-Enterprise/npd/issues) and
+[contributions](https://github.com/CMS-Enterprise/npd/pulls) from the open source and
 health-tech community at large.
 
 The team uses an internal Jira instance for planning and tracking work but
 seeks to hold any discussions relevant to specific Pull Requests in the open.
 
+### Dependencies
+The following tools **must be installed on your machine** before running any project commands, but it is important to note that some of these may be installed on your machine by default:
+
+- Python 3.10 or later
+- Docker
+- colima (if using macOS)
+- Docker Compose  
+- GNU Make  
+
 ### Installing
 
 Python and Javascript dependencies are handled via docker containers, so they
 will be built when running `docker compose build` or when running `docker
-compose up` for the first time.
+compose up` for the first time. The above installations are needed for local testing.
 
 Local dependencies for project tooling and testing can be installed with `make`:
 
@@ -119,6 +140,58 @@ You can review the use of those tools by running `make` or `bin/npr --help` at t
 
 `bin/npr` is a runner for managing complex `docker compose run` commands across the various services that make up this project.
 
+### Troubleshooting
+
+#### 1. PostgreSQL collation version mismatch
+
+| | |
+|---|---|
+| **Error** | `template database "template1" has a collation version mismatch` |
+| **Cause** | A PostgreSQL Docker volume was created using a different system library version. |
+| **Fix** | Automatically resolved by the Flyway migration `R__refresh_collation_version.sql`. |
+
+#### 2. Docker volume image mismatch
+
+| | |
+|---|---|
+| **Error** | `extension "postgis" already exists` |
+| **Cause** | Mismatch of Docker database images due to deprecated older code or a partially completed migration. |
+| **Fix** | Run `make reset-db` then `make setup`. |
+
+#### 3. Port already in use
+
+| | |
+|---|---|
+| **Error** | `bind: address already in use` |
+| **Cause** | Another local service is already using a required port. |
+| **Fix** | Run `sudo lsof -i :{port}` to find the process, then `sudo kill <PID>`. |
+
+#### 4. Updated elements do not appear on the frontend after build
+
+| | |
+|---|---|
+| **Error** | Elements do not appear after either pulling a branch or creating new code. |
+| **Cause** | Cached frontend assets or stale build artifacts are being served by the browser or container. |
+| **Fix** | Hard refresh with `Cmd + Shift + R`, or run `make clean-frontend` then `make build-frontend-assets`. |
+
+#### 5. API endpoint returns empty results but database has data
+
+| | |
+|---|---|
+| **Error** | A FHIR endpoint (e.g. `/fhir/Organization/`) returns an empty count. |
+| **Cause** | The API queries a materialized view, not the base table. Materialized views are snapshots that can become stale — if the view was created or last refreshed before seed data was loaded, it will be empty. |
+| **Fix** | Run `make refresh-views`, or manually: `REFRESH MATERIALIZED VIEW npd.<view_name>;` |
+
+**How to confirm this is the issue:**
+```bash
+# run the following command
+bin/npr -e PGPASSWORD={password} -s db psql -U postgres -h db -d npd
+```
+```sql
+-- The materialized view is empty or not accurate
+SELECT COUNT(*) FROM npd.organization_view;
+```
+
 ### Workflow and Branching
 
 We follow the [GitHub Flow Workflow](https://guides.github.com/introduction/flow/).
@@ -127,32 +200,58 @@ We follow the [GitHub Flow Workflow](https://guides.github.com/introduction/flow
 2.  Check out the `main` branch
 3.  Create a feature branch
 4.  Write code and tests for your change
-5.  From your branch, make a pull request against `DSACMS/npd/main`
+5.  From your branch, make a pull request against `CMS-Enterprise/npd/main`
 6.  Work with repo maintainers to get your change reviewed
-7.  Wait for your change to be pulled into `DSACMS/npd/main`
+7.  Wait for your change to be pulled into `CMS-Enterprise/npd/main`
 8.  Delete your feature branch
 
 ### Testing Conventions
 
-It is an expectation of this project that each feature will have new automated
-tests prior to opening a pull request and that all the tests in the repo are
-passing.
+With each pull request against main, automated GitHub actions will run the full NPD test suite (including Django unit tests, React unit tests, and end-to-end tests) against the codebase. Branch protections prevent pull requests from being merged unless all tests are passing.
 
-We do not expect 100% test coverage but we will be unlikely to accept Pull
-Requests which reduce test coverage or new features which do not include
-updates to the test suite.
+It is an expectation of this project that every pull request for a new feature will include unit tests and end-to-end tests that appropriately flex the edge cases of the feature being implemented or the change being made. 
+
+It is also an expectation of this project that any bug fixes will begin with the addition of new unit and/or end-to-end tests that demonstrates the bug conditions. The test(s) should pass after the bug fix is complete.
+
+We do not expect 100% test coverage, but we will be unlikely to accept pull requests that reduce test coverage or pull requests for new features/ bug fixes that do not also introduce appropriate tests.
 
 We recommend starting new feature work with a new Playwright end-to-end test and going from there.
 
 #### Backend Tests
 
-The backend test suite can be found in the `tests.py` file currently in
-`backend/npdfhir/tests.py`. The test suite can be run by navigating to the
-`backend` folder and running `make test` or `python manage.py test`.
+Any modifications that change the underlying data model, behavior of the API, or authentication should include Django unit tests that create appropriate test records and assertions to flex the main conditions and edge cases associated with the change. 
+
+Currently, the backend tests fall into three main categories:
+* [Overall application tests, including routing](/backend/app/tests/)
+* [Static content delivery tests, including feature flag settings](/backend/provider_directory/tests/)
+* [Data model and API tests, separated by FHIR endpoint](/backend/npdfhir/tests/)
+
+The full backend test suite can be run by executing the command `make test-backend` or by navigating to the
+`backend` folder and running `python manage.py test`.
+
+Best Practices:
+* Test methods should be clearly named to describe the scenarios that they are testing
+* Test data should be generated to support flexing edge cases (with comments to describe the test cases)
+* Filter tests should verify both the intended inclusion and exclusion established by the filter
 
 Please refer to the [Django
 documentation](https://docs.djangoproject.com/en/5.2/topics/testing/overview/)
 on testing for additional details.
+
+#### Frontend Tests
+Any modifications that change the React components or introduce new pages should include react unit tests that validate that the new components and pages are rendering correctly undes the expected logical conditions.
+
+The frontend tests can be found throughout the [frontend folder](/frontend/src), denoted by `.test` in the filename.
+
+The full frontend test suite can be run by executing the command `make test-frontend`, which also spins up a test server for mocked requests. 
+
+#### End-to-End Tests
+NPD utilizes Playwright for automated end-to-end testing. Any modifications that change either frontend or backend behavior should have an associated end-to-end test for that specific change, as well as a new or updated user journey test that validates the change in the context of user flows throughout the app. Note: we will continue to add user journey tests and associated documentation as we flesh out our user stories.
+
+Eventually, we intend to add automated User Acceptance Tests (UATs) to the end-to-end test suite, which will be similar to the user journey tests, but will further verify that NPD meets the business requirements and user needs defined for each software stage. These are intended to support a test-driven development strategy, in which the business requirements are defined as code and the implementation is validated against those codified requirements. The automated UATs will not be required to be passing with each PR, but rather will give an indication of progress toward fulfilling feature, release, and/or product goals.
+
+For additional information on our implementation of playwright and getting started with Playwright tests, please refer to the [README](/playwright/README.md) in the `playwright/` directory.
+
 
 ### Coding Style and Linters
 
@@ -180,7 +279,7 @@ When creating an issue please try to adhere to the following format:
 
     see our .github/ISSUE_TEMPLATE.md for more examples.
 
-In this project, [new issues](https://github.com/DSACMS/npd/issues) should be
+In this project, [new issues](https://github.com/CMS-Enterprise/npd/issues) should be
 limited to code, development tooling, automation, or site bugs, ___NOT___ data
 quality.
 
@@ -298,235 +397,12 @@ authorship metadata will be preserved.
 
 ## Shipping Releases
 
-<!-- TODO: What cadence does your project ship new releases? (e.g. one-time, ad-hoc, periodically, upon merge of new patches) Who does so? Below is a sample template you can use to provide this information.
-
-npd will see regular updates and new releases. This section describes the general guidelines around how and when a new release is cut.
-
--->
-
-<!-- ### Table of Contents
-
-- [Versioning](#versioning)
-  - [Breaking vs. non-breaking changes](#breaking-vs-non-breaking-changes)
-  - [Ongoing version support](#ongoing-version-support)
-- [Release Process](#release-process)
-  - [Goals](#goals)
-  - [Schedule](#schedule)
-  - [Communication and Workflow](#communication-and-workflow)
-  - [Beta Features](#beta-features)
-- [Preparing a Release Candidate](#preparing-a-release-candidate)
-  - [Incorporating feedback from review](#incorporating-feedback-from-review)
-- [Making a Release](#making-a-release)
-- [Auto Changelog](#auto-changelog)
-- [Hotfix Releases](#hotfix-releases) -->
-
-<!-- ### Versioning
-
-npd uses [Semantic Versioning](https://semver.org/). Each release is associated with a [`git tag`](github.com/DSACMS/npd/tags) of the form `X.Y.Z`.
-
-Given a version number in the `MAJOR.MINOR.PATCH` (eg., `X.Y.Z`) format, here are the differences in these terms:
-
-- **MAJOR** version - make breaking/incompatible API changes
-- **MINOR** version - add functionality in a backwards compatible manner
-- **PATCH** version - make backwards compatible bug fixes -->
-
-<!-- ### Breaking vs. non-breaking changes
-
-TODO: Examples and protocol for breaking changes
-
-Definitions for breaking changes will vary depending on the use-case and project but generally speaking if changes break standard workflows in any way then they should be put in a major version update.
--->
-
-<!-- #### Ongoing version support
-
-TODO: Explanation of general thought process
-
-Explain the project’s thought process behind what versions will and won’t be supported in the future.
--->
-
-<!-- TODO: List of supported releases
-
-This section should make clear which versions of the project are considered actively supported.
--->
-
-<!-- ### Release Process
-
-The sections below define the release process itself, including timeline, roles, and communication best practices. -->
-
-<!-- #### Goals
-
-TODO: Explain the goals of your project’s release structure
-
-This should ideally be a bulleted list of what your regular releases will deliver to key users and stakeholders
--->
-
-<!-- #### Schedule
-
-TODO: Communicate the timing of the regular release structure
-
-For example, if you plan on creating regular releases on a weekly basis you should communicate that as well as the typical days upcoming releases will become tagged.
-
-You should also communicate special cases such as security updates or critical bugfixes and how they would likely be released earlier than what is usually scheduled.
--->
-
-<!-- #### Communication and Workflow
-
-TODO: Communicate proper channels to be notified about releases
-
-Communicate the slack channels, mailing lists, or other means of pushing out release notifications.
--->
-
-<!-- TODO: (OPTIONAL) Support beta feature testing
-## Beta Features
-
-When a new beta feature is created for a release, make sure to create a new Issue with a '[Feature Name] - Beta [X.X.x] - Feedback' title and a 'beta' label. Update the spec text for the beta feature with 'Beta feature: Yes (as of X.X.x). Leave feedback' with a link to the new feature Issue.
-
-Once an item is moved out of beta, close its Issue and change the text to say 'Beta feature: No (as of X.X.x)'.
--->
-
-<!-- ### Preparing a Release Candidate
-
-The following steps outline the process to prepare a Release Candidate of npd. This process makes public the intention and contents of an upcoming release, while allowing work on the next release to continue as usual in `dev`.
-
-1. Create a _Release branch_ from the tip of `dev` named `release-x.y.z`, where `x.y.z` is the intended version of the release. This branch will be used to prepare the Release Candidate. For example, to prepare a Release Candidate for `0.5.0`:
-
-   ```bash
-   git fetch
-   git checkout origin/dev
-   git checkout -b release-0.5.0
-   git push -u origin release-0.5.0
-   ```
-
-   Changes generated by the steps below should be committed to this branch later.
-
-2. Create a tag like `x.y.z-rcN` for this Release Candidate. For example, for the first `0.5.0` Release Candidate:
-
-   ```bash
-   git fetch
-   git checkout origin/release-0.5.0
-   git tag 0.5.0-rc1
-   git push --tags
-   ```
-
-3. Publish a [pre-Release in GitHub](proj-releases-new):
-
-   ```md
-   Tag version: [tag you just pushed]
-   Target: [release branch]
-   Release title: [X.Y.Z Release Candidate N]
-   Description: [copy in ReleaseNotes.md created earlier]
-   This is a pre-release: Check
-   ```
-
-4. Open a Pull Request to `main` from the release branch (eg. `0.5.0-rc1`). This pull request is where review comments and feedback will be collected.
-
-5. Conduct Review of the Pull Request that was opened. -->
-
-<!-- #### Incorporating feedback from review
-
-The review process may result in changes being necessary to the release candidate.
-
-For example, if the second Release Candidate for `0.5.0` is being prepared, after committing necessary changes, create a tag on the tip of the release branch like `0.5.0-rc2` and make a new [GitHub pre-Release](proj-releases-new) from there:
-
-```bash
-git fetch
-git checkout origin/release-0.5.0
-# more commits per OMF review
-git tag 0.5.0-rc2
-git push --tags
-```
-
-Repeat as-needed for subsequent Release Candidates. Note the release branch will be pushed to `dev` at key points in the approval process to ensure the community is working with the latest code. -->
-
-<!-- ### Making a Release
-
-The following steps describe how to make an approved [Release Candidate](#preparing-a-release-candidate) an official release of npd:
-
-1. **Approved**. Ensure review has been completed and approval granted.
-
-2. **Main**. Merge the Pull Request created during the Release Candidate process to `main` to make the release official.
-
-3. **Dev**. Open a Pull Request from the release branch to `dev`. Merge this PR to ensure any changes to the Release Candidate during the review process make their way back into `dev`.
-
-4. **Release**. Publish a [Release in GitHub](proj-releases-new) with the following information
-
-   - Tag version: [X.Y.Z] (note this will create the tag for the `main` branch code when you publish the release)
-   - Target: main
-   - Release title: [X.Y.Z]
-   - Description: copy in Release Notes created earlier
-   - This is a pre-release: DO NOT check
-
-5. **Branch**. Finally, keep the release branch and don't delete it. This allows easy access to a browsable spec. -->
-
-<!-- ### Auto Changelog
-
-It is recommended to use the provided auto changelog github workflow to populate the project’s CHANGELOG.md file:
-
-```yml
-name: Changelog
-on:
-  release:
-    types:
-      - created
-jobs:
-  changelog:
-    runs-on: ubuntu-latest
-    steps:
-      - name: "Auto Generate changelog"
-        uses: heinrichreimer/action-github-changelog-generator@v2.3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-```
-
-This provided workflow will automatically populate the CHANGELOG.md with all of the associated changes created since the last release that are included in the current release.
-
-This workflow will be triggered when a new release is created.
-
-If you do not wish to use automatic changelogs, you can delete the workflow and update the CHANGELOG.md file manually. Although, this is not recommended.
-
-For best practices on writing changelogs, see: https://keepachangelog.com/en/1.1.0/#how -->
-
-<!-- ### Hotfix Releases
-
-In rare cases, a hotfix for a prior release may be required out-of-phase with the normal release cycle. For example, if a critical bug is discovered in the `0.3.x` line after `0.4.0` has already been released.
-
-1. Create a _Support branch_ from the tag in `main` at which the hotfix is needed. For example if the bug was discovered in `0.3.2`, create a branch from this tag:
-
-   ```bash
-   git fetch
-   git checkout 0.3.2
-   git checkout -b 0.3.x
-   git push -u origin 0.3.x
-   ```
-
-2. Merge (or commit directly) the hotfix work into this branch.
-
-3. Tag the support branch with the hotfix version. For example if `0.3.2` is the version being hotfixed:
-
-   ```bash
-   git fetch
-   git checkout 0.3.x
-   git tag 0.3.3
-   git push --tags
-   ```
-
-4. Create a [GitHub Release](proj-releases-new) from this tag and the support branch. For example if `0.3.3` is the new hotfix version:
-
-   ```md
-   Tag version: 0.3.3
-   Target: 0.3.x
-   Release title: 0.3.3
-   Description: [copy in ReleaseNotes created earlier]
-   This is a pre-release: DO NOT check
-   ```
-
-[proj-releases-new]: https://github.com/DSACMS/npd/releases/new
--->
+Please refer to our [Release Guidelines](release-guidelines.md) to read how we make releases.
 
 ## Documentation
 
 We also welcome improvements to the project documentation or to the existing
-docs. Please file an [issue](https://github.com/DSACMS/npd/issues).
+docs. Please file an [issue](https://github.com/CMS-Enterprise/npd/issues).
 
 ## Policies
 

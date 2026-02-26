@@ -1,11 +1,11 @@
-import type { FHIRPractioner } from "../@types/fhir";
+import type { FHIRPractitioner } from "../@types/fhir";
 import {
     formatAddress,
     formatDate
 } from "../helpers/formatters"
 
 export class PractitionerPresenter {
-    constructor(private record: FHIRPractioner) {}
+    constructor(private record: FHIRPractitioner) {}
 
     get name(): string {
         const name = this.record.name?.[0]

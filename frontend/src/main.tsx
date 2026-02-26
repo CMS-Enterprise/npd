@@ -22,10 +22,12 @@ import { Login } from "./pages/Login"
 import { NotFound } from "./pages/NotFound.tsx"
 import {
   Organization,
-  OrganizationList,
   OrganizationSearch,
 } from "./pages/Organization"
-import { Practitioner } from "./pages/Practitioner/Practitioner.tsx"
+import { 
+  Practitioner,
+  PractitionerSearch
+} from "./pages/Practitioner"
 import { Search } from "./pages/Search"
 import { FrontendSettingsProvider } from "./state/FrontendSettingsProvider"
 
@@ -48,17 +50,19 @@ createRoot(document.getElementById("root")!).render(
                   <Route element={<FeatureFlagRoute name="SEARCH_APP" />}>
                     <Route path="/search" element={<Search />} />
                     <Route path="/organizations">
-                      <Route index element={<OrganizationList />} />
                       <Route path="search" element={<OrganizationSearch />} />
                       <Route
                         path=":organizationId"
                         element={<Organization />}
                       />
                     </Route>
-                    <Route
-                      path="/practitioners/:practitionerId"
-                      element={<Practitioner />}
-                    />
+                    <Route path="/practitioners">
+                      <Route path="search" element={<PractitionerSearch />} />
+                      <Route
+                        path=":practitionerId"
+                        element={<Practitioner />}
+                      />
+                    </Route>
                   </Route>
                 </Route>
 

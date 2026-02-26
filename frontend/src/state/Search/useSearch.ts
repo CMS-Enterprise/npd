@@ -6,16 +6,14 @@ import {
   type SearchDispatchContextValue,
 } from "./SearchContext"
 
-// Custom hook to use the search context
-export const useSearchState = (): SearchContextValue => {
+export function useSearchState<T>(): SearchContextValue<T> {
   const context = useContext(SearchContext)
   if (context === undefined) {
     throw new Error("useSearchState must be used within a SearchProvider")
   }
-  return context
+  return context as SearchContextValue<T>
 }
 
-// Custom hook to use the search context
 export const useSearchDispatch = (): SearchDispatchContextValue => {
   const context = useContext(SearchDispatchContext)
   if (context === undefined) {

@@ -27,7 +27,7 @@ export interface FHIRCodeableConcept extends CodeableConcept {
   text?: string
 }
 
-export interface FHIRPractioner extends Practitioner {
+export interface FHIRPractitioner extends Practitioner {
   name?: HumanName[] | null
   identifier?: FHIRIdentifer[] | null
   telecom?: ContactPoint[] | null

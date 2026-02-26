@@ -1,11 +1,6 @@
-# This is an auto-generated Django model module.
-# You'll have to do the following manually to clean this up:
-#   * Rearrange models' order
-#   * Make sure each model has one field with primary_key=True
-#   * Make sure each ForeignKey and OneToOneField has `on_delete` set to the desired behavior
-#   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
-# Feel free to rename the models, but don't rename db_table values or field names.
-from django.db import models
+from django.db import connection, models
+from django.contrib.gis.db import models as geomodels
+from django.contrib.postgres.search import SearchVectorField
 
 
 class Address(models.Model):
@@ -51,6 +46,7 @@ class AddressInternational(models.Model):
     verification_status = models.CharField(max_length=32, blank=True, null=True)
     address_precision = models.CharField(max_length=32, blank=True, null=True)
     max_address_precision = models.CharField(max_length=32, blank=True, null=True)
+    geolocation = geomodels.PointField(srid=4326)
 
     class Meta:
         managed = False
@@ -68,6 +64,7 @@ class AddressNonstandard(models.Model):
     latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
     notes = models.TextField(blank=True, null=True)
+    geolocation = geomodels.PointField(srid=4326)
 
     class Meta:
         managed = False
@@ -129,10 +126,17 @@ class AddressUs(models.Model):
     lacslink_indicator = models.CharField(max_length=1, blank=True, null=True)
     suitelink_match = models.CharField(max_length=5, blank=True, null=True)
     enhanced_match = models.CharField(max_length=64, blank=True, null=True)
+    geolocation = geomodels.PointField(srid=4326)
+    search_vector = SearchVectorField(blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = "address_us"
+
+    def _do_insert(self, manager, using, fields, update_pk, raw):
+        # Prevents the model from attempting to insert values into the generated search_vector field
+        fields = [f for f in fields if f.attname != "search_vector"]
+        return super()._do_insert(manager, using, fields, update_pk, raw)
 
 
 class ClinicalOrganization(models.Model):
@@ -204,6 +208,8 @@ class EndpointInstance(models.Model):
     environment_type = models.ForeignKey(
         "EnvironmentType", models.DO_NOTHING, blank=True, null=True
     )
+
+    status = models.CharField(max_length=64, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -389,19 +395,25 @@ class IndividualToLanguageSpoken(models.Model):
 
 class IndividualToName(models.Model):
     pk = models.CompositePrimaryKey("individual_id", "first_name", "last_name", "name_use_id")
-    individual = models.ForeignKey(Individual, models.DO_NOTHING)
+    individual = models.ForeignKey(Individual, models.DO_NOTHING, db_index=True)
     prefix = models.CharField(max_length=10, blank=True, null=True)
-    first_name = models.CharField(max_length=50)
+    first_name = models.CharField(max_length=50, db_index=True)
     middle_name = models.CharField(max_length=50, blank=True, null=True)
-    last_name = models.CharField(max_length=200)
+    last_name = models.CharField(max_length=200, db_index=True)
     start_date = models.DateField(blank=True, null=True)
     end_date = models.DateField(blank=True, null=True)
     name_use = models.ForeignKey(FhirNameUse, models.DO_NOTHING)
     suffix = models.CharField(max_length=10, blank=True, null=True)
+    search_vector = SearchVectorField(blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = "individual_to_name"
+
+    def _do_insert(self, manager, using, fields, update_pk, raw):
+        # Prevents the model from attempting to insert values into the generated search_vector field
+        fields = [f for f in fields if f.attname != "search_vector"]
+        return super()._do_insert(manager, using, fields, update_pk, raw)
 
 
 class IndividualToPhone(models.Model):
@@ -506,10 +518,16 @@ class Nucc(models.Model):
     notes = models.TextField(blank=True, null=True)
     certifying_board_name = models.TextField(blank=True, null=True)
     certifying_board_url = models.TextField(blank=True, null=True)
+    search_vector = SearchVectorField(blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = "nucc"
+
+    def _do_insert(self, manager, using, fields, update_pk, raw):
+        # Prevents the model from attempting to insert values into the generated search_vector field
+        fields = [f for f in fields if f.attname != "search_vector"]
+        return super()._do_insert(manager, using, fields, update_pk, raw)
 
 
 class NuccClassification(models.Model):
@@ -583,10 +601,16 @@ class OrganizationToName(models.Model):
     organization = models.ForeignKey(Organization, models.DO_NOTHING)
     name = models.CharField(max_length=1000)
     is_primary = models.BooleanField(blank=True, null=True)
+    search_vector = SearchVectorField(blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = "organization_to_name"
+
+    def _do_insert(self, manager, using, fields, update_pk, raw):
+        # Prevents the model from attempting to insert values into the generated search_vector field
+        fields = [f for f in fields if f.attname != "search_vector"]
+        return super()._do_insert(manager, using, fields, update_pk, raw)
 
 
 class OrganizationToOtherId(models.Model):
@@ -626,6 +650,26 @@ class OrganizationToTaxonomy(models.Model):
         db_table = "organization_to_taxonomy"
 
 
+class OrganizationView(models.Model):
+    organization = models.OneToOneField(
+        Organization, models.DO_NOTHING, primary_key=True, db_column="id"
+    )
+    authorized_official = models.ForeignKey(Individual, models.DO_NOTHING, blank=True, null=True)
+    ein = models.ForeignKey(LegalEntity, models.DO_NOTHING, blank=True, null=True)
+    parent = models.ForeignKey("self", models.DO_NOTHING, blank=True, null=True)
+    # the sorting field from organization_to_name
+    name = models.CharField(max_length=1000)
+
+    @classmethod
+    def refresh_materialized_view(cls):
+        with connection.cursor() as cursor:
+            cursor.execute(f"REFRESH MATERIALIZED VIEW {cls._meta.db_table};")
+
+    class Meta:
+        managed = False
+        db_table = "organization_view"
+
+
 class OtherIdType(models.Model):
     value = models.CharField(max_length=50, blank=True, null=True)
 
@@ -645,7 +689,7 @@ class PayloadType(models.Model):
 
 
 class Provider(models.Model):
-    npi = models.OneToOneField(Npi, models.DO_NOTHING, db_column="npi")
+    npi = models.OneToOneField(Npi, models.DO_NOTHING, db_column="npi", db_index=True)
     individual = models.OneToOneField(Individual, models.DO_NOTHING, primary_key=True)
 
     class Meta:
@@ -710,6 +754,34 @@ class ProviderToLocation(models.Model):
         db_table = "provider_to_location"
 
 
+class ProviderToLocationView(models.Model):
+    location = models.ForeignKey(Location, models.DO_NOTHING)
+    other_address = models.ForeignKey(Address, models.DO_NOTHING, blank=True, null=True)
+    nucc_code = models.IntegerField(blank=True, null=True)
+    specialty_id = models.IntegerField(blank=True, null=True)
+    id = models.UUIDField(primary_key=True)
+    provider_role_code = models.CharField(max_length=10, blank=True, null=True)
+    other_phone = models.ForeignKey(IndividualToPhone, models.DO_NOTHING, blank=True, null=True)
+    other_endpoint = models.ForeignKey(Endpoint, models.DO_NOTHING, blank=True, null=True)
+    active = models.BooleanField(blank=True, null=True)
+    provider_to_organization = models.ForeignKey(
+        "ProviderToOrganization", models.DO_NOTHING, blank=True, null=True
+    )
+    practitioner_first_name = models.CharField(max_length=50, db_index=True)
+    practitioner_last_name = models.CharField(max_length=200, db_index=True)
+    organization_name = models.CharField(max_length=1000)
+    location_name = models.CharField(max_length=200, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = "provider_to_location_view"
+
+    @classmethod
+    def refresh_materialized_view(cls):
+        with connection.cursor() as cursor:
+            cursor.execute(f"REFRESH MATERIALIZED VIEW {cls._meta.db_table};")
+
+
 class ProviderToOrganization(models.Model):
     individual = models.ForeignKey(Provider, models.DO_NOTHING)
     organization = models.ForeignKey(Organization, models.DO_NOTHING)
@@ -746,6 +818,24 @@ class ProviderToTaxonomy(models.Model):
         managed = False
         db_table = "provider_to_taxonomy"
         unique_together = (("npi", "nucc_code"),)
+
+
+class ProviderView(models.Model):
+    provider = models.OneToOneField(
+        Provider, models.DO_NOTHING, primary_key=True, db_column="individual_id"
+    )
+    npi = models.OneToOneField(Npi, models.DO_NOTHING, db_column="npi", db_index=True)
+    first_name = models.CharField(max_length=50, db_index=True)
+    last_name = models.CharField(max_length=200, db_index=True)
+
+    class Meta:
+        managed = False
+        db_table = "provider_view"
+
+    @classmethod
+    def refresh_materialized_view(cls):
+        with connection.cursor() as cursor:
+            cursor.execute(f"REFRESH MATERIALIZED VIEW {cls._meta.db_table};")
 
 
 class RelationshipType(models.Model):

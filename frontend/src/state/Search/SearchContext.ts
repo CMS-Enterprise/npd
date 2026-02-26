@@ -1,26 +1,22 @@
 import { createContext } from "react"
-import type { FHIROrganization } from "../../@types/fhir"
 
-// Define the context value type
-export interface SearchContextValue {
+export interface SearchContextValue<T> {
   initialQuery?: string
-  data: FHIROrganization[] | null
+  data: T[] | null
   isLoading: boolean
+  isBackgroundLoading: boolean
   error: string | null
   pagination?: PaginationState
   query?: string
+  sort: string
 }
 
 export interface SearchDispatchContextValue {
   setQuery: (nameOrId: string) => void
   navigateToPage: (page: number) => void
+  setSort: (sort: string) => void
   clearSearch: () => void
 }
 
-// Create the context with undefined default value
-export const SearchContext = createContext<SearchContextValue | undefined>(
-  undefined,
-)
-export const SearchDispatchContext = createContext<
-  SearchDispatchContextValue | undefined
->(undefined)
+export const SearchContext = createContext<SearchContextValue<unknown> | undefined>(undefined)
+export const SearchDispatchContext = createContext<SearchDispatchContextValue | undefined>(undefined)

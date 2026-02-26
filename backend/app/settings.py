@@ -20,11 +20,14 @@ from decouple import config
 
 from app.logging import sql_trace_formatter
 
+LANGUAGE_CODE = "en-us"
+
+LANGUAGES = [
+    ("en", ("English")),
+]
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config("NPD_DJANGO_SECRET")
@@ -44,6 +47,10 @@ else:
 
 INTERNAL_APIS = config("DJANGO_ALLOWED_HOSTS").split(",")
 
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, "locale"),
+]
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -53,8 +60,10 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.gis",
     "corsheaders",
     "rest_framework",
+    "rest_framework_gis",
     "django_filters",
     "drf_spectacular",
     "xmlrunner",
@@ -72,7 +81,9 @@ MIDDLEWARE = [
     "npdfhir.middleware.HealthCheckMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -159,11 +170,11 @@ DATABASES = {
             "pool": {
                 # our default gunicorn container configuration only spins up 3 workerse
                 "min_size": 2,
-                "max_size": 4,
+                "max_size": 10,
                 # boot clients if a pooled connection is not available within 10 seconds
                 "timeout": 10,
                 # after 2 clients are waiting for connections, subsequent requests should immediately fail
-                "max_waiting": 2,
+                "max_waiting": 10,
             },
         },
     }
@@ -206,19 +217,14 @@ USE_I18N = True
 
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
+# Static file collection (CSS, JavaScript, Images)
+# django.contrib.staticfiles collects static files in a consistent place
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
-
 STATIC_URL = "static/"
-
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
-    os.path.join(BASE_DIR, "provider_directory", "static"),
-]
-
-# STATICFILES_DIRS = [
-#        os.path.join(BASE_DIR, "static"),
-#    ]
+# Static file hosting
+# whitenoise hosts static files collected by django.contrib.staticfiles
+# https://whitenoise.readthedocs.io/en/latest/
+STATIC_ROOT = STATIC_URL
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
