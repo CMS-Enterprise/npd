@@ -14,12 +14,14 @@ from rest_framework.renderers import BrowsableAPIRenderer
 from rest_framework.response import Response
 from rest_framework.filters import OrderingFilter
 
+from .documentation_content import docs
 from .pagination import CustomPaginator
 from .renderers import FHIRRenderer
 
 from .filters.endpoint_filter_set import EndpointFilterSet
 from .filters.location_filter_set import LocationFilterSet
 from .filters.organization_filter_set import OrganizationFilterSet
+from .filters.organization_affiliation_filter_set import OrganizationAffiliationFilterSet
 from .filters.practitioner_filter_set import PractitionerFilterSet
 from .filters.practitioner_role_filter_set import PractitionerRoleFilterSet
 
@@ -62,10 +64,6 @@ class ParamOrderingFilter(OrderingFilter):
 
 
 class FHIREndpointViewSet(viewsets.GenericViewSet):
-    """
-    ViewSet for FHIR Endpoint Resources
-    """
-
     queryset = (
         EndpointInstance.objects.all()
         .prefetch_related(
@@ -87,23 +85,12 @@ class FHIREndpointViewSet(viewsets.GenericViewSet):
     ordering = ["name"]
     ordering_fields = ["name", "address", "ehr_vendor_name"]
     pagination_class = CustomPaginator
-    pagination_class = CustomPaginator
     lookup_url_kwarg = "id"
 
     @extend_schema(
-        responses={
-            200: OpenApiResponse(
-                description="Successfully retrieved FHIR Bundle resource of FHIR Endpoint resources"
-            )
-        }
+        responses={200: OpenApiResponse(description=docs.endpoints.endpoint.list_response)}
     )
     def list(self, request):
-        """
-        Query a list of interoperability endpoints, represented as a bundle of FHIR Endpoint resources
-
-        Default sort order: ascending endpoint instance name
-        """
-
         endpoints = self.filter_queryset(self.queryset)
         paginated_endpoints = self.paginate_queryset(endpoints)
 
@@ -116,15 +103,9 @@ class FHIREndpointViewSet(viewsets.GenericViewSet):
         return response
 
     @extend_schema(
-        responses={
-            200: OpenApiResponse(description="Successfully retrieved FHIR Endpoint resource")
-        }
+        responses={200: OpenApiResponse(description=docs.endpoints.endpoint.retrieve_response)}
     )
     def retrieve(self, request, id=None):
-        """
-        Query a specific endpoint as a FHIR Endpoint resource
-        """
-
         try:
             UUID(id)
         except (ValueError, TypeError):
@@ -137,17 +118,20 @@ class FHIREndpointViewSet(viewsets.GenericViewSet):
 
         serialized_endpoint = EndpointSerializer(endpoint, context={"request": request})
 
-        # Set appropriate content type for FHIR responses
         response = Response(serialized_endpoint.data)
 
         return response
 
+    # drf-spectacular content
+    __doc__ = docs.endpoints.endpoint.viewset  # shows as endpoint group description
+    list.__doc__ = (
+        f"{docs.endpoints.endpoint.list_description}\n\n"
+        f"{docs.constants.sort_order_text}{docs.endpoints.endpoint.default_sort}"
+    )  # shows as GET /Endpoint/ description
+    retrieve.__doc__ = f"{docs.endpoints.endpoint.retrieve_description}"  # shows as GET /Endpoint/{id}/ description
+
 
 class FHIRPractitionerViewSet(viewsets.GenericViewSet):
-    """
-    ViewSet for FHIR Practitioner resources
-    """
-
     queryset = ProviderView.objects.all().prefetch_related(
         "provider__individual",
         "provider__npi",
@@ -184,22 +168,10 @@ class FHIRPractitionerViewSet(viewsets.GenericViewSet):
         "npi_value",
     ]
 
-    # permission_classes = [permissions.IsAuthenticated]
     @extend_schema(
-        responses={
-            200: OpenApiResponse(
-                description="Successfully retrieved FHIR Bundle resource of FHIR Practitioner resources"
-            )
-        }
+        responses={200: OpenApiResponse(description=docs.endpoints.practitioner.list_response)}
     )
     def list(self, request):
-        """
-        Query a list of healthcare providers, represented as a bundle of FHIR Practitioner resources
-
-        Default sort order: ascending last name, first name
-        """
-        # Subqueries for last_name and first_name of the individual
-
         providers = self.filter_queryset(self.queryset)
         paginated_providers = self.paginate_queryset(providers)
 
@@ -210,14 +182,9 @@ class FHIRPractitionerViewSet(viewsets.GenericViewSet):
         return response
 
     @extend_schema(
-        responses={
-            200: OpenApiResponse(description="Successfully retrieved FHIR Practitioner resource")
-        }
+        responses={200: OpenApiResponse(description=docs.endpoints.practitioner.retrieve_response)}
     )
     def retrieve(self, request, id=None):
-        """
-        Query a specific provider as a FHIR Practitioner resource
-        """
         try:
             UUID(id)
         except (ValueError, TypeError):
@@ -230,18 +197,20 @@ class FHIRPractitionerViewSet(viewsets.GenericViewSet):
 
         serialized_practitioner = PractitionerSerializer(provider)
 
-        # Set appropriate content type for FHIR responses
         response = Response(serialized_practitioner.data)
 
         return response
 
+    # drf-spectacular content
+    __doc__ = docs.endpoints.practitioner.viewset  # shows as endpoint group description
+    list.__doc__ = (
+        f"{docs.endpoints.practitioner.list_description}\n\n"
+        f"{docs.constants.sort_order_text}{docs.endpoints.practitioner.default_sort}"
+    )  # shows as GET /Practitioner/ description
+    retrieve.__doc__ = f"{docs.endpoints.practitioner.retrieve_description}"  # shows as GET /Practitioner/{id}/ description
+
 
 class FHIRPractitionerRoleViewSet(viewsets.GenericViewSet):
-    """
-    ViewSet for FHIR PractitionerRole resources
-
-    """
-
     queryset = (
         ProviderToLocationView.objects.all()
         .select_related("location")
@@ -264,22 +233,10 @@ class FHIRPractitionerRoleViewSet(viewsets.GenericViewSet):
         "organization_name",
     ]
 
-    # permission_classes = [permissions.IsAuthenticated]
     @extend_schema(
-        responses={
-            200: OpenApiResponse(
-                description="Successfully retrieved FHIR Bundle resource of FHIR PractitionerRole resources"
-            )
-        }
+        responses={200: OpenApiResponse(description=docs.endpoints.practitioner_role.list_response)}
     )
     def list(self, request):
-        """
-        Query a list of relationships between providers, healthcare organizations, and practice locations, represented as a bundle of FHIR PractitionerRole resources
-
-        Default sort order: aschending by location name
-        """
-        # all_params = request.query_params
-
         practitionerroles = self.filter_queryset(self.queryset)
         paginated_practitionerroles = self.paginate_queryset(practitionerroles)
 
@@ -293,15 +250,10 @@ class FHIRPractitionerRoleViewSet(viewsets.GenericViewSet):
 
     @extend_schema(
         responses={
-            200: OpenApiResponse(
-                description="Successfully retrieved FHIR PractitionerRole resource"
-            )
+            200: OpenApiResponse(description=docs.endpoints.practitioner_role.retrieve_response)
         }
     )
     def retrieve(self, request, id=None):
-        """
-        Query a specific relationship between providers, healthcare organizations, and practice locations, represented as a FHIR PractitionerRole resource
-        """
         try:
             UUID(id)
         except (ValueError, TypeError):
@@ -313,17 +265,20 @@ class FHIRPractitionerRoleViewSet(viewsets.GenericViewSet):
             practitionerrole, context={"request": request}
         )
 
-        # Set appropriate content type for FHIR responses
         response = Response(serialized_practitionerrole.data)
 
         return response
 
+    # drf-spectacular content
+    __doc__ = docs.endpoints.practitioner_role.viewset  # shows as endpoint group description
+    list.__doc__ = (
+        f"{docs.endpoints.practitioner_role.list_description}\n\n"
+        f"{docs.constants.sort_order_text}{docs.endpoints.practitioner_role.default_sort}"
+    )  # shows as GET /PractitionerRole/ description
+    retrieve.__doc__ = f"{docs.endpoints.practitioner_role.retrieve_description}"  # shows as GET /PractitionerRole/{id}/ description
+
 
 class FHIROrganizationViewSet(viewsets.GenericViewSet):
-    """
-    ViewSet for FHIR Organization resources
-    """
-
     queryset = OrganizationView.objects.prefetch_related(
         "authorized_official",
         "ein",
@@ -358,21 +313,10 @@ class FHIROrganizationViewSet(viewsets.GenericViewSet):
     ordering = ["name"]
     ordering_fields = ["name"]
 
-    # permission_classes = [permissions.IsAuthenticated]
     @extend_schema(
-        responses={
-            200: OpenApiResponse(
-                description="Successfully retrieved FHIR Bundle resource of FHIR Organization resources"
-            )
-        }
+        responses={200: OpenApiResponse(description=docs.endpoints.organization.list_response)}
     )
     def list(self, request):
-        """
-        Query a list of organizations, represented as a bundle of FHIR Practitioner resources
-
-        Default sort order: ascending by organization name
-        """
-
         organizations = self.filter_queryset(self.queryset)
         paginated_organizations = self.paginate_queryset(organizations)
 
@@ -385,14 +329,9 @@ class FHIROrganizationViewSet(viewsets.GenericViewSet):
         return response
 
     @extend_schema(
-        responses={
-            200: OpenApiResponse(description="Successfully retrieved FHIR Organization resource")
-        }
+        responses={200: OpenApiResponse(description=docs.endpoints.organization.retrieve_response)}
     )
     def retrieve(self, request, id=None):
-        """
-        Query a specific organization, represented as a FHIR Organization resource
-        """
         try:
             UUID(id)
         except (ValueError, TypeError):
@@ -405,17 +344,20 @@ class FHIROrganizationViewSet(viewsets.GenericViewSet):
 
         serialized_organization = OrganizationSerializer(organization, context={"request": request})
 
-        # Set appropriate content type for FHIR responses
         response = Response(serialized_organization.data)
 
         return response
 
+    # drf-spectacular content
+    __doc__ = docs.endpoints.organization.viewset  # shows as endpoint group description
+    list.__doc__ = (
+        f"{docs.endpoints.organization.list_description}\n\n"
+        f"{docs.constants.sort_order_text}{docs.endpoints.organization.default_sort}"
+    )  # shows as GET /Organization/ description
+    retrieve.__doc__ = f"{docs.endpoints.organization.retrieve_description}"  # shows as GET /Organization/{id}/ description
+
 
 class FHIRLocationViewSet(viewsets.GenericViewSet):
-    """
-    ViewSet for FHIR Location resources
-    """
-
     queryset = (
         Location.objects.all()
         .select_related(
@@ -457,24 +399,13 @@ class FHIRLocationViewSet(viewsets.GenericViewSet):
     ordering = ["name"]
     ordering_fields = ["organization_name", "name"]
 
-    # permission_classes = [permissions.IsAuthenticated]
     @extend_schema(
-        responses={
-            200: OpenApiResponse(
-                description="Successfully retrieved FHIR Bundle resource of FHIR Location resources"
-            )
-        }
+        responses={200: OpenApiResponse(description=docs.endpoints.location.list_response)}
     )
     def list(self, request):
-        """
-        Query a list of healthcare practice locations, represented as bundle of FHIR Location resources
-
-        Default sort order: ascending by location name
-        """
         locations = self.filter_queryset(self.queryset)
         paginated_locations = self.paginate_queryset(locations)
 
-        # Serialize the bundle
         serialized_locations = LocationSerializer(
             paginated_locations, many=True, context={"request": request}
         )
@@ -484,14 +415,9 @@ class FHIRLocationViewSet(viewsets.GenericViewSet):
         return response
 
     @extend_schema(
-        responses={
-            200: OpenApiResponse(description="Successfully retrieved FHIR Location resource")
-        }
+        responses={200: OpenApiResponse(description=docs.endpoints.location.retrieve_response)}
     )
     def retrieve(self, request, id=None):
-        """
-        Query a specific healthcare practice location as a FHIR Location resource
-        """
         try:
             UUID(id)
         except (ValueError, TypeError):
@@ -501,17 +427,20 @@ class FHIRLocationViewSet(viewsets.GenericViewSet):
 
         serialized_location = LocationSerializer(location, context={"request": request})
 
-        # Set appropriate content type for FHIR responses
         response = Response(serialized_location.data)
 
         return response
 
+    # drf-spectacular content
+    __doc__ = docs.endpoints.location.viewset  # shows as endpoint group description
+    list.__doc__ = (
+        f"{docs.endpoints.location.list_description}\n\n"
+        f"{docs.constants.sort_order_text}{docs.endpoints.location.default_sort}"
+    )  # shows as GET /Location/ description
+    retrieve.__doc__ = f"{docs.endpoints.location.retrieve_description}"  # shows as GET /Location/{id}/ description
+
 
 class FHIRCapabilityStatementView(APIView):
-    """
-    ViewSet for FHIR Practitioner resources
-    """
-
     if DEBUG:
         renderer_classes = [FHIRRenderer, BrowsableAPIRenderer]
     else:
@@ -519,15 +448,10 @@ class FHIRCapabilityStatementView(APIView):
 
     @extend_schema(
         responses={
-            200: OpenApiResponse(
-                description="Successfully retrieved FHIR CapabilityStatement resource"
-            )
+            200: OpenApiResponse(description=docs.endpoints.capability_statement.get_response)
         }
     )
     def get(self, request):
-        """
-        Query metadata about this FHIR instance, represented as FHIR CapabilityStatement resource
-        """
         serialized_capability_statement = CapabilityStatementSerializer(
             context={"request": request}
         )
@@ -535,24 +459,17 @@ class FHIRCapabilityStatementView(APIView):
         response = Response(serialized_capability_statement.to_representation())
         return response
 
+    # drf-spectacular content
+    __doc__ = docs.endpoints.capability_statement.viewset  # shows as endpoint group description
+    get.__doc__ = f"{docs.endpoints.capability_statement.get_description}"  # shows as GET /metadata description
+
 
 class FHIROrganizationAffiliationViewSet(viewsets.GenericViewSet):
     """
     ViewSet for FHIR EHR Vendor to Organizaton relationships
     """
 
-    queryset = Organization.objects.none()
-    if DEBUG:
-        renderer_classes = [FHIRRenderer, BrowsableAPIRenderer]
-    else:
-        renderer_classes = [FHIRRenderer]
-    filter_backends = [DjangoFilterBackend, ParamOrderingFilter]
-    # filterset_class = OrganizationFilterSet
-    pagination_class = CustomPaginator
-
-    ordering = ["organization_name"]
-    ordering_fields = ["ehr_vendor_name", "organization_name", "endpoint_name"]
-    lookup_url_kwarg = "id"
+    #queryset = Organization.objects.none()
 
     endpoint_subquery = LocationToEndpointInstance.objects.filter(
         location__organization=OuterRef("pk"), endpoint_instance__ehr_vendor__isnull=False
@@ -606,15 +523,24 @@ class FHIROrganizationAffiliationViewSet(viewsets.GenericViewSet):
             participating_npi=F("clinicalorganization__npi__npi"),
         )
         .distinct()
-        .order_by("organization_name")
     )
+
+    if DEBUG:
+        renderer_classes = [FHIRRenderer, BrowsableAPIRenderer]
+    else:
+        renderer_classes = [FHIRRenderer]
+    filter_backends = [DjangoFilterBackend, ParamOrderingFilter]
+    filterset_class = OrganizationAffiliationFilterSet
+    pagination_class = CustomPaginator
+
+    ordering = ["organization_name"]
+    ordering_fields = ["ehr_vendor_name", "organization_name"]
+    lookup_url_kwarg = "id"
 
     # permission_classes = [permissions.IsAuthenticated]
     @extend_schema(
         responses={
-            200: OpenApiResponse(
-                description="Successfully retrieved FHIR Bundle resource of FHIR OrganizationAffiliation resources"
-            )
+            200: OpenApiResponse(description=docs.endpoints.organization_affiliation.list_response)
         }
     )
     def list(self, request):
@@ -623,8 +549,8 @@ class FHIROrganizationAffiliationViewSet(viewsets.GenericViewSet):
 
         Default sort order: ascending by organization name
         """
-
-        paginated_organization_affiliations = self.paginate_queryset(self.queryset)
+        organization_affiliation = self.filter_queryset(self.queryset)
+        paginated_organization_affiliations = self.paginate_queryset(organization_affiliation)
 
         serialized_organization_affiliations = OrganizationAffiliationSerializer(
             paginated_organization_affiliations, many=True, context={"request": request}
@@ -638,13 +564,12 @@ class FHIROrganizationAffiliationViewSet(viewsets.GenericViewSet):
 
     @extend_schema(
         responses={
-            200: OpenApiResponse(description="Successfully retrieved FHIR Organization resource")
+            200: OpenApiResponse(
+                description=docs.endpoints.organization_affiliation.retrieve_response
+            )
         }
     )
     def retrieve(self, request, id=None):
-        """
-        Query a specific organization, represented as a FHIR Organization resource
-        """
         try:
             UUID(id)
         except (ValueError, TypeError):
@@ -659,7 +584,14 @@ class FHIROrganizationAffiliationViewSet(viewsets.GenericViewSet):
             organization_affiliation, context={"request": request}
         )
 
-        # Set appropriate content type for FHIR responses
         response = Response(serialized_organization_affiliation.data)
 
         return response
+
+    # drf-spectacular content
+    __doc__ = docs.endpoints.organization_affiliation.viewset  # shows as endpoint group description
+    list.__doc__ = (
+        f"{docs.endpoints.organization_affiliation.list_description}\n\n"
+        f"{docs.constants.sort_order_text}{docs.endpoints.organization_affiliation.default_sort}"
+    )  # shows as GET /OrganizationAffiliation/ description
+    retrieve.__doc__ = f"{docs.endpoints.organization_affiliation.retrieve_description}"  # shows as GET /OrganizationAffiliation/{id}/ description

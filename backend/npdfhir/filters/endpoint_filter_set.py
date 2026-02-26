@@ -1,26 +1,32 @@
 from django_filters import rest_framework as filters
 
+from ..documentation_content import docs
 from ..models import EndpointInstance
 
 
 class EndpointFilterSet(filters.FilterSet):
     name = filters.CharFilter(
-        field_name="name", lookup_expr="icontains", help_text="Filter by name"
+        field_name="name",
+        lookup_expr="icontains",
+        help_text=docs.filters.endpoint.name,
     )
 
     connection_type = filters.CharFilter(
         field_name="endpoint_connection_type__id",
         lookup_expr="icontains",
-        help_text="Filter by connection type",
+        help_text=docs.filters.endpoint.connection_type,
     )
 
     payload_type = filters.CharFilter(
         field_name="endpointinstancetopayload__payload_type__id",
         lookup_expr="icontains",
-        help_text="Filter by payload type",
+        help_text=docs.filters.endpoint.payload_type,
     )
 
-    status = filters.CharFilter(method="filter_status", help_text="Filter by status")
+    status = filters.CharFilter(
+        method="filter_status",
+        help_text=docs.filters.endpoint.status,
+    )
 
     # We don't have a concept of endpoint organization at the moment
     # organization = filters.CharFilter(

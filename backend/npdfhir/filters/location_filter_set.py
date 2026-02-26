@@ -5,40 +5,52 @@ from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import D
 from django.db.models import F
 
+from ..documentation_content import docs
 from ..mappings import addressUseMapping
 from ..models import Location
 
 
 class LocationFilterSet(filters.FilterSet):
     name = filters.CharFilter(
-        field_name="name", lookup_expr="contains", help_text="Filter by location name"
+        field_name="name",
+        lookup_expr="contains",
+        help_text=docs.filters.location.name,
     )
 
     organization_type = filters.CharFilter(
-        method="filter_organization_type", help_text="Filter by organization type"
+        method="filter_organization_type",
+        help_text=docs.filters.organization.type,
     )
 
-    address = filters.CharFilter(method="filter_address", help_text="Filter by any part of address")
+    address = filters.CharFilter(
+        method="filter_address",
+        help_text=docs.filters.address.full,
+    )
 
-    address_city = filters.CharFilter(method="filter_address_city", help_text="Filter by city name")
+    address_city = filters.CharFilter(
+        method="filter_address_city",
+        help_text=docs.filters.address.city,
+    )
 
     address_state = filters.CharFilter(
-        method="filter_address_state", help_text="Filter by state (2-letter abbreviation)"
+        method="filter_address_state",
+        help_text=docs.filters.address.state,
     )
 
     address_postalcode = filters.CharFilter(
-        method="filter_address_postalcode", help_text="Filter by postal code/zip code"
+        method="filter_address_postalcode",
+        help_text=docs.filters.address.postalcode,
     )
 
     address_use = filters.ChoiceFilter(
         method="filter_address_use",
         choices=addressUseMapping.to_choices(),
-        help_text="Filter by address use type",
+        help_text=docs.filters.address.use,
     )
 
     near = filters.CharFilter(
         method="filter_distance",
-        help_text="Filter by distance from a point expressed as [latitude]|[longitude]|[distance]|[units]. If no units are provided, km is assumed.",
+        help_text=docs.filters.location.near,
     )
 
     class Meta:
@@ -69,7 +81,7 @@ class LocationFilterSet(filters.FilterSet):
                 "address__address_us__state_code__abbreviation",
                 "address__address_us__zipcode",
             )
-        ).filter(search=SearchQuery(value, search_type="websearch"))
+        ).filter(search=SearchQuery(value, search_type="websearch", config="english"))
 
     def filter_address_city(self, queryset, name, value):
         return queryset.annotate(search=SearchVector("address__address_us__city_name")).filter(
