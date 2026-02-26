@@ -1,4 +1,4 @@
-name: datadog
+name: npd-datadog
 
 # by using `compose.datadog.yml` alone with `docker compose -f compose.datadog.yml and
 # the `extends:` settings for each of the named services, we can merge these
@@ -36,10 +36,6 @@ services:
       com.datadoghq.tags.env: "${ENV_KEY:-dev}"
       com.datadoghq.tags.service: "django-web"
       com.datadoghq.tags.version: "1.0.0"
-    depends_on: !override
-      - db
-      - db-migrations
-      - datadog-agent
 
   web:
     extends:

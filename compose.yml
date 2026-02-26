@@ -34,8 +34,6 @@ services:
         condition: service_healthy
       db-migrations:
         condition: service_completed_successfully
-      datadog-agent:
-        condition: service_healthy
 
   db:
     image: 'postgis/postgis:17-3.5'
