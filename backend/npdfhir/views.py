@@ -470,32 +470,9 @@ class FHIROrganizationAffiliationViewSet(viewsets.GenericViewSet):
     """
 
     queryset = (
-        OrganizationAffiliationView.objects.all().prefetch_related(
-            # Clinical organization (participating org)
-            "clinicalorganization",
-            "clinicalorganization__npi",
-            "clinicalorganization__organizationtootherid_set",
-            "clinicalorganization__organizationtootherid_set__other_id_type",
-            "clinicalorganization__organizationtotaxonomy_set",
-            "clinicalorganization__organizationtotaxonomy_set__nucc_code",
-            # --- NUCC CLASSIFICATIONS ---
-            "clinicalorganization__organizationtotaxonomy_set",
-            "clinicalorganization__organizationtotaxonomy_set__nucc_code",
-            # --- OTHER CODE CLASSIFICATIONS ---
-            "clinicalorganization__organizationtootherid_set",
-            "clinicalorganization__organizationtootherid_set__other_id_type",
-            # Names and addresses
-            "organizationtoname_set",
-            "organizationtoaddress_set",
-            "organizationtoaddress_set__address",
-            "organizationtoaddress_set__address__address_us",
-            "organizationtoaddress_set__address__address_us__state_code",
-            "organizationtoaddress_set__address_use",
-            # Endpoint + vendor relationship
-            "location_set",
-            "location_set__locationtoendpointinstance_set",
-            "location_set__locationtoendpointinstance_set__endpoint_instance",
-            "location_set__locationtoendpointinstance_set__endpoint_instance__ehr_vendor",
+        OrganizationAffiliationView.objects.all().select_related(
+            "organization",
+            "ehr_vendor",
         )
     )
 

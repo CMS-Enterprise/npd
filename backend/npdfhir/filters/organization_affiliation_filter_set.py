@@ -3,6 +3,7 @@ from django.db.models import Q
 from django_filters import rest_framework as filters
 
 from ..utils import parse_identifier_query
+from ..models import Nucc, Location
 
 
 class OrganizationAffiliationFilterSet(filters.FilterSet):
@@ -44,73 +45,68 @@ class OrganizationAffiliationFilterSet(filters.FilterSet):
         return queryset.filter(organization_name__icontains=value)
 
     def filter_identifier(self, queryset, name, value):
-        from uuid import UUID
-
         system, identifier_id = parse_identifier_query(value)
         queries = Q(pk__isnull=True)
 
-        if system:  # specific identifier search requested
+        if system:
             if system.upper() == "NPI":
                 try:
-                    queries = Q(organization__clinicalorganization__npi__npi=int(identifier_id))
+                    queries = Q(npi=int(identifier_id))
                 except (ValueError, TypeError):
-                    pass  # TODO: implement validationerror to show users that NPI must be an int
-        else:  # general identifier search requested
+                    pass
+        else:
             try:
-                queries |= Q(organization__clinicalorganization__npi__npi=int(identifier_id))
+                queries |= Q(npi=int(identifier_id))
             except (ValueError, TypeError):
                 pass
-
-            try:
-                UUID(identifier_id)
-                queries |= Q(ein__ein_id=identifier_id)
-            except (ValueError, TypeError):
-                pass
-
-            queries |= Q(
-                organization__clinicalorganization__organizationtootherid__other_id=identifier_id
-            )
 
         return queryset.filter(queries).distinct()
 
     def filter_organization_type(self, queryset, name, value):
-        query = SearchQuery(value, search_type="phrase")
+        # Get codes corresponding to the display name
+        codes = Nucc.objects.filter(display_name__icontains=value).values_list("code", flat=True)
+        if not codes:
+            return queryset.none()
 
-        return (
-            queryset.annotate(
-                taxonomy_search=SearchVector(
-                    "clinicalorganization__organizationtotaxonomy__nucc_code__display_name"
-                )
-            )
-            .filter(taxonomy_search=query)
-            .distinct()
-        )
+        return queryset.filter(taxonomy_codes__overlap=list(codes))
 
     def filter_location(self, queryset, name, value):
-        return (
-            queryset.annotate(
+        matching_location_ids = (
+            Location.objects
+            .annotate(
                 location_search=SearchVector(
-                    "location__name",
-                    "location__address__address_us__delivery_line_1",
-                    "location__address__address_us__delivery_line_2",
-                    "location__address__address_us__city_name",
-                    "location__address__address_us__state_code__abbreviation",
-                    "location__address__address_us__zipcode",
+                    "name",
+                    "address__address_us__delivery_line_1",
+                    "address__address_us__delivery_line_2",
+                    "address__address_us__city_name",
+                    "address__address_us__state_code__abbreviation",
+                    "address__address_us__zipcode",
                 )
             )
             .filter(location_search=SearchQuery(value, search_type="websearch", config="english"))
-            .distinct()
+            .values_list("id", flat=True)
         )
 
+        # Filter affiliation rows where any location_id overlaps
+        return queryset.filter(location_ids__overlap=list(matching_location_ids))
+
     def filter_address_city(self, queryset, name, value):
-        return queryset.annotate(
-            search=SearchVector("location__address__address_us__city_name")
-        ).filter(search=value)
+        matching_location_ids = Location.objects.filter(
+            address__address_us__city_name__icontains=value
+        ).values_list("id", flat=True)
+
+        return queryset.filter(location_ids__overlap=list(matching_location_ids))
 
     def filter_address_state(self, queryset, name, value):
-        return queryset.annotate(
-            search=SearchVector("location__address__address_us__state_code__abbreviation")
-        ).filter(search=value)
+        matching_location_ids = Location.objects.filter(
+            address__address_us__state_code__abbreviation__iexact=value
+        ).values_list("id", flat=True)
+
+        return queryset.filter(location_ids__overlap=list(matching_location_ids))
 
     def filter_address_postalcode(self, queryset, name, value):
-        return queryset.filter(location__address__address_us__zipcode=value)
+        matching_location_ids = Location.objects.filter(
+            address__address_us__zipcode=value
+        ).values_list("id", flat=True)
+
+        return queryset.filter(location_ids__overlap=list(matching_location_ids))

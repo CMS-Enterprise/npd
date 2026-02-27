@@ -198,6 +198,7 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
 
         OrganizationAffiliationView.refresh_materialized_view()
 
+        cls.first_affiliation = OrganizationAffiliationView.objects.first()
         return super().setUpTestData()
 
     def setUp(self):
@@ -277,7 +278,17 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
         url = reverse("fhir-organizationaffiliation-list")
         response = self.client.get(url)
 
-        ids = extract_resource_ids(response)
+        #ids = extract_resource_ids(response)
+        bundle = response.data["results"]
+
+        ids = []
+        for entry in bundle["entry"]:
+            self.assertIn("resource", entry)
+            org_affil = entry["resource"]
+
+            org_id = org_affil['participatingOrganization']['reference'].split('/')[-1]
+
+            ids.append(org_id)
 
         valid_ids = [str(org.id) for org in self.orgs]
 
@@ -337,10 +348,10 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
             self.assertEqual(str(self.org_good_1.id), entry_org_id)
 
     def test_retrieve_single_organization_affil(self):
-        url = reverse("fhir-organizationaffiliation-detail", args=[self.orgs[0].id])
+        url = reverse("fhir-organizationaffiliation-detail", args=[self.first_affiliation.id])
         response = self.client.get(url)
 
-        self.assertEqual(str(self.orgs[0].id), response.data["id"])
+        self.assertEqual(str(self.first_affiliation.id), response.data["id"])
 
         org_affiliation_entry = response.data
 

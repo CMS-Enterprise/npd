@@ -1,6 +1,7 @@
 from django.db import connection, models
 from django.contrib.gis.db import models as geomodels
 from django.contrib.postgres.search import SearchVectorField
+from django.contrib.postgres.fields import ArrayField
 
 
 class Address(models.Model):
@@ -670,16 +671,13 @@ class OrganizationView(models.Model):
         db_table = "organization_view"
 
 class OrganizationAffiliationView(models.Model):
-    id = models.CharField(
-        primary_key=True,
-        max_length=32,  # md5 hex length
-    )
+    id = models.CharField(primary_key=True, max_length=32)
 
     organization = models.ForeignKey(
         "Organization",
         models.DO_NOTHING,
         db_column="organization_id",
-        related_name="vendor_affiliations",
+        related_name="affiliations",
     )
 
     ehr_vendor = models.ForeignKey(
@@ -691,8 +689,11 @@ class OrganizationAffiliationView(models.Model):
 
     organization_name = models.CharField(max_length=255)
     ehr_vendor_name = models.CharField(max_length=255)
+    npi = models.BigIntegerField()
 
-    npi = models.CharField(max_length=20)
+    location_ids = ArrayField(models.UUIDField(), blank=True)
+    endpoint_instance_ids = ArrayField(models.UUIDField(), blank=True)
+    taxonomy_codes = ArrayField(models.CharField(max_length=10), blank=True)
 
     @classmethod
     def refresh_materialized_view(cls):
@@ -702,10 +703,6 @@ class OrganizationAffiliationView(models.Model):
     class Meta:
         managed = False
         db_table = "organization_affiliation"
-        indexes = [
-            models.Index(fields=["organization"]),
-            models.Index(fields=["ehr_vendor"]),
-        ]
 
 class OtherIdType(models.Model):
     value = models.CharField(max_length=50, blank=True, null=True)
