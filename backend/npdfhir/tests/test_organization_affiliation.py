@@ -10,6 +10,7 @@ from ..models import (
     Nucc,
     Organization,
     OtherIdType,
+    OrganizationAffiliationView,
 )
 from .api_test_case import APITestCase
 from .fixtures.endpoint import create_endpoint_instance
@@ -194,6 +195,8 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
             name="Dangling Endpoint",
             ehr=ehr_vendor,
         )
+
+        OrganizationAffiliationView.refresh_materialized_view()
 
         return super().setUpTestData()
 
