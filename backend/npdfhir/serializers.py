@@ -37,7 +37,6 @@ from .models import (
     Organization,
     OrganizationToName,
     ProviderToOrganization,
-    OrganizationAffiliationView
 )
 from .utils import genReference, get_schema_data
 
@@ -505,7 +504,6 @@ class OrganizationAffiliationSerializer(serializers.Serializer):
             genReference("fhir-endpoint-detail", ep_id, request)
             for ep_id in instance.endpoint_instance_ids
         ]
-
 
         organization_affiliation.location = locations
         organization_affiliation.endpoint = endpoints

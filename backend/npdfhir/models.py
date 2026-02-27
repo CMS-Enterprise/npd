@@ -670,6 +670,7 @@ class OrganizationView(models.Model):
         managed = False
         db_table = "organization_view"
 
+
 class OrganizationAffiliationView(models.Model):
     id = models.CharField(primary_key=True, max_length=32)
 
@@ -703,6 +704,7 @@ class OrganizationAffiliationView(models.Model):
     class Meta:
         managed = False
         db_table = "organization_affiliation"
+
 
 class OtherIdType(models.Model):
     value = models.CharField(max_length=50, blank=True, null=True)

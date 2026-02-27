@@ -72,8 +72,7 @@ class OrganizationAffiliationFilterSet(filters.FilterSet):
 
     def filter_location(self, queryset, name, value):
         matching_location_ids = (
-            Location.objects
-            .annotate(
+            Location.objects.annotate(
                 location_search=SearchVector(
                     "name",
                     "address__address_us__delivery_line_1",
@@ -91,20 +90,22 @@ class OrganizationAffiliationFilterSet(filters.FilterSet):
         return queryset.filter(location_ids__overlap=list(matching_location_ids))
 
     def filter_address_city(self, queryset, name, value):
-        matching_location_ids = Location.objects.annotate(
-            search=SearchVector("address__address_us__city_name")
-        ).filter(
-            search=value
-        ).values_list("id", flat=True)
+        matching_location_ids = (
+            Location.objects.annotate(search=SearchVector("address__address_us__city_name"))
+            .filter(search=value)
+            .values_list("id", flat=True)
+        )
 
         return queryset.filter(location_ids__overlap=list(matching_location_ids))
 
     def filter_address_state(self, queryset, name, value):
-        matching_location_ids = Location.objects.annotate(
-            search=SearchVector("address__address_us__state_code__abbreviation")
-        ).filter(
-            search=value
-        ).values_list("id", flat=True)
+        matching_location_ids = (
+            Location.objects.annotate(
+                search=SearchVector("address__address_us__state_code__abbreviation")
+            )
+            .filter(search=value)
+            .values_list("id", flat=True)
+        )
 
         return queryset.filter(location_ids__overlap=list(matching_location_ids))
 

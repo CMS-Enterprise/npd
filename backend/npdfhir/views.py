@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from django.conf import settings
-from django.db.models import CharField, Exists, F, OuterRef, Subquery, Value, Prefetch
+from django.db.models import CharField, F, Value, Prefetch
 from django.db.models.functions import Concat
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
@@ -28,7 +28,6 @@ from .filters.practitioner_role_filter_set import PractitionerRoleFilterSet
 from .models import (
     EndpointInstance,
     Location,
-    LocationToEndpointInstance,
     ProviderView,
     ProviderToLocationView,
     OrganizationToAddress,
@@ -469,11 +468,9 @@ class FHIROrganizationAffiliationViewSet(viewsets.GenericViewSet):
     ViewSet for FHIR EHR Vendor to Organizaton relationships
     """
 
-    queryset = (
-        OrganizationAffiliationView.objects.all().select_related(
-            "organization",
-            "ehr_vendor",
-        )
+    queryset = OrganizationAffiliationView.objects.all().select_related(
+        "organization",
+        "ehr_vendor",
     )
 
     if DEBUG:
