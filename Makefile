@@ -100,14 +100,14 @@ ifneq ($(NPD_DEVELOPMENT), True)
 endif
 	@echo "Dropping development database..."
 	@docker compose up -d db
-	@docker compose run --rm db sh -c 'echo "dropping $$POSTGRES_DB"; PGPASSWORD=$$POSTGRES_PASSWORD psql -h db -U $$POSTGRES_USER -d postgres -c "DROP DATABASE IF EXISTS $$POSTGRES_DB" || echo "failed to drop $$POSTGRES_DB"'
+	@docker compose run --rm db sh -c 'echo "dropping $$NPD_DB"; PGPASSWORD=$$POSTGRES_PASSWORD psql -h db -U $$POSTGRES_USER -d postgres -c "DROP DATABASE IF EXISTS $$NPD_DB" || echo "failed to drop $$NPD_DB"'
 
 .PHONY: create-db
 create-db:
 	@echo "Creating development database..."
 	@docker compose up -d db
 	# create development database only if it doesn't already exist
-	@docker compose run --rm db sh -c 'echo "creating $$POSTGRES_DB"; PGPASSWORD=$$POSTGRES_PASSWORD psql -h db -U $$POSTGRES_USER -d postgres -c "CREATE DATABASE $$POSTGRES_DB" || echo "$$POSTGRES_DB already exists"'
+	@docker compose run --rm db sh -c 'echo "creating $$NPD_DB"; PGPASSWORD=$$POSTGRES_PASSWORD psql -h db -U $$POSTGRES_USER -d postgres -c "CREATE DATABASE $$NPD_DB" || echo "$$NPD_DB already exists"'
 	
 # refresh all materialized views in the development database 
 .PHONY: refresh-views
