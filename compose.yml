@@ -37,10 +37,14 @@ services:
       - './backend/:/app'
       - ./backend/artifacts:/app/artifacts:rw
       - ./backend/provider_directory/static:/app/provider_directory/static:rw
+    restart: on-failure:10
     depends_on:
-      - db
-      - datadog-agent
-      - db-migrations
+      db:
+        condition: service_healthy
+      db-migrations:
+        condition: service_completed_successfully
+      datadog-agent:
+        condition: service_healthy
 
   db:
     image: 'postgis/postgis:17-3.5'
@@ -49,7 +53,8 @@ services:
       - path: backend/.env
         required: false
     environment:
-      POSTGRES_DB: ${NPD_DB_NAME:-npd_development}
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+      NPD_DB: ${NPD_DB_NAME:-npd_development}
       POSTGRES_USER: ${NPD_DB_USER:-postgres}
       POSTGRES_PASSWORD: ${NPD_DB_PASSWORD:-postgres}
       PGUSER: ${NPD_DB_USER:-postgres}
@@ -57,8 +62,9 @@ services:
       - ${NPD_DB_PORT:-5432}:5432
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./flyway/db-init:/docker-entrypoint-initdb.d/
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready", "-d",  "${NPD_DB_NAME:-npd_development}"]
+      test: ["CMD-SHELL", "pg_isready -d ${NPD_DB_NAME:-npd_development}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -78,10 +84,12 @@ services:
       FLYWAY_PLACEHOLDERS_npdReadonlyUserPassword: ${NPD_READONLY_PASSWORD:-test-password-123}
       FLYWAY_PLACEHOLDERS_loadTesterPassword: ${NPD_LOAD_TESTER_PASSWORD:-""}
       FLYWAY_PLACEHOLDERS_NPD_DB_NAME: ${NPD_DB_NAME:-npd_development}
+    restart: on-failure:10
     volumes:
       - ./flyway/sql:/flyway/sql
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     command: migrate -environment=development -outputType=json
 
   ## frontend
