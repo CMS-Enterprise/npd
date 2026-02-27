@@ -155,7 +155,7 @@ You can review the use of those tools by running `make` or `bin/npr --help` at t
 | | |
 |---|---|
 | **Error** | `extension "postgis" already exists` |
-| **Cause** | Mismatch of Docker database images due to deprecated older code or a partially completed migration. |
+| **Cause** | Using the same default database as npd database when starting with a fresh database initialization. |
 | **Fix** | Run `make reset-db` then `make setup`. |
 
 #### 3. Port already in use
