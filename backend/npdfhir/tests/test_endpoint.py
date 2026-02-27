@@ -3,7 +3,7 @@ from fhir.resources.R4B.bundle import Bundle
 from rest_framework import status
 
 from .api_test_case import APITestCase
-from .fixtures.endpoint import create_endpoint_instance
+from .fixtures.endpoint import DefaultEndpointInstance
 from .helpers import (
     assert_fhir_response,
     assert_has_results,
@@ -15,23 +15,27 @@ from .helpers import (
 class EndpointViewSetTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.endpoints = [
-            create_endpoint_instance(name="88 MEDICINE LLC"),
-            create_endpoint_instance(name="AAIA of Tampa Bay, LLC"),
-            create_endpoint_instance(name="ABC Healthcare Service Base URL"),
-            create_endpoint_instance(name="A Better Way LLC"),
-            create_endpoint_instance(name="Abington Surgical Center"),
-            create_endpoint_instance(name="Access Mental Health Agency"),
-            create_endpoint_instance(name="Abington Center Surgical"),
-            create_endpoint_instance(name="ADHD & Autism Psychological Services PLLC"),
-            create_endpoint_instance(name="Adolfo C FernandezObregon Md"),
-            create_endpoint_instance(name="Advanced Anesthesia, LLC"),
-            create_endpoint_instance(name="Advanced Cardiovascular Center"),
-            create_endpoint_instance(
-                name="Kansas City Psychiatric Group",
-                payload_type="urn:ihe:pcc:360x:hl7:OMG:O19:2017",
-            ),
+        # Generate test data for alpha sorting
+        cls.names_for_sorting = [
+            "88 MEDICINE LLC",
+            "AAIA of Tampa Bay, LLC",
+            "ABC Healthcare Service Base URL",
+            "A Better Way LLC",
+            "Abington Surgical Center",
+            "Access Mental Health Agency",
+            "ADHD & Autism Psychological Services PLLC",
+            "Adolfo C FernandezObregon Md",
+            "Advanced Anesthesia, LLC",
+            "Advanced Cardiovascular Center",
         ]
+        for name in cls.names_for_sorting:
+            DefaultEndpointInstance(name=name)
+
+        # Generate test data with a different payload type
+        cls.endpoint = DefaultEndpointInstance(
+            name="Kansas City Psychiatric Group",
+            payload_type="urn:ihe:pcc:360x:hl7:OMG:O19:2017",
+        )
 
         return super().setUpTestData()
 
@@ -56,18 +60,7 @@ class EndpointViewSetTestCase(APITestCase):
         # Note: have to normalize the names to have python sorting match sql
         names = extract_resource_names(response)
 
-        sorted_names = [
-            "88 MEDICINE LLC",
-            "AAIA of Tampa Bay, LLC",
-            "ABC Healthcare Service Base URL",
-            "A Better Way LLC",
-            "Abington Center Surgical",
-            "Abington Surgical Center",
-            "Access Mental Health Agency",
-            "ADHD & Autism Psychological Services PLLC",
-            "Adolfo C FernandezObregon Md",
-            "Advanced Anesthesia, LLC",
-        ]
+        sorted_names = self.names_for_sorting
 
         self.assertEqual(
             names,
@@ -178,7 +171,7 @@ class EndpointViewSetTestCase(APITestCase):
 
     # Retrieve tests
     def test_retrieve_specific_endpoint(self):
-        endpoint_id = str(self.endpoints[0].id)
+        endpoint_id = str(self.endpoint.id)
         detail_url = reverse("fhir-endpoint-detail", args=[endpoint_id])
 
         response = self.client.get(detail_url)

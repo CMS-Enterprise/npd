@@ -1,198 +1,169 @@
-import datetime
+from datetime import date
 import random
 import uuid
 
 from ...models import (
-    FhirAddressUse,
-    FipsState,
     Individual,
-    IndividualToAddress,
     IndividualToName,
-    LocationToEndpointInstance,
+    IndividualToAddress,
     Npi,
-    Nucc,
-    OtherIdType,
     Provider,
-    ProviderRole,
-    ProviderToLocation,
-    ProviderToOrganization,
     ProviderToOtherId,
     ProviderToTaxonomy,
-    RelationshipType,
+    FipsState,
 )
-from .endpoint import create_endpoint_instance
-from .location import create_location
-from .organization import create_organization
-from .utils import _ensure_name_use
+from .utils import random_date
+from .address import DefaultAddress
+from typing import List
 
 
-def _ensure_provider_role(code="PRV", display="Provider Role"):
-    return ProviderRole.objects.get_or_create(
-        code=code,
-        defaults={
-            "system": "http://hl7.org/fhir/practitionerrole",
-            "display": display,
-        },
-    )[0]
+class DefaultName:
+    def __init__(
+        self,
+        first_name: str = "Jane",
+        middle_name: str = "C.",
+        last_name: str = "Doe",
+        name_use_id: int = 1,
+    ):
+        self.first_name = first_name
+        self.middle_name = middle_name
+        self.last_name = last_name
+        self.name_use_id = name_use_id
 
 
-def _ensure_relationship_type():
-    """
-    Retrieve an existing relationship_type inserted by Flyway.
-    Default: 'assigning' (id=2)
-    """
-    try:
-        return RelationshipType.objects.get(value="assigning")
-    except RelationshipType.DoesNotExist:
-        # If Flyway hasn’t run (edge/dev case), create one safely
-        return RelationshipType.objects.create(value="assigning")
+class DefaultOtherID:
+    def __init__(self, other_id: str = "123", other_id_type: int = 2, state: str = "DC"):
+        self.other_id = other_id
+        self.other_id_type = other_id_type
+        self.state = state
 
 
-def create_practitioner(
-    first_name="Alice",
-    last_name="Smith",
-    gender="F",
-    birth_date=datetime.date(1990, 1, 1),
-    npi_value=None,
-    other_id=None,
-    other_id_type=None,
-    state=None,
-    practitioner_types=None,
-    location=None,
-    address_use="work",
-):
-    """
-    Creates an Individual, Name (via IndividualToName), Npi, Provider.
-    """
-    individual = Individual.objects.create(
-        id=uuid.uuid4(),
-        gender=gender,
-        birth_date=birth_date,
-    )
+class DefaultNPI:
+    def __init__(
+        self,
+        npi: int = None,
+        entity_type_code: int = 1,
+        enumeration_date: date = None,
+        last_update_date: date = None,
+    ):
+        if npi is None:
+            self.npi = random.randint(1000000000, 9999999999)
+        else:
+            self.npi = npi
 
-    IndividualToName.objects.create(
-        individual=individual,
-        first_name=first_name,
-        last_name=last_name,
-        name_use=_ensure_name_use(),
-    )
+        self.entity_type_code = entity_type_code
 
-    if location:
-        use = FhirAddressUse.objects.get(value=address_use)
+        if enumeration_date is None:
+            self.enumeration_date = random_date()
+        else:
+            self.enumeration_date = enumeration_date
 
-        IndividualToAddress.objects.create(
-            individual=individual, address=location.address, address_use=use
-        )
+        if last_update_date is None:
+            self.last_update_date = random_date(start_date=enumeration_date)
+        else:
+            self.last_update_date = last_update_date
+        self.create_if_not_exists()
 
-    npi_value = npi_value or random.randint(1000000000, 9999999999)
-
-    npi = Npi.objects.create(
-        npi=npi_value,
-        entity_type_code=1,
-        enumeration_date=datetime.date(2000, 1, 1),
-        last_update_date=datetime.date(2020, 1, 1),
-    )
-
-    provider = Provider.objects.create(
-        npi=npi,
-        individual=individual,
-    )
-
-    if other_id:
-        other_id_type = OtherIdType.objects.get(value=(other_id_type or "OTHER"))
-        fips_code = FipsState.objects.get(abbreviation=(state or "NY"))
-        ProviderToOtherId.objects.create(
-            npi=provider,
-            other_id=other_id,
-            other_id_type=other_id_type,
-            state_code=fips_code,
-            issuer="TEST",
-        )
-
-    if practitioner_types:
-        for type in practitioner_types:
-            code = Nucc.objects.get(pk=type)
-
-            ProviderToTaxonomy.objects.create(npi=provider, nucc_code=code, id=uuid.uuid4())
-
-        # display name
-        # Nucc
-
-    return provider
+    def create_if_not_exists(self):
+        npi_obj = Npi.objects.filter(npi=self.npi)
+        if npi_obj.exists():
+            npi = npi_obj.first()
+        else:
+            npi = Npi.objects.create(
+                npi=self.npi,
+                entity_type_code=1,
+                enumeration_date=self.enumeration_date,
+                last_update_date=self.last_update_date,
+            )
+        self.npi = npi
+        return self
 
 
-def create_full_practitionerrole(
-    first_name="Alice",
-    last_name="Smith",
-    gender="F",
-    npi_value=None,
-    org_name="Test Org",
-    location_id=None,
-    role_code="PRV",
-    role_display="Provider Role",
-    practitioner_nucc_types=None,
-    organization_nucc_type=None,
-    location_city=None,
-    location_state=None,
-    location_zip=None,
-    endpoint_payload_type="any",
-    endpoint_connection_type=None,
-    specialty_id=None,
-):
-    """
-    Creates:
-        Practitioner (Provider)
-        Organization
-        Location
-        ProviderToOrganization
-        ProviderToLocation
-    """
-    provider = create_practitioner(
-        first_name=first_name,
-        last_name=last_name,
-        gender=gender,
-        npi_value=npi_value,
-        practitioner_types=practitioner_nucc_types,
-    )
-    org = create_organization(name=org_name, organization_type=organization_nucc_type)
-    if location_id is None:
-        loc = create_location(
-            city=location_city, zipcode=location_zip, state=location_state, organization=org
-        )
-        location_id = loc.id
+class DefaultIndividual:
+    def __init__(
+        self,
+        names: List[DefaultName] = None,
+        addresses: List[DefaultAddress] = None,
+        id: uuid = None,
+        gender: str = "F",
+    ):
+        if id is None:
+            self.id = uuid.uuid4()
+        else:
+            self.id = id
+        if names is None:
+            names = [DefaultName()]
+        self.names = names
+        self.gender = gender
+        if addresses is None:
+            addresses = [DefaultAddress()]
+        self.addresses = addresses
+        self.create_if_not_exists()
 
-    # Ensure relationship + role codes exist
-    rel_type = _ensure_relationship_type()
-    _ensure_provider_role(role_code, role_display)
+    def create_if_not_exists(self):
+        individual = Individual.objects.filter(id=self.id)
+        if individual.exists():
+            self.individual = individual.first()
+        else:
+            self.individual = Individual.objects.create(
+                id=self.id,
+                gender=self.gender,
+            )
 
-    pto_org = ProviderToOrganization.objects.create(
-        id=uuid.uuid4(),
-        individual=provider,  # special FK uses Provider.individual_id
-        organization=org,
-        relationship_type=rel_type,
-        active=True,
-    )
+            for name in self.names:
+                IndividualToName.objects.create(
+                    individual_id=self.id,
+                    first_name=name.first_name,
+                    last_name=name.last_name,
+                    name_use_id=name.name_use_id,
+                )
+            for address in self.addresses:
+                IndividualToAddress.objects.create(
+                    individual_id=self.id,
+                    address_id=address.id,
+                    address_use_id=address.address_use_id,
+                )
+        return self.individual
 
-    endpoint_instance = create_endpoint_instance(
-        organization=org,
-        url="https://example.org/fhir",
-        name="Test Endpoint",
-        ehr=None,
-        payload_type=endpoint_payload_type,
-        endpoint_connection_type=endpoint_connection_type,
-    )
 
-    LocationToEndpointInstance.objects.create(
-        location_id=location_id, endpoint_instance_id=endpoint_instance.id
-    )
+class DefaultPractitioner:
+    def __init__(
+        self,
+        individual: DefaultIndividual = None,
+        taxonomies: List[str] = [],
+        other_ids: List[DefaultOtherID] = [],
+        npi: DefaultNPI = None,
+    ):
+        if individual is None:
+            individual = DefaultIndividual()
+        self.individual = individual
+        self.taxonomies = taxonomies
+        if npi is None:
+            npi = DefaultNPI()
+        self.npi = npi
+        self.other_ids = other_ids
+        self.create_if_not_exists()
 
-    pr = ProviderToLocation.objects.create(
-        id=uuid.uuid4(),
-        provider_to_organization=pto_org,
-        location_id=location_id,
-        provider_role_code=role_code,
-        active=True,
-        specialty_id=specialty_id,
-    )
+    def create_if_not_exists(self):
+        provider = Provider.objects.filter(individual_id=self.individual.id)
+        if provider.exists():
+            self.provider = provider.first()
+        else:
+            self.provider = Provider.objects.create(
+                npi=self.npi.npi,
+                individual_id=self.individual.id,
+            )
+            for taxonomy in self.taxonomies:
+                ProviderToTaxonomy.objects.create(
+                    npi=self.provider, nucc_code_id=taxonomy, id=uuid.uuid4()
+                )
 
-    return pr
+            for id in self.other_ids:
+                state_code = FipsState.objects.filter(abbreviation=id.state).first()
+                ProviderToOtherId.objects.create(
+                    npi=self.provider,
+                    other_id=id.other_id,
+                    other_id_type_id=id.other_id_type,
+                    state_code=state_code,
+                )
+        return self.provider
