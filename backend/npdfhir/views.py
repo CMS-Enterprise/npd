@@ -397,7 +397,7 @@ class FHIRLocationViewSet(viewsets.GenericViewSet):
     pagination_class = CustomPaginator
     lookup_url_kwarg = "id"
     ordering = ["name"]
-    ordering_fields = ["organization_name", "address_full", "name"]
+    ordering_fields = ["organization_name", "name"]
 
     @extend_schema(
         responses={200: OpenApiResponse(description=docs.endpoints.location.list_response)}

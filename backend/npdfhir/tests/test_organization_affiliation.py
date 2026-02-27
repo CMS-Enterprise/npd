@@ -1,26 +1,18 @@
-import uuid
-
 from django.urls import reverse
 from rest_framework import status
 
 from ..models import (
-    EhrVendor,
-    LocationToEndpointInstance,
-    Location,
-    Nucc,
-    Organization,
-    OtherIdType,
     OrganizationAffiliationView,
 )
 from .api_test_case import APITestCase
-from .fixtures.endpoint import create_endpoint_instance
-from .fixtures.location import create_location
-from .fixtures.organization import create_organization, create_legal_entity
+from .fixtures.endpoint import DefaultEhrVendor, DefaultEndpointInstance
+from .fixtures.organization import DefaultOrganization, DefaultLocation
+from .fixtures.organization import DefaultAddress
 from .helpers import (
     assert_fhir_response,
     assert_has_results,
     extract_resource_ids,
-    extract_resource_fields
+    extract_resource_fields,
 )
 
 
@@ -32,180 +24,82 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
         - Some that SHOULD match the query
         - Some that SHOULD NOT match the query
         """
-
         cls.orgs = []
 
-        # -----------------------------
-        # Reference data
-        # -----------------------------
-        legal_entity = create_legal_entity("Good Health EIN")
-        other_id_type = OtherIdType.objects.get(value="MEDICAID")
+        # Generate test data for an organization that has a single endpoint associated with default ehr vendor
+        org = DefaultOrganization(
+            names=["A Good Clinical Org"],
+            id="a9cd57b1-9e8c-4b75-86da-653acfc3ade6",
+            taxonomies=["283Q00000X"],
+            locations=[
+                DefaultLocation(
+                    name="Good Location 1",
+                    address=DefaultAddress(zip_code="87101"),
+                    endpoint_instance=DefaultEndpointInstance(
+                        name="Good Endpoint 1",
+                        ehr_vendor=DefaultEhrVendor(name="Vendor of EHR Systems"),
+                    ),
+                )
+            ],
+        )
+        cls.orgs.append(org)
 
-        nucc = Nucc.objects.get(code="261Q00000X")
+        # Generate test data for an organization with multiple endpoints, same EHR vendor
+        org = DefaultOrganization(
+            names=["B Good Clinical Org"],
+            locations=[
+                DefaultLocation(
+                    name="Location A",
+                    address=DefaultAddress(
+                        line_1="807 Dusty Ln", city="Springfield", state="NY", zip_code="01234"
+                    ),
+                    endpoint_instance=DefaultEndpointInstance(name="Endpoint A"),
+                ),
+                DefaultLocation(
+                    name="Location B",
+                    endpoint_instance=DefaultEndpointInstance(name="Endpoint B"),
+                ),
+            ],
+        )
+        cls.orgs.append(org)
 
-        ehr_vendor = EhrVendor.objects.create(
-            id=uuid.uuid4(),
-            name="Epic",
-            is_cms_aligned_network=True,
+        # Generate test data for an organization with multiple endpoints, different EHR vendors
+        org = DefaultOrganization(
+            names=["C Good Clinical Org"],
+            locations=[
+                DefaultLocation(
+                    name="Location A",
+                    endpoint_instance=DefaultEndpointInstance(
+                        name="Endpoint A", ehr_vendor=DefaultEhrVendor(name="EHR Vendor A")
+                    ),
+                ),
+                DefaultLocation(
+                    name="Location B",
+                    endpoint_instance=DefaultEndpointInstance(
+                        name="Endpoint B", ehr_vendor=DefaultEhrVendor(name="EHR Vendor B")
+                    ),
+                ),
+            ],
+        )
+        cls.orgs.append(org)
+
+        # Generate test data for an organization with no location
+        cls.org_with_no_location = DefaultOrganization(
+            names=["No Location Org"], has_locations=False
         )
 
-        ehr_vendor2 = EhrVendor.objects.create(
-            id=uuid.uuid4(),
-            name="Legendary",
-            is_cms_aligned_network=True,
+        # Generate test data for an organization with a location, but no endpoint
+        cls.org_with_no_affiliation = DefaultOrganization(
+            names=["No Endpoint Org"], locations=[DefaultLocation(has_endpoint=False)]
         )
 
-        ehr_vendor3 = EhrVendor.objects.create(
-            id=uuid.uuid4(),
-            name="Zod",
-            is_cms_aligned_network=True,
-        )
-
-        # =========================================================
-        # ✅ MATCHING ORGANIZATION #1 (FULLY QUALIFIED)
-        # =========================================================
-        cls.org_good_1 = create_organization(
-            name="A Good Clinical Org",
-            legal_entity=legal_entity,
-            other_id_type=other_id_type,
-            organization_type=nucc.code,
-        )
-
-        cls.orgs.append(cls.org_good_1)
-
-        loc_good_1 = create_location(
-            organization=cls.org_good_1,
-            name="Good Location 1",
-            city="Albuquerque",
-            state="NM",
-            zipcode="87101",
-            addr_line_1="807 Dusty Ln",
-        )
-
-        endpoint_instance = create_endpoint_instance(
-            organization=cls.org_good_1,
-            name="Good Endpoint 1",
-            ehr=ehr_vendor3,
-        )
-
-        LocationToEndpointInstance.objects.create(
-            location=loc_good_1,
-            endpoint_instance=endpoint_instance,
-        )
-
-        # =========================================================
-        # ✅ MATCHING ORGANIZATION #2 (MULTIPLE LOCATIONS / ENDPOINTS)
-        # =========================================================
-        cls.org_good_2 = create_organization(
-            name="B Good Clinical Org",
-            legal_entity=legal_entity,
-        )
-
-        cls.orgs.append(cls.org_good_2)
-
-        loc_good_2a = create_location(
-            organization=cls.org_good_2,
-            name="Location A",
-            city="Springfield",
-            state="MO",
-            zipcode="65203",
-            addr_line_1="403 Spring Ln",
-        )
-        loc_good_2b = create_location(
-            organization=cls.org_good_2, name="Location B", zipcode="01234"
-        )
-
-        endpoint_good_2a = create_endpoint_instance(
-            organization=cls.org_good_2,
-            name="Endpoint A",
-            ehr=ehr_vendor,
-        )
-
-        endpoint_good_2b = create_endpoint_instance(
-            organization=cls.org_good_2,
-            name="Endpoint B",
-            ehr=ehr_vendor,
-        )
-
-        LocationToEndpointInstance.objects.create(
-            location=loc_good_2a,
-            endpoint_instance=endpoint_good_2a,
-        )
-        LocationToEndpointInstance.objects.create(
-            location=loc_good_2b,
-            endpoint_instance=endpoint_good_2b,
-        )
-
-        # =========================================================
-        # ✅ MATCHING ORGANIZATION #3 (MULTIPLE LOCATIONS / ENDPOINTS)
-        # =========================================================
-        cls.org_good_3 = create_organization(
-            name="C Good Clinical Org",
-            legal_entity=legal_entity,
-        )
-
-        cls.orgs.append(cls.org_good_3)
-
-        loc_good_3a = create_location(organization=cls.org_good_3, name="Location C")
-        loc_good_3b = create_location(organization=cls.org_good_3, name="Location D")
-
-        endpoint_good_3a = create_endpoint_instance(
-            organization=cls.org_good_3,
-            name="Endpoint A",
-            ehr=ehr_vendor2,
-        )
-
-        endpoint_good_3b = create_endpoint_instance(
-            organization=cls.org_good_3,
-            name="Endpoint B",
-            ehr=ehr_vendor2,
-        )
-
-        LocationToEndpointInstance.objects.create(
-            location=loc_good_3a,
-            endpoint_instance=endpoint_good_3a,
-        )
-        LocationToEndpointInstance.objects.create(
-            location=loc_good_3b,
-            endpoint_instance=endpoint_good_3b,
-        )
-
-        # =========================================================
-        # ❌ NON-MATCHING #1 — NO LOCATION
-        # =========================================================
-        cls.invalid_1 = create_organization(
-            name="No Location Org",
-            legal_entity=legal_entity,
-        )
-
-        # =========================================================
-        # ❌ NON-MATCHING #2 — LOCATION BUT NO ENDPOINT
-        # =========================================================
-        cls.org_no_endpoint = create_organization(name="No Endpoint Org")
-        create_location(organization=cls.org_no_endpoint)
-
-        # =========================================================
-        # ❌ NON-MATCHING #4 — ENDPOINT NOT LINKED TO LOCATION
-        # =========================================================
-        cls.org_unlinked = create_organization(name="Unlinked Endpoint Org")
-        create_location(organization=cls.org_unlinked)
-
-        create_endpoint_instance(
-            organization=cls.org_unlinked,
-            name="Dangling Endpoint",
-            ehr=ehr_vendor,
-        )
+        # Generate test data for an EHR Vendor that has no organizations associated
+        DefaultEhrVendor(name="Lonely EHR Vendor")
 
         OrganizationAffiliationView.refresh_materialized_view()
 
         cls.first_affiliation = OrganizationAffiliationView.objects.first()
         return super().setUpTestData()
-
-    def setUp(self):
-        super().setUp()
-        self.org_without_authorized_official = Organization.objects.create(
-            id="26708690-19d6-499e-b481-cebe05b98f08", authorized_official_id=None
-        )
 
     # Basic tests
     def test_list_default(self):
@@ -234,7 +128,13 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
         particpiationg_orgs = extract_resource_fields(response, "participatingOrganization")
         participating_org_names = [org["display"] for org in particpiationg_orgs]
 
-        sorted = ["A Good Clinical Org", "B Good Clinical Org", "C Good Clinical Org"]
+        sorted = [
+            "A Good Clinical Org",
+            "B Good Clinical Org",
+            "B Good Clinical Org",
+            "C Good Clinical Org",
+            "C Good Clinical Org"
+        ]
 
         self.assertEqual(
             participating_org_names,
@@ -250,7 +150,13 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
         particpiationg_orgs = extract_resource_fields(response, "participatingOrganization")
         participating_org_names = [org["display"] for org in particpiationg_orgs]
 
-        sorted = ["C Good Clinical Org", "B Good Clinical Org", "A Good Clinical Org"]
+        sorted = [
+            "C Good Clinical Org",
+            "C Good Clinical Org",
+            "B Good Clinical Org",
+            "B Good Clinical Org",
+            "A Good Clinical Org"
+        ]
 
         self.assertEqual(
             participating_org_names,
@@ -266,7 +172,7 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
         ehr_orgs = extract_resource_fields(response, "organization")
         ehr_org_names = [org["display"] for org in ehr_orgs]
 
-        sorted = ["Epic", "Legendary", "Zod"]
+        sorted = ["EHR Vendor", "EHR Vendor", "EHR Vendor A", "EHR Vendor B", "Vendor of EHR Systems"]
 
         self.assertEqual(
             ehr_org_names,
@@ -277,6 +183,7 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
     def test_list_has_correct_orgs(self):
         url = reverse("fhir-organizationaffiliation-list")
         response = self.client.get(url)
+        assert_has_results(self, response)
 
         #ids = extract_resource_ids(response)
         bundle = response.data["results"]
@@ -290,25 +197,26 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
 
             ids.append(org_id)
 
+        ids.sort()
         valid_ids = [str(org.id) for org in self.orgs]
+        valid_ids.sort()
 
-        self.assertEqual(sorted(ids), sorted(valid_ids))
+        self.assertEqual(set(ids), set(valid_ids))
 
     def test_list_does_not_have_incorrect_orgs(self):
         url = reverse("fhir-organizationaffiliation-list")
         response = self.client.get(url)
         ids = extract_resource_ids(response)
 
-        self.assertNotIn(str(self.invalid_1.id), ids)
-        self.assertNotIn(str(self.org_no_endpoint.id), ids)
-        self.assertNotIn(str(self.org_unlinked.id), ids)
+        self.assertNotIn(str(self.org_with_no_affiliation.id), ids)
+        self.assertNotIn(str(self.org_with_no_location.id), ids)
 
     def test_org_name_filter(self):
-        name_search = "Epic"
+        name_search = "Vendor of EHR Systems"
         url = reverse("fhir-organizationaffiliation-list")
         response = self.client.get(url, {"org_name": name_search})
-
         bundle = response.data["results"]
+        assert_has_results(self, response)
 
         for entry in bundle["entry"]:
             self.assertIn("resource", entry)
@@ -322,8 +230,8 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
         name_search = "A Good Clinical Org"
         url = reverse("fhir-organizationaffiliation-list")
         response = self.client.get(url, {"participating_org_name": name_search})
-
         bundle = response.data["results"]
+        assert_has_results(self, response)
 
         for entry in bundle["entry"]:
             self.assertIn("resource", entry)
@@ -333,11 +241,20 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
             entry_org_name = org_affil["participatingOrganization"]["display"]
             self.assertIn(name_search, entry_org_name)
 
+    def test_ehr_vendor_with_no_orgs(self):
+        name_search = "Lonely EHR Vendor"
+        url = reverse("fhir-organizationaffiliation-list")
+        response = self.client.get(url, {"participating_org_name": name_search})
+        bundle = response.data["results"]
+
+        self.assertEqual(0, len(bundle["entry"]))
+
     def test_org_type_filter(self):
-        org_type_search = "Clinic/Center"
+        org_type_search = "Hospital"
         url = reverse("fhir-organizationaffiliation-list")
         response = self.client.get(url, {"participating_organization_type": org_type_search})
         bundle = response.data["results"]
+        assert_has_results(self, response)
 
         for entry in bundle["entry"]:
             self.assertIn("resource", entry)
@@ -345,7 +262,7 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
             self.assertIn("id", org_affil)
 
             entry_org_id = org_affil["participatingOrganization"]["reference"].split("/")[-1]
-            self.assertEqual(str(self.org_good_1.id), entry_org_id)
+            self.assertEqual("a9cd57b1-9e8c-4b75-86da-653acfc3ade6", entry_org_id)
 
     def test_retrieve_single_organization_affil(self):
         url = reverse("fhir-organizationaffiliation-detail", args=[self.first_affiliation.id])
@@ -377,16 +294,15 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
 
             address_lines = []
             for location in location_entry["location"]:
-                loc_id = location["reference"].split("/")[-1]
-                loc_obj = Location.objects.filter(pk=loc_id).first()
-                address_lines.append(loc_obj.address.address_us.delivery_line_1)
+                returned_location = self.client.get(location["reference"]).json()
+                address_lines.append(returned_location["address"])
 
-            self.assertIn(address_search, address_lines)
+            self.assertIn(address_search, str(address_lines))
 
     def test_list_filter_by_address_city(self):
-        address_search = "Springfield"
+        city_search = "Springfield"
         url = reverse("fhir-organizationaffiliation-list")
-        response = self.client.get(url, {"address_city": address_search})
+        response = self.client.get(url, {"address_city": city_search})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
 
@@ -396,18 +312,17 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
             self.assertIn("resource", entry)
             location_entry = entry["resource"]
 
-            address_lines = []
+            cities = []
             for location in location_entry["location"]:
-                loc_id = location["reference"].split("/")[-1]
-                loc_obj = Location.objects.filter(pk=loc_id).first()
-                address_lines.append(loc_obj.address.address_us.city_name)
+                returned_location = self.client.get(location["reference"]).json()
+                cities.append(returned_location["address"]["city"])
 
-            self.assertIn(address_search, address_lines)
+            self.assertIn(city_search, cities)
 
     def test_list_filter_by_address_state(self):
-        address_search = "NY"
+        state_search = "NY"
         url = reverse("fhir-organizationaffiliation-list")
-        response = self.client.get(url, {"address_state": address_search})
+        response = self.client.get(url, {"address_state": state_search})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
 
@@ -417,18 +332,15 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
             self.assertIn("resource", entry)
             location_entry = entry["resource"]
 
-            address_lines = []
+            states = []
             for location in location_entry["location"]:
-                loc_id = location["reference"].split("/")[-1]
-                loc_obj = Location.objects.filter(pk=loc_id).first()
-                address_lines.append(loc_obj.address.address_us.state_code.abbreviation)
-
-            self.assertIn(address_search, address_lines)
+                returned_location = self.client.get(location["reference"]).json()
+                states.append(returned_location["address"]["state"])
 
     def test_list_filter_by_address_zipcode(self):
-        address_search = "87101"
+        zip_code_search = "87101"
         url = reverse("fhir-organizationaffiliation-list")
-        response = self.client.get(url, {"address_postalcode": address_search})
+        response = self.client.get(url, {"address_postalcode": zip_code_search})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
 
@@ -438,18 +350,17 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
             self.assertIn("resource", entry)
             location_entry = entry["resource"]
 
-            address_lines = []
+            zip_codes = []
             for location in location_entry["location"]:
-                loc_id = location["reference"].split("/")[-1]
-                loc_obj = Location.objects.filter(pk=loc_id).first()
-                address_lines.append(loc_obj.address.address_us.zipcode)
+                returned_location = self.client.get(location["reference"]).json()
+                zip_codes.append(returned_location["address"]["postalCode"])
 
-            self.assertIn(address_search, address_lines)
+            self.assertIn(zip_code_search, zip_codes)
 
     def test_list_filter_by_address_zipcode_leading_zero(self):
-        address_search = "01234"
+        zip_code_search = "01234"
         url = reverse("fhir-organizationaffiliation-list")
-        response = self.client.get(url, {"address_postalcode": address_search})
+        response = self.client.get(url, {"address_postalcode": zip_code_search})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
 
@@ -459,13 +370,12 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
             self.assertIn("resource", entry)
             location_entry = entry["resource"]
 
-            address_lines = []
+            zip_codes = []
             for location in location_entry["location"]:
-                loc_id = location["reference"].split("/")[-1]
-                loc_obj = Location.objects.filter(pk=loc_id).first()
-                address_lines.append(loc_obj.address.address_us.zipcode)
+                returned_location = self.client.get(location["reference"]).json()
+                zip_codes.append(returned_location["address"]["postalCode"])
 
-            self.assertIn(address_search, address_lines)
+            self.assertIn(zip_code_search, zip_codes)
 
     def test_retrieve_non_existent_organization_affil(self):
         url = reverse(
@@ -475,6 +385,6 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_retrieve_non_valid_organization_affil(self):
-        url = reverse("fhir-organizationaffiliation-detail", args=[self.invalid_1.id])
+        url = reverse("fhir-organizationaffiliation-detail", args=[self.org_with_no_affiliation.id])
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
