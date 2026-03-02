@@ -1,12 +1,11 @@
 import { Alert } from "@cmsgov/design-system"
 import classNames from "classnames"
 import { useTranslation } from "react-i18next"
-import { useParams } from "react-router"
+import { useLocation, useParams } from "react-router"
 import { FeatureFlag } from "../../components/FeatureFlag"
 import { InfoItem } from "../../components/InfoItem"
 import { LoadingIndicator } from "../../components/LoadingIndicator"
 import { DetailPageBanner } from "../../components/DetailPageBanner"
-import { formatIdentifierType } from "../../helpers/formatters"
 import { PractitionerPresenter } from "../../presenters/PractitionerPresenter"
 import { usePractitionerAPI } from "../../state/requests/practitioners"
 import layout from "../Layout.module.css"
@@ -23,6 +22,8 @@ export const Practitioner = () => {
   const { t } = useTranslation()
   const { practitionerId } = useParams()
   const { data, error, isLoading } = usePractitionerAPI(practitionerId)
+  const location = useLocation()
+  const searchUrl = location.state?.searchUrl
 
   if (isLoading) {
     return <LoadingIndicator />
@@ -42,10 +43,14 @@ export const Practitioner = () => {
         title={practitioner.name}
         subtitle={`NPI: ${practitioner.npi}`}
         pageType="Practitioner"
-        backLink={{
-          label: "Back to search results",
-          href: "/search",
-        }}
+        backLink={
+          searchUrl
+            ? {
+                label: "Back to search results",
+                href: searchUrl,
+              }
+            : undefined
+        }
       />
       <main className={contentClass}>
         <FeatureFlag inverse name="PRACTITIONER_LOOKUP_DETAILS">
