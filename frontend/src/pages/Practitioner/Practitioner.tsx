@@ -41,13 +41,13 @@ export const Practitioner = () => {
     <>
       <DetailPageBanner
         title={practitioner.name}
-        subtitle={`NPI: ${practitioner.npi}`}
-        pageType="Practitioner"
+        subtitle={`${t("practitioners.npi")}: ${practitioner.npi}`}
+        pageType={t("practitioners.detail.header.type")}
         testIdPrefix="practitioner"
         backLink={
           searchUrl
             ? {
-                label: "Back to search results",
+                label: t("practitioners.detail.header.search"),
                 href: searchUrl,
               }
             : undefined

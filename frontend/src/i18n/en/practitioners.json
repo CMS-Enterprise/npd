@@ -8,6 +8,10 @@
       "subtitle": "Learn how to",
       "link": "update your information."
     },
+    "header": {
+      "type": "Practitioner",
+      "search": "Back to search results"
+    },
     "about": {
       "title": "About",
       "name": "Name(s)",
