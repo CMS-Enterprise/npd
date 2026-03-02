@@ -71,11 +71,6 @@ export const Organization = () => {
         </FeatureFlag>
 
         <FeatureFlag name="ORGANIZATION_LOOKUP_DETAILS">
-          <Alert heading={t("organizations.update.title")}>
-            {t("organizations.update.subtitle")}{" "}
-            <a href="#">{t("organizations.update.link")}</a>
-          </Alert>
-
           <section className={layout.section}>
             <h2>{t("organizations.about")}</h2>
             <div className="ds-l-row">

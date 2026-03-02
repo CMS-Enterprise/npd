@@ -1,5 +1,9 @@
 {
-  "title": "Provider group",
+  "header": {
+    "title": "Organization",
+    "npi": "NPI",
+    "search": "Back to search results"
+  },
   "unavailable": "This content is not currently available.",
   "update": {
     "title": "Are you the practitioner listed?",
