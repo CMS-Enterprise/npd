@@ -22,15 +22,6 @@ services:
       NPD_DB_HOST: ${NPD_DB_HOST:-db}
       NPD_DB_PORT: ${NPD_DB_PORT:-5432}
       NPD_REQUIRE_AUTHENTICATION: False
-      DD_AGENT_HOST: datadog-agent
-      DD_ENV: "${ENV_KEY:-dev}"
-      DD_SERVICE: "django-web"
-      DD_VERSION: "1.0.0"
-      DD_LOGS_INJECTION: true
-    labels:
-      com.datadoghq.tags.env: "${ENV_KEY:-dev}"
-      com.datadoghq.tags.service: "django-web"
-      com.datadoghq.tags.version: "1.0.0"
     ports:
       - '8000:8000'
     volumes:
@@ -43,8 +34,6 @@ services:
         condition: service_healthy
       db-migrations:
         condition: service_completed_successfully
-      datadog-agent:
-        condition: service_healthy
 
   db:
     image: 'postgis/postgis:17-3.5'
@@ -111,23 +100,6 @@ services:
       VITE_API_BASE_URL: "http://localhost:8000" # assume django-web is also running
       IN_DOCKER: 1
     command: ["npm", "run", "watch"]
-
-  datadog-agent:
-    image: datadog/agent:latest
-    environment:
-      - DD_API_KEY=${DATADOG_API_KEY:-dummy-api-key}
-      - DD_SITE=ddog-gov.com
-      - DD_APM_ENABLED=true
-      - DD_APM_NON_LOCAL_TRAFFIC=true
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /proc/:/host/proc/:ro
-      - /sys/fs/cgroup/:/host/sys/fs/cgroup:ro
-    healthcheck:
-      test: ["CMD", "agent", "status"]
-      interval: 30s
-      retries: 3
-      timeout: 10s
 
 volumes:
   postgres_data:
