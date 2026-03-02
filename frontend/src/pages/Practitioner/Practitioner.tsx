@@ -70,18 +70,6 @@ export const Practitioner = () => {
                   value={practitioner.gender}
                 />
               </div>
-              <div className="ds-l-col--12 ds-l-md-col--3 ds-u-margin-bottom--2">
-                <InfoItem
-                  label={t("practitioners.detail.about.deceased")}
-                  value={practitioner.isDeceased}
-                />
-              </div>
-              <div className="ds-l-col--12 ds-l-md-col--3 ds-u-margin-bottom--2">
-                <InfoItem
-                  label={t("practitioners.detail.about.status")}
-                  value={practitioner.isActive}
-                />
-              </div>
             </div>
           </section>
 
@@ -130,9 +118,7 @@ export const Practitioner = () => {
                 <TableBody>
                   {practitioner.identifiers.map((identifier, index) => (
                     <TableRow key={index}>
-                      <TableCell>
-                        {formatIdentifierType(identifier.system ?? "Unknown")}
-                      </TableCell>
+                      <TableCell>{identifier.system}</TableCell>
                       <TableCell>{identifier.number}</TableCell>
                       <TableCell>{identifier.details}</TableCell>
                     </TableRow>
