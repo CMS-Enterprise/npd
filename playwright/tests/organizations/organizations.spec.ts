@@ -126,16 +126,46 @@ test.describe("Organization show", () => {
     await page.getByRole("button", { name: "Search" }).click()
     await page.getByRole("link", { name: organization.name }).click()
 
-    // should be on the single organization show page
     await expect(page).toHaveURL(`/organizations/${organization.id}`)
-    await expect(page.locator("div[role='heading']")).toContainText(
-      organization.name,
-    )
+    await expect(page.getByTestId("organization-name")).toContainText(organization.name)
+    await expect(page.getByTestId("organization-npi")).toContainText(`NPI: ${organization.npi}`)
+  })
 
-    const banner = page.locator("section.banner")
-    await expect(banner.getByText("Provider group")).toBeVisible()
-    await expect(banner.getByText(organization.name)).toBeVisible()
-    await expect(banner.getByText(`NPI: ${organization.npi}`)).toBeVisible()
+  test("displays resource type label", async ({ page }) => {
+    await page.goto(`/organizations/${organization.id}`)
+    await expect(page.getByText("Organization", { exact: true })).toBeVisible()
+  })
+
+  test("shows back link when navigating from search", async ({ page }) => {
+    await page.goto("/organizations/search")
+    await page.getByRole("textbox", { name: "Name or NPI" }).fill(organization.name)
+    await page.getByRole("button", { name: "Search" }).click()
+    await page.getByRole("link", { name: organization.name }).click()
+
+    await expect(page).toHaveURL(`/organizations/${organization.id}`)
+    const backLink = page.getByRole("link", { name: /Back to search results/i })
+    await expect(backLink).toBeVisible()
+    await expect(backLink).toHaveAttribute("href", /\/organizations\/search\?/)
+  })
+
+  test("back link returns to search with preserved query params", async ({ page }) => {
+    await page.goto("/organizations/search")
+    await page.getByRole("textbox", { name: "Name or NPI" }).fill(organization.name)
+    await page.getByRole("button", { name: "Search" }).click()
+    await page.getByRole("link", { name: organization.name }).click()
+
+    await expect(page).toHaveURL(`/organizations/${organization.id}`)
+    await page.getByRole("link", { name: /Back to search results/i }).click()
+
+    await expect(page).toHaveURL(/\/organizations\/search/)
+    await expect(page).toHaveURL(/query=AAA/)
+  })
+
+  test("does not show back link on direct navigation", async ({ page }) => {
+    await page.goto(`/organizations/${organization.id}`)
+
+    await expect(page.getByTestId("organization-name")).toBeVisible()
+    await expect(page.getByRole("link", { name: /Back to search results/i })).not.toBeVisible()
   })
 })
 
