@@ -117,7 +117,7 @@ class OrganizationViewSetTestCase(APITestCase):
             self.assertIn("resource", entry)
 
             org_entry = entry["resource"]
-            org_type_extension = org_entry["extension"][0]["extension"][0]
+            org_type_extension = org_entry["extension"][0]
 
             self.assertIn("valueCodeableConcept", org_type_extension)
 
@@ -270,7 +270,7 @@ class OrganizationViewSetTestCase(APITestCase):
             self.assertIn("resource", entry)
 
             org_entry = entry["resource"]
-            nucc_display_name = org_entry["extension"][0]["extension"][0]["valueCodeableConcept"][
+            nucc_display_name = org_entry["extension"][0]["valueCodeableConcept"][
                 "coding"
             ][0]["display"]
 

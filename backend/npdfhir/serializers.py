@@ -48,59 +48,6 @@ if "runserver" or "test" in sys.argv:
         nucc_taxonomy_codes,
     )
 
-# Extend the Organization class
-#NOTE: fhir.resources really doesn't like when you try to subclass their Pydantic models
-ORG_QUALIFICATION_URL = (
-    "https://build.fhir.org/organization-definitions.html#Organization.qualification"
-)
-
-
-def build_org_qualification_extension(
-    code: CodeableConcept,
-    identifiers: list[Identifier] | None = None,
-    period: Period | None = None,
-    issuer: Reference | None = None,
-) -> Extension:
-    sub_extensions = []
-
-    if identifiers:
-        for identifier in identifiers:
-            sub_extensions.append(
-                Extension(
-                    url="identifier",
-                    valueIdentifier=identifier,
-                )
-            )
-
-    sub_extensions.append(
-        Extension(
-            url=ORG_QUALIFICATION_URL,
-            valueCodeableConcept=code,
-        )
-    )
-
-    if period:
-        sub_extensions.append(
-            Extension(
-                url="period",
-                valuePeriod=period,
-            )
-        )
-
-    if issuer:
-        sub_extensions.append(
-            Extension(
-                url="issuer",
-                valueReference=issuer,
-            )
-        )
-
-    return Extension(
-        url=ORG_QUALIFICATION_URL,
-        extension=sub_extensions,
-    )
-
-
 class AddressSerializer(serializers.Serializer):
     delivery_line_1 = serializers.CharField(source="addressus__delivery_line_1", read_only=True)
     delivery_line_2 = serializers.CharField(source="addressus__delivery_line_2", read_only=True)
@@ -430,17 +377,24 @@ class OrganizationSerializer(serializers.Serializer):
                     identifiers.append(other_identifier)
 
                 for taxonomy in clinical_org.organizationtotaxonomy_set.all():
-                    qualification_ext = build_org_qualification_extension(
-                        code=CodeableConcept(
-                            coding=[
-                                Coding(
-                                    system="http://nucc.org/provider-taxonomy",
-                                    code=taxonomy.nucc_code_id,
-                                    display=nucc_taxonomy_codes[str(taxonomy.nucc_code_id)],
-                                )
-                            ]
-                        )
+                    code = CodeableConcept(
+                        coding=[
+                            Coding(
+                                system="http://nucc.org/provider-taxonomy",
+                                code=taxonomy.nucc_code_id,
+                                display=nucc_taxonomy_codes[str(taxonomy.nucc_code_id)],
+                            )
+                        ]
                     )
+
+                    # Extend the Organization class
+                    #NOTE: fhir.resources really doesn't like when you try to subclass their Pydantic models
+
+                    qualification_ext = Extension(
+                        url="https://build.fhir.org/organization-definitions.html#Organization.qualification",
+                        valueCodeableConcept=code,
+                    )
+
                     taxonomies.append(qualification_ext)
 
                 if taxonomies:
