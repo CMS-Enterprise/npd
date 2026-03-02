@@ -18,7 +18,8 @@ import {
 
 import classNames from "classnames"
 import { useTranslation } from "react-i18next"
-import { useParams } from "react-router"
+import { useLocation, useParams } from "react-router"
+import { DetailPageBanner } from "../../components/DetailPageBanner"
 import { FeatureFlag } from "../../components/FeatureFlag"
 import { InfoItem } from "../../components/InfoItem"
 import { LoadingIndicator } from "../../components/LoadingIndicator"
@@ -30,13 +31,14 @@ export const Organization = () => {
   const { t } = useTranslation()
   const { organizationId } = useParams()
   const { data, isLoading } = useOrganizationAPI(organizationId)
+  const location = useLocation()
+  const searchUrl = location.state?.searchUrl
 
   if (isLoading) {
     return <LoadingIndicator />
   }
 
   const contentClass = classNames(layout.content, "ds-l-container")
-  const bannerClass = classNames(layout.banner, "banner")
 
   const npi = organizationNpiSelector(data)
   const mailingAddress = organizationMailingAddressSelector(data)
@@ -46,23 +48,17 @@ export const Organization = () => {
 
   return (
     <>
-      <section className={bannerClass}>
-        <div className="ds-l-container">
-          <div className="ds-l-row">
-            <div className="ds-l-col--12">
-              <div className={layout.leader}>
-                <span className={layout.subtitle}>
-                  {t("organizations.title")}
-                </span>
-                <div role="heading" aria-level={1} className={layout.title}>
-                  {data?.name}
-                </div>
-                <span className={layout.subtitle}>NPI: {npi}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <DetailPageBanner
+        title={data?.name ?? ""}
+        subtitle={`${t("organizations.header.npi")}: ${npi}`}
+        pageType={t("organizations.header.title")}
+        testIdPrefix="organization"
+        backLink={
+          searchUrl
+            ? { label: t("organizations.header.search"), href: searchUrl }
+            : undefined
+        }
+      />
       <main className={contentClass}>
         <FeatureFlag inverse name="ORGANIZATION_LOOKUP_DETAILS">
           <Alert variation="warn" heading="Content not available">

@@ -14,7 +14,11 @@ export const ListedOrganization = ({ data }: { data: FHIROrganization }) => {
     <div role="listitem" className="ds-u-border-top--1 ds-u-padding-y--2">
       <div className={search.entry}>
         <div className={search.head}>
-          <Link className={search.name} to={`/organizations/${data.id}`}>
+          <Link
+            className={search.name}
+            to={`/organizations/${data.id}`}
+            state={{ searchUrl: `/organizations/search${location.search}` }}
+          >
             {data.name}
           </Link>
           <span>
