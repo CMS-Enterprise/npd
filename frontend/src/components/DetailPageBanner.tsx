@@ -4,6 +4,7 @@ interface DetailPageBannerProps {
   title: string
   subtitle?: string
   pageType: string
+  testIdPrefix: string
   backLink?: {
     label: string
     href: string
@@ -14,6 +15,7 @@ export const DetailPageBanner = ({
   title,
   subtitle,
   pageType,
+  testIdPrefix,
   backLink,
 }: DetailPageBannerProps) => (
   <section className={styles.banner}>
@@ -29,7 +31,7 @@ export const DetailPageBanner = ({
             <span className={styles.resourceType}>{pageType}</span>
             <h1
               role="heading"
-              data-testid="detail-banner-title"
+              data-testid={`${testIdPrefix}-name`}
               aria-level={1}
               className={styles.title}
             >
@@ -37,7 +39,7 @@ export const DetailPageBanner = ({
             </h1>
             {subtitle && (
               <span
-                data-testid="detail-banner-subtitle"
+                data-testid={`${testIdPrefix}-npi`}
                 className={styles.subtitle}
               >
                 {subtitle}

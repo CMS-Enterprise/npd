@@ -43,6 +43,7 @@ export const Practitioner = () => {
         title={practitioner.name}
         subtitle={`NPI: ${practitioner.npi}`}
         pageType="Practitioner"
+        testIdPrefix="practitioner"
         backLink={
           searchUrl
             ? {
