@@ -5,6 +5,7 @@ import { useParams } from "react-router"
 import { FeatureFlag } from "../../components/FeatureFlag"
 import { InfoItem } from "../../components/InfoItem"
 import { LoadingIndicator } from "../../components/LoadingIndicator"
+import { DetailPageBanner } from "../../components/DetailPageBanner"
 import { formatIdentifierType } from "../../helpers/formatters"
 import { PractitionerPresenter } from "../../presenters/PractitionerPresenter"
 import { usePractitionerAPI } from "../../state/requests/practitioners"
@@ -32,36 +33,20 @@ export const Practitioner = () => {
   }
 
   const contentClass = classNames(layout.content, "ds-l-container")
-  const bannerClass = classNames(layout.banner)
 
   const practitioner = new PractitionerPresenter(data)
 
   return (
     <>
-      <section className={bannerClass}>
-        <div className="ds-l-container">
-          <div className="ds-l-row">
-            <div className="ds-l-col--12">
-              <div className={layout.leader}>
-                <h1
-                  role="heading"
-                  data-testid="practitioner-name"
-                  aria-level={1}
-                  className={layout.title}
-                >
-                  {practitioner.name}
-                </h1>
-                <span
-                  data-testid="practitioner-npi"
-                  className={layout.subtitle}
-                >
-                  NPI: {practitioner.npi}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <DetailPageBanner
+        title={practitioner.name}
+        subtitle={`NPI: ${practitioner.npi}`}
+        pageType="Practitioner"
+        backLink={{
+          label: "Back to search results",
+          href: "/search",
+        }}
+      />
       <main className={contentClass}>
         <FeatureFlag inverse name="PRACTITIONER_LOOKUP_DETAILS">
           <Alert variation="warn" heading="Content not available">
@@ -70,11 +55,6 @@ export const Practitioner = () => {
         </FeatureFlag>
 
         <FeatureFlag name="PRACTITIONER_LOOKUP_DETAILS">
-          <Alert heading={t("practitioners.detail.update.title")}>
-            {t("practitioners.detail.update.subtitle")}{" "}
-            <a href="#">{t("practitioners.detail.update.link")}</a>
-          </Alert>
-
           <section className={layout.section}>
             <h2>{t("practitioners.detail.about.title")}</h2>
             <div className="ds-l-row">
@@ -136,7 +116,9 @@ export const Practitioner = () => {
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell>{t("practitioners.detail.identifiers.type")}</TableCell>
+                    <TableCell>
+                      {t("practitioners.detail.identifiers.type")}
+                    </TableCell>
                     <TableCell>
                       {t("practitioners.detail.identifiers.number")}
                     </TableCell>

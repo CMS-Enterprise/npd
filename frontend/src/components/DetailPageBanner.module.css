@@ -1,0 +1,44 @@
+.banner {
+    padding: 2rem 0 2.5rem;
+    margin-bottom: var(--spacer-7);
+    background: linear-gradient(
+        93deg,
+        rgba(144, 255, 244, 0.1) 1.46%,
+        rgba(0, 153, 255, 0.1) 97.1%
+      );
+  }
+  
+  .backLink {
+    display: inline-block;
+    color: var(--color-primary);
+    text-decoration: none;
+    margin-bottom: 1.5rem;
+  }
+  
+  .backLink:hover {
+    text-decoration: underline;
+  }
+  
+  .leader {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .resourceType {
+    font-weight: 700;
+    color: var(--color-primary-darkest);
+  }
+  
+  .title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--color-primary-darkest);
+    margin: 0;
+    line-height: 1.2;
+  }
+  
+  .subtitle {
+    font-size: 1.25rem;
+    color: var(--color-primary-darkest);
+  }
