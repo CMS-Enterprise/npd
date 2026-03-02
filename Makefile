@@ -21,6 +21,7 @@ help:
 	@echo ""
 	@echo "  up             Start the NPD application at http://localhost:8000"
 	@echo "  down           Stop all running docker compose services"
+	@echo "  up-datadog     Start the NPD application with datadog at http://localhost:8000"
 	@echo ""
 	@echo "  test           Run the full frontend and backend test suites with DB setup"
 	@echo "  test-setup     Set up test database (drop/create test DB + run test migrations)"
@@ -265,3 +266,8 @@ setup: build create-db migrate
 # bring local working copy up to date
 .PHONY: update
 update: build migrate build-frontend-assets
+
+# run the app locally with datadog
+.PHONY: up-datadog
+up-datadog: 
+	@docker compose -f compose.datadog.yml up --build
