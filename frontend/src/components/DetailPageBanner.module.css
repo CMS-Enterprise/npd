@@ -41,4 +41,5 @@
   .subtitle {
     font-size: 1.25rem;
     color: var(--color-primary-darkest);
+    font-weight: 600;
   }
