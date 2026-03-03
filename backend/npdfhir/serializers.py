@@ -28,6 +28,7 @@ from fhir.resources.R4B.period import Period
 from fhir.resources.R4B.practitioner import Practitioner, PractitionerQualification
 from fhir.resources.R4B.practitionerrole import PractitionerRole
 from fhir.resources.R4B.reference import Reference
+from fhir.resources.R4B.extension import Extension
 from rest_framework import serializers
 
 from .models import (
@@ -46,7 +47,6 @@ if "runserver" or "test" in sys.argv:
         fhir_phone_use,
         nucc_taxonomy_codes,
     )
-
 
 class AddressSerializer(serializers.Serializer):
     delivery_line_1 = serializers.CharField(source="addressus__delivery_line_1", read_only=True)
@@ -319,6 +319,7 @@ class OrganizationSerializer(serializers.Serializer):
         organization.meta = Meta(
             profile=["http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization"]
         )
+
         identifiers = []
 
         taxonomies = []
@@ -385,20 +386,19 @@ class OrganizationSerializer(serializers.Serializer):
                             )
                         ]
                     )
-                    qualification = PractitionerQualification(
-                        identifier=[
-                            Identifier(
-                                value="test",
-                                type=code,  # TODO: Replace
-                                period=Period(),
-                            )
-                        ],
-                        code=code,
+
+                    # Extend the Organization class
+                    #NOTE: fhir.resources really doesn't like when you try to subclass their Pydantic models
+
+                    qualification_ext = Extension(
+                        url="https://build.fhir.org/organization-definitions.html#Organization.qualification",
+                        valueCodeableConcept=code,
                     )
-                    taxonomies.append(qualification.model_dump())
-                # TODO extend based on US core
-                # if taxonomies:
-                #    organization.qualification = taxonomies
+
+                    taxonomies.append(qualification_ext)
+
+                if taxonomies:
+                    organization.extension = taxonomies
 
         organization.identifier = identifiers
 

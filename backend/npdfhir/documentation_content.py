@@ -98,7 +98,8 @@ class docs:
             viewset = _("ViewSet for FHIR Organization resources")
             list_description = _(
                 "Query a list of organizations, represented as a bundle "
-                "of FHIR Organization resources"
+                "of FHIR Organization resources."
+                "Adds an extension to include qualification information"
             )
             default_sort = _("ascending by organization name")
             retrieve_description = _(
