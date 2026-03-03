@@ -147,6 +147,7 @@ class FHIRPractitionerViewSet(viewsets.GenericViewSet):
         "provider__individual__individualtoname_set",
         "provider__providertootherid_set",
         "provider__providertotaxonomy_set",
+        "provider__providertotaxonomy_set__nucc_code",
     )
     if DEBUG:
         renderer_classes = [FHIRRenderer, BrowsableAPIRenderer]
@@ -469,7 +470,7 @@ class FHIROrganizationAffiliationViewSet(viewsets.GenericViewSet):
     ViewSet for FHIR EHR Vendor to Organizaton relationships
     """
 
-    #queryset = Organization.objects.none()
+    # queryset = Organization.objects.none()
 
     endpoint_subquery = LocationToEndpointInstance.objects.filter(
         location__organization=OuterRef("pk"), endpoint_instance__ehr_vendor__isnull=False
