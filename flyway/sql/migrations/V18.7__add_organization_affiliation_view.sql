@@ -1,8 +1,13 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 CREATE MATERIALIZED VIEW npd.organization_affiliation AS
 SELECT
     o.id AS organization_id,
     ev.id AS ehr_vendor_id,
-    md5(o.id::text || '-' || ev.id::text) AS id,
+    uuid_generate_v5(
+        uuid_ns_dns(),
+        o.id::text || '-' || ev.id::text
+    ) AS id,
     MIN(otn.name) AS organization_name,
     ev.name AS ehr_vendor_name,
     co.npi AS npi,
