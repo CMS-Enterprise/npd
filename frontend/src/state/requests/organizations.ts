@@ -1,6 +1,6 @@
 import { skipToken, useQuery } from "@tanstack/react-query"
 import type { FHIRCollection, FHIROrganization } from "../../@types/fhir"
-import { formatAddress, formatDate } from "../../helpers/formatters"
+import { formatAddress, formatDetails } from "../../helpers/formatters"
 import { apiUrl } from "../api"
 import type { SortOption } from "../../@types/search"
 
@@ -179,11 +179,9 @@ export const organizationIdentifiersSelector = (org?: FHIROrganization) => {
   if (!org || !org.identifier?.length) return []
 
   return org.identifier.map((identity) => ({
-    type: identity.type?.coding?.[0]?.display || "Unknown",
+    type: identity.type?.coding?.[0]?.display?.trim() || "Unknown",
     number: identity.value,
-    details: identity.period?.start
-      ? `Active, Received ${formatDate(identity.period.start)}` // hardcoding active and received if we get a response?
-      : "",
+    details: identity.period ? formatDetails(identity.period) : "",
     system: identity.system,
   }))
 }
