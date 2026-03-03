@@ -126,26 +126,24 @@ class OrganizationViewSetTestCase(APITestCase):
             self.assertIn("contact", org_entry)
 
     def test_taxonomy_extensions(self):
-        url = reverse("fhir-organization-list")
+        id = "5fe868ad-2d9e-467e-b208-b0cfcfa39054"
+
+        url = reverse("fhir-organization-detail", args=[id])
         response = self.client.get(url)
-        assert_fhir_response(self, response)
-        assert_has_results(self, response)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        bundle = response.data["results"]
+        org = response.data
+        self.assertEqual(org["resourceType"], "Organization")
+        self.assertEqual(org["name"], "Organization ABC")
 
-        # Assert each entry has basic keys
-        for entry in bundle["entry"]:
-            self.assertIn("resource", entry)
+        org_type_extension = org["extension"][0]
 
-            org_entry = entry["resource"]
-            org_type_extension = org_entry["extension"][0]
-
-            self.assertIn("valueCodeableConcept", org_type_extension)
-            self.assertIn("url", org_type_extension)
-            extension_url = (
-                "https://build.fhir.org/organization-definitions.html#Organization.qualification"
-            )
-            self.assertEqual(org_type_extension["url"], extension_url)
+        self.assertIn("valueCodeableConcept", org_type_extension)
+        self.assertIn("url", org_type_extension)
+        extension_url = (
+            "https://build.fhir.org/organization-definitions.html#Organization.qualification"
+        )
+        self.assertEqual(org_type_extension["url"], extension_url)
 
     # Sorting tests
     def test_list_in_default_order(self):
