@@ -1,6 +1,5 @@
 import { skipToken, useQuery } from "@tanstack/react-query"
 import type { FHIRCollection, FHIROrganization } from "../../@types/fhir"
-import { formatAddress, formatDetails } from "../../helpers/formatters"
 import { apiUrl } from "../api"
 import type { SortOption } from "../../@types/search"
 
