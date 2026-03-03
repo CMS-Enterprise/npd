@@ -75,4 +75,17 @@ describe("Practitioner", () => {
       await screen.findByText("Taxonomy", { selector: "section h2" })
     })
   })
+
+  describe("taxonomy section", () => {
+    it("shows taxonomy table with qualification data", async () => {
+      render(<RoutedPractitioner path="/practitioners/12345" />, {
+        settings: { feature_flags: { PRACTITIONER_LOOKUP_DETAILS: true } },
+      })
+
+      await screen.findByText("Taxonomy", { selector: "section h2" })
+
+      expect(screen.getByText("207R00000X")).toBeInTheDocument()
+      expect(screen.getByText("Internal Medicine")).toBeInTheDocument()
+    })
+  })
 })

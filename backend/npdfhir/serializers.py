@@ -134,7 +134,7 @@ class TaxonomySerializer(serializers.Serializer):
                 Coding(
                     system="http://nucc.org/provider-taxonomy",
                     code=instance.nucc_code_id,
-                    display=instance.nucc_code.display_code,
+                    display=instance.nucc_code.display_name,
                 )
             ]
         )
