@@ -31,6 +31,14 @@ export interface FHIRPractitioner extends Practitioner {
   name?: HumanName[] | null
   identifier?: FHIRIdentifer[] | null
   telecom?: ContactPoint[] | null
+  qualification?: FHIRPractitionerQualification[] | null
+}
+
+// generated base type is too loosely typed so made this manually
+export interface FHIRPractitionerQualification {
+  code: FHIRCodeableConcept
+  identifier?: FHIRIdentifer[] | null
+  period?: Period | null
 }
 
 export interface FHIRCollection<T> {
