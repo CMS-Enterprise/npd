@@ -57,4 +57,14 @@ export class PractitionerPresenter {
       system: formatIdentifierType(identity.system as string) || "Unknown",
     }))
   }
+
+  get taxonomy() {
+    if (!this.record.qualification?.length) return []
+
+    return this.record.qualification.map((taxonomy) => ({
+      state: "", // we arent capturing this currently, we could use the state they're from?
+      licenseNumber: taxonomy.code?.coding?.[0]?.code || "Unknown",
+      displayCode: taxonomy.code?.coding?.[0]?.display || "Unknown",
+    }))
+  }
 }

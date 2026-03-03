@@ -139,8 +139,37 @@ export const Practitioner = () => {
           </section>
 
           <section className={layout.section}>
-            <h2>Taxonomy</h2>
-            <p>[taxonomy information]</p>
+            <h2>{t("practitioners.detail.taxonomy.title")}</h2>
+            {practitioner.taxonomy.length > 0 ? (
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>
+                      {t("practitioners.detail.taxonomy.state")}
+                    </TableCell>
+                    <TableCell>
+                      {t("practitioners.detail.taxonomy.licenseNumber")}
+                    </TableCell>
+                    <TableCell>
+                      {t("practitioners.detail.taxonomy.taxonomy")}
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {practitioner.taxonomy.map((taxonomy, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{taxonomy.state}</TableCell>
+                      <TableCell>{taxonomy.licenseNumber}</TableCell>
+                      <TableCell>{taxonomy.displayCode}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <p className="ds-u-color--gray">
+                {t("practitioners.detail.taxonomy.fallback")}
+              </p>
+            )}
           </section>
 
           <section className={layout.section}>

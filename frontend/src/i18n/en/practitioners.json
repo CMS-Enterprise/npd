@@ -32,7 +32,13 @@
       "details": "Details",
       "fallback": "No identifiers available"
     },
-    "taxonomy": "Taxonomy",
+    "taxonomy": {
+      "title": "Taxonomy",
+      "state": "State",
+      "licenseNumber": "License number",
+      "taxonomy": "Taxonomy",
+      "fallback": "No taxonomy information available"
+    },
     "organizations": "Organization(s)",
     "endpoints": "Endpoint(s)",
     "locations": "Locations"
