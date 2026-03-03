@@ -7,14 +7,8 @@ import {
   TableRow,
 } from "@cmsgov/design-system"
 
-import {
-  organizationAuthorizedOfficialSelector,
-  organizationAuthorizedPhoneSelector,
-  organizationIdentifiersSelector,
-  organizationMailingAddressSelector,
-  organizationNpiSelector,
-  useOrganizationAPI,
-} from "../../state/requests/organizations"
+import { useOrganizationAPI } from "../../state/requests/organizations"
+import { OrganizationPresenter } from "../../presenters/OrganizationPresenter"
 
 import classNames from "classnames"
 import { useTranslation } from "react-i18next"
@@ -23,7 +17,6 @@ import { DetailPageBanner } from "../../components/DetailPageBanner"
 import { FeatureFlag } from "../../components/FeatureFlag"
 import { InfoItem } from "../../components/InfoItem"
 import { LoadingIndicator } from "../../components/LoadingIndicator"
-import { formatIdentifierType } from "../../helpers/formatters"
 import layout from "../Layout.module.css"
 import styles from "./Organization.module.css"
 
@@ -40,17 +33,13 @@ export const Organization = () => {
 
   const contentClass = classNames(layout.content, "ds-l-container")
 
-  const npi = organizationNpiSelector(data)
-  const mailingAddress = organizationMailingAddressSelector(data)
-  const authorizedOfficial = organizationAuthorizedOfficialSelector(data)
-  const authorizedPhone = organizationAuthorizedPhoneSelector(data)
-  const identifiers = organizationIdentifiersSelector(data)
+  const organization = new OrganizationPresenter(data!)
 
   return (
     <>
       <DetailPageBanner
-        title={data?.name ?? ""}
-        subtitle={`${t("organizations.header.npi")}: ${npi}`}
+        title={organization.name}
+        subtitle={`${t("organizations.header.npi")}: ${organization.npi}`}
         pageType={t("organizations.header.title")}
         testIdPrefix="organization"
         backLink={
@@ -71,7 +60,7 @@ export const Organization = () => {
             <h2>{t("organizations.about")}</h2>
             <div className="ds-l-row">
               <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
-                <InfoItem label="Other name(s)" value={data?.name} />
+                <InfoItem label="Other name(s)" value={organization.name} />
               </div>
               <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
                 <InfoItem label="Type" value="Provider Group" />
@@ -87,20 +76,23 @@ export const Organization = () => {
             <div className="ds-l-row">
               <div
                 className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2"
-                style={{ whiteSpace: "pre-line " }}
+                style={{ whiteSpace: "pre-line" }}
               >
-                <InfoItem label="Mailing address" value={mailingAddress} />
+                <InfoItem
+                  label="Mailing address"
+                  value={organization.address}
+                />
               </div>
               <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
                 <InfoItem
                   label="Authorized official"
-                  value={authorizedOfficial}
+                  value={organization.authorizedOfficial}
                 />
               </div>
               <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
                 <InfoItem
                   label="Authorized official phone"
-                  value={authorizedPhone}
+                  value={organization.authorizedPhone}
                 />
               </div>
             </div>
@@ -108,8 +100,7 @@ export const Organization = () => {
 
           <section className={layout.section}>
             <h2>{t("organizations.identifiers")}</h2>
-            {/* TODO: look into modularizing table creation to reduce code duplication */}
-            {identifiers.length > 0 ? (
+            {organization.identifiers.length > 0 ? (
               <Table>
                 <TableHead>
                   <TableRow>
@@ -119,11 +110,9 @@ export const Organization = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {identifiers.map((identifier, index) => (
+                  {organization.identifiers.map((identifier, index) => (
                     <TableRow key={index}>
-                      <TableCell>
-                        {formatIdentifierType(identifier.system ?? "Unknown")}
-                      </TableCell>
+                      <TableCell>{identifier.system}</TableCell>
                       <TableCell>{identifier.number}</TableCell>
                       <TableCell>{identifier.details}</TableCell>
                     </TableRow>
