@@ -31,7 +31,10 @@ export const ListedOrganization = ({ data }: { data: FHIROrganization }) => {
             <br />
             TBD
           </div>
-          <div className="ds-l-col--4 ds-m-col--6">
+          <div
+            className="ds-l-col--4 ds-m-col--6"
+            style={{ whiteSpace: "pre-line " }}
+          >
             <strong>{t("organizations.listing.location")}</strong>
             <br />
             {organizationMailingAddressSelector(data)}

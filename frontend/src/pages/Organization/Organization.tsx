@@ -85,7 +85,10 @@ export const Organization = () => {
           <section className={layout.section}>
             <h2>{t("organizations.contact")}</h2>
             <div className="ds-l-row">
-              <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
+              <div
+                className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2"
+                style={{ whiteSpace: "pre-line " }}
+              >
                 <InfoItem label="Mailing address" value={mailingAddress} />
               </div>
               <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
