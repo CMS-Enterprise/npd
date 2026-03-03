@@ -52,7 +52,7 @@ describe("Organization", () => {
       })
 
       // ensure FeatureFlag components have finished loading
-      await screen.findByText("Are you the practitioner listed?")
+      await screen.findByText("About")
 
       expect(
         screen.queryByText("About", { selector: "section h2" }),
@@ -80,7 +80,7 @@ describe("identifiers section", () => {
       settings: { feature_flags: { ORGANIZATION_LOOKUP_DETAILS: true } },
     })
 
-    await screen.findByText("Are you the practitioner listed?")
+    await screen.findByText("About")
 
     const table = screen.getByRole("table")
     expect(table).toBeInTheDocument()
