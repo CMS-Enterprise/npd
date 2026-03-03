@@ -7,31 +7,31 @@ from ..models import Nucc, Location
 
 
 class OrganizationAffiliationFilterSet(filters.FilterSet):
-    org_name = filters.CharFilter(method="filter_name", help_text="Filter by organization name")
-    participating_org_name = filters.CharFilter(
+    primary_organization_name = filters.CharFilter(method="filter_name", help_text="Filter by organization name")
+    participating_organization_name = filters.CharFilter(
         method="filter_participating_name", help_text="Filter by pariticipating organization name"
     )
 
     participating_organization_identifier = filters.CharFilter(
         method="filter_identifier",
-        help_text="Filter by identifier (NPI, EIN, or other). Format: value or system|value",
+        help_text="Filter by identifier (NPI, EIN, or other). Format: value or system|value"
     )
 
     participating_organization_type = filters.CharFilter(
         method="filter_organization_type", help_text="Filter by organization type/taxonomy"
     )
 
-    address = filters.CharFilter(
+    location_address = filters.CharFilter(
         method="filter_location", help_text="Filter by any part of address"
     )
 
-    address_city = filters.CharFilter(method="filter_address_city", help_text="Filter by city name")
+    location_address_city = filters.CharFilter(method="filter_address_city", help_text="Filter by city name")
 
-    address_state = filters.CharFilter(
+    location_address_state = filters.CharFilter(
         method="filter_address_state", help_text="Filter by state (2-letter abbreviation)"
     )
 
-    address_postalcode = filters.CharFilter(
+    location_address_postalcode = filters.CharFilter(
         method="filter_address_postalcode", help_text="Filter by postal code/zip code"
     )
 
