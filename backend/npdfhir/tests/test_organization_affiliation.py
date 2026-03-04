@@ -1,5 +1,9 @@
 from django.urls import reverse
 from rest_framework import status
+
+from ..models import (
+    OrganizationAffiliationView,
+)
 from .api_test_case import APITestCase
 from .fixtures.endpoint import DefaultEhrVendor, DefaultEndpointInstance
 from .fixtures.organization import DefaultOrganization, DefaultLocation
@@ -92,6 +96,9 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
         # Generate test data for an EHR Vendor that has no organizations associated
         DefaultEhrVendor(name="Lonely EHR Vendor")
 
+        OrganizationAffiliationView.refresh_materialized_view()
+
+        cls.first_affiliation = OrganizationAffiliationView.objects.first()
         return super().setUpTestData()
 
     # Basic tests
@@ -121,7 +128,13 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
         particpiationg_orgs = extract_resource_fields(response, "participatingOrganization")
         participating_org_names = [org["display"] for org in particpiationg_orgs]
 
-        sorted = ["A Good Clinical Org", "B Good Clinical Org", "C Good Clinical Org"]
+        sorted = [
+            "A Good Clinical Org",
+            "B Good Clinical Org",
+            "B Good Clinical Org",
+            "C Good Clinical Org",
+            "C Good Clinical Org"
+        ]
 
         self.assertEqual(
             participating_org_names,
@@ -137,7 +150,13 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
         particpiationg_orgs = extract_resource_fields(response, "participatingOrganization")
         participating_org_names = [org["display"] for org in particpiationg_orgs]
 
-        sorted = ["C Good Clinical Org", "B Good Clinical Org", "A Good Clinical Org"]
+        sorted = [
+            "C Good Clinical Org",
+            "C Good Clinical Org",
+            "B Good Clinical Org",
+            "B Good Clinical Org",
+            "A Good Clinical Org"
+        ]
 
         self.assertEqual(
             participating_org_names,
@@ -153,7 +172,7 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
         ehr_orgs = extract_resource_fields(response, "organization")
         ehr_org_names = [org["display"] for org in ehr_orgs]
 
-        sorted = ["EHR Vendor", "EHR Vendor A", "Vendor of EHR Systems"]
+        sorted = ["EHR Vendor", "EHR Vendor", "EHR Vendor A", "EHR Vendor B", "Vendor of EHR Systems"]
 
         self.assertEqual(
             ehr_org_names,
@@ -166,13 +185,23 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
         response = self.client.get(url)
         assert_has_results(self, response)
 
-        ids = extract_resource_ids(response)
-        ids.sort()
+        #ids = extract_resource_ids(response)
+        bundle = response.data["results"]
 
+        ids = []
+        for entry in bundle["entry"]:
+            self.assertIn("resource", entry)
+            org_affil = entry["resource"]
+
+            org_id = org_affil['participatingOrganization']['reference'].split('/')[-1]
+
+            ids.append(org_id)
+
+        ids.sort()
         valid_ids = [str(org.id) for org in self.orgs]
         valid_ids.sort()
 
-        self.assertEqual(sorted(ids), sorted(valid_ids))
+        self.assertEqual(set(ids), set(valid_ids))
 
     def test_list_does_not_have_incorrect_orgs(self):
         url = reverse("fhir-organizationaffiliation-list")
@@ -185,7 +214,7 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
     def test_org_name_filter(self):
         name_search = "Vendor of EHR Systems"
         url = reverse("fhir-organizationaffiliation-list")
-        response = self.client.get(url, {"org_name": name_search})
+        response = self.client.get(url, {"primary_organization_name": name_search})
         bundle = response.data["results"]
         assert_has_results(self, response)
 
@@ -200,7 +229,7 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
     def test_participating_org_name_filter(self):
         name_search = "A Good Clinical Org"
         url = reverse("fhir-organizationaffiliation-list")
-        response = self.client.get(url, {"participating_org_name": name_search})
+        response = self.client.get(url, {"participating_organization_name": name_search})
         bundle = response.data["results"]
         assert_has_results(self, response)
 
@@ -215,7 +244,7 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
     def test_ehr_vendor_with_no_orgs(self):
         name_search = "Lonely EHR Vendor"
         url = reverse("fhir-organizationaffiliation-list")
-        response = self.client.get(url, {"participating_org_name": name_search})
+        response = self.client.get(url, {"participating_organization_name": name_search})
         bundle = response.data["results"]
 
         self.assertEqual(0, len(bundle["entry"]))
@@ -236,11 +265,10 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
             self.assertEqual("a9cd57b1-9e8c-4b75-86da-653acfc3ade6", entry_org_id)
 
     def test_retrieve_single_organization_affil(self):
-        id = "a9cd57b1-9e8c-4b75-86da-653acfc3ade6"
-        url = reverse("fhir-organizationaffiliation-detail", args=[id])
+        url = reverse("fhir-organizationaffiliation-detail", args=[self.first_affiliation.id])
         response = self.client.get(url)
 
-        self.assertEqual(id, response.data["id"])
+        self.assertEqual(str(self.first_affiliation.id), response.data["id"])
 
         org_affiliation_entry = response.data
 
@@ -254,7 +282,7 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
     def test_list_filter_by_address(self):
         address_search = "807 Dusty Ln"
         url = reverse("fhir-organizationaffiliation-list")
-        response = self.client.get(url, {"address": address_search})
+        response = self.client.get(url, {"location_address": address_search})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
 
@@ -274,7 +302,7 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
     def test_list_filter_by_address_city(self):
         city_search = "Springfield"
         url = reverse("fhir-organizationaffiliation-list")
-        response = self.client.get(url, {"address_city": city_search})
+        response = self.client.get(url, {"location_address_city": city_search})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
 
@@ -294,7 +322,7 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
     def test_list_filter_by_address_state(self):
         state_search = "NY"
         url = reverse("fhir-organizationaffiliation-list")
-        response = self.client.get(url, {"address_state": state_search})
+        response = self.client.get(url, {"location_address_state": state_search})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
 
@@ -312,7 +340,7 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
     def test_list_filter_by_address_zipcode(self):
         zip_code_search = "87101"
         url = reverse("fhir-organizationaffiliation-list")
-        response = self.client.get(url, {"address_postalcode": zip_code_search})
+        response = self.client.get(url, {"location_address_postalcode": zip_code_search})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
 
@@ -332,7 +360,7 @@ class OrganizationAffiliationViewSetTestCase(APITestCase):
     def test_list_filter_by_address_zipcode_leading_zero(self):
         zip_code_search = "01234"
         url = reverse("fhir-organizationaffiliation-list")
-        response = self.client.get(url, {"address_postalcode": zip_code_search})
+        response = self.client.get(url, {"location_address_postalcode": zip_code_search})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
 
