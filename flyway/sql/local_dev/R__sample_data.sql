@@ -90349,4 +90349,5 @@ INSERT INTO npd.location_to_endpoint_instance VALUES ('f157bb0d-e668-4661-b2ab-d
 
 REFRESH MATERIALIZED VIEW npd.organization_view; 
 REFRESH MATERIALIZED VIEW npd.provider_to_location_view; 
-REFRESH MATERIALIZED VIEW npd.provider_view; 
+REFRESH MATERIALIZED VIEW npd.provider_view;
+REFRESH MATERIALIZED VIEW npd.organization_affiliation;
