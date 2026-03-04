@@ -12,6 +12,7 @@ type Props = {
   value: string
   onChange: (value: string) => void
   inputLabel: string
+  disabled?: boolean
 }
 
 export const SearchResultsHeader = ({
@@ -20,6 +21,7 @@ export const SearchResultsHeader = ({
   value,
   onChange,
   inputLabel,
+  disabled = false,
 }: Props) => {
   const { t } = useTranslation()
 
@@ -47,6 +49,7 @@ export const SearchResultsHeader = ({
           options={options}
           value={value}
           onChange={handleSort}
+          disabled={disabled}
         />
       </div>
     </div>
