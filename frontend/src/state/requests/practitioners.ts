@@ -1,4 +1,4 @@
-import { skipToken, useQuery } from "@tanstack/react-query"
+import { skipToken, useQuery, keepPreviousData } from "@tanstack/react-query"
 import type { FHIRCollection, FHIRPractitioner } from "../../@types/fhir"
 import { apiUrl } from "../api"
 import type { SortOption } from "../../@types/search"
@@ -119,5 +119,6 @@ export const usePractitionersAPI = (
         : () => {
             return fetchPractitioners(params)
           },
+    placeholderData: keepPreviousData,
   })
 }

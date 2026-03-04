@@ -13,43 +13,47 @@ interface SearchProviderProps<T> {
   children: ReactNode
   useSearchAPI: (
     params: PaginationParams & SearchParams,
-    options?: { requireQuery?: boolean }
+    options?: { requireQuery?: boolean },
   ) => UseQueryResult<FHIRCollection<T>>
   defaultSort: string
 }
 
-export function SearchProvider<T>({ 
-  children, 
+export function SearchProvider<T>({
+  children,
   useSearchAPI,
-  defaultSort
+  defaultSort,
 }: SearchProviderProps<T>) {
   const [isBackgroundLoading, setIsBackgroundLoading] = useState(false)
   const [params, setParams] = usePaginationParams()
   const [query, setQueryValue] = useState<string>(params.query || "")
 
   const currentSort = params.sort || defaultSort
-  
+
   // the injected hook handles the actual fetching
-  const { data, isLoading, error } = useSearchAPI(
+  const { data, isLoading, isPlaceholderData, error } = useSearchAPI(
     { ...params, sort: currentSort },
-    { requireQuery: true }
+    { requireQuery: true },
   )
-  
+
   const pagination = usePagination(params, data)
 
-  const buildParams = (overrides: { page?: string; query?: string; sort?: string }) => {
+  const buildParams = (overrides: {
+    page?: string
+    query?: string
+    sort?: string
+  }) => {
     const nextQuery = overrides.query ?? params.query ?? query
     const nextSort = overrides.sort ?? currentSort
-    
+
     const next: Record<string, string> = {
       page: overrides.page ?? "1",
-      sort: nextSort
+      sort: nextSort,
     }
-    
+
     if (nextQuery) {
       next.query = nextQuery
     }
-    
+
     return next
   }
 
@@ -84,14 +88,16 @@ export function SearchProvider<T>({
   }, [isLoading])
 
   const hasActiveQuery = params.query && params.query.length > 0
-  
+
   const state: SearchContextValue<T> = {
     initialQuery: query,
-    data: hasActiveQuery && data?.results?.entry
-      ? data.results.entry.map((entry) => entry.resource)
-      : null,
+    data:
+      hasActiveQuery && data?.results?.entry
+        ? data.results.entry.map((entry) => entry.resource)
+        : null,
     isLoading,
     isBackgroundLoading,
+    isPlaceholderData: isPlaceholderData ?? false,
     error: error
       ? error instanceof Error
         ? error.message
@@ -99,7 +105,7 @@ export function SearchProvider<T>({
       : null,
     pagination,
     query,
-    sort: currentSort
+    sort: currentSort,
   }
 
   const dispatch: SearchDispatchContextValue = {
@@ -111,9 +117,7 @@ export function SearchProvider<T>({
 
   return (
     <SearchContext value={state}>
-      <SearchDispatchContext value={dispatch}>
-        {children}
-      </SearchDispatchContext>
+      <SearchDispatchContext value={dispatch}>{children}</SearchDispatchContext>
     </SearchContext>
   )
 }

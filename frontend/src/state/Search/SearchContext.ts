@@ -5,6 +5,7 @@ export interface SearchContextValue<T> {
   data: T[] | null
   isLoading: boolean
   isBackgroundLoading: boolean
+  isPlaceholderData: boolean
   error: string | null
   pagination?: PaginationState
   query?: string
@@ -18,5 +19,9 @@ export interface SearchDispatchContextValue {
   clearSearch: () => void
 }
 
-export const SearchContext = createContext<SearchContextValue<unknown> | undefined>(undefined)
-export const SearchDispatchContext = createContext<SearchDispatchContextValue | undefined>(undefined)
+export const SearchContext = createContext<
+  SearchContextValue<unknown> | undefined
+>(undefined)
+export const SearchDispatchContext = createContext<
+  SearchDispatchContextValue | undefined
+>(undefined)
