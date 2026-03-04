@@ -469,7 +469,7 @@ class OrganizationAffiliationSerializer(serializers.Serializer):
         organization_affiliation.organization = Reference(display=str(instance.ehr_vendor_name))
 
         organization_affiliation.participatingOrganization = genReference(
-            "fhir-organization-detail", instance.id, request
+            "fhir-organization-detail", instance.organization_id, request
         )
         organization_affiliation.participatingOrganization.display = str(instance.organization_name)
 
@@ -495,13 +495,15 @@ class OrganizationAffiliationSerializer(serializers.Serializer):
 
         endpoints = []
 
-        for location in instance.location_set.all():
-            locations.append(genReference("fhir-location-detail", location.id, request))
+        locations = [
+            genReference("fhir-location-detail", loc_id, request)
+            for loc_id in instance.location_ids
+        ]
 
-            for link in location.locationtoendpointinstance_set.all():
-                endpoint = link.endpoint_instance
-
-                endpoints.append(genReference("fhir-endpoint-detail", endpoint.id, request))
+        endpoints = [
+            genReference("fhir-endpoint-detail", ep_id, request)
+            for ep_id in instance.endpoint_instance_ids
+        ]
 
         organization_affiliation.location = locations
         organization_affiliation.endpoint = endpoints
