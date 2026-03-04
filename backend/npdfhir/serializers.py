@@ -48,6 +48,7 @@ if "runserver" or "test" in sys.argv:
         nucc_taxonomy_codes,
     )
 
+
 class AddressSerializer(serializers.Serializer):
     delivery_line_1 = serializers.CharField(source="addressus__delivery_line_1", read_only=True)
     delivery_line_2 = serializers.CharField(source="addressus__delivery_line_2", read_only=True)
@@ -133,7 +134,7 @@ class TaxonomySerializer(serializers.Serializer):
                 Coding(
                     system="http://nucc.org/provider-taxonomy",
                     code=instance.nucc_code_id,
-                    display=nucc_taxonomy_codes[str(instance.nucc_code_id)],
+                    display=instance.nucc_code.display_name,
                 )
             ]
         )
@@ -388,7 +389,7 @@ class OrganizationSerializer(serializers.Serializer):
                     )
 
                     # Extend the Organization class
-                    #NOTE: fhir.resources really doesn't like when you try to subclass their Pydantic models
+                    # NOTE: fhir.resources really doesn't like when you try to subclass their Pydantic models
 
                     qualification_ext = Extension(
                         url="https://build.fhir.org/organization-definitions.html#Organization.qualification",

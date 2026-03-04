@@ -146,6 +146,7 @@ class FHIRPractitionerViewSet(viewsets.GenericViewSet):
         "provider__individual__individualtoname_set",
         "provider__providertootherid_set",
         "provider__providertotaxonomy_set",
+        "provider__providertotaxonomy_set__nucc_code",
     )
     if DEBUG:
         renderer_classes = [FHIRRenderer, BrowsableAPIRenderer]
