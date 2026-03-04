@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from django.conf import settings
-from django.db.models import CharField, Exists, F, OuterRef, Subquery, Value, Prefetch
+from django.db.models import CharField, F, Value, Prefetch
 from django.db.models.functions import Concat
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
@@ -28,12 +28,11 @@ from .filters.practitioner_role_filter_set import PractitionerRoleFilterSet
 from .models import (
     EndpointInstance,
     Location,
-    LocationToEndpointInstance,
-    Organization,
     ProviderView,
     ProviderToLocationView,
     OrganizationToAddress,
     OrganizationView,
+    OrganizationAffiliationView,
     IndividualToAddress,
 )
 
@@ -470,60 +469,9 @@ class FHIROrganizationAffiliationViewSet(viewsets.GenericViewSet):
     ViewSet for FHIR EHR Vendor to Organizaton relationships
     """
 
-    # queryset = Organization.objects.none()
-
-    endpoint_subquery = LocationToEndpointInstance.objects.filter(
-        location__organization=OuterRef("pk"), endpoint_instance__ehr_vendor__isnull=False
-    )
-
-    # Subquery for endpoint name (take first matching)
-    endpoint_name_subquery = LocationToEndpointInstance.objects.filter(
-        location__organization=OuterRef("pk"), endpoint_instance__ehr_vendor__isnull=False
-    ).values("endpoint_instance__name")[:1]
-
-    # Subquery for ehr_vendor name (take first matching)
-    ehr_vendor_name_subquery = LocationToEndpointInstance.objects.filter(
-        location__organization=OuterRef("pk"), endpoint_instance__ehr_vendor__isnull=False
-    ).values("endpoint_instance__ehr_vendor__name")[:1]
-
-    queryset = (
-        Organization.objects.all()
-        .filter(Exists(endpoint_subquery))
-        .prefetch_related(
-            # Clinical organization (participating org)
-            "clinicalorganization",
-            "clinicalorganization__npi",
-            "clinicalorganization__organizationtootherid_set",
-            "clinicalorganization__organizationtootherid_set__other_id_type",
-            "clinicalorganization__organizationtotaxonomy_set",
-            "clinicalorganization__organizationtotaxonomy_set__nucc_code",
-            # --- NUCC CLASSIFICATIONS ---
-            "clinicalorganization__organizationtotaxonomy_set",
-            "clinicalorganization__organizationtotaxonomy_set__nucc_code",
-            # --- OTHER CODE CLASSIFICATIONS ---
-            "clinicalorganization__organizationtootherid_set",
-            "clinicalorganization__organizationtootherid_set__other_id_type",
-            # Names and addresses
-            "organizationtoname_set",
-            "organizationtoaddress_set",
-            "organizationtoaddress_set__address",
-            "organizationtoaddress_set__address__address_us",
-            "organizationtoaddress_set__address__address_us__state_code",
-            "organizationtoaddress_set__address_use",
-            # Endpoint + vendor relationship
-            "location_set",
-            "location_set__locationtoendpointinstance_set",
-            "location_set__locationtoendpointinstance_set__endpoint_instance",
-            "location_set__locationtoendpointinstance_set__endpoint_instance__ehr_vendor",
-        )
-        .annotate(
-            # Organization name
-            organization_name=F("organizationtoname__name"),
-            endpoint_name=Subquery(endpoint_name_subquery),
-            ehr_vendor_name=Subquery(ehr_vendor_name_subquery),
-            participating_npi=F("clinicalorganization__npi__npi"),
-        )
-        .distinct()
+    queryset = OrganizationAffiliationView.objects.all().select_related(
+        "organization",
+        "ehr_vendor",
     )
 
     if DEBUG:
