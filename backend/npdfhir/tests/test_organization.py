@@ -113,13 +113,37 @@ class OrganizationViewSetTestCase(APITestCase):
 
         bundle = response.data["results"]
 
+        # Assert each entry has basic keys
         for entry in bundle["entry"]:
             self.assertIn("resource", entry)
 
             org_entry = entry["resource"]
-            org_type_extension = org_entry["extension"][0]
 
-            self.assertIn("valueCodeableConcept", org_type_extension)
+            self.assertEqual(org_entry["resourceType"], "Organization")
+            self.assertIn("identifier", org_entry)
+            self.assertIn("meta", org_entry)
+            self.assertIn("name", org_entry)
+            self.assertIn("contact", org_entry)
+
+    def test_taxonomy_extensions(self):
+        id = "5fe868ad-2d9e-467e-b208-b0cfcfa39054"
+
+        url = reverse("fhir-organization-detail", args=[id])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        org = response.data
+        self.assertEqual(org["resourceType"], "Organization")
+        self.assertEqual(org["name"], "Organization ABC")
+
+        org_type_extension = org["extension"][0]
+
+        self.assertIn("valueCodeableConcept", org_type_extension)
+        self.assertIn("url", org_type_extension)
+        extension_url = (
+            "https://build.fhir.org/organization-definitions.html#Organization.qualification"
+        )
+        self.assertEqual(org_type_extension["url"], extension_url)
 
     # Sorting tests
     def test_list_in_default_order(self):
@@ -270,9 +294,9 @@ class OrganizationViewSetTestCase(APITestCase):
             self.assertIn("resource", entry)
 
             org_entry = entry["resource"]
-            nucc_display_name = org_entry["extension"][0]["valueCodeableConcept"][
-                "coding"
-            ][0]["display"]
+            nucc_display_name = org_entry["extension"][0]["valueCodeableConcept"]["coding"][0][
+                "display"
+            ]
 
             self.assertIn(filter_param_value, nucc_display_name)
             self.assertEqual("cc9d6beb-992f-47f6-8f41-a10d4cf13694", org_entry["id"])
