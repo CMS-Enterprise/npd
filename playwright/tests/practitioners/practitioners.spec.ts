@@ -148,6 +148,43 @@ test.describe("Practitioner show", () => {
     await expect(page.getByTestId("practitioner-name")).toContainText(practitioner.name)
     await expect(page.getByTestId("practitioner-npi")).toContainText(`NPI: ${practitioner.npi}`)
   })
+
+  test("displays resource type label", async ({ page }) => {
+    await page.goto(`/practitioners/${practitioner.id}`)
+    await expect(page.getByText("Practitioner", { exact: true })).toBeVisible()
+  })
+
+  test("shows back link when navigating from search", async ({ page }) => {
+    await page.goto("/practitioners/search")
+    await page.getByRole("textbox", { name: "Name or NPI" }).fill("1234567894")
+    await page.getByRole("button", { name: "Search" }).click()
+    await page.getByRole("link", { name: /AAA Test Practitioner/i }).click()
+
+    await expect(page).toHaveURL(`/practitioners/${practitioner.id}`)
+    const backLink = page.getByRole("link", { name: /Back to search results/i })
+    await expect(backLink).toBeVisible()
+    await expect(backLink).toHaveAttribute("href", /\/practitioners\/search\?/)
+  })
+
+  test("back link returns to search with preserved query params", async ({ page }) => {
+    await page.goto("/practitioners/search")
+    await page.getByRole("textbox", { name: "Name or NPI" }).fill("1234567894")
+    await page.getByRole("button", { name: "Search" }).click()
+    await page.getByRole("link", { name: /AAA Test Practitioner/i }).click()
+
+    await expect(page).toHaveURL(`/practitioners/${practitioner.id}`)
+    await page.getByRole("link", { name: /Back to search results/i }).click()
+
+    await expect(page).toHaveURL(/\/practitioners\/search/)
+    await expect(page).toHaveURL(/query=1234567894/)
+  })
+
+  test("does not show back link on direct navigation", async ({ page }) => {
+    await page.goto(`/practitioners/${practitioner.id}`)
+
+    await expect(page.getByTestId("practitioner-name")).toBeVisible()
+    await expect(page.getByRole("link", { name: /Back to search results/i })).not.toBeVisible()
+  })
 })
 
 test.describe("sort Practitioners", () => {

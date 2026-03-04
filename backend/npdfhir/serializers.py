@@ -48,6 +48,7 @@ if "runserver" or "test" in sys.argv:
         nucc_taxonomy_codes,
     )
 
+
 class AddressSerializer(serializers.Serializer):
     delivery_line_1 = serializers.CharField(source="addressus__delivery_line_1", read_only=True)
     delivery_line_2 = serializers.CharField(source="addressus__delivery_line_2", read_only=True)
@@ -133,7 +134,7 @@ class TaxonomySerializer(serializers.Serializer):
                 Coding(
                     system="http://nucc.org/provider-taxonomy",
                     code=instance.nucc_code_id,
-                    display=nucc_taxonomy_codes[str(instance.nucc_code_id)],
+                    display=instance.nucc_code.display_name,
                 )
             ]
         )
@@ -388,7 +389,7 @@ class OrganizationSerializer(serializers.Serializer):
                     )
 
                     # Extend the Organization class
-                    #NOTE: fhir.resources really doesn't like when you try to subclass their Pydantic models
+                    # NOTE: fhir.resources really doesn't like when you try to subclass their Pydantic models
 
                     qualification_ext = Extension(
                         url="https://build.fhir.org/organization-definitions.html#Organization.qualification",
@@ -469,7 +470,7 @@ class OrganizationAffiliationSerializer(serializers.Serializer):
         organization_affiliation.organization = Reference(display=str(instance.ehr_vendor_name))
 
         organization_affiliation.participatingOrganization = genReference(
-            "fhir-organization-detail", instance.id, request
+            "fhir-organization-detail", instance.organization_id, request
         )
         organization_affiliation.participatingOrganization.display = str(instance.organization_name)
 
@@ -495,13 +496,15 @@ class OrganizationAffiliationSerializer(serializers.Serializer):
 
         endpoints = []
 
-        for location in instance.location_set.all():
-            locations.append(genReference("fhir-location-detail", location.id, request))
+        locations = [
+            genReference("fhir-location-detail", loc_id, request)
+            for loc_id in instance.location_ids
+        ]
 
-            for link in location.locationtoendpointinstance_set.all():
-                endpoint = link.endpoint_instance
-
-                endpoints.append(genReference("fhir-endpoint-detail", endpoint.id, request))
+        endpoints = [
+            genReference("fhir-endpoint-detail", ep_id, request)
+            for ep_id in instance.endpoint_instance_ids
+        ]
 
         organization_affiliation.location = locations
         organization_affiliation.endpoint = endpoints

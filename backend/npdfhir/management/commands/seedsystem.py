@@ -57,7 +57,7 @@ class Command(BaseCommand):
         if options.get("seed", None):
             Faker.seed(int(options["seed"]))
 
-        provider = DefaultPractitioner()
+        provider = DefaultPractitioner(taxonomies=["207R00000X"])
 
         self.stdout.write(f"created Practitioner: {provider.individual.id}")
 
@@ -66,6 +66,7 @@ class Command(BaseCommand):
             known_practitioner = DefaultPractitioner(
                 individual=DefaultIndividual(names=[DefaultName(**name)]),
                 npi=DefaultNPI(npi=1234567894),
+                taxonomies=["207R00000X"],
             )
             self.stdout.write(
                 f"created known Practitioner: {self.to_json(id=known_practitioner.individual.id, npi=known_practitioner.npi.npi.npi, name=' '.join(name.values()))}"

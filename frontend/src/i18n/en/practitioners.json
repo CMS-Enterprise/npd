@@ -8,6 +8,10 @@
       "subtitle": "Learn how to",
       "link": "update your information."
     },
+    "header": {
+      "type": "Practitioner",
+      "search": "Back to search results"
+    },
     "about": {
       "title": "About",
       "name": "Name(s)",
@@ -28,7 +32,13 @@
       "details": "Details",
       "fallback": "No identifiers available"
     },
-    "taxonomy": "Taxonomy",
+    "taxonomy": {
+      "title": "Taxonomy",
+      "state": "State",
+      "licenseNumber": "License number",
+      "taxonomy": "Taxonomy",
+      "fallback": "No taxonomy information available"
+    },
     "organizations": "Organization(s)",
     "endpoints": "Endpoint(s)",
     "locations": "Locations"

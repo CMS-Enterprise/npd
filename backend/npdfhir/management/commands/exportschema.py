@@ -54,7 +54,18 @@ class Command(BaseCommand):
         return f"Basic {base64.b64encode(payload_bytes).decode('utf-8')}"
 
     def load_fhir_model(self, model_name: str):
-        module = importlib.import_module(f".R4B.{model_name.lower()}", "fhir.resources")
+        try:
+            module = importlib.import_module(f".R4B.{model_name.lower()}", "fhir.resources")
+        except ModuleNotFoundError:
+            # handle nested models
+            for parent in ["practitioner", "organization"]:
+                try:
+                    module = importlib.import_module(f".R4B.{parent}", "fhir.resources")
+                    if hasattr(module, model_name):
+                        return getattr(module, model_name)
+                except ModuleNotFoundError:
+                    continue
+            raise CommandError(f"Could not find FHIR model: {model_name}")
         return getattr(module, model_name)
 
     def get_record_and_schema(
@@ -88,7 +99,7 @@ class Command(BaseCommand):
         return json_record, schema
 
     def handle(self, *args, **options):
-        if str(options["model"]).lower().startswith("prac"):
+        if str(options["model"]).lower() == "practitioner":
             model_type = "Practitioner"
             json_record, schema = self.get_record_and_schema(
                 Provider,
@@ -97,7 +108,7 @@ class Command(BaseCommand):
                 options,
                 lambda record: record.individual.id,
             )
-        elif str(options["model"]).lower().startswith("org"):
+        elif str(options["model"]).lower() == "organization":
             model_type = "Organization"
             json_record, schema = self.get_record_and_schema(
                 Organization,
