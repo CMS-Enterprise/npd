@@ -63,7 +63,7 @@ export const Organization = () => {
                 <InfoItem label="Other name(s)" value={organization.name} />
               </div>
               <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
-                <InfoItem label="Type" value="Provider Group" />
+                <InfoItem label="Type" value={organization.type} />
               </div>
               <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
                 <InfoItem label="Parent organization" value={null} />

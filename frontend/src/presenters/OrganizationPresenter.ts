@@ -12,6 +12,15 @@ export class OrganizationPresenter {
     return this.record.name ?? ""
   }
 
+  get type(): string {
+    const type = this.record.extension?.find(
+      (url) =>
+        url.url ===
+        "https://build.fhir.org/organization-definitions.html#Organization.qualification",
+    )
+    return type?.valueCodeableConcept?.coding?.[0]?.display ?? ""
+  }
+
   get npi(): string {
     const npiIdentifier = this.record.identifier?.find(
       (id) =>
