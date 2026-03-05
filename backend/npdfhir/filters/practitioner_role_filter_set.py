@@ -8,7 +8,7 @@ from django_filters import rest_framework as filters
 from ..documentation_content import docs
 from ..mappings import genderMapping
 from ..models import ProviderToLocationView
-from .filter_utils import broad_address_match, field_based_vector_search, filter_identifier_general
+from .filter_utils import broad_address_match, field_based_vector_search, filter_identifier_general, generic_filter_gender
 
 
 class PractitionerRoleFilterSet(filters.FilterSet):
@@ -123,22 +123,13 @@ class PractitionerRoleFilterSet(filters.FilterSet):
         ]
 
     def filter_practitioner_name(self, queryset, name, value):
-        query = SearchQuery(f"{value.upper()}", search_type="websearch", config="english")
-        return queryset.filter(
-            provider_to_organization__individual__individual__individualtoname__search_vector=query
-        ).distinct()
+        return field_based_vector_search(queryset, name, value.upper(), "provider_to_organization__individual__individual__individualtoname__search_vector")
 
     def filter_practitioner_gender(self, queryset, name, value):
-        if value in genderMapping.keys():
-            gender = genderMapping.toNPD(value)
-            return queryset.filter(provider_to_organization__individual__individual__gender=gender)
-        return queryset
+        return generic_filter_gender(queryset, name, value, "provider_to_organization__individual__individual__gender")
 
     def filter_practitioner_type(self, queryset, name, value):
-        query = SearchQuery(value, search_type="websearch", config="english")
-        return queryset.filter(
-            provider_to_organization__individual__providertotaxonomy__nucc_code__search_vector=query
-        )
+        return field_based_vector_search(queryset, name, value, "provider_to_organization__individual__providertotaxonomy__nucc_code__search_vector")
 
     def filter_organization_name(self, queryset, name, value):
         return queryset.annotate(

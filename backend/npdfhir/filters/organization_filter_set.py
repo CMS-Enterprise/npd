@@ -64,8 +64,7 @@ class OrganizationFilterSet(filters.FilterSet):
         ]
 
     def filter_name(self, queryset, name, value):
-        query = SearchQuery(f"{value.upper()}", search_type="websearch", config="english")
-        return queryset.filter(organization__organizationtoname__search_vector=query)
+        return field_based_vector_search(queryset, name, value.upper(), "organization__organizationtoname__search_vector")
 
     def filter_identifier(self, queryset, name, value):
         return filter_identifier_general(queryset, name, value, npi_path="organization__clinicalorganization__npi__npi", ein_path="ein__ein_id", other_path="organization__clinicalorganization__organizationtootherid__other_id")

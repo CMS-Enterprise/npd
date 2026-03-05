@@ -3,7 +3,7 @@ from django.db.models import Q
 from django_filters import rest_framework as filters
 
 from ..models import Nucc, Location
-from .filter_utils import filter_identifier_general
+from .filter_utils import filter_identifier_general, broad_address_match, field_based_vector_search
 
 
 class OrganizationAffiliationFilterSet(filters.FilterSet):
@@ -36,10 +36,7 @@ class OrganizationAffiliationFilterSet(filters.FilterSet):
     )
 
     def filter_name(self, queryset, name, value):
-        query = SearchQuery(f"{value}", search_type="phrase")
-        return queryset.annotate(ehr_vendor_search=SearchVector("ehr_vendor_name")).filter(
-            ehr_vendor_search=query
-        )
+        return field_based_vector_search(queryset, name, value, "ehr_vendor_name")
 
     def filter_participating_name(self, queryset, name, value):
         return queryset.filter(organization_name__icontains=value)
@@ -56,18 +53,17 @@ class OrganizationAffiliationFilterSet(filters.FilterSet):
         return queryset.filter(taxonomy_codes__overlap=list(codes))
 
     def filter_location(self, queryset, name, value):
+        location_paths = [
+            "name",
+            "address__address_us__delivery_line_1",
+            "address__address_us__delivery_line_2",
+            "address__address_us__city_name",
+            "address__address_us__state_code__abbreviation",
+            "address__address_us__zipcode"
+        ]
+
         matching_location_ids = (
-            Location.objects.annotate(
-                location_search=SearchVector(
-                    "name",
-                    "address__address_us__delivery_line_1",
-                    "address__address_us__delivery_line_2",
-                    "address__address_us__city_name",
-                    "address__address_us__state_code__abbreviation",
-                    "address__address_us__zipcode",
-                )
-            )
-            .filter(location_search=SearchQuery(value, search_type="websearch", config="english"))
+            broad_address_match(Location.objects, name, value, location_paths)
             .values_list("id", flat=True)
         )
 
@@ -76,8 +72,7 @@ class OrganizationAffiliationFilterSet(filters.FilterSet):
 
     def filter_address_city(self, queryset, name, value):
         matching_location_ids = (
-            Location.objects.annotate(search=SearchVector("address__address_us__city_name"))
-            .filter(search=value)
+            field_based_vector_search(Location.objects, name, value, "address__address_us__city_name")
             .values_list("id", flat=True)
         )
 
@@ -85,10 +80,7 @@ class OrganizationAffiliationFilterSet(filters.FilterSet):
 
     def filter_address_state(self, queryset, name, value):
         matching_location_ids = (
-            Location.objects.annotate(
-                search=SearchVector("address__address_us__state_code__abbreviation")
-            )
-            .filter(search=value)
+            field_based_vector_search(Location.objects, name, value, "address__address_us__state_code__abbreviation")
             .values_list("id", flat=True)
         )
 
