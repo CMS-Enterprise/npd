@@ -90,8 +90,6 @@ const PractitionerSearchForm: React.FC = () => {
                     />
                     <div
                       style={{
-                        opacity: isPlaceholderData ? 0.5 : 1,
-                        transition: "opacity 200ms ease",
                         pointerEvents: isPlaceholderData ? "none" : "auto",
                       }}
                     >
