@@ -12,6 +12,7 @@ type Props = {
   buttonTextKey: string
   isLoading?: boolean
   isBackgroundLoading?: boolean
+  isPlaceholderData?: boolean
   className?: string
 }
 
@@ -23,6 +24,7 @@ export const SearchBar = ({
   buttonTextKey,
   isLoading = false,
   isBackgroundLoading = false,
+  isPlaceholderData = false,
   className,
 }: Props) => {
   const { t } = useTranslation()
@@ -57,7 +59,11 @@ export const SearchBar = ({
                 value={value}
                 onChange={handleInputChange}
               />
-              <Button type="submit" variation="solid" disabled={isDisabled}>
+              <Button
+                type="submit"
+                variation="solid"
+                disabled={isDisabled || isPlaceholderData}
+              >
                 {showLoadingState ? t("search.searching") : t(buttonTextKey)}
               </Button>
             </div>
