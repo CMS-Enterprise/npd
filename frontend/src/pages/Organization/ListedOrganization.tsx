@@ -27,7 +27,7 @@ export const ListedOrganization = ({ data }: { data: FHIROrganization }) => {
           <div className="ds-l-col--4 ds-m-col--6">
             <strong>{t("organizations.listing.taxonomy")}</strong>
             <br />
-            TBD
+            {organization.types[0] ?? "---"}
           </div>
           <div
             className="ds-l-col--4 ds-m-col--6"
