@@ -1,18 +1,14 @@
 import type { Address } from "../@types/fhir/Address"
 import type { Period } from "../@types/fhir/Period"
 
-export const formatAddress = (
-  address?: Address,
-  { singleLine = false }: { singleLine?: boolean } = {},
-): string => {
+export const formatAddress = (address?: Address): string => {
   if (!address) return ""
 
-  const street = address.line?.filter(Boolean).join(", ") ?? ""
+  const street = address.line?.filter(Boolean).join("\n") ?? ""
   const cityState = [address.city, address.state].filter(Boolean).join(", ")
   const cityStateZip = [cityState, address.postalCode].filter(Boolean).join(" ")
 
-  const separator = singleLine ? ", " : "\n"
-  return [street, cityStateZip].filter(Boolean).join(separator)
+  return [street, cityStateZip].filter(Boolean).join("\n")
 }
 
 export const formatDate = (dateString: string): string => {

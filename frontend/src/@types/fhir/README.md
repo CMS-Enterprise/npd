@@ -15,10 +15,6 @@ docker compose run --rm web \
     > frontend/src/@types/fhir/Organization.ts
 ```
 
-docker compose run --rm web \
-    npx json2ts src/@types/fhir/extension_schema.json \
-    > frontend/src/@types/fhir/Extension.ts
-
 As a repeatable command, you could add this to your local `scratch/` folder and run it:
 
 ```sh
