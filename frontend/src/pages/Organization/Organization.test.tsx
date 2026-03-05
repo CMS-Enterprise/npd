@@ -52,7 +52,7 @@ describe("Organization", () => {
       })
 
       // ensure FeatureFlag components have finished loading
-      await screen.findByText("Are you the practitioner listed?")
+      await screen.findByText("About")
 
       expect(
         screen.queryByText("About", { selector: "section h2" }),
@@ -80,7 +80,7 @@ describe("identifiers section", () => {
       settings: { feature_flags: { ORGANIZATION_LOOKUP_DETAILS: true } },
     })
 
-    await screen.findByText("Are you the practitioner listed?")
+    await screen.findByText("About")
 
     const table = screen.getByRole("table")
     expect(table).toBeInTheDocument()
@@ -93,6 +93,27 @@ describe("identifiers section", () => {
     ).toBeInTheDocument()
     expect(
       within(table).getByText("Details", { selector: "th" }),
+    ).toBeInTheDocument()
+  })
+})
+
+describe("taxonomy section", () => {
+  beforeEach(() => {
+    mockGlobalFetch([orgApiResponse])
+  })
+
+  it("shows taxonomy data when extensions exist", async () => {
+    render(<RoutedOrganization path="/organizations/12345" />, {
+      settings: { feature_flags: { ORGANIZATION_LOOKUP_DETAILS: true } },
+    })
+
+    const taxonomyHeading = await screen.findByText("Taxonomy", {
+      selector: "section h2",
+    })
+    const taxonomySection = taxonomyHeading.closest("section")!
+
+    expect(
+      within(taxonomySection).getByText("Pediatric Clinic"),
     ).toBeInTheDocument()
   })
 })
