@@ -12,7 +12,11 @@ export const ListedPractitioner = ({ data }: { data: FHIRPractitioner }) => {
     <div role="listitem" className="ds-u-border-top--1 ds-u-padding-y--2">
       <div className={search.entry}>
         <div className={search.head}>
-          <Link className={search.name} to={`/practitioners/${data.id}`}>
+          <Link
+            className={search.name}
+            to={`/practitioners/${data.id}`}
+            state={{ searchUrl: `/practitioners/search${location.search}` }}
+          >
             {practitioner.name}
           </Link>
           <span>
@@ -28,7 +32,7 @@ export const ListedPractitioner = ({ data }: { data: FHIRPractitioner }) => {
           <div className="ds-l-col--4 ds-m-col--6">
             <strong>{t("practitioners.listing.location")}</strong>
             <br />
-              {practitioner.address}
+            {practitioner.address}
           </div>
         </div>
       </div>
