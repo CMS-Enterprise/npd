@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test"
-import { ORGANIZATION } from "../../constants"
+import { ORGANIZATION } from "../constants"
 
 let organization = ORGANIZATION
 

@@ -36,6 +36,8 @@ export default defineConfig({
 
     actionTimeout: 5000,
 
+    baseURL: process.env.BASE_URL,
+
     ...devices["Desktop Chrome"],
   },
 
@@ -52,17 +54,8 @@ export default defineConfig({
       testDir: './tests/local',
     },
     {
-      name: 'dev',
-      use: {
-        baseURL: process.env.DEV_URL,
-      },
-      testDir: './tests/uat',
-    },
-    {
-      name: 'prod-test',
-      use: {
-        baseURL: process.env.PROD_TEST_URL,
-      },
+      name: 'uat',
+      dependencies: ["setup"],
       testDir: './tests/uat',
     },
 
@@ -101,7 +94,7 @@ export default defineConfig({
   /* Run your local dev server before starting the tests */
   webServer: {
         cwd: "../",
-        command: "make test-server",
+        command: "bin/npr --test --publish 8008:8008 python manage.py runserver 0.0.0.0:8008",
         url: "http://localhost:8008",
         reuseExistingServer: !process.env.CI,
         timeout: 300000, // give at least 5 minutes to download all container dependencies
