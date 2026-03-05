@@ -12,13 +12,17 @@ export class OrganizationPresenter {
     return this.record.name ?? ""
   }
 
-  get type(): string {
-    const type = this.record.extension?.find(
-      (url) =>
-        url.url ===
-        "https://build.fhir.org/organization-definitions.html#Organization.qualification",
+  get types(): string[] {
+    return (
+      this.record.extension
+        ?.filter(
+          (ext) =>
+            ext.url ===
+            "https://build.fhir.org/organization-definitions.html#Organization.qualification",
+        )
+        .map((ext) => ext.valueCodeableConcept?.coding?.[0]?.display ?? "") ??
+      []
     )
-    return type?.valueCodeableConcept?.coding?.[0]?.display ?? ""
   }
 
   get npi(): string {

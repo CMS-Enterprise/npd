@@ -4,16 +4,26 @@
     "npi": "NPI",
     "search": "Back to search results"
   },
+
   "unavailable": "This content is not currently available.",
+
   "update": {
     "title": "Are you the practitioner listed?",
     "subtitle": "Learn how to",
     "link": "update your information."
   },
+
   "about": "About",
   "contact": "Contact information",
   "identifiers": "Identifiers",
-  "taxonomy": "Taxonomy",
+
+  "taxonomy": {
+    "title": "Taxonomy",
+    "primary": "Primary",
+    "secondary": "Secondary",
+    "fallback": "No taxonomy available"
+  },
+
   "endpoints": "Endpoints",
   "locations": "Locations",
   "practitioners": "Practitioners",

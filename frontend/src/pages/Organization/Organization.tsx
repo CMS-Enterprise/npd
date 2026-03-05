@@ -63,7 +63,7 @@ export const Organization = () => {
                 <InfoItem label="Other name(s)" value={organization.name} />
               </div>
               <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
-                <InfoItem label="Type" value={organization.type} />
+                <InfoItem label="Type" value={organization.types[0]} />
               </div>
               <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
                 <InfoItem label="Parent organization" value={null} />
@@ -125,8 +125,27 @@ export const Organization = () => {
           </section>
 
           <section className={layout.section}>
-            <h2>{t("organizations.taxonomy")}</h2>
-            <p className={styles.emptyState}>No taxonomy available</p>
+            <h2>{t("organizations.taxonomy.title")}</h2>
+            {organization.types.length > 0 ? (
+              <div className="ds-l-row">
+                <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
+                  <InfoItem
+                    label={t("organizations.taxonomy.primary")}
+                    value={organization.types[0]}
+                  />
+                </div>
+                <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
+                  <InfoItem
+                    label={t("organizations.taxonomy.secondary")}
+                    value={organization.types[1]}
+                  />
+                </div>
+              </div>
+            ) : (
+              <p className={styles.emptyState}>
+                {t("organizations.taxonomy.fallback")}
+              </p>
+            )}
           </section>
 
           <section className={layout.section}>
