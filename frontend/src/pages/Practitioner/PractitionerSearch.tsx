@@ -88,21 +88,31 @@ const PractitionerSearchForm: React.FC = () => {
                       inputLabel={"practitioners.sort.by"}
                       disabled={isPlaceholderData}
                     />
-                    <Pagination
-                      currentPage={pagination.page}
-                      onPageChange={(evt, page) => {
-                        evt.preventDefault()
-                        evt.stopPropagation()
-                        navigateToPage(page)
+                    <div
+                      style={{
+                        opacity: isPlaceholderData ? 0.5 : 1,
+                        transition: "opacity 200ms ease",
+                        pointerEvents: isPlaceholderData ? "none" : "auto",
                       }}
-                      renderHref={(pageNumber) => {
-                        const nextParams = new URLSearchParams()
-                        nextParams.set("page", pageNumber.toString())
-                        if (searchQuery) nextParams.set("query", searchQuery)
-                        return apiUrl(`/practitioners?${nextParams.toString()}`)
-                      }}
-                      totalPages={pagination.totalPages}
-                    />
+                    >
+                      <Pagination
+                        currentPage={pagination.page}
+                        onPageChange={(evt, page) => {
+                          evt.preventDefault()
+                          evt.stopPropagation()
+                          navigateToPage(page)
+                        }}
+                        renderHref={(pageNumber) => {
+                          const nextParams = new URLSearchParams()
+                          nextParams.set("page", pageNumber.toString())
+                          if (searchQuery) nextParams.set("query", searchQuery)
+                          return apiUrl(
+                            `/practitioners?${nextParams.toString()}`,
+                          )
+                        }}
+                        totalPages={pagination.totalPages}
+                      />
+                    </div>
                   </>
                 )}
                 <div
