@@ -1,14 +1,19 @@
 import re
 from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import D
-from django.contrib.postgres.search import SearchVector, SearchQuery
+from django.contrib.postgres.search import SearchVector
 from django.db.models import Q
 from django_filters import rest_framework as filters
 
 from ..documentation_content import docs
 from ..mappings import genderMapping
 from ..models import ProviderToLocationView
-from .filter_utils import broad_address_match, field_based_vector_search, filter_identifier_general, generic_filter_gender
+from .filter_utils import (
+    broad_address_match,
+    field_based_vector_search,
+    filter_identifier_general,
+    generic_filter_gender,
+)
 
 
 class PractitionerRoleFilterSet(filters.FilterSet):
@@ -123,13 +128,25 @@ class PractitionerRoleFilterSet(filters.FilterSet):
         ]
 
     def filter_practitioner_name(self, queryset, name, value):
-        return field_based_vector_search(queryset, name, value.upper(), "provider_to_organization__individual__individual__individualtoname__search_vector")
+        return field_based_vector_search(
+            queryset,
+            name,
+            value.upper(),
+            "provider_to_organization__individual__individual__individualtoname__search_vector",
+        )
 
     def filter_practitioner_gender(self, queryset, name, value):
-        return generic_filter_gender(queryset, name, value, "provider_to_organization__individual__individual__gender")
+        return generic_filter_gender(
+            queryset, name, value, "provider_to_organization__individual__individual__gender"
+        )
 
     def filter_practitioner_type(self, queryset, name, value):
-        return field_based_vector_search(queryset, name, value, "provider_to_organization__individual__providertotaxonomy__nucc_code__search_vector")
+        return field_based_vector_search(
+            queryset,
+            name,
+            value,
+            "provider_to_organization__individual__providertotaxonomy__nucc_code__search_vector",
+        )
 
     def filter_organization_name(self, queryset, name, value):
         return queryset.annotate(
@@ -169,7 +186,13 @@ class PractitionerRoleFilterSet(filters.FilterSet):
         ).distinct()
 
     def filter_practitioner_identifier(self, queryset, name, value):
-        return filter_identifier_general(queryset, name, value, npi_path="provider_to_organization__individual__npi__npi",other_path="provider_to_organization__individual__providertootherid__other_id__icontains")
+        return filter_identifier_general(
+            queryset,
+            name,
+            value,
+            npi_path="provider_to_organization__individual__npi__npi",
+            other_path="provider_to_organization__individual__providertootherid__other_id__icontains",
+        )
 
     def filter_specialty(self, queryset, name, value):
         return queryset.filter(Q(specialty_id__iexact=value)).distinct()
@@ -203,15 +226,19 @@ class PractitionerRoleFilterSet(filters.FilterSet):
             "location__address__address_us__delivery_line_2",
             "location__address__address_us__city_name",
             "location__address__address_us__state_code__abbreviation",
-            "location__address__address_us__zipcode"
+            "location__address__address_us__zipcode",
         ]
-        return broad_address_match(queryset,name,value, address_match_paths)
+        return broad_address_match(queryset, name, value, address_match_paths)
 
     def filter_address_city(self, queryset, name, value):
-        return field_based_vector_search(queryset, name, value, "location__address__address_us__city_name")
+        return field_based_vector_search(
+            queryset, name, value, "location__address__address_us__city_name"
+        )
 
     def filter_address_state(self, queryset, name, value):
-        return field_based_vector_search(queryset, name, value, "location__address__address_us__state_code__abbreviation")
+        return field_based_vector_search(
+            queryset, name, value, "location__address__address_us__state_code__abbreviation"
+        )
 
     def filter_address_postalcode(self, queryset, name, value):
         return queryset.filter(location__address__address_us__zipcode=value)

@@ -1,5 +1,3 @@
-from django.contrib.postgres.search import SearchVector, SearchQuery
-from django.db.models import Q
 from django_filters import rest_framework as filters
 
 from ..models import Nucc, Location
@@ -7,14 +5,16 @@ from .filter_utils import filter_identifier_general, broad_address_match, field_
 
 
 class OrganizationAffiliationFilterSet(filters.FilterSet):
-    primary_organization_name = filters.CharFilter(method="filter_name", help_text="Filter by organization name")
+    primary_organization_name = filters.CharFilter(
+        method="filter_name", help_text="Filter by organization name"
+    )
     participating_organization_name = filters.CharFilter(
         method="filter_participating_name", help_text="Filter by pariticipating organization name"
     )
 
     participating_organization_identifier = filters.CharFilter(
         method="filter_identifier",
-        help_text="Filter by identifier (NPI, EIN, or other). Format: value or system|value"
+        help_text="Filter by identifier (NPI, EIN, or other). Format: value or system|value",
     )
 
     participating_organization_type = filters.CharFilter(
@@ -25,7 +25,9 @@ class OrganizationAffiliationFilterSet(filters.FilterSet):
         method="filter_location", help_text="Filter by any part of address"
     )
 
-    location_address_city = filters.CharFilter(method="filter_address_city", help_text="Filter by city name")
+    location_address_city = filters.CharFilter(
+        method="filter_address_city", help_text="Filter by city name"
+    )
 
     location_address_state = filters.CharFilter(
         method="filter_address_state", help_text="Filter by state (2-letter abbreviation)"
@@ -59,30 +61,27 @@ class OrganizationAffiliationFilterSet(filters.FilterSet):
             "address__address_us__delivery_line_2",
             "address__address_us__city_name",
             "address__address_us__state_code__abbreviation",
-            "address__address_us__zipcode"
+            "address__address_us__zipcode",
         ]
 
-        matching_location_ids = (
-            broad_address_match(Location.objects, name, value, location_paths)
-            .values_list("id", flat=True)
-        )
+        matching_location_ids = broad_address_match(
+            Location.objects, name, value, location_paths
+        ).values_list("id", flat=True)
 
         # Filter affiliation rows where any location_id overlaps
         return queryset.filter(location_ids__overlap=list(matching_location_ids))
 
     def filter_address_city(self, queryset, name, value):
-        matching_location_ids = (
-            field_based_vector_search(Location.objects, name, value, "address__address_us__city_name")
-            .values_list("id", flat=True)
-        )
+        matching_location_ids = field_based_vector_search(
+            Location.objects, name, value, "address__address_us__city_name"
+        ).values_list("id", flat=True)
 
         return queryset.filter(location_ids__overlap=list(matching_location_ids))
 
     def filter_address_state(self, queryset, name, value):
-        matching_location_ids = (
-            field_based_vector_search(Location.objects, name, value, "address__address_us__state_code__abbreviation")
-            .values_list("id", flat=True)
-        )
+        matching_location_ids = field_based_vector_search(
+            Location.objects, name, value, "address__address_us__state_code__abbreviation"
+        ).values_list("id", flat=True)
 
         return queryset.filter(location_ids__overlap=list(matching_location_ids))
 

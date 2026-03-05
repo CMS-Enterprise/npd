@@ -29,4 +29,9 @@ class EhrVendorFilterSet(filters.FilterSet):
         return field_based_vector_search(queryset, name, value, "name").distinct()
 
     def filter_identifier(self, queryset, name, value):
-        return filter_identifier_general(queryset, name, value, ein_path="endpointinstance__locationtoendpointinstance__location__organization__ein__ein_id")
+        return filter_identifier_general(
+            queryset,
+            name,
+            value,
+            ein_path="endpointinstance__locationtoendpointinstance__location__organization__ein__ein_id",
+        )

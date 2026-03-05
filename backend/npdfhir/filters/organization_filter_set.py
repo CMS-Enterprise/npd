@@ -1,5 +1,3 @@
-from django.contrib.postgres.search import SearchQuery
-from django.db.models import Q
 from django_filters import rest_framework as filters
 
 from ..documentation_content import docs
@@ -64,13 +62,27 @@ class OrganizationFilterSet(filters.FilterSet):
         ]
 
     def filter_name(self, queryset, name, value):
-        return field_based_vector_search(queryset, name, value.upper(), "organization__organizationtoname__search_vector")
+        return field_based_vector_search(
+            queryset, name, value.upper(), "organization__organizationtoname__search_vector"
+        )
 
     def filter_identifier(self, queryset, name, value):
-        return filter_identifier_general(queryset, name, value, npi_path="organization__clinicalorganization__npi__npi", ein_path="ein__ein_id", other_path="organization__clinicalorganization__organizationtootherid__other_id")
+        return filter_identifier_general(
+            queryset,
+            name,
+            value,
+            npi_path="organization__clinicalorganization__npi__npi",
+            ein_path="ein__ein_id",
+            other_path="organization__clinicalorganization__organizationtootherid__other_id",
+        )
 
     def filter_organization_type(self, queryset, name, value):
-        return field_based_vector_search(queryset, name, value, "organization__clinicalorganization__organizationtotaxonomy__nucc_code__display_name")
+        return field_based_vector_search(
+            queryset,
+            name,
+            value,
+            "organization__clinicalorganization__organizationtotaxonomy__nucc_code__display_name",
+        )
 
     def filter_address(self, queryset, name, value):
         location_address_paths = [
@@ -78,15 +90,25 @@ class OrganizationFilterSet(filters.FilterSet):
             "organization__organizationtoaddress__address__address_us__delivery_line_2",
             "organization__organizationtoaddress__address__address_us__city_name",
             "organization__organizationtoaddress__address__address_us__state_code__abbreviation",
-            "organization__organizationtoaddress__address__address_us__zipcode"
+            "organization__organizationtoaddress__address__address_us__zipcode",
         ]
         return broad_address_match(queryset, name, value, location_address_paths)
 
     def filter_address_city(self, queryset, name, value):
-        return field_based_vector_search(queryset, name, value, "organization__organizationtoaddress__address__address_us__city_name")
+        return field_based_vector_search(
+            queryset,
+            name,
+            value,
+            "organization__organizationtoaddress__address__address_us__city_name",
+        )
 
     def filter_address_state(self, queryset, name, value):
-        return field_based_vector_search(queryset, name, value, "organization__organizationtoaddress__address__address_us__state_code__abbreviation")
+        return field_based_vector_search(
+            queryset,
+            name,
+            value,
+            "organization__organizationtoaddress__address__address_us__state_code__abbreviation",
+        )
 
     def filter_address_postalcode(self, queryset, name, value):
         return queryset.filter(
