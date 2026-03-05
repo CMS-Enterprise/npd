@@ -1,0 +1,849 @@
+{
+  "additionalProperties": false,
+  "description": "Disclaimer: Any field name ends with ``__ext`` doesn't part of\nResource StructureDefinition, instead used to enable Extensibility feature\nfor FHIR Primitive Data Types.\n\nOptional Extensions Element.\nOptional Extension Element - found in all resources.",
+  "properties": {
+    "fhir_comments": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "element_property": false,
+      "title": "Fhir Comments"
+    },
+    "extension": {
+      "anyOf": [
+        {
+          "items": {},
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "May be used to represent additional information that is not part of the basic definition of the element. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.",
+      "element_property": true,
+      "title": "Additional content defined by implementations"
+    },
+    "id": {
+      "anyOf": [
+        {
+          "pattern": "[ \r\n\t\\S]+",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
+      "element_property": true,
+      "title": "Unique id for inter-element referencing"
+    },
+    "url": {
+      "anyOf": [
+        {
+          "pattern": "\\S*",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Source of the definition for the extension code - a logical name or a URL.",
+      "element_property": true,
+      "element_required": true,
+      "title": "identifies the meaning of the extension"
+    },
+    "valueAddress": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueAge": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueAnnotation": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueAttachment": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueBase64Binary": {
+      "anyOf": [
+        {
+          "format": "base64",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueBoolean": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueCanonical": {
+      "anyOf": [
+        {
+          "pattern": "\\S*",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueCode": {
+      "anyOf": [
+        {
+          "pattern": "^[^\\s]+(\\s[^\\s]+)*$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueCodeableConcept": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueCodeableReference": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueCoding": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueContactDetail": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueContactPoint": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueContributor": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueCount": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueDataRequirement": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueDate": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueDateTime": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueDecimal": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueDistance": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueDosage": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueDuration": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueExpression": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueHumanName": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueId": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9\\-.]+$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueIdentifier": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueInstant": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueInteger": {
+      "anyOf": [
+        {
+          "maximum": 2147483647,
+          "minimum": -2147483648,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueMarkdown": {
+      "anyOf": [
+        {
+          "pattern": "\\s*(\\S|\\s)*",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueMoney": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueOid": {
+      "anyOf": [
+        {
+          "pattern": "^urn:oid:[0-2](\\.(0|[1-9][0-9]*))+$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueParameterDefinition": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valuePeriod": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valuePositiveInt": {
+      "anyOf": [
+        {
+          "maximum": 2147483647,
+          "minimum": -2147483648,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueQuantity": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueRange": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueRatio": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueRatioRange": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueReference": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueRelatedArtifact": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueSampledData": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueSignature": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueString": {
+      "anyOf": [
+        {
+          "pattern": "[ \r\n\t\\S]+",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueTime": {
+      "anyOf": [
+        {
+          "format": "time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueTiming": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueTriggerDefinition": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueUnsignedInt": {
+      "anyOf": [
+        {
+          "maximum": 2147483647,
+          "minimum": -2147483648,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueUri": {
+      "anyOf": [
+        {
+          "pattern": "\\S*",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueUrl": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueUsageContext": {
+      "anyOf": [
+        {},
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    },
+    "valueUuid": {
+      "anyOf": [
+        {
+          "format": "uuid4",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Value of extension - must be one of a constrained set of the data types (see [Extensibility](extensibility.html) for a list).",
+      "element_property": true,
+      "one_of_many": "value",
+      "one_of_many_required": false,
+      "title": "Value of extension"
+    }
+  },
+  "title": "Extension",
+  "type": "object"
+}
