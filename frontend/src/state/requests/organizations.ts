@@ -1,4 +1,4 @@
-import { skipToken, useQuery } from "@tanstack/react-query"
+import { skipToken, useQuery, keepPreviousData } from "@tanstack/react-query"
 import type { FHIRCollection, FHIROrganization } from "../../@types/fhir"
 import { apiUrl } from "../api"
 import type { SortOption } from "../../@types/search"
@@ -86,14 +86,6 @@ export const fetchOrganizations = async (
     }
   }
 
-  // Sort
-  if (params.sort) {
-    const apiValue = detectSortKey(params.sort as OrganizationSortKey)
-    if (apiValue) {
-      url.searchParams.set("_sort", apiValue)
-    }
-  }
-
   const response = await fetch(url)
   if (!response.ok) {
     console.error(await response.text())
@@ -120,5 +112,6 @@ export const useOrganizationsAPI = (
         : () => {
             return fetchOrganizations(params)
           },
+    placeholderData: keepPreviousData,
   })
 }
