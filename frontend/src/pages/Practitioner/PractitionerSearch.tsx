@@ -25,6 +25,7 @@ const PractitionerSearchForm: React.FC = () => {
   const {
     isLoading,
     isBackgroundLoading,
+    isPlaceholderData,
     initialQuery,
     query: searchQuery,
     error: searchError,
@@ -44,6 +45,8 @@ const PractitionerSearchForm: React.FC = () => {
     }),
   )
 
+  const hasResults = data && data.length > 0
+
   return (
     <>
       <TitlePanel
@@ -60,6 +63,7 @@ const PractitionerSearchForm: React.FC = () => {
           buttonTextKey="practitioners.search.button"
           isLoading={isLoading}
           isBackgroundLoading={isBackgroundLoading}
+          isPlaceholderData={isPlaceholderData}
         />
       </TitlePanel>
 
@@ -72,7 +76,7 @@ const PractitionerSearchForm: React.FC = () => {
           )}
 
           <div className="ds-l-col--12 ds-u-margin-bottom--7">
-            {data && data.length > 0 && (
+            {hasResults && (
               <>
                 {pagination && (
                   <>
@@ -82,25 +86,42 @@ const PractitionerSearchForm: React.FC = () => {
                       value={sort}
                       onChange={setSort}
                       inputLabel={"practitioners.sort.by"}
+                      disabled={isPlaceholderData}
                     />
-                    <Pagination
-                      currentPage={pagination.page}
-                      onPageChange={(evt, page) => {
-                        evt.preventDefault()
-                        evt.stopPropagation()
-                        navigateToPage(page)
+                    <div
+                      style={{
+                        pointerEvents: isPlaceholderData ? "none" : "auto",
                       }}
-                      renderHref={(pageNumber) => {
-                        const nextParams = new URLSearchParams()
-                        nextParams.set("page", pageNumber.toString())
-                        if (searchQuery) nextParams.set("query", searchQuery)
-                        return apiUrl(`/practitioners?${nextParams.toString()}`)
-                      }}
-                      totalPages={pagination.totalPages}
-                    />
+                    >
+                      <Pagination
+                        currentPage={pagination.page}
+                        onPageChange={(evt, page) => {
+                          evt.preventDefault()
+                          evt.stopPropagation()
+                          navigateToPage(page)
+                        }}
+                        renderHref={(pageNumber) => {
+                          const nextParams = new URLSearchParams()
+                          nextParams.set("page", pageNumber.toString())
+                          if (searchQuery) nextParams.set("query", searchQuery)
+                          return apiUrl(
+                            `/practitioners?${nextParams.toString()}`,
+                          )
+                        }}
+                        totalPages={pagination.totalPages}
+                      />
+                    </div>
                   </>
                 )}
-                <div data-testid="searchresults" role="list">
+                <div
+                  data-testid="searchresults"
+                  role="list"
+                  style={{
+                    opacity: isPlaceholderData ? 0.5 : 1,
+                    transition: "opacity 200ms ease",
+                    pointerEvents: isPlaceholderData ? "none" : "auto",
+                  }}
+                >
                   {data.map((practitioner) => (
                     <ListedPractitioner
                       data={practitioner}
