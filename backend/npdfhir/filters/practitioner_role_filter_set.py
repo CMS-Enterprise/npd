@@ -8,7 +8,7 @@ from django_filters import rest_framework as filters
 from ..documentation_content import docs
 from ..mappings import genderMapping
 from ..models import ProviderToLocationView
-from ..utils import parse_identifier_query
+from .filter_utils import broad_address_match, field_based_vector_search, filter_identifier_general
 
 
 class PractitionerRoleFilterSet(filters.FilterSet):
@@ -178,26 +178,7 @@ class PractitionerRoleFilterSet(filters.FilterSet):
         ).distinct()
 
     def filter_practitioner_identifier(self, queryset, name, value):
-        system, identifier_id = parse_identifier_query(value)
-        queries = Q(pk__isnull=True)
-
-        if system:  # specific identifier search requested
-            if system.upper() == "NPI":
-                try:
-                    queries = Q(provider_to_organization__individual__npi__npi=int(identifier_id))
-                except (ValueError, TypeError):
-                    pass
-        else:  # general identifier search requested
-            try:
-                queries |= Q(provider_to_organization__individual__npi__npi=int(identifier_id))
-            except (ValueError, TypeError):
-                pass
-
-            queries |= Q(
-                provider_to_organization__individual__providertootherid__other_id__icontains=identifier_id
-            )
-
-        return queryset.filter(queries).distinct()
+        return filter_identifier_general(queryset, name, value, npi_path="provider_to_organization__individual__npi__npi",other_path="provider_to_organization__individual__providertootherid__other_id__icontains")
 
     def filter_specialty(self, queryset, name, value):
         return queryset.filter(Q(specialty_id__iexact=value)).distinct()
@@ -226,25 +207,20 @@ class PractitionerRoleFilterSet(filters.FilterSet):
         return queryset.filter(location__organization__organizationtoname__name=value)
 
     def filter_address(self, queryset, name, value):
-        return queryset.annotate(
-            search=SearchVector(
-                "location__address__address_us__delivery_line_1",
-                "location__address__address_us__delivery_line_2",
-                "location__address__address_us__city_name",
-                "location__address__address_us__state_code__abbreviation",
-                "location__address__address_us__zipcode",
-            )
-        ).filter(search=SearchQuery(value, search_type="websearch", config="english"))
+        address_match_paths = [
+            "location__address__address_us__delivery_line_1",
+            "location__address__address_us__delivery_line_2",
+            "location__address__address_us__city_name",
+            "location__address__address_us__state_code__abbreviation",
+            "location__address__address_us__zipcode"
+        ]
+        return broad_address_match(queryset,name,value, address_match_paths)
 
     def filter_address_city(self, queryset, name, value):
-        return queryset.annotate(
-            search=SearchVector("location__address__address_us__city_name")
-        ).filter(search=SearchQuery(value))
+        return field_based_vector_search(queryset, name, value, "location__address__address_us__city_name")
 
     def filter_address_state(self, queryset, name, value):
-        return queryset.annotate(
-            search=SearchVector("location__address__address_us__state_code__abbreviation")
-        ).filter(search=value)
+        return field_based_vector_search(queryset, name, value, "location__address__address_us__state_code__abbreviation")
 
     def filter_address_postalcode(self, queryset, name, value):
         return queryset.filter(location__address__address_us__zipcode=value)

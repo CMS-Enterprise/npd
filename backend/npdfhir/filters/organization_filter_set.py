@@ -1,11 +1,11 @@
-from django.contrib.postgres.search import SearchVector, SearchQuery
+from django.contrib.postgres.search import SearchQuery
 from django.db.models import Q
 from django_filters import rest_framework as filters
 
 from ..documentation_content import docs
 from ..mappings import addressUseMapping
 from ..models import OrganizationView
-from ..utils import parse_identifier_query
+from .filter_utils import broad_address_match, field_based_vector_search, filter_identifier_general
 
 
 class OrganizationFilterSet(filters.FilterSet):
@@ -68,66 +68,26 @@ class OrganizationFilterSet(filters.FilterSet):
         return queryset.filter(organization__organizationtoname__search_vector=query)
 
     def filter_identifier(self, queryset, name, value):
-        from uuid import UUID
-
-        system, identifier_id = parse_identifier_query(value)
-        queries = Q(pk__isnull=True)
-
-        if system:  # specific identifier search requested
-            if system.upper() == "NPI":
-                try:
-                    queries = Q(organization__clinicalorganization__npi__npi=int(identifier_id))
-                except (ValueError, TypeError):
-                    pass  # TODO: implement validationerror to show users that NPI must be an int
-        else:  # general identifier search requested
-            try:
-                queries |= Q(organization__clinicalorganization__npi__npi=int(identifier_id))
-            except (ValueError, TypeError):
-                pass
-
-            try:
-                UUID(identifier_id)
-                queries |= Q(ein__ein_id=identifier_id)
-            except (ValueError, TypeError):
-                pass
-
-            queries |= Q(
-                organization__clinicalorganization__organizationtootherid__other_id=identifier_id
-            )
-
-        return queryset.filter(queries).distinct()
+        return filter_identifier_general(queryset, name, value, npi_path="organization__clinicalorganization__npi__npi", ein_path="ein__ein_id", other_path="organization__clinicalorganization__organizationtootherid__other_id")
 
     def filter_organization_type(self, queryset, name, value):
-        return queryset.annotate(
-            search=SearchVector(
-                "organization__clinicalorganization__organizationtotaxonomy__nucc_code__display_name"
-            )
-        ).filter(search=value)
+        return field_based_vector_search(queryset, name, value, "organization__clinicalorganization__organizationtotaxonomy__nucc_code__display_name")
 
     def filter_address(self, queryset, name, value):
-        return queryset.annotate(
-            search=SearchVector(
-                "organization__organizationtoaddress__address__address_us__delivery_line_1",
-                "organization__organizationtoaddress__address__address_us__delivery_line_2",
-                "organization__organizationtoaddress__address__address_us__city_name",
-                "organization__organizationtoaddress__address__address_us__state_code__abbreviation",
-                "organization__organizationtoaddress__address__address_us__zipcode",
-            )
-        ).filter(search=SearchQuery(value, search_type="websearch", config="english"))
+        location_address_paths = [
+            "organization__organizationtoaddress__address__address_us__delivery_line_1",
+            "organization__organizationtoaddress__address__address_us__delivery_line_2",
+            "organization__organizationtoaddress__address__address_us__city_name",
+            "organization__organizationtoaddress__address__address_us__state_code__abbreviation",
+            "organization__organizationtoaddress__address__address_us__zipcode"
+        ]
+        return broad_address_match(queryset, name, value, location_address_paths)
 
     def filter_address_city(self, queryset, name, value):
-        return queryset.annotate(
-            search=SearchVector(
-                "organization__organizationtoaddress__address__address_us__city_name"
-            )
-        ).filter(search=value)
+        return field_based_vector_search(queryset, name, value, "organization__organizationtoaddress__address__address_us__city_name")
 
     def filter_address_state(self, queryset, name, value):
-        return queryset.annotate(
-            search=SearchVector(
-                "organization__organizationtoaddress__address__address_us__state_code__abbreviation"
-            )
-        ).filter(search=value)
+        return field_based_vector_search(queryset, name, value, "organization__organizationtoaddress__address__address_us__state_code__abbreviation")
 
     def filter_address_postalcode(self, queryset, name, value):
         return queryset.filter(

@@ -2,8 +2,8 @@ from django.contrib.postgres.search import SearchVector, SearchQuery
 from django.db.models import Q
 from django_filters import rest_framework as filters
 
-from ..utils import parse_identifier_query
 from ..models import Nucc, Location
+from .filter_utils import filter_identifier_general
 
 
 class OrganizationAffiliationFilterSet(filters.FilterSet):
@@ -45,22 +45,7 @@ class OrganizationAffiliationFilterSet(filters.FilterSet):
         return queryset.filter(organization_name__icontains=value)
 
     def filter_identifier(self, queryset, name, value):
-        system, identifier_id = parse_identifier_query(value)
-        queries = Q(pk__isnull=True)
-
-        if system:
-            if system.upper() == "NPI":
-                try:
-                    queries = Q(npi=int(identifier_id))
-                except (ValueError, TypeError):
-                    pass
-        else:
-            try:
-                queries |= Q(npi=int(identifier_id))
-            except (ValueError, TypeError):
-                pass
-
-        return queryset.filter(queries).distinct()
+        return filter_identifier_general(queryset, name, value, npi_path="npi")
 
     def filter_organization_type(self, queryset, name, value):
         # Get codes corresponding to the display name

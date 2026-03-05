@@ -1,5 +1,4 @@
 import re
-from django.contrib.postgres.search import SearchVector, SearchQuery
 from django_filters import rest_framework as filters
 from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import D
@@ -8,6 +7,7 @@ from django.db.models import F
 from ..documentation_content import docs
 from ..mappings import addressUseMapping
 from ..models import Location
+from .filter_utils import broad_address_match, field_based_vector_search
 
 
 class LocationFilterSet(filters.FilterSet):
@@ -66,32 +66,23 @@ class LocationFilterSet(filters.FilterSet):
         ]
 
     def filter_organization_type(self, queryset, name, value):
-        return queryset.annotate(
-            search=SearchVector(
-                "organization__clinicalorganization__organizationtotaxonomy__nucc_code__code"
-            )
-        ).filter(search=value)
+        return field_based_vector_search(queryset, name, value, "organization__clinicalorganization__organizationtotaxonomy__nucc_code__code")
 
     def filter_address(self, queryset, name, value):
-        return queryset.annotate(
-            search=SearchVector(
-                "address__address_us__delivery_line_1",
-                "address__address_us__delivery_line_2",
-                "address__address_us__city_name",
-                "address__address_us__state_code__abbreviation",
-                "address__address_us__zipcode",
-            )
-        ).filter(search=SearchQuery(value, search_type="websearch", config="english"))
+        location_filter_paths = [
+            "address__address_us__delivery_line_1",
+            "address__address_us__delivery_line_2",
+            "address__address_us__city_name",
+            "address__address_us__state_code__abbreviation",
+            "address__address_us__zipcode"
+        ]
+        return broad_address_match(queryset, name, value, location_filter_paths)
 
     def filter_address_city(self, queryset, name, value):
-        return queryset.annotate(search=SearchVector("address__address_us__city_name")).filter(
-            search=value
-        )
+        return field_based_vector_search(queryset, name, value, "address__address_us__city_name")
 
     def filter_address_state(self, queryset, name, value):
-        return queryset.annotate(
-            search=SearchVector("address__address_us__state_code__abbreviation")
-        ).filter(search=value)
+        return field_based_vector_search(queryset, name, value, "address__address_us__state_code__abbreviation")
 
     def filter_address_postalcode(self, queryset, name, value):
         return queryset.filter(address__address_us__zipcode=value)

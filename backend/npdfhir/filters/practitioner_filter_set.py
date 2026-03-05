@@ -5,7 +5,7 @@ from django_filters import rest_framework as filters
 from ..documentation_content import docs
 from ..mappings import addressUseMapping, genderMapping
 from ..models import ProviderView
-from ..utils import parse_identifier_query
+from .filter_utils import filter_identifier_general
 
 
 class PractitionerFilterSet(filters.FilterSet):
@@ -79,24 +79,7 @@ class PractitionerFilterSet(filters.FilterSet):
         return queryset.filter(provider__individual__gender=value)
 
     def filter_identifier(self, queryset, name, value):
-        system, identifier_id = parse_identifier_query(value)
-        queries = Q(pk__isnull=True)
-
-        if system:  # specific identifier search requested
-            if system.upper() == "NPI":
-                try:
-                    queries = Q(npi__npi=int(identifier_id))
-                except (ValueError, TypeError):
-                    pass
-        else:  # general identifier search requested
-            try:
-                queries |= Q(npi__npi=int(identifier_id))
-            except (ValueError, TypeError):
-                pass
-
-            queries |= Q(provider__providertootherid__other_id=identifier_id)
-
-        return queryset.filter(queries).distinct()
+        return filter_identifier_general(queryset, name, value, npi_path="npi__npi", other_path="provider__providertootherid__other_id")
 
     def filter_practitioner_name(self, queryset, name, value):
         query = SearchQuery(value, search_type="websearch", config="english")
