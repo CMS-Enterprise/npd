@@ -96,3 +96,24 @@ describe("identifiers section", () => {
     ).toBeInTheDocument()
   })
 })
+
+describe("taxonomy section", () => {
+  beforeEach(() => {
+    mockGlobalFetch([orgApiResponse])
+  })
+
+  it("shows taxonomy data when extensions exist", async () => {
+    render(<RoutedOrganization path="/organizations/12345" />, {
+      settings: { feature_flags: { ORGANIZATION_LOOKUP_DETAILS: true } },
+    })
+
+    const taxonomyHeading = await screen.findByText("Taxonomy", {
+      selector: "section h2",
+    })
+    const taxonomySection = taxonomyHeading.closest("section")!
+
+    expect(
+      within(taxonomySection).getByText("Pediatric Clinic"),
+    ).toBeInTheDocument()
+  })
+})

@@ -13,9 +13,27 @@
     "link": "update your information."
   },
 
-  "about": "About",
-  "contact": "Contact information",
-  "identifiers": "Identifiers",
+  "about": {
+    "title": "About",
+    "otherNames": "Other name(s)",
+    "type": "Type",
+    "parentOrganization": "Parent organization"
+  },
+
+  "contact": {
+    "title": "Contact information",
+    "address": "Mailing address",
+    "authorizedOfficial": "Authorized official",
+    "authorizedOfficialPhone": "Authorized official phone"
+  },
+
+  "identifiers": {
+    "title": "Identifiers",
+    "type": "Type",
+    "number": "Number",
+    "details": "Details",
+    "fallback": "No identifiers available"
+  },
 
   "taxonomy": {
     "title": "Taxonomy",

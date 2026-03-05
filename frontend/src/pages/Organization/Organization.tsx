@@ -57,41 +57,50 @@ export const Organization = () => {
 
         <FeatureFlag name="ORGANIZATION_LOOKUP_DETAILS">
           <section className={layout.section}>
-            <h2>{t("organizations.about")}</h2>
+            <h2>{t("organizations.about.title")}</h2>
             <div className="ds-l-row">
               <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
-                <InfoItem label="Other name(s)" value={organization.name} />
+                <InfoItem
+                  label={t("organizations.about.otherNames")}
+                  value={organization.name}
+                />
               </div>
               <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
-                <InfoItem label="Type" value={organization.types[0]} />
+                <InfoItem
+                  label={t("organizations.about.type")}
+                  value={organization.types[0]}
+                />
               </div>
               <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
-                <InfoItem label="Parent organization" value={null} />
+                <InfoItem
+                  label={t("organizations.about.parentOrganization")}
+                  value={null}
+                />
               </div>
             </div>
           </section>
 
           <section className={layout.section}>
-            <h2>{t("organizations.contact")}</h2>
+            <h2>{t("organizations.contact.title")}</h2>
             <div className="ds-l-row">
               <div
                 className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2"
                 style={{ whiteSpace: "pre-line" }}
               >
                 <InfoItem
-                  label="Mailing address"
+                  label={t("organizations.contact.address")}
                   value={organization.address}
                 />
               </div>
               <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
                 <InfoItem
-                  label="Authorized official"
+                  label={t("organizations.contact.authorizedOfficial")}
                   value={organization.authorizedOfficial}
                 />
               </div>
               <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
                 <InfoItem
-                  label="Authorized official phone"
+                  label={t("organizations.contact.authorizedOfficialPhone")}
                   value={organization.authorizedPhone}
                 />
               </div>
@@ -99,14 +108,18 @@ export const Organization = () => {
           </section>
 
           <section className={layout.section}>
-            <h2>{t("organizations.identifiers")}</h2>
+            <h2>{t("organizations.identifiers.title")}</h2>
             {organization.identifiers.length > 0 ? (
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell>Type</TableCell>
-                    <TableCell>Number</TableCell>
-                    <TableCell>Details</TableCell>
+                    <TableCell>{t("organizations.identifiers.type")}</TableCell>
+                    <TableCell>
+                      {t("organizations.identifiers.number")}
+                    </TableCell>
+                    <TableCell>
+                      {t("organizations.identifiers.details")}
+                    </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -120,7 +133,9 @@ export const Organization = () => {
                 </TableBody>
               </Table>
             ) : (
-              <p className="ds-u-color--gray">No identifiers available</p>
+              <p className="ds-u-color--gray">
+                {t("organizations.identifiers.fallback")}
+              </p>
             )}
           </section>
 
