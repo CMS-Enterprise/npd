@@ -29,7 +29,6 @@ jobs:
         run: npx playwright install chromium --with-deps
       # this step starts the test web server via `make test-server`
       - name: Run Playwright tests
-        working-directory: /
         run: make playwright-local
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
