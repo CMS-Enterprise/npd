@@ -27,12 +27,12 @@ If you are using VS Code, it is also recommended that you [install the Playwrigh
 We use Playwright projects for a separation of testing concerns.
 
 ### local
-The "local" project performs test server setup, seeds the system, and runs tests against the local test server. All local end-to-end tests should be stored in the local folder.
+The "local" project performs test server setup, seeds the system, and runs tests against the local test server. All local end-to-end tests should be stored in the local folder. Any modifications that change either frontend or backend behavior should have an associated local end-to-end test for that specific change, as well as a new or updated user journey test that validates the change in the context of user flows throughout the app. Note: we will continue to add user journey tests and associated documentation as we flesh out our user stories.
 
 The local project can be run by executing the command `make playwright-local` from within the root directory.
 
 ### uat
-The "uat" project allows the dev to configure the base url, username, and password, allowing tests to be run against the deployed environments (please refer to the .env_template file for the environment variables that are expected). All uat tests should be stored in the uat folder. The intention is that these uat tests will validate the Search/ Front-end/ API/ Authentication user stories against real-life data coming in from the ETL.
+The "uat" project allows the dev to configure the base url, username, and password, allowing tests to be run against the deployed environments (please refer to the .env_template file for the environment variables that are expected). All uat tests should be stored in the uat folder. The UAT tests should verify that NPD meets the business requirements and user needs defined for each software stage. These are intended to support a test-driven development strategy, in which the business requirements are defined as code and the implementation is validated against those codified requirements. The automated UATs will not be required to be passing with each PR, but rather will give an indication of progress toward fulfilling feature, release, and/or product goals.
 
 The uat project can be run with the command `npx playwright test --project=uat` from within the playwright directory.
 
