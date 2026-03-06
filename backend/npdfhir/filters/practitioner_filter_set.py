@@ -1,4 +1,3 @@
-from django.contrib.postgres.search import SearchQuery
 from django_filters import rest_framework as filters
 
 from ..documentation_content import docs
@@ -8,6 +7,7 @@ from .filter_utils import (
     filter_identifier_general,
     field_based_vector_search,
     generic_filter_gender,
+    simple_generic_field_search,
 )
 
 
@@ -88,14 +88,14 @@ class PractitionerFilterSet(filters.FilterSet):
         )
 
     def filter_practitioner_name(self, queryset, name, value):
-        query = SearchQuery(value, search_type="websearch", config="english")
-        return queryset.filter(
-            provider__individual__individualtoname__search_vector=query
+        return simple_generic_field_search(
+            queryset, name, value, "provider__individual__individualtoname__search_vector"
         ).distinct()
 
     def filter_practitioner_type(self, queryset, name, value):
-        query = SearchQuery(value, search_type="websearch", config="english")
-        return queryset.filter(provider__providertotaxonomy__nucc_code__search_vector=query)
+        return simple_generic_field_search(
+            queryset, name, value, "provider__providertotaxonomy__nucc_code__search_vector"
+        )
 
     def filter_address(self, queryset, name, value):
         return field_based_vector_search(

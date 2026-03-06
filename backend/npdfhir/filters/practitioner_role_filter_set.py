@@ -1,7 +1,7 @@
 import re
 from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import D
-from django.contrib.postgres.search import SearchVector, SearchQuery
+from django.contrib.postgres.search import SearchVector
 from django.db.models import Q
 from django_filters import rest_framework as filters
 
@@ -13,6 +13,7 @@ from .filter_utils import (
     field_based_vector_search,
     filter_identifier_general,
     generic_filter_gender,
+    simple_generic_field_search,
 )
 
 
@@ -128,9 +129,11 @@ class PractitionerRoleFilterSet(filters.FilterSet):
         ]
 
     def filter_practitioner_name(self, queryset, name, value):
-        query = SearchQuery(f"{value.upper()}", search_type="websearch", config="english")
-        return queryset.filter(
-            provider_to_organization__individual__individual__individualtoname__search_vector=query
+        return simple_generic_field_search(
+            queryset,
+            name,
+            value,
+            "provider_to_organization__individual__individual__individualtoname__search_vector",
         ).distinct()
 
     def filter_practitioner_gender(self, queryset, name, value):

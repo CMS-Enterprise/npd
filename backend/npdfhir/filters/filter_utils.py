@@ -57,3 +57,11 @@ def generic_filter_gender(queryset, name, value, gender_path):
         param_map = {gender_path: genderMapping.toNPD(value)}
         return queryset.filter(**param_map)
     return queryset
+
+
+def simple_generic_field_search(queryset, name, value, name_path):
+    query = SearchQuery(value, search_type="websearch", config="english")
+
+    name_path_dict = {name_path: query}
+
+    return queryset.filter(**name_path_dict)
