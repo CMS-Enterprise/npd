@@ -8,6 +8,9 @@ on:
   pull_request:
     branches: [main, release]
 
+env:
+  BASE_URL: 'http://localhost:8008'
+
 jobs:
   test:
     timeout-minutes: 10
@@ -29,8 +32,7 @@ jobs:
         run: npx playwright install chromium --with-deps
       # this step starts the test web server via `make test-server`
       - name: Run Playwright tests
-        working-directory: playwright/
-        run: npx playwright test
+        run: make playwright-local
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:

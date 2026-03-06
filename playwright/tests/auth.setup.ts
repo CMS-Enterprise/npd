@@ -7,8 +7,8 @@ setup("authenticate", async ({ page }) => {
   await page.goto("/accounts/login/")
   await expect(page).toHaveURL("/accounts/login/")
   await expect(page.locator("#login-form")).toBeVisible()
-  await page.getByLabel("Username").fill("developer@cms.hhs.gov")
-  await page.getByLabel("Password").fill("password123")
+  await page.getByLabel("Username").fill(process.env.USERNAME ?? "developer@cms.hhs.gov")
+  await page.getByLabel("Password").fill(process.env.PASSWORD ?? "password123")
   await page.getByRole("button", { name: "Sign in" }).click()
 
   // Wait until the page receives the cookies.
