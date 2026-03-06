@@ -88,8 +88,9 @@ class PractitionerFilterSet(filters.FilterSet):
         )
 
     def filter_practitioner_name(self, queryset, name, value):
-        return field_based_vector_search(
-            queryset, name, value, "provider__individual__individualtoname__search_vector"
+        query = SearchQuery(value, search_type="websearch", config="english")
+        return queryset.filter(
+            provider__individual__individualtoname__search_vector=query
         ).distinct()
 
     def filter_practitioner_type(self, queryset, name, value):
