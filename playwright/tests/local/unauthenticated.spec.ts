@@ -14,8 +14,8 @@ test("local dev default account can sign in and sign out", async ({ page }) => {
   await expect(page.locator("form legend")).toContainText("Sign in")
 
   // act: sign in
-  await page.getByLabel("Username").fill("developer@cms.hhs.gov")
-  await page.getByLabel("Password").fill("password123")
+  await page.getByLabel("Username").fill(process.env.USERNAME ?? "developer@cms.hhs.gov")
+  await page.getByLabel("Password").fill(process.env.PASSWORD ?? "password123")
   await page.getByRole("button", { name: "Sign in" }).click()
 
   // assert: redirection after successful sign-in sends user to the landing

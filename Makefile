@@ -30,7 +30,7 @@ help:
 	@echo "  test-frontend  Run the frontend test suite"
 	@echo "                 Use ARGS=... to pass arguments"
 	@echo "  test-server    Start a test server for e2e testing with Playwright"
-	@echo "  playwright     Run the playwright e2e test suite (on host)"
+	@echo "  playwright-local     Create a test server and run the playwright e2e test suite (on host)"
 	@echo ""
 	@echo "  clean          Remove cache files, test artifacts, and transient frontend assets"
 	@echo ""
@@ -198,10 +198,10 @@ test: test-setup
 	@$(MAKE) test-backend
 	@$(MAKE) test-frontend
 
-.PHONY: playwright
-playwright:
+.PHONY: playwright-local
+playwright-local: test-system-setup build-frontend-test-assets
 	@cd playwright; \
-		npx playwright test
+		npx playwright test --project=local
 
 # clean up test artifacts
 .PHONY: clean
