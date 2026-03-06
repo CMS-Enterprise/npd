@@ -199,7 +199,7 @@ test: test-setup
 	@$(MAKE) test-frontend
 
 .PHONY: playwright-local
-playwright-local: test-system-setup
+playwright-local: test-system-setup build-frontend-test-assets
 	@cd playwright; \
 		npx playwright test --project=local
 
