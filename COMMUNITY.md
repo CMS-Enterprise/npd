@@ -81,20 +81,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for more details on the release process.
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/acme-cms-challenge">
-                    <img src="https://avatars.githubusercontent.com/u/70127703?v=4" width="100;" alt="acme-cms-challenge"/>
-                    <br />
-                    <sub><b>acme-cms-challenge</b></sub>
-                </a>
-            </td>
-            <td align="center">
-                <a href="https://github.com/IsaacMilarky">
-                    <img src="https://avatars.githubusercontent.com/u/24639268?v=4" width="100;" alt="IsaacMilarky"/>
-                    <br />
-                    <sub><b>Isaac Milarsky</b></sub>
-                </a>
-            </td>
-            <td align="center">
                 <a href="https://github.com/sachin-panayil">
                     <img src="https://avatars.githubusercontent.com/u/79382140?v=4" width="100;" alt="sachin-panayil"/>
                     <br />
@@ -102,10 +88,24 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for more details on the release process.
                 </a>
             </td>
             <td align="center">
+                <a href="https://github.com/acme-cms-challenge">
+                    <img src="https://avatars.githubusercontent.com/u/70127703?v=4" width="100;" alt="acme-cms-challenge"/>
+                    <br />
+                    <sub><b>acme-cms-challenge</b></sub>
+                </a>
+            </td>
+            <td align="center">
                 <a href="https://github.com/wbprice">
                     <img src="https://avatars.githubusercontent.com/u/2590422?v=4" width="100;" alt="wbprice"/>
                     <br />
                     <sub><b>Blaine Price</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/IsaacMilarky">
+                    <img src="https://avatars.githubusercontent.com/u/24639268?v=4" width="100;" alt="IsaacMilarky"/>
+                    <br />
+                    <sub><b>Isaac Milarsky</b></sub>
                 </a>
             </td>
 		</tr>
@@ -118,17 +118,17 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for more details on the release process.
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/dturner5234">
-                    <img src="https://avatars.githubusercontent.com/u/232453748?v=4" width="100;" alt="dturner5234"/>
-                    <br />
-                    <sub><b>dturner5234</b></sub>
-                </a>
-            </td>
-            <td align="center">
                 <a href="https://github.com/tspecht-cms">
                     <img src="https://avatars.githubusercontent.com/u/237267425?v=4" width="100;" alt="tspecht-cms"/>
                     <br />
                     <sub><b>tspecht-cms</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/dturner5234">
+                    <img src="https://avatars.githubusercontent.com/u/232453748?v=4" width="100;" alt="dturner5234"/>
+                    <br />
+                    <sub><b>dturner5234</b></sub>
                 </a>
             </td>
             <td align="center">
@@ -139,10 +139,26 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for more details on the release process.
                 </a>
             </td>
             <td align="center">
+                <a href="https://github.com/sman-dsac">
+                    <img src="https://avatars.githubusercontent.com/u/242507394?v=4" width="100;" alt="sman-dsac"/>
+                    <br />
+                    <sub><b>sman-dsac</b></sub>
+                </a>
+            </td>
+            <td align="center">
                 <a href="https://github.com/ftrotter">
                     <img src="https://avatars.githubusercontent.com/u/83133?v=4" width="100;" alt="ftrotter"/>
                     <br />
                     <sub><b>Fred Trotter</b></sub>
+                </a>
+            </td>
+		</tr>
+		<tr>
+            <td align="center">
+                <a href="https://github.com/dmtrscms">
+                    <img src="https://avatars.githubusercontent.com/u/237252101?v=4" width="100;" alt="dmtrscms"/>
+                    <br />
+                    <sub><b>dmtrscms</b></sub>
                 </a>
             </td>
             <td align="center">
@@ -150,15 +166,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for more details on the release process.
                     <img src="https://avatars.githubusercontent.com/u/244575051?v=4" width="100;" alt="rmillergv"/>
                     <br />
                     <sub><b>rmillergv</b></sub>
-                </a>
-            </td>
-		</tr>
-		<tr>
-            <td align="center">
-                <a href="https://github.com/sman-dsac">
-                    <img src="https://avatars.githubusercontent.com/u/242507394?v=4" width="100;" alt="sman-dsac"/>
-                    <br />
-                    <sub><b>sman-dsac</b></sub>
                 </a>
             </td>
 		</tr>
