@@ -23,6 +23,19 @@ npm init playwright@latest --yes -- . --quiet --browser=chromium
 
 If you are using VS Code, it is also recommended that you [install the Playwright extension for VS Code](https://playwright.dev/docs/getting-started-vscode) and open the `playwright/` directory in its own editor session.
 
+## Projects
+We use Playwright projects for a separation of testing concerns.
+
+### local
+The "local" project performs test server setup, seeds the system, and runs tests against the local test server. All local end-to-end tests should be stored in the local folder.
+
+The local project can be run by executing the command `make playwright-local` from within the root directory.
+
+### uat
+The "uat" project allows the dev to configure the base url, username, and password, allowing tests to be run against the deployed environments (please refer to the .env_template file for the environment variables that are expected). All uat tests should be stored in the uat folder. The intention is that these uat tests will validate the Search/ Front-end/ API/ Authentication user stories against real-life data coming in from the ETL.
+
+The uat project can be run with the command `npx playwright test --project=uat` from within the playwright directory.
+
 ## Running tests
 
 ### Locally
@@ -30,7 +43,7 @@ If you are using VS Code, it is also recommended that you [install the Playwrigh
 The test suite will start the test-server if it is not already running:
 
 ```sh
-npx playwright test
+npx playwright test --project=local
 ```
 
 If you want live rebuilds of frontend assets and to control the test-server separately, you can start those jobs in different shells.
@@ -49,7 +62,7 @@ By default, Playwright assumes the test server is already running. You can disab
 
 ```sh
 cd playwright
-CI=true npx playwright test
+CI=true npx playwright test --project=uat
 ```
 
 This command will cause Playwright to launch the test-server (including rebuilding the database and compiling frontend assets) in docker and then shut it down at the end of the test suite.
