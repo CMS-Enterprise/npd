@@ -27,9 +27,12 @@ export const ListedPractitioner = ({ data }: { data: FHIRPractitioner }) => {
           <div className="ds-l-col--4 ds-m-col--6">
             <strong>{t("practitioners.listing.taxonomy")}</strong>
             <br />
-            TBD
+            {practitioner.taxonomy[0]?.displayCode ?? "---"}
           </div>
-          <div className="ds-l-col--4 ds-m-col--6">
+          <div
+            className="ds-l-col--4 ds-m-col--6"
+            style={{ whiteSpace: "pre-line " }}
+          >
             <strong>{t("practitioners.listing.location")}</strong>
             <br />
             {practitioner.address}

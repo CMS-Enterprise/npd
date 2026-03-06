@@ -82,7 +82,10 @@ export const Practitioner = () => {
           <section className={layout.section}>
             <h2>{t("practitioners.detail.contact.title")}</h2>
             <div className="ds-l-row">
-              <div className="ds-l-col--12 ds-l-md-col--3 ds-u-margin-bottom--2">
+              <div
+                className="ds-l-col--12 ds-l-md-col--3 ds-u-margin-bottom--2"
+                style={{ whiteSpace: "pre-line " }}
+              >
                 <InfoItem
                   label={t("practitioners.detail.contact.address")}
                   value={practitioner.address}

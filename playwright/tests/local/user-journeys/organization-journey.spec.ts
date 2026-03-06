@@ -54,10 +54,8 @@ test.describe("Organization Journey", () => {
     // finally, confirm detail page content
     await expect(page).toHaveURL(`/organizations/${organization.id}`)
 
-    const banner = page.locator("section.banner")
-    await expect(banner.getByText("Provider group")).toBeVisible()
-    await expect(banner.getByText(organization.name)).toBeVisible()
-    await expect(banner.getByText(`NPI: ${organization.npi}`)).toBeVisible()
+    await expect(page.getByTestId("organization-name")).toContainText(organization.name)
+    await expect(page.getByTestId("organization-npi")).toContainText(`NPI: ${organization.npi}`)
   })
 
   test("landing -> last page -> organization detail", async ({ page }) => {
@@ -90,7 +88,7 @@ test.describe("Organization Journey", () => {
     await page.getByRole("link", { name: "AAA Test Org" }).click()
   
     await expect(page).toHaveURL(`/organizations/${organization.id}`)
-    await expect(page.locator("div[role='heading']")).toContainText(organization.name)
+    await expect(page.getByTestId("organization-name")).toContainText(organization.name)
   })
 
   test("organization journey with partial name search", async ({ page }) => {
@@ -132,7 +130,6 @@ test.describe("Organization Journey", () => {
 
     await page.getByRole("link", { name: /TEST/ }).first().click()
 
-    const banner = page.locator("section.banner")
-    await expect(banner.getByText(/TEST/)).toBeVisible()
+    await expect(page.getByTestId("organization-name")).toContainText(/TEST/)
   })
 })

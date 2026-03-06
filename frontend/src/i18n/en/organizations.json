@@ -1,15 +1,47 @@
 {
-  "title": "Provider group",
+  "header": {
+    "title": "Organization",
+    "npi": "NPI",
+    "search": "Back to search results"
+  },
+
   "unavailable": "This content is not currently available.",
+
   "update": {
     "title": "Are you the practitioner listed?",
     "subtitle": "Learn how to",
     "link": "update your information."
   },
-  "about": "About",
-  "contact": "Contact information",
-  "identifiers": "Identifiers",
-  "taxonomy": "Taxonomy",
+
+  "about": {
+    "title": "About",
+    "otherNames": "Other name(s)",
+    "type": "Type",
+    "parentOrganization": "Parent organization"
+  },
+
+  "contact": {
+    "title": "Contact information",
+    "address": "Mailing address",
+    "authorizedOfficial": "Authorized official",
+    "authorizedOfficialPhone": "Authorized official phone"
+  },
+
+  "identifiers": {
+    "title": "Identifiers",
+    "type": "Type",
+    "number": "Number",
+    "details": "Details",
+    "fallback": "No identifiers available"
+  },
+
+  "taxonomy": {
+    "title": "Taxonomy",
+    "primary": "Primary",
+    "secondary": "Secondary",
+    "fallback": "No taxonomy available"
+  },
+
   "endpoints": "Endpoints",
   "locations": "Locations",
   "practitioners": "Practitioners",

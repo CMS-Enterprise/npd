@@ -8,6 +8,7 @@ import type { Identifier } from "./Identifier"
 import type { Organization } from "./Organization"
 import type { Period } from "./Period"
 import type { Practitioner } from "./Practitioner"
+import type { Extension } from "./Extension"
 
 // NOTE: (@abachman-dsac) due to limitations in the fhir.resource.R4B model
 // definitions, we cannot fully generate response types automatically
@@ -15,6 +16,11 @@ export interface FHIROrganization extends Organization {
   identifier?: FHIRIdentifer[] | null
   contact?: ExtendedContactDetail[] | null
   address?: Address[] | null
+  extension?: FHIRExtension[] | null
+}
+
+export interface FHIRExtension extends Extension {
+  valueCodeableConcept?: FHIRCodeableConcept
 }
 
 export interface FHIRIdentifer extends Identifier {

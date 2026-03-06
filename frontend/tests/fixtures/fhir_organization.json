@@ -50,5 +50,19 @@
         }
       ]
     }
+  ],
+  "extension": [
+    {
+      "url": "https://build.fhir.org/organization-definitions.html#Organization.qualification",
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://nucc.org/provider-taxonomy",
+            "code": "261QP2000X",
+            "display": "Pediatric Clinic"
+          }
+        ]
+      }
+    }
   ]
 }
