@@ -55,6 +55,10 @@ export default defineConfig({
     },
     {
       name: 'uat',
+      use: {
+        storageState: "tests/.auth/user.json",
+        actionTimeout: 30000,
+      },
       dependencies: ["setup"],
       testDir: './tests/uat',
     },

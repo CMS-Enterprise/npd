@@ -42,6 +42,7 @@ export type IdentifierData = {
         }
 export type NameData = {
             "code": string,
+            "namePrefix"?: string,
             "firstName": string,
             "middleName"? : string
             "lastName": string,

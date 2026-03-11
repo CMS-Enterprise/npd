@@ -7,7 +7,40 @@ export const AddressTypeMapping = {
     "LOCATION": 'physical',
 }
 
-export async function testNPI(npiResponse: any, testData: PractitionerData){
+const base_url = process.env.BASE_URL
+
+export async function testHasFhirResults(response:any, testData: PractitionerData, resource: string){
+    // Assert the status code
+    expect(response.status()).toBe(200);
+    
+    // Get the 'content-type' header value
+    const contentType = response.headers()['content-type'];
+    
+    // Assert that the content type contains the expected value (application/fhir+json)
+    expect(contentType).toContain('application/fhir+json');
+    
+    // Get the response body as JSON
+    const body = await response.json();
+    
+    //Check for basic elements of the FHIR response
+    expect(body).toHaveProperty('count');
+    expect(body.count).toBeGreaterThan(0);
+    expect(body.results.resourceType).toEqual('Bundle');
+    if (body.results.total>body.count){
+        expect(body.next).not.toBeNull()
+    }
+    const entry = body.results.entry[0];
+    expect(entry).toHaveProperty('resource');
+    const fhirResource = entry.resource;
+    expect(fhirResource).toHaveProperty('identifier');
+    expect(fhirResource.resourceType).toEqual(resource);
+    const id = fhirResource.id;
+    const resourceUrl = entry.fullUrl;
+    expect(resourceUrl).toEqual(`${base_url?.replace('https://','http://')}/fhir/${resource}/${id}`); // TODO: update reference URLs in FHIR API to use https instead of http
+    return body  
+}
+
+export function testNPI(npiResponse: any, testData: PractitionerData){
         expect(npiResponse).toHaveProperty('use');
         expect(npiResponse.use).toEqual('official');
         expect(npiResponse).toHaveProperty('value');
@@ -31,7 +64,7 @@ export async function testNPI(npiResponse: any, testData: PractitionerData){
         }
 }
 
-export async function testTaxonomies(qualificationResponse: any, testData: PractitionerData){
+export function testTaxonomies(qualificationResponse: any, testData: PractitionerData){
     const taxonomies = qualificationResponse.filter(qualification => qualification.code.coding[0].system == "http://nucc.org/provider-taxonomy");
     testData.taxonomies.forEach(testDataTaxonomy => {
         const filtered_taxonomies = taxonomies.filter(taxonomy => taxonomy.code.coding[0].code == testDataTaxonomy.code);
@@ -41,22 +74,24 @@ export async function testTaxonomies(qualificationResponse: any, testData: Pract
     })
 }
 
-export async function testNames(nameResponse: any, testData: PractitionerData){
+export function testNames(nameResponse: any, testData: PractitionerData){
     const practitioner_names: Array<NameData> = [{
                 "code": "1",
+                "namePrefix": testData.basic.namePrefix,
                 "firstName": testData.basic.firstName,
+                "middleName": testData.basic.middleName,
                 "lastName": testData.basic.lastName,
                 "type": 'OFFICIAL'
             }, ...testData.otherNames]
     practitioner_names.forEach(practitioner_name => {
-        const filtered_name = nameResponse.filter(name => name.text == [practitioner_name.firstName, practitioner_name.middleName, practitioner_name.lastName].join(' '));
+        const filtered_name = nameResponse.filter(name => name.text.toLowerCase() == [practitioner_name.namePrefix, practitioner_name.firstName, practitioner_name.middleName, practitioner_name.lastName].join(' ').toLowerCase());
             expect(filtered_name.length).toBeGreaterThanOrEqual(1);
             expect(filtered_name[0].family = practitioner_name?.lastName)
             // TODO: improve
         })
 }
 
-export async function testAddresses(addressResponse: any, testData: PractitionerData){
+export function testAddresses(addressResponse: any, testData: PractitionerData){
     const testAddresses: Array<AddressData> = [...testData.addresses, ...testData.practiceLocations];
     testAddresses.forEach(testAddress => {
         const filtered_address = addressResponse.filter(address => address.line.includes(testAddress.addressLine1) && address.city == testAddress.city && address.state == testAddress.state && address.postalCode == testAddress.postalCode);
@@ -64,4 +99,42 @@ export async function testAddresses(addressResponse: any, testData: Practitioner
         expect(filtered_address[0].type = AddressTypeMapping[testAddress.addressType]);
         // TODO: improve
     })
+}
+
+export async function testTelecoms(telecomResponse: any, testData: PractitionerData){
+    const testAddresses: Array<AddressData> = [...testData.addresses, ...testData.practiceLocations];
+    const testNumbers = testAddresses.map(address => address.teleNumber);
+    testNumbers.forEach(testNumber => {
+        const filtered_telecom = telecomResponse.filter(telecom => telecom.system == "phone" && telecom.value == testNumber)
+        expect(filtered_telecom.length).toBeGreaterThanOrEqual(1);
+    })
+    const testFaxes = testAddresses.map(address => address.faxNumber);
+    testFaxes.forEach(testFax => {
+        const filtered_telecom = telecomResponse.filter(telecom => telecom.system == "fax" && telecom.value == testFax)
+        expect(filtered_telecom.length).toBeGreaterThanOrEqual(1);
+    })
+}
+
+export async function expectResultsToHavePractitioner(url: string, testData: PractitionerData, request: any) {
+    var next: string | null = url;
+    var found;
+    
+    while (next !== null && !found){
+        const response = await request.get(next);
+    
+        var body = await testHasFhirResults(response, testData, 'Practitioner')
+    
+        const entries = body.results.entry;
+    
+        entries.forEach(entry => {
+            const npi = entry.resource.identifier.filter(identifier => identifier.system == "http://terminology.hl7.org/NamingSystem/npi")[0];
+            if (npi.value == testData.number) {
+                found = true;
+            }
+            
+        })
+    
+        next = body.next;
+    }
+    expect(found).toBeTruthy();
 }
