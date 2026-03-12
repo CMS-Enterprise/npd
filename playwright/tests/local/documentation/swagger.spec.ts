@@ -5,53 +5,53 @@ test.describe("Swagger", () => {
   test("loads successfully", async ({ page }) => {
     await page.goto("/fhir/docs/")
 
-    await expect(page.locator("#swagger-ui")).toBeVisible()
-    await expect(page.locator(".info .title")).toContainText("NPD FHIR API")
+    await expect(page.getByText("NPD FHIR API")).toBeVisible()
+    await expect(page.getByRole("link", { name: "/fhir/docs/schema/" })).toBeVisible()
+    await expect(page.locator("section").filter({ hasText: "Authorize" })).toBeVisible()
   })
 
   test("displays all FHIR resource tags", async ({ page }) => {
     await page.goto("/fhir/docs/")
-    await expect(page.locator("#swagger-ui")).toBeVisible()
+    await expect(page.getByText("NPD FHIR API")).toBeVisible()
 
     for (const resource of FHIR_RESOURCES) {
-      const tag = page.locator(`h3.opblock-tag[data-tag="${resource}"]`)
+      const tag = page.getByRole("link", { name: resource, exact: true })
       await expect(tag).toBeVisible()
     }
   })
 
   test("regression test: 'search' parameter should not appear in any endpoint", async ({ page }) => {
     await page.goto("/fhir/docs/")
-    await expect(page.locator("#swagger-ui")).toBeVisible()
+    await expect(page.getByText("NPD FHIR API")).toBeVisible()
 
     // check Organization endpoint
-    const orgOperation = page.locator("#operations-Organization-Organization_list")
-    await orgOperation.locator(".opblock-summary-control").click()
-    await expect(orgOperation.locator(".opblock-body")).toBeVisible()
+    await page.getByRole("button", { name: "GET /fhir/Organization/", exact: true }).click()
+    await expect(page.getByText("GET/fhir/Organization/ Query")).toBeVisible()
 
-    await expect(orgOperation.locator("tr[data-param-name]").first()).toBeAttached()
-    await expect(orgOperation.locator("tr[data-param-name='search']")).not.toBeAttached()
-  
+    const orgSection = page.locator("section").filter({ hasText: "GET/fhir/Organization/" })
+    await expect(orgSection.locator("tr[data-param-name]").first()).toBeAttached()
+    await expect(orgSection.locator("tr[data-param-name='search']")).not.toBeAttached()
+
     // check Practitioner endpoint
-    const practitionerOperation = page.locator("#operations-Practitioner-Practitioner_list")
-    await practitionerOperation.locator(".opblock-summary-control").click()
-    await expect(practitionerOperation.locator(".opblock-body")).toBeVisible()
+    await page.getByRole("button", { name: "GET /fhir/Practitioner/", exact: true }).click()
+    await expect(page.getByText("GET/fhir/Practitioner/ Query")).toBeVisible()
 
-    await expect(practitionerOperation.locator("tr[data-param-name]").first()).toBeAttached()
-    await expect(practitionerOperation.locator("tr[data-param-name='search']")).not.toBeAttached()
+    const practitionerSection = page.locator("section").filter({ hasText: "GET/fhir/Practitioner/" })
+    await expect(practitionerSection.locator("tr[data-param-name]").first()).toBeAttached()
+    await expect(practitionerSection.locator("tr[data-param-name='search']")).not.toBeAttached()
   })
 })
 
 test.describe("Swagger - Organization", () => {
   test("GET /fhir/Organization/", async ({ page }) => {
     await page.goto("/fhir/docs/")
-    await expect(page.locator("#swagger-ui")).toBeVisible()
+    await expect(page.getByText("NPD FHIR API")).toBeVisible()
 
-    const operation = page.locator("#operations-Organization-Organization_list")
-    await operation.locator(".opblock-summary-control").click()
-    await operation.locator(".try-out__btn").click()
-    await operation.locator(".execute").click()
+    await page.getByRole("button", { name: "GET /fhir/Organization/", exact: true }).click()
+    await page.getByRole("button", { name: "Try it out" }).click()
+    await page.getByRole("button", { name: "Execute" }).click()
 
-    const liveResponse = operation.locator(".live-responses-table tbody .response-col_status")
+    const liveResponse = page.locator(".live-responses-table tbody .response-col_status")
     await expect(liveResponse).toContainText("200")
   })
 
@@ -62,16 +62,15 @@ test.describe("Swagger - Organization", () => {
     const orgId = orgData.results.entry[0].resource.id
 
     await page.goto("/fhir/docs/")
-    await expect(page.locator("#swagger-ui")).toBeVisible()
+    await expect(page.getByText("NPD FHIR API")).toBeVisible()
 
-    const operation = page.locator("#operations-Organization-Organization_retrieve")
-    await operation.locator(".opblock-summary-control").click()
-    await operation.locator(".try-out__btn").click()
+    await page.getByRole("button", { name: "GET /fhir/Organization/{id}/", exact: true }).click()
+    await page.getByRole("button", { name: "Try it out" }).click()
 
-    await operation.locator("tr[data-param-name='id'] input").fill(orgId)
-    await operation.locator(".execute").click()
+    await page.locator("tr[data-param-name='id'] input").fill(orgId)
+    await page.getByRole("button", { name: "Execute" }).click()
 
-    const liveResponse = operation.locator(".live-responses-table tbody .response-col_status")
+    const liveResponse = page.locator(".live-responses-table tbody .response-col_status")
     await expect(liveResponse).toContainText("200")
   })
 })
@@ -79,14 +78,13 @@ test.describe("Swagger - Organization", () => {
 test.describe("Swagger - Practitioner", () => {
   test("GET /fhir/Practitioner/", async ({ page }) => {
     await page.goto("/fhir/docs/")
-    await expect(page.locator("#swagger-ui")).toBeVisible()
+    await expect(page.getByText("NPD FHIR API")).toBeVisible()
 
-    const operation = page.locator("#operations-Practitioner-Practitioner_list")
-    await operation.locator(".opblock-summary-control").click()
-    await operation.locator(".try-out__btn").click()
-    await operation.locator(".execute").click()
+    await page.getByRole("button", { name: "GET /fhir/Practitioner/", exact: true }).click()
+    await page.getByRole("button", { name: "Try it out" }).click()
+    await page.getByRole("button", { name: "Execute" }).click()
 
-    const liveResponse = operation.locator(".live-responses-table tbody .response-col_status")
+    const liveResponse = page.locator(".live-responses-table tbody .response-col_status")
     await expect(liveResponse).toContainText("200")
   })
 
@@ -97,16 +95,15 @@ test.describe("Swagger - Practitioner", () => {
     const practitionerId = data.results.entry[0].resource.id
 
     await page.goto("/fhir/docs/")
-    await expect(page.locator("#swagger-ui")).toBeVisible()
+    await expect(page.getByText("NPD FHIR API")).toBeVisible()
 
-    const operation = page.locator("#operations-Practitioner-Practitioner_retrieve")
-    await operation.locator(".opblock-summary-control").click()
-    await operation.locator(".try-out__btn").click()
+    await page.getByRole("button", { name: "GET /fhir/Practitioner/{id}/", exact: true }).click()
+    await page.getByRole("button", { name: "Try it out" }).click()
 
-    await operation.locator("tr[data-param-name='id'] input").fill(practitionerId)
-    await operation.locator(".execute").click()
+    await page.locator("tr[data-param-name='id'] input").fill(practitionerId)
+    await page.getByRole("button", { name: "Execute" }).click()
 
-    const liveResponse = operation.locator(".live-responses-table tbody .response-col_status")
+    const liveResponse = page.locator(".live-responses-table tbody .response-col_status")
     await expect(liveResponse).toContainText("200")
   })
 })
@@ -114,14 +111,13 @@ test.describe("Swagger - Practitioner", () => {
 test.describe("Swagger - Location", () => {
   test("GET /fhir/Location/", async ({ page }) => {
     await page.goto("/fhir/docs/")
-    await expect(page.locator("#swagger-ui")).toBeVisible()
+    await expect(page.getByText("NPD FHIR API")).toBeVisible()
 
-    const operation = page.locator("#operations-Location-Location_list")
-    await operation.locator(".opblock-summary-control").click()
-    await operation.locator(".try-out__btn").click()
-    await operation.locator(".execute").click()
+    await page.getByRole("button", { name: "GET /fhir/Location/", exact: true }).click()
+    await page.getByRole("button", { name: "Try it out" }).click()
+    await page.getByRole("button", { name: "Execute" }).click()
 
-    const liveResponse = operation.locator(".live-responses-table tbody .response-col_status")
+    const liveResponse = page.locator(".live-responses-table tbody .response-col_status")
     await expect(liveResponse).toContainText("200")
   })
 
@@ -133,14 +129,13 @@ test.describe("Swagger - Location", () => {
 test.describe("Swagger - Endpoint", () => {
   test("GET /fhir/Endpoint/", async ({ page }) => {
     await page.goto("/fhir/docs/")
-    await expect(page.locator("#swagger-ui")).toBeVisible()
+    await expect(page.getByText("NPD FHIR API")).toBeVisible()
 
-    const operation = page.locator("#operations-Endpoint-Endpoint_list")
-    await operation.locator(".opblock-summary-control").click()
-    await operation.locator(".try-out__btn").click()
-    await operation.locator(".execute").click()
+    await page.getByRole("button", { name: "GET /fhir/Endpoint/", exact: true }).click()
+    await page.getByRole("button", { name: "Try it out" }).click()
+    await page.getByRole("button", { name: "Execute" }).click()
 
-    const liveResponse = operation.locator(".live-responses-table tbody .response-col_status")
+    const liveResponse = page.locator(".live-responses-table tbody .response-col_status")
     await expect(liveResponse).toContainText("200")
   })
 
@@ -148,20 +143,18 @@ test.describe("Swagger - Endpoint", () => {
     // First get a valid endpoint ID
     const response = await page.request.get("/fhir/Endpoint/")
     const data = await response.json()
-
     const endpointId = data.results.entry[0].resource.id
 
     await page.goto("/fhir/docs/")
-    await expect(page.locator("#swagger-ui")).toBeVisible()
+    await expect(page.getByText("NPD FHIR API")).toBeVisible()
 
-    const operation = page.locator("#operations-Endpoint-Endpoint_retrieve")
-    await operation.locator(".opblock-summary-control").click()
-    await operation.locator(".try-out__btn").click()
+    await page.getByRole("button", { name: "GET /fhir/Endpoint/{id}/", exact: true }).click()
+    await page.getByRole("button", { name: "Try it out" }).click()
 
-    await operation.locator("tr[data-param-name='id'] input").fill(endpointId)
-    await operation.locator(".execute").click()
+    await page.locator("tr[data-param-name='id'] input").fill(endpointId)
+    await page.getByRole("button", { name: "Execute" }).click()
 
-    const liveResponse = operation.locator(".live-responses-table tbody .response-col_status")
+    const liveResponse = page.locator(".live-responses-table tbody .response-col_status")
     await expect(liveResponse).toContainText("200")
   })
 })
@@ -169,14 +162,13 @@ test.describe("Swagger - Endpoint", () => {
 test.describe("Swagger - PractitionerRole", () => {
   test("GET /fhir/PractitionerRole/", async ({ page }) => {
     await page.goto("/fhir/docs/")
-    await expect(page.locator("#swagger-ui")).toBeVisible()
+    await expect(page.getByText("NPD FHIR API")).toBeVisible()
 
-    const operation = page.locator("#operations-PractitionerRole-PractitionerRole_list")
-    await operation.locator(".opblock-summary-control").click()
-    await operation.locator(".try-out__btn").click()
-    await operation.locator(".execute").click()
+    await page.getByRole("button", { name: "GET /fhir/PractitionerRole/", exact: true }).click()
+    await page.getByRole("button", { name: "Try it out" }).click()
+    await page.getByRole("button", { name: "Execute" }).click()
 
-    const liveResponse = operation.locator(".live-responses-table tbody .response-col_status")
+    const liveResponse = page.locator(".live-responses-table tbody .response-col_status")
     await expect(liveResponse).toContainText("200")
   })
 
@@ -188,14 +180,13 @@ test.describe("Swagger - PractitionerRole", () => {
 test.describe("Swagger - metadata", () => {
   test("GET /fhir/metadata/", async ({ page }) => {
     await page.goto("/fhir/docs/")
-    await expect(page.locator("#swagger-ui")).toBeVisible()
+    await expect(page.getByText("NPD FHIR API")).toBeVisible()
 
-    const operation = page.locator("#operations-metadata-metadata_retrieve")
-    await operation.locator(".opblock-summary-control").click()
-    await operation.locator(".try-out__btn").click()
-    await operation.locator(".execute").click()
+    await page.getByRole("button", { name: "GET /fhir/metadata/", exact: true }).click()
+    await page.getByRole("button", { name: "Try it out" }).click()
+    await page.getByRole("button", { name: "Execute" }).click()
 
-    const liveResponse = operation.locator(".live-responses-table tbody .response-col_status")
+    const liveResponse = page.locator(".live-responses-table tbody .response-col_status")
     await expect(liveResponse).toContainText("200")
   })
 })
