@@ -5,12 +5,12 @@ from ..mappings import addressUseMapping
 from ..models import Location
 from .filter_utils import (
     broad_address_match,
-    field_based_vector_search,
     city_address_search,
     state_address_search,
     postalcode_address_search,
     address_use_search,
     general_filter_distance,
+    gen_nucc_code_filter,
 )
 
 
@@ -70,12 +70,7 @@ class LocationFilterSet(filters.FilterSet):
         ]
 
     def filter_organization_type(self, queryset, name, value):
-        return field_based_vector_search(
-            queryset,
-            name,
-            value,
-            "organization__clinicalorganization__organizationtotaxonomy__nucc_code__code",
-        )
+        return gen_nucc_code_filter(queryset, name, value)
 
     def filter_address(self, queryset, name, value):
         return broad_address_match(queryset, name, value)

@@ -142,3 +142,11 @@ def filter_individual_name(queryset, name, value, prefix):
 def filter_organization_name_gen(queryset, name, value, prefix=""):
     path = prefix + "organizationtoname__search_vector"
     return simple_generic_field_search(queryset, name, value, path)
+
+def gen_nucc_code_filter(queryset, name, value, prefix=""):
+    path = prefix + "organization__clinicalorganization__organizationtotaxonomy__nucc_code__code"
+    return field_based_vector_search(queryset, name, value, path)
+
+def gen_nucc_display_filter(queryset, name, value, prefix=""):
+    path = prefix + "organization__clinicalorganization__organizationtotaxonomy__nucc_code__display_name"
+    return field_based_vector_search(queryset, name, value, path)

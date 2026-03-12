@@ -15,6 +15,7 @@ from .filter_utils import (
     filter_individual_name,
     filter_organization_name_gen,
     general_filter_distance,
+    gen_nucc_display_filter,
 )
 
 
@@ -155,11 +156,7 @@ class PractitionerRoleFilterSet(filters.FilterSet):
         return general_filter_distance(queryset, name, value, prefix="location__")
 
     def filter_organization_type(self, queryset, name, value):
-        return queryset.filter(
-            Q(
-                provider_to_organization__organization__clinicalorganization__organizationtotaxonomy__nucc_code__display_name=value
-            )
-        ).distinct()
+        return gen_nucc_display_filter(queryset,name,value,prefix="provider_to_organization__")
 
     def filter_practitioner_identifier(self, queryset, name, value):
         return filter_identifier_general(
