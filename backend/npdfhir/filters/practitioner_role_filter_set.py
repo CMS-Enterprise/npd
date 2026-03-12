@@ -1,6 +1,3 @@
-import re
-from django.contrib.gis.geos import Point
-from django.contrib.gis.measure import D
 from django.contrib.postgres.search import SearchVector
 from django.db.models import Q
 from django_filters import rest_framework as filters
@@ -10,11 +7,14 @@ from ..mappings import genderMapping
 from ..models import ProviderToLocationView
 from .filter_utils import (
     broad_address_match,
+    city_address_search,
+    state_address_search,
+    postalcode_address_search,
     field_based_vector_search,
     filter_identifier_general,
     generic_filter_gender,
-    simple_generic_field_search,
     filter_individual_name,
+    general_filter_distance,
 )
 
 
@@ -138,9 +138,7 @@ class PractitionerRoleFilterSet(filters.FilterSet):
         ).distinct()
 
     def filter_practitioner_gender(self, queryset, name, value):
-        return generic_filter_gender(
-            queryset, name, value, "provider_to_organization__individual"
-        )
+        return generic_filter_gender(queryset, name, value, "provider_to_organization__individual")
 
     def filter_practitioner_type(self, queryset, name, value):
         return field_based_vector_search(
@@ -156,29 +154,7 @@ class PractitionerRoleFilterSet(filters.FilterSet):
         ).filter(search=value)
 
     def filter_distance(self, queryset, name, value):
-        pattern = r"(-?\d+\.?\d*)\|(-?\d+\.?\d*)\|(\d+\.?\d*)\|?(km|mi|ft)?"
-        match = re.fullmatch(pattern, value)
-        if match:
-            lat, lon, distance, units = match.groups()
-            lon = float(lon)
-            lat = float(lat)
-            distance = float(distance)
-            user_location = Point(lon, lat, srid=4326)
-            match units:
-                case "mi":
-                    distance_function = D(mi=distance)
-                case "ft":
-                    distance_function = D(ft=distance)
-                case _:
-                    distance_function = D(km=distance)
-            return queryset.filter(
-                location__address__address_us__geolocation__distance_lte=(
-                    user_location,
-                    distance_function,
-                )
-            )
-        else:
-            return ProviderToLocationView.objects.none()
+        return general_filter_distance(queryset, name, value, prefix="location__")
 
     def filter_organization_type(self, queryset, name, value):
         return queryset.filter(
@@ -223,24 +199,13 @@ class PractitionerRoleFilterSet(filters.FilterSet):
         return queryset.filter(location__organization__organizationtoname__name=value)
 
     def filter_address(self, queryset, name, value):
-        address_match_paths = [
-            "location__address__address_us__delivery_line_1",
-            "location__address__address_us__delivery_line_2",
-            "location__address__address_us__city_name",
-            "location__address__address_us__state_code__abbreviation",
-            "location__address__address_us__zipcode",
-        ]
-        return broad_address_match(queryset, name, value, address_match_paths)
+        return broad_address_match(queryset, name, value, prefix="location__")
 
     def filter_address_city(self, queryset, name, value):
-        return field_based_vector_search(
-            queryset, name, value, "location__address__address_us__city_name"
-        )
+        return city_address_search(queryset, name, value, prefix="location__")
 
     def filter_address_state(self, queryset, name, value):
-        return field_based_vector_search(
-            queryset, name, value, "location__address__address_us__state_code__abbreviation"
-        )
+        return state_address_search(queryset, name, value, prefix="location__")
 
     def filter_address_postalcode(self, queryset, name, value):
-        return queryset.filter(location__address__address_us__zipcode=value)
+        return postalcode_address_search(queryset, name, value, prefix="location__")

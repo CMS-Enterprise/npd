@@ -3,7 +3,15 @@ from django_filters import rest_framework as filters
 from ..documentation_content import docs
 from ..mappings import addressUseMapping
 from ..models import OrganizationView
-from .filter_utils import broad_address_match, field_based_vector_search, filter_identifier_general
+from .filter_utils import (
+    broad_address_match,
+    field_based_vector_search,
+    filter_identifier_general,
+    address_use_search,
+    city_address_search,
+    state_address_search,
+    postalcode_address_search,
+)
 
 
 class OrganizationFilterSet(filters.FilterSet):
@@ -85,39 +93,18 @@ class OrganizationFilterSet(filters.FilterSet):
         )
 
     def filter_address(self, queryset, name, value):
-        location_address_paths = [
-            "organization__organizationtoaddress__address__address_us__delivery_line_1",
-            "organization__organizationtoaddress__address__address_us__delivery_line_2",
-            "organization__organizationtoaddress__address__address_us__city_name",
-            "organization__organizationtoaddress__address__address_us__state_code__abbreviation",
-            "organization__organizationtoaddress__address__address_us__zipcode",
-        ]
-        return broad_address_match(queryset, name, value, location_address_paths)
+        return broad_address_match(
+            queryset, name, value, prefix="organization__organizationtoaddress__"
+        )
 
     def filter_address_city(self, queryset, name, value):
-        return field_based_vector_search(
-            queryset,
-            name,
-            value,
-            "organization__organizationtoaddress__address__address_us__city_name",
-        )
+        return city_address_search(queryset, name, value, prefix="organization__organizationtoaddress__")
 
     def filter_address_state(self, queryset, name, value):
-        return field_based_vector_search(
-            queryset,
-            name,
-            value,
-            "organization__organizationtoaddress__address__address_us__state_code__abbreviation",
-        )
+        return state_address_search(queryset, name, value, prefix="organization__organizationtoaddress__")
 
     def filter_address_postalcode(self, queryset, name, value):
-        return queryset.filter(
-            organization__organizationtoaddress__address__address_us__zipcode=value
-        )
+        return postalcode_address_search(queryset, name, value, prefix="organization__organizationtoaddress__")
 
     def filter_address_use(self, queryset, name, value):
-        if value in addressUseMapping.keys():
-            value = addressUseMapping.toNPD(value)
-        else:
-            value = -1
-        return queryset.filter(organization__organizationtoaddress__address_use_id=value)
+        return address_use_search(queryset, name, value, prefix="organization__organizationtoaddress")

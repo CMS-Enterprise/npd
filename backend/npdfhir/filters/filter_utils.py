@@ -1,12 +1,23 @@
+import re
 from django.contrib.postgres.search import SearchVector, SearchQuery
 from django.db.models import Q
+from django.contrib.gis.geos import Point
+from django.contrib.gis.measure import D
 
 from ..utils import parse_identifier_query
-from ..mappings import genderMapping
+from ..mappings import genderMapping, addressUseMapping
 
-#TODO: only pass in prefixes to address 
-def broad_address_match(queryset, name, value, address_paths):
-    return queryset.annotate(search=SearchVector(*address_paths)).filter(
+
+def broad_address_match(queryset, name, value, prefix=""):
+    location_filter_paths = [
+        prefix + "address__address_us__delivery_line_1",
+        prefix + "address__address_us__delivery_line_2",
+        prefix + "address__address_us__city_name",
+        prefix + "address__address_us__state_code__abbreviation",
+        prefix + "address__address_us__zipcode",
+    ]
+
+    return queryset.annotate(search=SearchVector(*location_filter_paths)).filter(
         search=SearchQuery(value, search_type="websearch", config="english")
     )
 
@@ -17,8 +28,62 @@ def field_based_vector_search(queryset, name, value, address_path):
     )
 
 
-#All paths will share the same prefix
-#Start with name ones, then the address ones. To standardize the paths and only pass in the prefix. 
+def city_address_search(queryset, name, value, prefix=""):
+    path = prefix + "address__address_us__city_name"
+    return field_based_vector_search(queryset, name, value, path)
+
+
+def state_address_search(queryset, name, value, prefix=""):
+    path = prefix + "address__address_us__state_code__abbreviation"
+    return field_based_vector_search(queryset, name, value, path)
+
+
+def postalcode_address_search(queryset, name, value, prefix=""):
+    path = prefix + "address__address_us__zipcode"
+    arg = {path: value}
+    return queryset.filter(**arg)
+
+
+def address_use_search(queryset, name, value, prefix=""):
+    if value in addressUseMapping.keys():
+        value = addressUseMapping.toNPD(value)
+    else:
+        value = -1
+
+    arg = {prefix + "__address_use_id": value}
+    return queryset.filter(**arg)
+
+
+def general_filter_distance(queryset, name, value, prefix=""):
+    pattern = r"(-?\d+\.?\d*)\|(-?\d+\.?\d*)\|(\d+\.?\d*)\|?(km|mi|ft)?"
+    match = re.fullmatch(pattern, value)
+    if match:
+        lat, lon, distance, units = match.groups()
+        lon = float(lon)
+        lat = float(lat)
+        distance = float(distance)
+        user_location = Point(lon, lat, srid=4326)
+        match units:
+            case "mi":
+                distance_function = D(mi=distance)
+            case "ft":
+                distance_function = D(ft=distance)
+            case _:
+                distance_function = D(km=distance)
+
+        arg = {
+            prefix + "address__address_us__geolocation__distance_lte": (
+                user_location,
+                distance_function,
+            )
+        }
+        return queryset.filter(**arg)
+    else:
+        return queryset.objects.none()
+
+
+# All paths will share the same prefix
+# Start with name ones, then the address ones. To standardize the paths and only pass in the prefix.
 def filter_identifier_general(queryset, name, value, npi_path=None, ein_path=None, other_path=None):
     from uuid import UUID
 
@@ -69,6 +134,7 @@ def simple_generic_field_search(queryset, name, value, name_path):
     name_path_dict = {name_path: query}
 
     return queryset.filter(**name_path_dict)
+
 
 def filter_individual_name(queryset, name, value, prefix):
     path = prefix + "__individual__individualtoname__search_vector"
