@@ -8,6 +8,7 @@ from .filter_utils import (
     field_based_vector_search,
     generic_filter_gender,
     simple_generic_field_search,
+    filter_individual_name,
 )
 
 
@@ -76,7 +77,7 @@ class PractitionerFilterSet(filters.FilterSet):
         ]
 
     def filter_gender(self, queryset, name, value):
-        return generic_filter_gender(queryset, name, value, "provider__individual__gender")
+        return generic_filter_gender(queryset, name, value, "provider")
 
     def filter_identifier(self, queryset, name, value):
         return filter_identifier_general(
@@ -88,8 +89,8 @@ class PractitionerFilterSet(filters.FilterSet):
         )
 
     def filter_practitioner_name(self, queryset, name, value):
-        return simple_generic_field_search(
-            queryset, name, value, "provider__individual__individualtoname__search_vector"
+        return filter_individual_name(
+            queryset, name, value, "provider"
         ).distinct()
 
     def filter_practitioner_type(self, queryset, name, value):

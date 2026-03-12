@@ -43,6 +43,7 @@ class OrganizationAffiliationFilterSet(filters.FilterSet):
     def filter_participating_name(self, queryset, name, value):
         return queryset.filter(organization_name__icontains=value)
 
+    #Filter generally by clinical organizational 
     def filter_identifier(self, queryset, name, value):
         return filter_identifier_general(queryset, name, value, npi_path="npi")
 

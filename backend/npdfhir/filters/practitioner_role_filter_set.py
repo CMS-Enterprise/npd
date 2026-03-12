@@ -14,6 +14,7 @@ from .filter_utils import (
     filter_identifier_general,
     generic_filter_gender,
     simple_generic_field_search,
+    filter_individual_name,
 )
 
 
@@ -129,16 +130,16 @@ class PractitionerRoleFilterSet(filters.FilterSet):
         ]
 
     def filter_practitioner_name(self, queryset, name, value):
-        return simple_generic_field_search(
+        return filter_individual_name(
             queryset,
             name,
             value,
-            "provider_to_organization__individual__individual__individualtoname__search_vector",
+            "provider_to_organization__individual",
         ).distinct()
 
     def filter_practitioner_gender(self, queryset, name, value):
         return generic_filter_gender(
-            queryset, name, value, "provider_to_organization__individual__individual__gender"
+            queryset, name, value, "provider_to_organization__individual"
         )
 
     def filter_practitioner_type(self, queryset, name, value):
