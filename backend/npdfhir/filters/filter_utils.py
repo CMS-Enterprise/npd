@@ -138,3 +138,7 @@ def simple_generic_field_search(queryset, name, value, name_path):
 def filter_individual_name(queryset, name, value, prefix):
     path = prefix + "__individual__individualtoname__search_vector"
     return simple_generic_field_search(queryset, name, value, path)
+
+def filter_organization_name_gen(queryset, name, value, prefix=""):
+    path = prefix + "organizationtoname__search_vector"
+    return simple_generic_field_search(queryset, name, value, path)

@@ -1,4 +1,3 @@
-from django.contrib.postgres.search import SearchVector
 from django.db.models import Q
 from django_filters import rest_framework as filters
 
@@ -14,6 +13,7 @@ from .filter_utils import (
     filter_identifier_general,
     generic_filter_gender,
     filter_individual_name,
+    filter_organization_name_gen,
     general_filter_distance,
 )
 
@@ -149,9 +149,7 @@ class PractitionerRoleFilterSet(filters.FilterSet):
         )
 
     def filter_organization_name(self, queryset, name, value):
-        return queryset.annotate(
-            search=SearchVector("provider_to_organization__organization__organizationtoname__name")
-        ).filter(search=value)
+        return filter_organization_name_gen(queryset, name, value, prefix="provider_to_organization__organization__")
 
     def filter_distance(self, queryset, name, value):
         return general_filter_distance(queryset, name, value, prefix="location__")
@@ -196,7 +194,7 @@ class PractitionerRoleFilterSet(filters.FilterSet):
 
     def filter_endpoint_organization_name(self, queryset, name, value):
         # The parent of the organization that owns the location the endpoint is attached to
-        return queryset.filter(location__organization__organizationtoname__name=value)
+        return filter_organization_name_gen(queryset, name, value, prefix="location__organization__")
 
     def filter_address(self, queryset, name, value):
         return broad_address_match(queryset, name, value, prefix="location__")

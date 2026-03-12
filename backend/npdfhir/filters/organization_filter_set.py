@@ -7,6 +7,7 @@ from .filter_utils import (
     broad_address_match,
     field_based_vector_search,
     filter_identifier_general,
+    filter_organization_name_gen,
     address_use_search,
     city_address_search,
     state_address_search,
@@ -70,9 +71,7 @@ class OrganizationFilterSet(filters.FilterSet):
         ]
 
     def filter_name(self, queryset, name, value):
-        return field_based_vector_search(
-            queryset, name, value.upper(), "organization__organizationtoname__search_vector"
-        )
+        return filter_organization_name_gen(queryset, name, value.upper(), prefix="organization__")
 
     def filter_identifier(self, queryset, name, value):
         return filter_identifier_general(
