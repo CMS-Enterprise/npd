@@ -150,13 +150,15 @@ class PractitionerRoleFilterSet(filters.FilterSet):
         )
 
     def filter_organization_name(self, queryset, name, value):
-        return filter_organization_name_gen(queryset, name, value, prefix="provider_to_organization__organization__")
+        return filter_organization_name_gen(
+            queryset, name, value, prefix="provider_to_organization__organization__"
+        )
 
     def filter_distance(self, queryset, name, value):
         return general_filter_distance(queryset, name, value, prefix="location__")
 
     def filter_organization_type(self, queryset, name, value):
-        return gen_nucc_display_filter(queryset,name,value,prefix="provider_to_organization__")
+        return gen_nucc_display_filter(queryset, name, value, prefix="provider_to_organization__")
 
     def filter_practitioner_identifier(self, queryset, name, value):
         return filter_identifier_general(
@@ -191,7 +193,9 @@ class PractitionerRoleFilterSet(filters.FilterSet):
 
     def filter_endpoint_organization_name(self, queryset, name, value):
         # The parent of the organization that owns the location the endpoint is attached to
-        return filter_organization_name_gen(queryset, name, value, prefix="location__organization__")
+        return filter_organization_name_gen(
+            queryset, name, value, prefix="location__organization__"
+        )
 
     def filter_address(self, queryset, name, value):
         return broad_address_match(queryset, name, value, prefix="location__")
