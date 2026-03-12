@@ -8,10 +8,15 @@ import dotenv from 'dotenv';
 import path from 'path';
 dotenv.config({ path: path.resolve(__dirname, '.env') });
 
+const globalTimeout: string = process.env.GLOBAL_TIMEOUT ?? "30000";
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
+
+  globalTimeout: parseFloat(globalTimeout),
+  
   testDir: "./tests",
 
   /* Run tests in files in parallel */

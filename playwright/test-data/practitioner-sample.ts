@@ -1,6 +1,6 @@
 import { PractitionerDataType } from "./types"
 
-export const practitioner_data: PractitionerDataType = {
+export const data: PractitionerDataType = {
     "addresses": [
         {
             "addressLine1": "PO BOX 27036",

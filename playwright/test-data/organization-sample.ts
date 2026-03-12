@@ -1,6 +1,6 @@
 import { OrganizationDataType } from "./types"
 
-export const organization_data: OrganizationDataType = {
+export const data: OrganizationDataType = {
     "addresses": [
         {
             "addressLine1": "PO BOX 6154",

@@ -1,20 +1,40 @@
 import { test, expect } from '@playwright/test';
 
-import { organization_data } from '../../../test-data/organization'
+import { data } from '../../../test-data/organization-sample'
 
 import { testNPI, testOrganizationNames, testTaxonomies, testAddresses, testTelecoms, testHasFhirResults } from '../../../utils/fhir-checks';
 
+import { getRandomNPIRecords, getSpecificNPIRecords } from '../../../utils/random-sample';
+import { OrganizationDataType } from '../../../test-data/types';
+
+var testData: Array<OrganizationDataType> = [data];
+
+const type = 2;
+
+test.beforeAll( async({request}) => {
+    var npiList = process.env.NPI_LIST?.split(",")
+    if (npiList !== undefined && npiList.length >0) {
+        testData = await getSpecificNPIRecords(request, npiList, type)
+    }
+    else if (Boolean(process.env.RANDOM_SAMPLE?.toLowerCase()) === true){
+        testData = await getRandomNPIRecords(request, 10, type);
+    }
+    else {
+        testData = [data]
+    }
+})
+
 // These tests are based on the FHIR API User Stories Found in This Epic: https://jiraent.cms.gov/browse/NDH-877
 test.describe('I want to retrieve Organization resources by Type 2 NPI so that I can get organizational provider information in a FHIR format', () => { 
-
-        test('Is a valid FHIR response', async ({request}) => {
+    for (const record of testData) {
+        test(`NPI: ${record.number} - Is a valid FHIR response`, async ({request}) => {
             // Search by NPI
-            const response = await request.get(`/fhir/Organization/?identifier=NPI|${organization_data.number}`);
-            await testHasFhirResults(response, organization_data, 'Organization')
+            const response = await request.get(`/fhir/Organization/?identifier=NPI|${record.number}`);
+            await testHasFhirResults(response, record, 'Organization')
             });
-        test('Has expected NPI', async ({request}) => {
+        test(`NPI: ${record.number}Has expected NPI`, async ({request}) => {
             // Search by NPI
-            const response = await request.get(`/fhir/Organization/?identifier=NPI|${organization_data.number}`);
+            const response = await request.get(`/fhir/Organization/?identifier=NPI|${record.number}`);
 
             const body = await response.json()
 
@@ -24,22 +44,22 @@ test.describe('I want to retrieve Organization resources by Type 2 NPI so that I
             const identifiers = resource.identifier;
             expect(identifiers.length).toBeGreaterThan(0);
             const npi = identifiers.filter(identifier => identifier.system == "http://terminology.hl7.org/NamingSystem/npi")[0];
-            testNPI(npi, organization_data)
+            testNPI(npi, record)
         });
-        test('Has expected name(s)', async ({request}) => {
+        test(`NPI: ${record.number}Has expected name(s)`, async ({request}) => {
             // Search by NPI
-            const response = await request.get(`/fhir/Organization/?identifier=NPI|${organization_data.number}`);
+            const response = await request.get(`/fhir/Organization/?identifier=NPI|${record.number}`);
 
             const body = await response.json()
 
             const resource = body.results.entry[0].resource
 
             // Validate that name data are being returned properly and match the expected data
-            testOrganizationNames(resource, organization_data)
+            testOrganizationNames(resource, record)
         });
-        test('Has expected taxonomy(ies)', async ({request}) => {
+        test(`NPI: ${record.number}Has expected taxonomy(ies)`, async ({request}) => {
             // Search by NPI
-            const response = await request.get(`/fhir/Organization/?identifier=NPI|${organization_data.number}`);
+            const response = await request.get(`/fhir/Organization/?identifier=NPI|${record.number}`);
 
             const body = await response.json()
 
@@ -47,12 +67,12 @@ test.describe('I want to retrieve Organization resources by Type 2 NPI so that I
 
             // Validate that taxonomy data are being returned properly and match the expected data
             expect(resource).toHaveProperty('qualification')
-            expect(resource.qualification.length).toEqual(organization_data.taxonomies.length);
-            testTaxonomies(resource.qualification, organization_data);
+            expect(resource.qualification.length).toEqual(record.taxonomies.length);
+            testTaxonomies(resource.qualification, record);
         });
-        test('Has expected address(es)', async ({request}) => {
+        test(`NPI: ${record.number}Has expected address(es)`, async ({request}) => {
             // Search by NPI
-            const response = await request.get(`/fhir/Organization/?identifier=NPI|${organization_data.number}`);
+            const response = await request.get(`/fhir/Organization/?identifier=NPI|${record.number}`);
 
             const body = await response.json()
 
@@ -60,11 +80,11 @@ test.describe('I want to retrieve Organization resources by Type 2 NPI so that I
 
             // Validate that address data are being returned properly and match the expected data
             expect(resource).toHaveProperty('address');
-            testAddresses(resource.address, organization_data);
+            testAddresses(resource.address, record);
         });
-        test('Has expected phone(s)', async ({request}) => {
+        test(`NPI: ${record.number}Has expected phone(s)`, async ({request}) => {
             // Search by NPI
-            const response = await request.get(`/fhir/Organization/?identifier=NPI|${organization_data.number}`);
+            const response = await request.get(`/fhir/Organization/?identifier=NPI|${record.number}`);
 
             const body = await response.json()
 
@@ -72,8 +92,9 @@ test.describe('I want to retrieve Organization resources by Type 2 NPI so that I
 
             // Validate that phone data are being returned properly and match the expected data
             expect(resource).toHaveProperty('telecom');
-            testTelecoms(resource.telecom, organization_data);
+            testTelecoms(resource.telecom, record);
         });
-    });
+    }
+});
     
     
