@@ -1,6 +1,5 @@
-import { PractitionerData } from "../tests/local/constants"
+import { PractitionerDataType, NameDataType, FullAddressDataType, OrganizationDataType, OrganizationNameDataType } from "../test-data/types"
 import { expect } from '@playwright/test';
-import { NameData, AddressData } from "../tests/local/constants";
 
 export const AddressTypeMapping = {
     "MAILING": 'postal',
@@ -9,7 +8,7 @@ export const AddressTypeMapping = {
 
 const base_url = process.env.BASE_URL
 
-export async function testHasFhirResults(response:any, testData: PractitionerData, resource: string){
+export async function testHasFhirResults(response:any, testData: PractitionerDataType | OrganizationDataType, resource: string){
     // Assert the status code
     expect(response.status()).toBe(200);
     
@@ -40,7 +39,7 @@ export async function testHasFhirResults(response:any, testData: PractitionerDat
     return body  
 }
 
-export function testNPI(npiResponse: any, testData: PractitionerData){
+export function testNPI(npiResponse: any, testData: PractitionerDataType | OrganizationDataType){
         expect(npiResponse).toHaveProperty('use');
         expect(npiResponse.use).toEqual('official');
         expect(npiResponse).toHaveProperty('value');
@@ -64,7 +63,7 @@ export function testNPI(npiResponse: any, testData: PractitionerData){
         }
 }
 
-export function testTaxonomies(qualificationResponse: any, testData: PractitionerData){
+export function testTaxonomies(qualificationResponse: any, testData: PractitionerDataType | OrganizationDataType){
     const taxonomies = qualificationResponse.filter(qualification => qualification.code.coding[0].system == "http://nucc.org/provider-taxonomy");
     testData.taxonomies.forEach(testDataTaxonomy => {
         const filtered_taxonomies = taxonomies.filter(taxonomy => taxonomy.code.coding[0].code == testDataTaxonomy.code);
@@ -74,8 +73,10 @@ export function testTaxonomies(qualificationResponse: any, testData: Practitione
     })
 }
 
-export function testNames(nameResponse: any, testData: PractitionerData){
-    const practitioner_names: Array<NameData> = [{
+export function testNames(fhirResource: any, testData: PractitionerDataType ){
+    const names = fhirResource.name;
+    expect(names.length).toEqual(testData.otherNames.length + 1);
+    const practitioner_names: Array<NameDataType> = [{
                 "code": "1",
                 "namePrefix": testData.basic.namePrefix,
                 "firstName": testData.basic.firstName,
@@ -84,15 +85,29 @@ export function testNames(nameResponse: any, testData: PractitionerData){
                 "type": 'OFFICIAL'
             }, ...testData.otherNames]
     practitioner_names.forEach(practitioner_name => {
-        const filtered_name = nameResponse.filter(name => name.text.toLowerCase() == [practitioner_name.namePrefix, practitioner_name.firstName, practitioner_name.middleName, practitioner_name.lastName].join(' ').toLowerCase());
+        const filtered_name = names.filter(name => name.text.toLowerCase() == [practitioner_name.namePrefix, practitioner_name.firstName, practitioner_name.middleName, practitioner_name.lastName].join(' ').toLowerCase());
             expect(filtered_name.length).toBeGreaterThanOrEqual(1);
             expect(filtered_name[0].family = practitioner_name?.lastName)
             // TODO: improve
         })
 }
 
-export function testAddresses(addressResponse: any, testData: PractitionerData){
-    const testAddresses: Array<AddressData> = [...testData.addresses, ...testData.practiceLocations];
+export function testOrganizationNames(fhirResource: any, testData: OrganizationDataType ){
+    const allNames = [fhirResource.name, ...fhirResource.alias]
+    const organization_names: Array<OrganizationNameDataType> = [{
+            code: "",
+            organizationName: testData.basic.name,
+            type: "",
+        }, ...testData.otherNames]
+    organization_names.forEach(organization_name => {
+        const filtered_name = allNames.filter(name => name.toLowerCase() == organization_name.organizationName.toLowerCase());
+            expect(filtered_name.length).toBeGreaterThanOrEqual(1);
+            // TODO: improve
+        })
+}
+
+export function testAddresses(addressResponse: any, testData: PractitionerDataType | OrganizationDataType){
+    const testAddresses: Array<FullAddressDataType> = [...testData.addresses, ...testData.practiceLocations];
     testAddresses.forEach(testAddress => {
         const filtered_address = addressResponse.filter(address => address.line.includes(testAddress.addressLine1) && address.city == testAddress.city && address.state == testAddress.state && address.postalCode == testAddress.postalCode);
         expect(filtered_address.length).toBeGreaterThanOrEqual(1);
@@ -101,8 +116,8 @@ export function testAddresses(addressResponse: any, testData: PractitionerData){
     })
 }
 
-export async function testTelecoms(telecomResponse: any, testData: PractitionerData){
-    const testAddresses: Array<AddressData> = [...testData.addresses, ...testData.practiceLocations];
+export async function testTelecoms(telecomResponse: any, testData: PractitionerDataType | OrganizationDataType){
+    const testAddresses: Array<FullAddressDataType> = [...testData.addresses, ...testData.practiceLocations];
     const testNumbers = testAddresses.map(address => address.teleNumber);
     testNumbers.forEach(testNumber => {
         const filtered_telecom = telecomResponse.filter(telecom => telecom.system == "phone" && telecom.value == testNumber)
@@ -115,14 +130,14 @@ export async function testTelecoms(telecomResponse: any, testData: PractitionerD
     })
 }
 
-export async function expectResultsToHavePractitioner(url: string, testData: PractitionerData, request: any) {
+export async function expectResultsToHaveProvider(url: string, testData: PractitionerDataType | OrganizationDataType, request: any, resource: 'Practitioner' | 'Organization') {
     var next: string | null = url;
-    var found;
+    var found: boolean = false;
     
     while (next !== null && !found){
         const response = await request.get(next);
     
-        var body = await testHasFhirResults(response, testData, 'Practitioner')
+        var body = await testHasFhirResults(response, testData, resource)
     
         const entries = body.results.entry;
     

@@ -1,20 +1,20 @@
 import { test, expect } from '@playwright/test';
 
-import { practitioner_data } from '../../../test-data/practitioner'
+import { organization_data } from '../../../test-data/organization'
 
-import { testNPI, testNames, testTaxonomies, testAddresses, testTelecoms, testHasFhirResults } from '../../../utils/fhir-checks';
+import { testNPI, testOrganizationNames, testTaxonomies, testAddresses, testTelecoms, testHasFhirResults } from '../../../utils/fhir-checks';
 
 // These tests are based on the FHIR API User Stories Found in This Epic: https://jiraent.cms.gov/browse/NDH-877
-test.describe('As a developer, I want to retrieve a Practitioner resource by NPI so that I can get provider demographic information in FHIR format', () => { 
+test.describe('I want to retrieve Organization resources by Type 2 NPI so that I can get organizational provider information in a FHIR format', () => { 
 
         test('Is a valid FHIR response', async ({request}) => {
             // Search by NPI
-            const response = await request.get(`/fhir/Practitioner/?identifier=NPI|${practitioner_data.number}`);
-            await testHasFhirResults(response, practitioner_data, 'Practitioner')
+            const response = await request.get(`/fhir/Organization/?identifier=NPI|${organization_data.number}`);
+            await testHasFhirResults(response, organization_data, 'Organization')
             });
         test('Has expected NPI', async ({request}) => {
             // Search by NPI
-            const response = await request.get(`/fhir/Practitioner/?identifier=NPI|${practitioner_data.number}`);
+            const response = await request.get(`/fhir/Organization/?identifier=NPI|${organization_data.number}`);
 
             const body = await response.json()
 
@@ -24,24 +24,22 @@ test.describe('As a developer, I want to retrieve a Practitioner resource by NPI
             const identifiers = resource.identifier;
             expect(identifiers.length).toBeGreaterThan(0);
             const npi = identifiers.filter(identifier => identifier.system == "http://terminology.hl7.org/NamingSystem/npi")[0];
-            testNPI(npi, practitioner_data)
+            testNPI(npi, organization_data)
         });
         test('Has expected name(s)', async ({request}) => {
             // Search by NPI
-            const response = await request.get(`/fhir/Practitioner/?identifier=NPI|${practitioner_data.number}`);
+            const response = await request.get(`/fhir/Organization/?identifier=NPI|${organization_data.number}`);
 
             const body = await response.json()
 
             const resource = body.results.entry[0].resource
 
             // Validate that name data are being returned properly and match the expected data
-            const names = resource.name;
-            expect(names.length).toEqual(practitioner_data.otherNames.length + 1);
-            testNames(names, practitioner_data)
+            testOrganizationNames(resource, organization_data)
         });
         test('Has expected taxonomy(ies)', async ({request}) => {
             // Search by NPI
-            const response = await request.get(`/fhir/Practitioner/?identifier=NPI|${practitioner_data.number}`);
+            const response = await request.get(`/fhir/Organization/?identifier=NPI|${organization_data.number}`);
 
             const body = await response.json()
 
@@ -49,12 +47,12 @@ test.describe('As a developer, I want to retrieve a Practitioner resource by NPI
 
             // Validate that taxonomy data are being returned properly and match the expected data
             expect(resource).toHaveProperty('qualification')
-            expect(resource.qualification.length).toEqual(practitioner_data.taxonomies.length);
-            testTaxonomies(resource.qualification, practitioner_data);
+            expect(resource.qualification.length).toEqual(organization_data.taxonomies.length);
+            testTaxonomies(resource.qualification, organization_data);
         });
         test('Has expected address(es)', async ({request}) => {
             // Search by NPI
-            const response = await request.get(`/fhir/Practitioner/?identifier=NPI|${practitioner_data.number}`);
+            const response = await request.get(`/fhir/Organization/?identifier=NPI|${organization_data.number}`);
 
             const body = await response.json()
 
@@ -62,11 +60,11 @@ test.describe('As a developer, I want to retrieve a Practitioner resource by NPI
 
             // Validate that address data are being returned properly and match the expected data
             expect(resource).toHaveProperty('address');
-            testAddresses(resource.address, practitioner_data);
+            testAddresses(resource.address, organization_data);
         });
         test('Has expected phone(s)', async ({request}) => {
             // Search by NPI
-            const response = await request.get(`/fhir/Practitioner/?identifier=NPI|${practitioner_data.number}`);
+            const response = await request.get(`/fhir/Organization/?identifier=NPI|${organization_data.number}`);
 
             const body = await response.json()
 
@@ -74,7 +72,7 @@ test.describe('As a developer, I want to retrieve a Practitioner resource by NPI
 
             // Validate that phone data are being returned properly and match the expected data
             expect(resource).toHaveProperty('telecom');
-            testTelecoms(resource.telecom, practitioner_data);
+            testTelecoms(resource.telecom, organization_data);
         });
     });
     

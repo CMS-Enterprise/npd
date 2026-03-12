@@ -1,8 +1,8 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 
 import { practitioner_data } from '../../../test-data/practitioner'
 
-import { expectResultsToHavePractitioner } from '../../../utils/fhir-checks';
+import { expectResultsToHaveProvider } from '../../../utils/fhir-checks';
 
 
 // These tests are based on the FHIR API User Stories Found in This Epic: https://jiraent.cms.gov/browse/NDH-877
@@ -11,27 +11,27 @@ import { expectResultsToHavePractitioner } from '../../../utils/fhir-checks';
         test('Can search by full name', async ({request})=>{
             // Search by Full Name
             const fullNameSearch = `/fhir/Practitioner/?page_size=1000&name=${practitioner_data.basic.firstName} ${practitioner_data.basic.lastName}`;
-            await expectResultsToHavePractitioner(fullNameSearch, practitioner_data, request)
+            await expectResultsToHaveProvider(fullNameSearch, practitioner_data, request, 'Practitioner')
         })
         test('Can search by first name', async ({request})=>{
             // Search by First Name
             const firstNameSearch = `/fhir/Practitioner/?page_size=1000&name=${practitioner_data.basic.firstName}`;
-            await expectResultsToHavePractitioner(firstNameSearch, practitioner_data, request)
+            await expectResultsToHaveProvider(firstNameSearch, practitioner_data, request, 'Practitioner')
         })
         test('Can search by last name', async ({request})=>{
             // Search by Last Name
             const lastNameSearch = `/fhir/Practitioner/?page_size=1000&name=${practitioner_data.basic.lastName}`;
-            await expectResultsToHavePractitioner(lastNameSearch, practitioner_data, request)
+            await expectResultsToHaveProvider(lastNameSearch, practitioner_data, request, 'Practitioner')
         })
         test('Can search by address', async ({request})=>{
             // Search by Location
             const addressSearch = `/fhir/Practitioner/?page_size=1000&address=${practitioner_data.addresses[0].addressLine1}`;
-            await expectResultsToHavePractitioner(addressSearch, practitioner_data, request)
+            await expectResultsToHaveProvider(addressSearch, practitioner_data, request, 'Practitioner')
         })
         test('Can search by full name and address', async ({request})=>{
 
             // Search by Name and Location
             const nameAddressSearch = `/fhir/Practitioner/?page_size=1000&address=${practitioner_data.addresses[0].addressLine1}&name=${practitioner_data.basic.firstName} ${practitioner_data.basic.lastName}`;
-            await expectResultsToHavePractitioner(nameAddressSearch, practitioner_data, request)
+            await expectResultsToHaveProvider(nameAddressSearch, practitioner_data, request, 'Practitioner')
         })
     })

@@ -1,6 +1,6 @@
-import { PractitionerData } from "../tests/local/constants"
+import { PractitionerDataType } from "./types"
 
-export const practitioner_data: PractitionerData = {
+export const practitioner_data: PractitionerDataType = {
     "addresses": [
         {
             "addressLine1": "PO BOX 27036",

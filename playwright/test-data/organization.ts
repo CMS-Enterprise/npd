@@ -1,0 +1,281 @@
+import { OrganizationDataType } from "./types"
+
+export const organization_data: OrganizationDataType = {
+    "addresses": [
+        {
+            "addressLine1": "PO BOX 6154",
+            "addressLine2": "",
+            "addressPurpose": "MAILING",
+            "addressType": "DOM",
+            "city": "NEW YORK",
+            "countryCode": "US",
+            "countryName": "United States",
+            "postalCode": "102496154",
+            "state": "NY",
+            "teleNumber": "914-335-8803"
+        },
+        {
+            "addressLine1": "622 W 168TH ST",
+            "addressLine2": "",
+            "addressPurpose": "LOCATION",
+            "addressType": "DOM",
+            "city": "NEW YORK",
+            "countryCode": "US",
+            "countryName": "United States",
+            "postalCode": "100323720",
+            "state": "NY",
+            "teleNumber": "914-335-8803"
+        }
+    ],
+    "basic": {
+        "aoFirstName": "MICHAEL",
+        "aoLastName": "BRESLIN",
+        "aoMiddleName": "P.",
+        "aoTeleNumber": "9292971768",
+        "aoTitle": "Group SVP and CFO",
+        "certificationDate": "2025-10-07",
+        "enumerationDate": "2006-08-24",
+        "lastUpdated": "2025-10-07",
+        "name": "THE NEW YORK AND PRESBYTERIAN HOSPITAL",
+        "orgName": "THE NEW YORK AND PRESBYTERIAN HOSPITAL",
+        "orgSubpart": "NO",
+        "status": "A"
+    },
+    "endPoints": [
+        {
+            "addressLine1": "5141 Broadway",
+            "addressType": "DOM",
+            "affiliation": "N",
+            "city": "New York",
+            "contentOtherDescription": "FHIR",
+            "contentType": "OTHER",
+            "contentTypeDescription": "Other",
+            "countryCode": "US",
+            "countryName": "United States",
+            "endpoint": "https://epicproxy-pub.et1089.epichosted.com/FHIRProxy/api/FHIR/DSTU2/",
+            "endpointDescription": "FHIR",
+            "endpointType": "FHIR",
+            "endpointTypeDescription": "FHIR URL",
+            "postalCode": "100341159",
+            "state": "NY",
+            "use": "HIE",
+            "useDescription": "Health Information Exchange (HIE)"
+        },
+        {
+            "addressLine1": "622 W 168th St",
+            "addressType": "DOM",
+            "affiliation": "N",
+            "city": "New York",
+            "contentOtherDescription": "FHIR",
+            "contentType": "OTHER",
+            "contentTypeDescription": "Other",
+            "countryCode": "US",
+            "countryName": "United States",
+            "endpoint": "https://epicproxy-pub.et1089.epichosted.com/FHIRProxy/api/FHIR/DSTU2/",
+            "endpointDescription": "FHIR",
+            "endpointType": "FHIR",
+            "endpointTypeDescription": "FHIR URL",
+            "postalCode": "100323720",
+            "state": "NY",
+            "use": "HIE",
+            "useDescription": "Health Information Exchange (HIE)"
+        },
+        {
+            "addressLine1": "622 W 168th St",
+            "addressType": "DOM",
+            "affiliation": "N",
+            "city": "New York",
+            "contentOtherDescription": "Direct Address",
+            "contentType": "OTHER",
+            "contentTypeDescription": "Other",
+            "countryCode": "US",
+            "countryName": "United States",
+            "endpoint": "NYP-CUMC@direct.nyp.org",
+            "endpointDescription": "Direct Address",
+            "endpointType": "DIRECT",
+            "endpointTypeDescription": "Direct Messaging Address",
+            "postalCode": "100323720",
+            "state": "NY",
+            "use": "DIRECT",
+            "useDescription": "Direct"
+        },
+        {
+            "addressLine1": "622 W 168th St",
+            "addressType": "DOM",
+            "affiliation": "N",
+            "city": "New York",
+            "contentOtherDescription": "FHIR",
+            "contentType": "OTHER",
+            "contentTypeDescription": "Other",
+            "countryCode": "US",
+            "countryName": "United States",
+            "endpoint": "https://epicproxy-pub.et1089.epichosted.com/FHIRProxy/api/FHIR/R4/",
+            "endpointDescription": "FHIR",
+            "endpointType": "FHIR",
+            "endpointTypeDescription": "FHIR URL",
+            "postalCode": "100323720",
+            "state": "NY",
+            "use": "HIE",
+            "useDescription": "Health Information Exchange (HIE)"
+        },
+        {
+            "addressLine1": "5141 Broadway",
+            "addressType": "DOM",
+            "affiliation": "N",
+            "city": "New York",
+            "contentOtherDescription": "Direct Address",
+            "contentType": "OTHER",
+            "contentTypeDescription": "Other",
+            "countryCode": "US",
+            "countryName": "United States",
+            "endpoint": "NYP-AH@direct.nyp.org",
+            "endpointDescription": "Direct Address",
+            "endpointType": "DIRECT",
+            "endpointTypeDescription": "Direct Messaging Address",
+            "postalCode": "100341159",
+            "state": "NY",
+            "use": "DIRECT",
+            "useDescription": "Direct"
+        },
+        {
+            "addressLine1": "3959 Broadway",
+            "addressType": "DOM",
+            "affiliation": "N",
+            "city": "New York",
+            "contentOtherDescription": "FHIR",
+            "contentType": "OTHER",
+            "contentTypeDescription": "Other",
+            "countryCode": "US",
+            "countryName": "United States",
+            "endpoint": "https://epicproxy-pub.et1089.epichosted.com/FHIRProxy/api/FHIR/R4/",
+            "endpointDescription": "FHIR",
+            "endpointType": "FHIR",
+            "endpointTypeDescription": "FHIR URL",
+            "postalCode": "100321559",
+            "state": "NY",
+            "use": "HIE",
+            "useDescription": "Health Information Exchange (HIE)"
+        },
+        {
+            "addressLine1": "5141 Broadway",
+            "addressType": "DOM",
+            "affiliation": "N",
+            "city": "New York",
+            "contentOtherDescription": "FHIR",
+            "contentType": "OTHER",
+            "contentTypeDescription": "Other",
+            "countryCode": "US",
+            "countryName": "United States",
+            "endpoint": "https://epicproxy-pub.et1089.epichosted.com/FHIRProxy/api/FHIR/R4/",
+            "endpointDescription": "FHIR",
+            "endpointType": "FHIR",
+            "endpointTypeDescription": "FHIR URL",
+            "postalCode": "100341159",
+            "state": "NY",
+            "use": "HIE",
+            "useDescription": "Health Information Exchange (HIE)"
+        },
+        {
+            "addressLine1": "3959 Broadway",
+            "addressType": "DOM",
+            "affiliation": "N",
+            "city": "New York",
+            "contentOtherDescription": "Direct Address",
+            "contentType": "OTHER",
+            "contentTypeDescription": "Other",
+            "countryCode": "US",
+            "countryName": "United States",
+            "endpoint": "NYP-MSCH@direct.nyp.org",
+            "endpointDescription": "Direct Address",
+            "endpointType": "DIRECT",
+            "endpointTypeDescription": "Direct Messaging Address",
+            "postalCode": "100321559",
+            "state": "NY",
+            "use": "DIRECT",
+            "useDescription": "Direct"
+        },
+        {
+            "addressLine1": "3959 Broadway",
+            "addressType": "DOM",
+            "affiliation": "N",
+            "city": "New York",
+            "contentOtherDescription": "FHIR",
+            "contentType": "OTHER",
+            "contentTypeDescription": "Other",
+            "countryCode": "US",
+            "countryName": "United States",
+            "endpoint": "https://epicproxy-pub.et1089.epichosted.com/FHIRProxy/api/FHIR/DSTU2/",
+            "endpointDescription": "FHIR",
+            "endpointType": "FHIR",
+            "endpointTypeDescription": "FHIR URL",
+            "postalCode": "100321559",
+            "state": "NY",
+            "use": "HIE",
+            "useDescription": "Health Information Exchange (HIE)"
+        }
+    ],
+    "enumerationType": "NPI-2",
+    "identifiers": [
+        {
+            "identifier": "000034",
+            "code": "01",
+            "desc": "Other (non-Medicare)",
+            "issuer": "EBCBS",
+            "state": "NY"
+        },
+        {
+            "identifier": "00243178",
+            "code": "05",
+            "desc": "MEDICAID",
+            "state": "NY"
+        }
+    ],
+    "number": "1194832477",
+    "otherNames": [
+        {
+            "code": "3",
+            "organizationName": "NEWYORK-PRESBYTERIAN HOSPITAL",
+            "type": "Doing Business As"
+        }
+    ],
+    "practiceLocations": [
+        {
+            "addressLine1": "5141 BROADWAY",
+            "addressLine2": "",
+            "addressPurpose": "LOCATION",
+            "addressType": "DOM",
+            "city": "NEW YORK",
+            "countryCode": "US",
+            "countryName": "United States",
+            "postalCode": "100341159",
+            "state": "NY",
+            "teleNumber": "212-932-4000"
+        },
+        {
+            "addressLine1": "3959 BROADWAY",
+            "addressLine2": "",
+            "addressPurpose": "LOCATION",
+            "addressType": "DOM",
+            "city": "NEW YORK",
+            "countryCode": "US",
+            "countryName": "United States",
+            "postalCode": "100321559",
+            "state": "NY",
+            "teleNumber": "347-812-0392"
+        }
+    ],
+    "taxonomies": [
+        {
+            "code": "251B00000X",
+            "desc": "Case Management",
+            "primary": false,
+            "specialization": ""
+        },
+        {
+            "code": "282N00000X",
+            "desc": "General Acute Care Hospital",
+            "primary": true,
+            "specialization": ""
+        }
+    ]
+}
