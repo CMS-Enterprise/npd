@@ -98,13 +98,21 @@ class OrganizationFilterSet(filters.FilterSet):
         )
 
     def filter_address_city(self, queryset, name, value):
-        return city_address_search(queryset, name, value, prefix="organization__organizationtoaddress__")
+        return city_address_search(
+            queryset, name, value, prefix="organization__organizationtoaddress__"
+        )
 
     def filter_address_state(self, queryset, name, value):
-        return state_address_search(queryset, name, value, prefix="organization__organizationtoaddress__")
+        return state_address_search(
+            queryset, name, value, prefix="organization__organizationtoaddress__"
+        )
 
     def filter_address_postalcode(self, queryset, name, value):
-        return postalcode_address_search(queryset, name, value, prefix="organization__organizationtoaddress__")
+        return postalcode_address_search(
+            queryset, name, value, prefix="organization__organizationtoaddress__"
+        )
 
     def filter_address_use(self, queryset, name, value):
-        return address_use_search(queryset, name, value, prefix="organization__organizationtoaddress")
+        return address_use_search(
+            queryset, name, value, prefix="organization__organizationtoaddress"
+        )

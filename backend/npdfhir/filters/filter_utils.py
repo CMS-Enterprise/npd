@@ -81,7 +81,10 @@ def general_filter_distance(queryset, name, value, prefix=""):
     else:
         return queryset.objects.none()
 
-def filter_identifier_general(queryset, name, value, npi_prefix=None, ein_prefix=None, other_prefix=None):
+
+def filter_identifier_general(
+    queryset, name, value, npi_prefix=None, ein_prefix=None, other_prefix=None
+):
     from uuid import UUID
 
     system, identifier_id = parse_identifier_query(value)
