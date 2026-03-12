@@ -81,23 +81,17 @@ def general_filter_distance(queryset, name, value, prefix=""):
     else:
         return queryset.objects.none()
 
-
-# All paths will share the same prefix
-# Start with name ones, then the address ones. To standardize the paths and only pass in the prefix.
-def filter_identifier_general(queryset, name, value, npi_path=None, ein_path=None, other_path=None):
+def filter_identifier_general(queryset, name, value, npi_prefix=None, ein_prefix=None, other_prefix=None):
     from uuid import UUID
 
     system, identifier_id = parse_identifier_query(value)
     queries = Q(pk__isnull=True)
 
     try:
-        npi_q_argument = {npi_path: int(identifier_id)}
+        npi_q_argument = {npi_prefix + "npi": int(identifier_id)}
     except (ValueError, TypeError):
         # TODO: implement validationerror to show users that NPI must be an int
         npi_q_argument = None
-
-    ein_q_argument = {ein_path: identifier_id}
-    other_q_argument = {other_path: identifier_id}
 
     if system:  # specific identifier search requested
         if system.upper() == "NPI":
@@ -107,14 +101,16 @@ def filter_identifier_general(queryset, name, value, npi_path=None, ein_path=Non
         if npi_q_argument:
             queries |= Q(**npi_q_argument)
 
-        if ein_path:
+        if ein_prefix:
             try:
+                ein_q_argument = {ein_prefix + "ein_id": identifier_id}
                 UUID(identifier_id)
                 queries |= Q(**ein_q_argument)
             except (ValueError, TypeError):
                 pass
 
-        if other_path:
+        if other_prefix:
+            other_q_argument = {other_prefix + "other_id": identifier_id}
             queries |= Q(**other_q_argument)
 
     return queryset.filter(queries).distinct()

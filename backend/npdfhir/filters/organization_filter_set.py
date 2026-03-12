@@ -79,9 +79,9 @@ class OrganizationFilterSet(filters.FilterSet):
             queryset,
             name,
             value,
-            npi_path="organization__clinicalorganization__npi__npi",
-            ein_path="ein__ein_id",
-            other_path="organization__clinicalorganization__organizationtootherid__other_id",
+            npi_prefix="organization__clinicalorganization__npi__",
+            ein_prefix="ein__",
+            other_prefix="organization__clinicalorganization__organizationtootherid__",
         )
 
     def filter_organization_type(self, queryset, name, value):

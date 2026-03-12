@@ -52,7 +52,7 @@ class OrganizationAffiliationFilterSet(filters.FilterSet):
 
     # Filter generally by clinical organizational
     def filter_identifier(self, queryset, name, value):
-        return filter_identifier_general(queryset, name, value, npi_path="npi")
+        return filter_identifier_general(queryset, name, value, npi_prefix="")
 
     def filter_organization_type(self, queryset, name, value):
         # Get codes corresponding to the display name

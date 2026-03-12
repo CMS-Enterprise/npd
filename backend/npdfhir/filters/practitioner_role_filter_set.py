@@ -168,8 +168,8 @@ class PractitionerRoleFilterSet(filters.FilterSet):
             queryset,
             name,
             value,
-            npi_path="provider_to_organization__individual__npi__npi",
-            other_path="provider_to_organization__individual__providertootherid__other_id__icontains",
+            npi_prefix="provider_to_organization__individual__npi__",
+            other_prefix="provider_to_organization__individual__providertootherid__",
         )
 
     def filter_specialty(self, queryset, name, value):

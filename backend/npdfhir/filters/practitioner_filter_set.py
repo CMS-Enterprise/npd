@@ -88,8 +88,8 @@ class PractitionerFilterSet(filters.FilterSet):
             queryset,
             name,
             value,
-            npi_path="npi__npi",
-            other_path="provider__providertootherid__other_id",
+            npi_prefix="npi__",
+            other_prefix="provider__providertootherid__",
         )
 
     def filter_practitioner_name(self, queryset, name, value):

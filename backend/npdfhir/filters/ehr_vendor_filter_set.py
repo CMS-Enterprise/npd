@@ -33,5 +33,5 @@ class EhrVendorFilterSet(filters.FilterSet):
             queryset,
             name,
             value,
-            ein_path="endpointinstance__locationtoendpointinstance__location__organization__ein__ein_id",
+            ein_prefix="endpointinstance__locationtoendpointinstance__location__organization__ein__",
         )
