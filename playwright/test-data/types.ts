@@ -1,17 +1,17 @@
 export interface AddressDataType {
-            addressLine1: string;
-            addressLine2?: string;
-            addressType: string;
+            address_1: string;
+            address_2?: string;
+            address_type: string;
             city: string;
-            countryCode: string;
-            countryName: string;
+            country_code: string;
+            country_name: string;
             state: string,
-            postalCode: string;
+            postal_code: string;
         }
 export interface FullAddressDataType extends AddressDataType {
-            addressPurpose: string;
-            faxNumber?: string;
-            teleNumber: string;
+            address_purpose: string;
+            fax_number?: string;
+            telephone_number?: string;
         }
 export interface IdentifierDataType {
             identifier: string;
@@ -22,83 +22,82 @@ export interface IdentifierDataType {
         }
 export interface NameDataType {
             code: string;
-            namePrefix?: string;
-            firstName: string;
-            middleName? : string;
-            lastName: string;
+            name_prefix?: string;
+            first_name: string;
+            middle_name? : string;
+            last_name: string;
             type: string;
         }
 export interface OrganizationNameDataType {
             code: string;
-            organizationName: string;
+            organization_name: string;
             type: string;
         }
 export interface TaxonomyDataType {
             code: string;
             desc: string;
             primary: boolean;
-            specialization: string;
-        }
-export interface PractitionerTaxonomyDataType extends TaxonomyDataType {
-            groupCode: string;
+            specialization?: string;
+            taxonomy_group: string;
             license: string;
             state: string;
         }
+
 export interface EndpointDataType extends AddressDataType {
             affiliation: string;
-            contentOtherDescription: string;
-            contentType: string;
+            contentOtherDescription?: string;
+            contentType?: string;
             contentTypeDescription: string;
             endpoint: string;
             endpointDescription: string;
             endpointType: string;
             endpointTypeDescription: string;
-            use: string;
+            use?: string;
             useDescription: string;
         }
 export interface BaseProviderDataType {
     addresses: Array<FullAddressDataType>;
-    endPoints: Array<EndpointDataType> | [];
-    enumerationType: string;
+    endpoints?: Array<EndpointDataType> | [];
+    enumeration_type: string;
     identifiers: Array<IdentifierDataType>;
     number: string;
     practiceLocations: Array<FullAddressDataType> | [];
+    taxonomies: Array<TaxonomyDataType>;
+    created_epoch: string;
+    last_updated_epoch: string;
 }
 export interface PractitionerDataType extends BaseProviderDataType {
     basic: {
-        credential: string;
-        enumerationDate: string;
-        deactivationDate? : string;
-        firstName: string;
-        gender: string;
-        lastName: string;
-        lastUpdated: string;
-        middleName? : string;
-        name: string;
-        namePrefix: string;
-        soleProprietor: string;
+        credential?: string;
+        enumeration_date: string;
+        deactivation_date? : string;
+        first_name: string;
+        last_name: string;
+        last_updated: string;
+        middle_name? : string;
+        sex: string;
+        name_prefix?: string;
+        name_suffix?: string;
+        sole_proprietor: string;
         status: string;
     },
-    otherNames: Array<NameDataType> | [];
-    taxonomies: Array<PractitionerTaxonomyDataType>;
+    other_names?: Array<NameDataType> | [];
 }
 
 export interface OrganizationDataType extends BaseProviderDataType{
     basic: {
-        aoFirstName: string;
-        aoLastName: string;
-        aoMiddleName: string;
-        aoTeleNumber: string;
-        aoTitle: string;
-        certificationDate: string;
-        enumerationDate: string;
-        deactivationDate? : string;
-        lastUpdated: string;
-        name: string;
-        orgName: string;
-        orgSubpart: string;
+        authorized_official_first_name: string;
+        authorized_official_last_name: string;
+        authorized_official_middle_name: string;
+        authorized_official_telephone_number: string;
+        authorized_official_title_or_position: string;
+        certification_date: string;
+        enumeration_date: string;
+        deactivation_date? : string;
+        last_updated: string;
+        organization_name: string;
+        organizational_subpart: string;
         status: string;
     };
-    otherNames: Array<OrganizationNameDataType> | [];
-    taxonomies: Array<TaxonomyDataType>;
+    other_names?: Array<OrganizationNameDataType> | [];
 }

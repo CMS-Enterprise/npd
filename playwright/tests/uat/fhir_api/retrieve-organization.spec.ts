@@ -1,28 +1,12 @@
 import { test, expect } from '@playwright/test';
 
-import { data } from '../../../test-data/organization-sample'
-
 import { testNPI, testOrganizationNames, testTaxonomies, testAddresses, testTelecoms, testHasFhirResults } from '../../../utils/fhir-checks';
 
-import { getRandomNPIRecords, getSpecificNPIRecords } from '../../../utils/random-sample';
+import data from "../../../test-data/tmp/organization-data.json";
 import { OrganizationDataType } from '../../../test-data/types';
 
-var testData: Array<OrganizationDataType> = [data];
+const testData: Array<OrganizationDataType> = data;
 
-const type = 2;
-
-test.beforeAll( async({request}) => {
-    var npiList = process.env.NPI_LIST?.split(",")
-    if (npiList !== undefined && npiList.length >0) {
-        testData = await getSpecificNPIRecords(request, npiList, type)
-    }
-    else if (Boolean(process.env.RANDOM_SAMPLE?.toLowerCase()) === true){
-        testData = await getRandomNPIRecords(request, 10, type);
-    }
-    else {
-        testData = [data]
-    }
-})
 
 // These tests are based on the FHIR API User Stories Found in This Epic: https://jiraent.cms.gov/browse/NDH-877
 test.describe('I want to retrieve Organization resources by Type 2 NPI so that I can get organizational provider information in a FHIR format', () => { 
@@ -32,7 +16,7 @@ test.describe('I want to retrieve Organization resources by Type 2 NPI so that I
             const response = await request.get(`/fhir/Organization/?identifier=NPI|${record.number}`);
             await testHasFhirResults(response, record, 'Organization')
             });
-        test(`NPI: ${record.number}Has expected NPI`, async ({request}) => {
+        test(`NPI: ${record.number} - Has expected NPI`, async ({request}) => {
             // Search by NPI
             const response = await request.get(`/fhir/Organization/?identifier=NPI|${record.number}`);
 
@@ -46,7 +30,7 @@ test.describe('I want to retrieve Organization resources by Type 2 NPI so that I
             const npi = identifiers.filter(identifier => identifier.system == "http://terminology.hl7.org/NamingSystem/npi")[0];
             testNPI(npi, record)
         });
-        test(`NPI: ${record.number}Has expected name(s)`, async ({request}) => {
+        test(`NPI: ${record.number} - Has expected name(s)`, async ({request}) => {
             // Search by NPI
             const response = await request.get(`/fhir/Organization/?identifier=NPI|${record.number}`);
 
@@ -57,7 +41,7 @@ test.describe('I want to retrieve Organization resources by Type 2 NPI so that I
             // Validate that name data are being returned properly and match the expected data
             testOrganizationNames(resource, record)
         });
-        test(`NPI: ${record.number}Has expected taxonomy(ies)`, async ({request}) => {
+        test(`NPI: ${record.number} - Has expected taxonomy(ies)`, async ({request}) => {
             // Search by NPI
             const response = await request.get(`/fhir/Organization/?identifier=NPI|${record.number}`);
 
@@ -70,7 +54,7 @@ test.describe('I want to retrieve Organization resources by Type 2 NPI so that I
             expect(resource.qualification.length).toEqual(record.taxonomies.length);
             testTaxonomies(resource.qualification, record);
         });
-        test(`NPI: ${record.number}Has expected address(es)`, async ({request}) => {
+        test(`NPI: ${record.number} - Has expected address(es)`, async ({request}) => {
             // Search by NPI
             const response = await request.get(`/fhir/Organization/?identifier=NPI|${record.number}`);
 
@@ -82,7 +66,7 @@ test.describe('I want to retrieve Organization resources by Type 2 NPI so that I
             expect(resource).toHaveProperty('address');
             testAddresses(resource.address, record);
         });
-        test(`NPI: ${record.number}Has expected phone(s)`, async ({request}) => {
+        test(`NPI: ${record.number} - Has expected phone(s)`, async ({request}) => {
             // Search by NPI
             const response = await request.get(`/fhir/Organization/?identifier=NPI|${record.number}`);
 

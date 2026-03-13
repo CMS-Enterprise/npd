@@ -56,10 +56,10 @@ export function testNPI(npiResponse: any, testData: PractitionerDataType | Organ
               });
         expect(npiResponse).toHaveProperty('period');
         expect(npiResponse.period).toHaveProperty('start');
-        expect(npiResponse.period.start.split('T')[0]).toEqual(testData.basic.enumerationDate);
-        if (testData.basic.deactivationDate) {
+        expect(npiResponse.period.start.split('T')[0]).toEqual(testData.basic.enumeration_date);
+        if (testData.basic.deactivation_date) {
             expect(npiResponse.period).toHaveProperty('end');
-            expect(npiResponse.period.end.split('T')[0].toEqual(testData.basic.deactivationDate));
+            expect(npiResponse.period.end.split('T')[0].toEqual(testData.basic.deactivation_date));
         }
 }
 
@@ -75,19 +75,19 @@ export function testTaxonomies(qualificationResponse: any, testData: Practitione
 
 export function testNames(fhirResource: any, testData: PractitionerDataType ){
     const names = fhirResource.name;
-    expect(names.length).toEqual(testData.otherNames.length + 1);
+    expect(names.length).toEqual(testData.other_names.length + 1);
     const practitioner_names: Array<NameDataType> = [{
                 "code": "1",
-                "namePrefix": testData.basic.namePrefix,
-                "firstName": testData.basic.firstName,
-                "middleName": testData.basic.middleName,
-                "lastName": testData.basic.lastName,
+                "name_prefix": testData.basic.name_prefix,
+                "first_name": testData.basic.first_name,
+                "middle_name": testData.basic.middle_name,
+                "last_name": testData.basic.last_name,
                 "type": 'OFFICIAL'
-            }, ...testData.otherNames]
+            }, ...testData.other_names]
     practitioner_names.forEach(practitioner_name => {
-        const filtered_name = names.filter(name => name.text.toLowerCase() == [practitioner_name.namePrefix, practitioner_name.firstName, practitioner_name.middleName, practitioner_name.lastName].join(' ').toLowerCase());
+        const filtered_name = names.filter(name => name.text.toLowerCase() == [practitioner_name.name_prefix, practitioner_name.first_name, practitioner_name.middle_name, practitioner_name.last_name].join(' ').toLowerCase());
             expect(filtered_name.length).toBeGreaterThanOrEqual(1);
-            expect(filtered_name[0].family = practitioner_name?.lastName)
+            expect(filtered_name[0].family = practitioner_name?.last_name)
             // TODO: improve
         })
 }
@@ -96,11 +96,11 @@ export function testOrganizationNames(fhirResource: any, testData: OrganizationD
     const allNames = [fhirResource.name, ...fhirResource.alias]
     const organization_names: Array<OrganizationNameDataType> = [{
             code: "",
-            organizationName: testData.basic.name,
+            organization_name: testData.basic.organization_name,
             type: "",
-        }, ...testData.otherNames]
+        }, ...testData.other_names]
     organization_names.forEach(organization_name => {
-        const filtered_name = allNames.filter(name => name.toLowerCase() == organization_name.organizationName.toLowerCase());
+        const filtered_name = allNames.filter(name => name.toLowerCase() == organization_name.organization_name.toLowerCase());
             expect(filtered_name.length).toBeGreaterThanOrEqual(1);
             // TODO: improve
         })
@@ -109,21 +109,21 @@ export function testOrganizationNames(fhirResource: any, testData: OrganizationD
 export function testAddresses(addressResponse: any, testData: PractitionerDataType | OrganizationDataType){
     const testAddresses: Array<FullAddressDataType> = [...testData.addresses, ...testData.practiceLocations];
     testAddresses.forEach(testAddress => {
-        const filtered_address = addressResponse.filter(address => address.line.includes(testAddress.addressLine1) && address.city == testAddress.city && address.state == testAddress.state && address.postalCode == testAddress.postalCode);
+        const filtered_address = addressResponse.filter(address => address.line.includes(testAddress.address_1) && address.city == testAddress.city && address.state == testAddress.state && address.postalCode == testAddress.postal_code);
         expect(filtered_address.length).toBeGreaterThanOrEqual(1);
-        expect(filtered_address[0].type = AddressTypeMapping[testAddress.addressType]);
+        expect(filtered_address[0].type = AddressTypeMapping[testAddress.address_type]);
         // TODO: improve
     })
 }
 
 export async function testTelecoms(telecomResponse: any, testData: PractitionerDataType | OrganizationDataType){
     const testAddresses: Array<FullAddressDataType> = [...testData.addresses, ...testData.practiceLocations];
-    const testNumbers = testAddresses.map(address => address.teleNumber);
+    const testNumbers = testAddresses.map(address => address.telephone_number);
     testNumbers.forEach(testNumber => {
         const filtered_telecom = telecomResponse.filter(telecom => telecom.system == "phone" && telecom.value == testNumber)
         expect(filtered_telecom.length).toBeGreaterThanOrEqual(1);
     })
-    const testFaxes = testAddresses.map(address => address.faxNumber);
+    const testFaxes = testAddresses.map(address => address.fax_number);
     testFaxes.forEach(testFax => {
         const filtered_telecom = telecomResponse.filter(telecom => telecom.system == "fax" && telecom.value == testFax)
         expect(filtered_telecom.length).toBeGreaterThanOrEqual(1);
