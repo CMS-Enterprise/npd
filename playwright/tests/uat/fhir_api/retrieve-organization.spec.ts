@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-import { testNPI, testOrganizationNames, testTaxonomies, testAddresses, testTelecoms, testHasFhirResults } from '../../../utils/fhir-checks';
+import { testNPI, testOrganizationNames, testAddresses, testTelecoms, testHasFhirResults, testTaxonomyExtension } from '../../../utils/fhir-checks';
 
 import data from "../../../test-data/tmp/organization-data.json";
 import { OrganizationDataType } from '../../../test-data/types';
@@ -52,7 +52,7 @@ test.describe('I want to retrieve Organization resources by Type 2 NPI so that I
             // Validate that taxonomy data are being returned properly and match the expected data
             expect(resource).toHaveProperty('qualification')
             expect(resource.qualification.length).toEqual(record.taxonomies.length);
-            testTaxonomies(resource.qualification, record);
+            testTaxonomyExtension(resource.qualification, record);
         });
         test(`NPI: ${record.number} - Has expected address(es)`, async ({request}) => {
             // Search by NPI

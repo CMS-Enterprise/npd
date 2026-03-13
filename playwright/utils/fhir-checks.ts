@@ -73,6 +73,16 @@ export function testTaxonomies(qualificationResponse: any, testData: Practitione
     })
 }
 
+export function testTaxonomyExtension(extensions: any, testData: PractitionerDataType | OrganizationDataType){
+    const taxonomies = extensions.filter(extension => extension.url == "https://build.fhir.org/organization-definitions.html#Organization.qualification");
+    testData.taxonomies.forEach(testDataTaxonomy => {
+        const filtered_taxonomies = taxonomies.filter(taxonomy => taxonomy.valueCodeableConcept.coding[0].code == testDataTaxonomy.code);
+        expect(filtered_taxonomies.length).toBeGreaterThan(0);
+        expect(filtered_taxonomies[0].valueCodeableConcept.coding[0].display).toEqual(testDataTaxonomy.desc);
+        // TODO: improve
+    })
+}
+
 export function testNames(fhirResource: any, testData: PractitionerDataType ){
     const names = fhirResource.name;
     expect(names.length).toEqual(testData.other_names.length + 1);
