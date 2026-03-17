@@ -41,7 +41,7 @@ The uat project can be run with the command `npm run get-data-and-test` from wit
 
 #### UAT Test Data
 When the uat tests are spun up, test data are fetched from the NPI registry, according to the environment variables specified (see .env_template for examples).
-* No environment variables: Dr. Oz's record is used as the default test practitioner record (stored in `/test-data/practitioner-sample.ts`) and New York Presbyterian Hosptial is used as the default test organization record (stored in `/test-data/organization-sample.ts`)
+* No environment variables: Dr. Oz's record is used as the default test practitioner record (stored in `/test-data/practitioner-sample.ts`) and New York Presbyterian Hospital is used as the default test organization record (stored in `/test-data/organization-sample.ts`)
 * `NPI_LIST`: if the `NPI_LIST` environment variable is specified and contains a comma-separated list of NPIs, then the records associated with those NPIs will be fetched and used as test data.
 * `RANDOM`: if the `RANDOM` environment variable is specified and set to `true`, then a random sampling of NPIs will be fetched and used as test data. `RANDOM_QUANTITY` specifies the number of random records that should be fetched (default 5).
 
