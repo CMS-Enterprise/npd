@@ -1,23 +1,25 @@
-import { Alert } from "@cmsgov/design-system"
 import classNames from "classnames"
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useLocation, useParams } from "react-router"
 import { FeatureFlag } from "../../components/FeatureFlag"
 import { InfoItem } from "../../components/InfoItem"
 import { LoadingIndicator } from "../../components/LoadingIndicator"
 import { DetailPageBanner } from "../../components/DetailPageBanner"
+import { FeedbackCTA } from "../../components/forms/feedback/FeedbackCTA"
+import { FeedbackForm } from "../../components/forms/feedback/FeedbackForm"
 import { PractitionerPresenter } from "../../presenters/PractitionerPresenter"
 import { usePractitionerAPI } from "../../state/requests/practitioners"
 import layout from "../Layout.module.css"
 
 import {
+  Alert,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
 } from "@cmsgov/design-system"
-import { FeedbackCTA } from "../../components/forms/feedback/FeedbackCTA"
 
 export const Practitioner = () => {
   const { t } = useTranslation()
@@ -25,6 +27,8 @@ export const Practitioner = () => {
   const { data, error, isLoading } = usePractitionerAPI(practitionerId)
   const location = useLocation()
   const searchUrl = location.state?.searchUrl
+
+  const [isReportIssueOpen, setIsReportIssueOpen] = useState(false)
 
   if (isLoading) {
     return <LoadingIndicator />
@@ -86,7 +90,7 @@ export const Practitioner = () => {
               <div className="ds-l-col--12 ds-l-md-col--4">
                 <FeedbackCTA
                   subtitle="Let us know if you see any problems with this provider record."
-                  onButtonClick={() => console.log("CTA clicked")}
+                  onButtonClick={() => setIsReportIssueOpen(true)}
                 />
               </div>
             </div>
@@ -196,7 +200,15 @@ export const Practitioner = () => {
           </section>
         </FeatureFlag>
 
-        <div className="ds-u-margin-top--7"></div>
+        <FeedbackForm
+          isOpen={isReportIssueOpen}
+          onExit={() => setIsReportIssueOpen(false)}
+          presenterData={{
+            recordName: practitioner.name,
+          }}
+        />
+
+        <div className="ds-u-margin-top--7" />
       </main>
     </>
   )
