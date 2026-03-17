@@ -31,6 +31,7 @@ help:
 	@echo "                 Use ARGS=... to pass arguments"
 	@echo "  test-server    Start a test server for e2e testing with Playwright"
 	@echo "  playwright-local     Create a test server and run the playwright e2e test suite (on host)"
+	@echo "  playwright-uat     Fetch test records and run the playwright e2e test suite against a deployed environment"
 	@echo ""
 	@echo "  clean          Remove cache files, test artifacts, and transient frontend assets"
 	@echo ""
@@ -202,6 +203,11 @@ test: test-setup
 playwright-local: test-system-setup build-frontend-test-assets
 	@cd playwright; \
 		npx playwright test --project=local
+
+.PHONY: playwright-uat
+playwright-uat: 
+	@cd playwright; \
+		npm run get-data-and-test
 
 # clean up test artifacts
 .PHONY: clean

@@ -256,7 +256,7 @@ The local project can be run by executing the command `make playwright-local` fr
 ##### uat
 The "uat" project allows the dev to configure the base url, username, and password, allowing tests to be run against the deployed environments (please refer to the .env_template file for the environment variables that are expected). All uat tests should be stored in the uat folder. The UAT tests should verify that NPD meets the business requirements and user needs defined for each software stage. These are intended to support a test-driven development strategy, in which the business requirements are defined as code and the implementation is validated against those codified requirements. The automated UATs will not be required to be passing with each PR, but rather will give an indication of progress toward fulfilling feature, release, and/or product goals.
 
-The uat project can be run with the command `npx playwright test --project=uat` from within the playwright directory.
+The uat project can be run with the command ` npm run get-data-and-test` from within the playwright directory.
 
 
 For additional information on our implementation of playwright and getting started with Playwright tests, please refer to the [README](/playwright/README.md) in the `playwright/` directory.

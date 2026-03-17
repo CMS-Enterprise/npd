@@ -8,6 +8,8 @@ import dotenv from 'dotenv';
 import path from 'path';
 dotenv.config({ path: path.resolve(__dirname, '.env') });
 
+const randomQuantity = process.env.RANDOM_QUANTITY ?? 5
+
 const fs = require("node:fs/promises");
 
 let orgTestData: Array<OrganizationDataType>;
@@ -21,7 +23,7 @@ let practitionerTestData: Array<PractitionerDataType>;
         practitionerTestData = specificData.type1;
     }
     else if (Boolean(process.env.RANDOM_SAMPLE?.toLowerCase()) === true){
-        const randomData = await getRandomNPIRecords(5);
+        const randomData = await getRandomNPIRecords(randomQuantity);
         orgTestData = randomData.type2;
         practitionerTestData = randomData.type1;
     }

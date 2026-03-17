@@ -31,10 +31,19 @@ The "local" project performs test server setup, seeds the system, and runs tests
 
 The local project can be run by executing the command `make playwright-local` from within the root directory.
 
+#### Local Test Data
+When the local tests are spun up, a seedsystem.py script runs to randomly generate realistic test practitioners and organizations, as well as ones that satisfy certain test criteria. These records are used to test the system.
+
 ### uat
 The "uat" project allows the dev to configure the base url, username, and password, allowing tests to be run against the deployed environments (please refer to the .env_template file for the environment variables that are expected). All uat tests should be stored in the uat folder. The UAT tests should verify that NPD meets the business requirements and user needs defined for each software stage. These are intended to support a test-driven development strategy, in which the business requirements are defined as code and the implementation is validated against those codified requirements. The automated UATs will not be required to be passing with each PR, but rather will give an indication of progress toward fulfilling feature, release, and/or product goals.
 
-The uat project can be run with the command `npx playwright test --project=uat` from within the playwright directory.
+The uat project can be run with the command `npm run get-data-and-test` from within the playwright directory or `make playwright-uat` from within the root directory.
+
+#### UAT Test Data
+When the uat tests are spun up, test data are fetched from the NPI registry, according to the environment variables specified (see .env_template for examples).
+* No environment variables: Dr. Oz's record is used as the default test practitioner record (stored in `/test-data/practitioner-sample.ts`) and New York Presbyterian Hosptial is used as the default test organization record (stored in `/test-data/organization-sample.ts`)
+* `NPI_LIST`: if the `NPI_LIST` environment variable is specified and contains a comma-separated list of NPIs, then the records associated with those NPIs will be fetched and used as test data.
+* `RANDOM`: if the `RANDOM` environment variable is specified and set to `true`, then a random sampling of NPIs will be fetched and used as test data. `RANDOM_QUANTITY` specifies the number of random records that should be fetched (default 5).
 
 ## Running tests
 
@@ -62,7 +71,7 @@ By default, Playwright assumes the test server is already running. You can disab
 
 ```sh
 cd playwright
-CI=true npx playwright test --project=uat
+CI=true npx get-data-and-test
 ```
 
 This command will cause Playwright to launch the test-server (including rebuilding the database and compiling frontend assets) in docker and then shut it down at the end of the test suite.
