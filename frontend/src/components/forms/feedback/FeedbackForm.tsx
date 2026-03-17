@@ -52,7 +52,10 @@ export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
   })
 
   const onSubmit: SubmitHandler<ReportIssueFormData> = (formData) => {
+    const uuid = crypto.randomUUID()
+
     const payload = {
+      uuid,
       ...presenterData,
       ...formData,
     }
@@ -97,14 +100,23 @@ export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
             }}
             render={({ field }) => (
               <ChoiceList
+                type="checkbox"
+                errorMessage={errors.issues?.message}
+                hint="Select all that apply"
+                label={
+                  <>
+                    What issue(s) do you want to report on this profile?
+                    <span className="ds-u-color--error" aria-hidden="true">
+                      {" "}
+                      *
+                    </span>
+                  </>
+                }
+                name="issues"
                 choices={ISSUE_CHOICES.map((choice) => ({
                   ...choice,
                   checked: field.value?.includes(choice.value),
                 }))}
-                errorMessage={errors.issues?.message}
-                hint="Select all that apply"
-                label="What issue(s) do you want to report on this profile?"
-                name="issues"
                 onChange={(e) => {
                   const { value, checked } = e.target as HTMLInputElement
                   const current: string[] = field.value ?? []
@@ -113,7 +125,6 @@ export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
                     : current.filter((v) => v !== value)
                   field.onChange(next)
                 }}
-                type="checkbox"
               />
             )}
           />
