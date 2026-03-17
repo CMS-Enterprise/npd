@@ -4,7 +4,6 @@ import classNames from "classnames"
 import styles from "./FeedbackCTA.module.css"
 
 type Props = {
-  title: string
   subtitle: string
   onButtonClick: () => void
   isDisabled?: boolean
@@ -12,7 +11,7 @@ type Props = {
 }
 
 export const FeedbackCTA = ({
-  subtitle: subtitleKey,
+  subtitle,
   onButtonClick,
   isDisabled = false,
   className,
@@ -25,9 +24,7 @@ export const FeedbackCTA = ({
       <h3 className="ds-text-heading--lg ds-u-margin-bottom--1">
         Help improve the directory
       </h3>
-      <p className="ds-u-color--muted ds-u-margin-bottom--3">
-        {t(subtitleKey)}
-      </p>
+      <p className="ds-u-color--muted ds-u-margin-bottom--3">{subtitle}</p>
       <Button variation="solid" onClick={onButtonClick} disabled={isDisabled}>
         Report an issue
       </Button>

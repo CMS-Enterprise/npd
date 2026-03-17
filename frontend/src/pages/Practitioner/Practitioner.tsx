@@ -85,7 +85,6 @@ export const Practitioner = () => {
               </div>
               <div className="ds-l-col--12 ds-l-md-col--4">
                 <FeedbackCTA
-                  title="Help us improve the directory"
                   subtitle="Let us know if you see any problems with this provider record."
                   onButtonClick={() => console.log("CTA clicked")}
                 />
