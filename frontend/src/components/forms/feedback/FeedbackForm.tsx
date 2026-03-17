@@ -51,6 +51,10 @@ export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
     },
   })
 
+  const errorMessages = Object.values(errors)
+    .map((error) => error?.message)
+    .filter(Boolean) as string[]
+
   const onSubmit: SubmitHandler<ReportIssueFormData> = (formData) => {
     const uuid = crypto.randomUUID()
 
@@ -80,12 +84,18 @@ export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
             information to improve our data collection in the future.
           </p>
 
-          {/* <Alert
-                        heading="This form contains the following errors"
-                        variation="error"
-                    >
-                        {errors.details?.message}
-                    </Alert> */}
+          {errorMessages.length > 0 && (
+            <Alert
+              heading="This form contains the following errors"
+              variation="error"
+            >
+              <ul className="ds-c-list ds-c-list--bare">
+                {errorMessages.map((message, index) => (
+                  <li key={index}>{message}</li>
+                ))}
+              </ul>
+            </Alert>
+          )}
 
           <p className="ds-u-margin-bottom--3">
             <strong>Provider name</strong> <br />
@@ -107,7 +117,6 @@ export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
                   <>
                     What issue(s) do you want to report on this profile?
                     <span className="ds-u-color--error" aria-hidden="true">
-                      {" "}
                       *
                     </span>
                   </>
