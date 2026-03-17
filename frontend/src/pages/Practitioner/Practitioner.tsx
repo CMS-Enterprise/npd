@@ -17,6 +17,7 @@ import {
   TableHead,
   TableRow,
 } from "@cmsgov/design-system"
+import { FeedbackCTA } from "../../components/forms/feedback/FeedbackCTA"
 
 export const Practitioner = () => {
   const { t } = useTranslation()
@@ -62,25 +63,40 @@ export const Practitioner = () => {
 
         <FeatureFlag name="PRACTITIONER_LOOKUP_DETAILS">
           <section className={layout.section}>
-            <h2>{t("practitioners.detail.about.title")}</h2>
-            <div className="ds-l-row">
-              <div className="ds-l-col--12 ds-l-md-col--3 ds-u-margin-bottom--2">
-                <InfoItem
-                  label={t("practitioners.detail.about.name")}
-                  value={practitioner.name}
-                />
+            <div className="ds-l-row ds-u-align-items--start">
+              <div className="ds-l-col--12 ds-l-md-col--8">
+                <h2 className="ds-u-margin-top--0">
+                  {t("practitioners.detail.about.title")}
+                </h2>
+                <div className="ds-l-row">
+                  <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
+                    <InfoItem
+                      label={t("practitioners.detail.about.name")}
+                      value={practitioner.name}
+                    />
+                  </div>
+                  <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
+                    <InfoItem
+                      label={t("practitioners.detail.about.gender")}
+                      value={practitioner.gender}
+                    />
+                  </div>
+                </div>
               </div>
-              <div className="ds-l-col--12 ds-l-md-col--3 ds-u-margin-bottom--2">
-                <InfoItem
-                  label={t("practitioners.detail.about.gender")}
-                  value={practitioner.gender}
+              <div className="ds-l-col--12 ds-l-md-col--4">
+                <FeedbackCTA
+                  title="Help us improve the directory"
+                  subtitle="Let us know if you see any problems with this provider record."
+                  onButtonClick={() => console.log("CTA clicked")}
                 />
               </div>
             </div>
           </section>
 
           <section className={layout.section}>
-            <h2>{t("practitioners.detail.contact.title")}</h2>
+            <h2 className="ds-u-margin-top--4">
+              {t("practitioners.detail.contact.title")}
+            </h2>
             <div className="ds-l-row">
               <div
                 className="ds-l-col--12 ds-l-md-col--3 ds-u-margin-bottom--2"
