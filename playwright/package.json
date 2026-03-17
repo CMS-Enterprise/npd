@@ -7,7 +7,8 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "format": "npx prettier . --write",
-    "get-data-and-test": "ts-node get-test-data.ts && npx playwright test --project=uat --ui"
+    "get-data-and-test": "ts-node get-test-data.ts && npx playwright test --project=uat",
+    "get-data-and-test-ui": "ts-node get-test-data.ts && npx playwright test --project=uat --ui"
   },
   "keywords": [],
   "author": "",
