@@ -16,7 +16,7 @@ export const ORGANIZATION_SORT_OPTIONS: Record<string, SortOption> = {
 
 export type OrganizationSortKey = keyof typeof ORGANIZATION_SORT_OPTIONS
 
-const fetchOrganization = async (
+export const fetchOrganization = async (
   organizationId: string,
 ): Promise<FHIROrganization> => {
   const url = apiUrl("/fhir/Organization/:organizationId/", { organizationId })
