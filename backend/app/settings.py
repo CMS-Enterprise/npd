@@ -73,7 +73,7 @@ INSTALLED_APPS = [
     "provider_directory.apps.ProviderDirectoryConfig",
 ]
 
-if not TESTING:
+if DEBUG and not TESTING:
     INSTALLED_APPS.append("debug_toolbar")
 
 MIDDLEWARE = [
@@ -94,7 +94,7 @@ MIDDLEWARE = [
 if REQUIRE_AUTHENTICATION:
     MIDDLEWARE.append("django.contrib.auth.middleware.LoginRequiredMiddleware")
 
-if not TESTING:
+if DEBUG and not TESTING:
     MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")
     # This must come at the end.
 
@@ -258,7 +258,9 @@ LOGIN_REDIRECT_URL = "/"
 LOGIN_URL = "/accounts/login/"
 LOGOUT_REDIRECT_URL = LOGIN_URL
 
-DEBUG_TOOLBAR_CONFIG = {"SHOW_TOOLBAR_CALLBACK": lambda request: DEBUG and not TESTING}
+if DEBUG and not TESTING:
+    INTERNAL_IPS = ["127.0.0.1", "::1"]
+    DEBUG_TOOLBAR_CONFIG = {"SHOW_TOOLBAR_CALLBACK": "debug_toolbar.middleware.show_toolbar"}
 
 CACHES = {
     "default": {
