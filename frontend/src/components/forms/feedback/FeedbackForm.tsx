@@ -11,10 +11,16 @@ import type { SubmitHandler } from "react-hook-form"
 import { Altcha } from "./Altcha"
 
 const ISSUE_CHOICES = [
-  { label: "Practice location(s)", value: "incorrect_locations" },
-  { label: "Phone number(s)", value: "incorrect_phone" },
-  { label: "Taxonomy(-ies)/specialty(-ies)", value: "incorrect_taxonomy" },
-  { label: "Organization affiliation (s)", value: "incorrect_org_affiliation" },
+  { label: "Practice location(s)", value: "incorrect_practice_locations" },
+  { label: "Phone number(s)", value: "incorrect_phone_numbers" },
+  {
+    label: "Taxonomy(-ies)/specialty(-ies)",
+    value: "incorrect_taxonomy_or_speciality",
+  },
+  {
+    label: "Organization affiliation (s)",
+    value: "incorrect_organization_affiliation",
+  },
   { label: "FHIR endpoint", value: "incorrect_endpoint" },
   { label: "Missing information", value: "missing_information" },
   { label: "Other (specify below)", value: "other" },

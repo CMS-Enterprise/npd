@@ -6,7 +6,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.conf import settings
 from django.core.cache import cache
+from .feedback_serializer import FeedbackSerializer
 import hashlib
+import json
 
 
 class FeedbackFlowThrottle(AnonRateThrottle):
@@ -35,18 +37,27 @@ class FeedbackView(APIView):
     throttle_classes = [FeedbackFlowThrottle]
 
     def post(self, request):
-        altcha_payload = request.data.get("altcha")
+        serializer = FeedbackSerializer(data=request.data)
 
-        if not altcha_payload:
+        if not serializer.is_valid():
             return Response(
-                {"error": "CAPTCHA verification is required"}, status=status.HTTP_400_BAD_REQUEST
+                {"error": "Invalid submission", "details": serializer.errors},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
-        verified = verify_solution(
-            altcha_payload,
-            settings.ALTCHA_HMAC_KEY,
-            check_expires=True,
-        )
+        altcha_payload = serializer.validated_data
+
+        try:
+            verified = verify_solution(
+                altcha_payload,
+                settings.ALTCHA_HMAC_KEY,
+                check_expires=True,
+            )
+        except Exception:
+            return Response(
+                {"error": "CAPTCHA verification failed. Please try again"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         if not verified:
             return Response(
@@ -55,7 +66,9 @@ class FeedbackView(APIView):
             )
 
         # replay prevention
-        payload_hash = hashlib.sha256(altcha_payload.encode()).hexdigest()
+        payload_hash = hashlib.sha256(
+            json.dumps(altcha_payload["altcha"], sort_keys=True).encode()
+        ).hexdigest()
         cache_key = f"altcha_used:{payload_hash}"
 
         if cache.get(cache_key):
@@ -74,7 +87,7 @@ class FeedbackView(APIView):
             "email": request.data.get("email", ""),
         }
 
-        # print(feedback_data)
+        print(feedback_data)
         # send this data to email at this point
 
         return Response(
