@@ -37,11 +37,13 @@ type Props = {
 
 export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
   const [dialogStatus, setDialogStatus] = useState<"form" | "success">("form")
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   const {
     register,
     handleSubmit,
     control,
+    watch,
     formState: { errors },
   } = useForm<ReportIssueFormData>({
     defaultValues: {
@@ -51,22 +53,36 @@ export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
     },
   })
 
-  const errorMessages = Object.values(errors)
-    .map((error) => error?.message)
-    .filter(Boolean) as string[]
+  const maxChars = 500
+  const detailsLength = watch("details")?.length ?? 0
+  const errorMessages = [
+    ...(Object.values(errors)
+      .map((error) => error?.message)
+      .filter(Boolean) as string[]),
+    ...(submitError ? [submitError] : []),
+  ]
 
-  const onSubmit: SubmitHandler<ReportIssueFormData> = (formData) => {
-    const uuid = crypto.randomUUID()
+  const onSubmit: SubmitHandler<ReportIssueFormData> = async (formData) => {
+    try {
+      setSubmitError(null)
 
-    const payload = {
-      uuid,
-      ...presenterData,
-      ...formData,
+      const uuid = crypto.randomUUID()
+
+      const payload = {
+        uuid,
+        ...presenterData,
+        ...formData,
+      }
+
+      // hook this up to django email
+      console.log(payload)
+      setDialogStatus("success")
+    } catch (e) {
+      setSubmitError(
+        "There was an error in submitting the form. Please try again.",
+      )
+      console.error(e)
     }
-
-    // hook this up to django email
-    console.log(payload)
-    setDialogStatus("success")
   }
 
   return (
@@ -138,15 +154,24 @@ export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
             )}
           />
 
-          <TextField
-            {...register("details")}
-            label="Please provide details about the issue(s)"
-            hint="Describe what information is incorrect or outdated and what corrections should be made, if known"
-            multiline
-            rows={4}
-            errorMessage={errors.details?.message}
-            className="ds-u-margin-top--3"
-          />
+          <div>
+            <TextField
+              {...register("details", {
+                validate: (value) =>
+                  value.length <= maxChars || "Reduce character count",
+              })}
+              label="Please provide details about the issue(s)"
+              hint="Describe what information is incorrect or outdated and what corrections should be made, if known"
+              multiline
+              rows={4}
+              maxLength={maxChars}
+              errorMessage={errors.details?.message}
+              className="ds-u-margin-top--3"
+            />
+            <p className="ds-u-margin-top--1 ds-u-color--gray ds-u-font-size--sm">
+              {detailsLength}/500
+            </p>
+          </div>
 
           <TextField
             {...register("email", {
