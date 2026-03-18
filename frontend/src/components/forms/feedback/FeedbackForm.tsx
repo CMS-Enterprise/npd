@@ -5,9 +5,10 @@ import {
   Dialog,
   TextField,
 } from "@cmsgov/design-system"
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { useForm, Controller } from "react-hook-form"
 import type { SubmitHandler } from "react-hook-form"
+import { Altcha } from "./Altcha"
 
 const ISSUE_CHOICES = [
   { label: "Practice location(s)", value: "incorrect_locations" },
@@ -38,6 +39,7 @@ type Props = {
 export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
   const [dialogStatus, setDialogStatus] = useState<"form" | "success">("form")
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const altchaRef = useRef<HTMLInputElement>(null)
 
   const {
     register,
@@ -76,6 +78,7 @@ export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
 
       // hook this up to django email
       console.log(payload)
+      console.log(altchaRef.current?.value)
       setDialogStatus("success")
     } catch (e) {
       setSubmitError(
@@ -192,6 +195,10 @@ export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
               be used to send you updates about this specific issue submission.
             </p>
           </Alert>
+
+          <fieldset className="ds-u-margin-top--4">
+            <Altcha ref={altchaRef} />
+          </fieldset>
 
           <div className="ds-u-margin-top--4 ds-u-display--flex ds-u-justify-content--end">
             <Button variation="ghost" onClick={onExit} type="button">
