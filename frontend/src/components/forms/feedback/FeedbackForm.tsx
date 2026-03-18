@@ -39,7 +39,7 @@ type Props = {
 export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
   const [dialogStatus, setDialogStatus] = useState<"form" | "success">("form")
   const [submitError, setSubmitError] = useState<string | null>(null)
-  const altchaRef = useRef<HTMLInputElement>(null)
+  const altchaRef = useRef<{ value: string | null }>(null)
 
   const {
     register,
@@ -57,6 +57,7 @@ export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
 
   const maxChars = 500
   const detailsLength = watch("details")?.length ?? 0
+
   const errorMessages = [
     ...(Object.values(errors)
       .map((error) => error?.message)
@@ -68,17 +69,35 @@ export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
     try {
       setSubmitError(null)
 
-      const uuid = crypto.randomUUID()
+      const altchaValue = altchaRef.current?.value
 
-      const payload = {
-        uuid,
-        ...presenterData,
-        ...formData,
+      if (!altchaValue) {
+        setSubmitError("Please complete the CAPTCHA verification")
+        return
       }
 
-      // hook this up to django email
-      console.log(payload)
-      console.log(altchaRef.current?.value)
+      const response = await fetch("/api/feedback/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          uuid: crypto.randomUUID(),
+          ...presenterData,
+          ...formData,
+          altcha: altchaRef.current?.value,
+        }),
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        setSubmitError(data.error || "Something went wrong. Please try again.")
+
+        // reset ALTCHA on failure so user must reverify
+        if (altchaRef.current && "reset" in altchaRef.current) {
+          ;(altchaRef.current as unknown as { reset: () => void }).reset()
+        }
+        return
+      }
+
       setDialogStatus("success")
     } catch (e) {
       setSubmitError(

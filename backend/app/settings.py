@@ -383,3 +383,6 @@ structlog.configure(
     logger_factory=structlog.stdlib.LoggerFactory(),
     cache_logger_on_first_use=True,
 )
+
+# Altcha configuration
+ALTCHA_HMAC_KEY = os.environ.get("ALTCHA_HMAC_KEY", "")

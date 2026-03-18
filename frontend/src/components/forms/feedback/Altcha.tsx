@@ -43,15 +43,13 @@ export const Altcha = forwardRef<{ value: string | null }, AltchaProps>(
       }
     }, [onStateChange])
 
-    /* Configure your `challengeurl` and remove the `test` attribute, see docs: https://altcha.org/docs/v2/widget-integration/  */
     return (
       <altcha-widget
         ref={widgetRef}
+        challengeurl="/api/altcha"
         style={{
           "--altcha-max-width": "100%",
         }}
-        debug
-        test
       ></altcha-widget>
     )
   },
