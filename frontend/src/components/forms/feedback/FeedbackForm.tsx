@@ -39,7 +39,7 @@ type Props = {
 export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
   const [dialogStatus, setDialogStatus] = useState<"form" | "success">("form")
   const [submitError, setSubmitError] = useState<string | null>(null)
-  const altchaRef = useRef<{ value: string | null }>(null)
+  const altchaRef = useRef<{ value: string | null; reset: () => void }>(null)
 
   const {
     register,
@@ -56,7 +56,11 @@ export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
   })
 
   const maxChars = 500
+  const selectedIssues = watch("issues")
+  const hasOther = selectedIssues.includes("other")
   const detailsLength = watch("details")?.length ?? 0
+  const isSubmitDisabled =
+    selectedIssues.length === 0 || (hasOther && detailsLength === 0)
 
   const errorMessages = [
     ...(Object.values(errors)
@@ -91,10 +95,8 @@ export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
         const data = await response.json()
         setSubmitError(data.error || "Something went wrong. Please try again.")
 
-        // reset ALTCHA on failure so user must reverify
-        if (altchaRef.current && "reset" in altchaRef.current) {
-          ;(altchaRef.current as unknown as { reset: () => void }).reset()
-        }
+        // reset CAPTCHA on failure so user must re verify
+        altchaRef.current?.reset()
         return
       }
 
@@ -179,10 +181,23 @@ export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
           <div>
             <TextField
               {...register("details", {
-                validate: (value) =>
-                  value.length <= maxChars || "Reduce character count",
+                validate: (value) => {
+                  if (value.length > maxChars) return "Reduce character count"
+                  if (hasOther && !value.trim())
+                    return "Please provide details for 'Other"
+                  return true
+                },
               })}
-              label="Please provide details about the issue(s)"
+              label={
+                <>
+                  Please provide details about the issue(s)
+                  {hasOther && (
+                    <span className="ds-u-color--error" aria-hidden="true">
+                      *
+                    </span>
+                  )}
+                </>
+              }
               hint="Describe what information is incorrect or outdated and what corrections should be made, if known"
               multiline
               rows={4}
@@ -228,6 +243,7 @@ export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
               variation="solid"
               type="submit"
               className="ds-u-margin-left--2"
+              disabled={isSubmitDisabled}
             >
               Submit
             </Button>

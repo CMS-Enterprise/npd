@@ -9,14 +9,14 @@ from django.core.cache import cache
 import hashlib
 
 
-class AltchaChallengeThrottle(AnonRateThrottle):
+class FeedbackFlowThrottle(AnonRateThrottle):
     rate = "10/min"
 
 
 class AltchaChallengeView(APIView):
     authentication_classes = []
     permission_classes = []
-    throttle_classes = [AltchaChallengeThrottle]
+    throttle_classes = [FeedbackFlowThrottle]
 
     def get(self, request):
         challenge = create_challenge(
@@ -32,6 +32,7 @@ class AltchaChallengeView(APIView):
 class FeedbackView(APIView):
     authentication_classes = []
     permission_classes = []
+    throttle_classes = [FeedbackFlowThrottle]
 
     def post(self, request):
         altcha_payload = request.data.get("altcha")
@@ -41,7 +42,7 @@ class FeedbackView(APIView):
                 {"error": "CAPTCHA verification is required"}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        verified, err = verify_solution(
+        verified = verify_solution(
             altcha_payload,
             settings.ALTCHA_HMAC_KEY,
             check_expires=True,
@@ -73,6 +74,7 @@ class FeedbackView(APIView):
             "email": request.data.get("email", ""),
         }
 
+        # print(feedback_data)
         # send this data to email at this point
 
         return Response(
