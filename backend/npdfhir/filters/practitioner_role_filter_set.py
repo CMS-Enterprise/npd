@@ -1,14 +1,22 @@
-import re
-from django.contrib.gis.geos import Point
-from django.contrib.gis.measure import D
-from django.contrib.postgres.search import SearchVector, SearchQuery
 from django.db.models import Q
 from django_filters import rest_framework as filters
 
 from ..documentation_content import docs
 from ..mappings import genderMapping
 from ..models import ProviderToLocationView
-from ..utils import parse_identifier_query
+from .filter_utils import (
+    broad_address_match,
+    city_address_search,
+    state_address_search,
+    postalcode_address_search,
+    field_based_vector_search,
+    filter_identifier_general,
+    generic_filter_gender,
+    filter_individual_name,
+    filter_organization_name_gen,
+    general_filter_distance,
+    gen_nucc_display_filter,
+)
 
 
 class PractitionerRoleFilterSet(filters.FilterSet):
@@ -123,81 +131,43 @@ class PractitionerRoleFilterSet(filters.FilterSet):
         ]
 
     def filter_practitioner_name(self, queryset, name, value):
-        query = SearchQuery(f"{value.upper()}", search_type="websearch", config="english")
-        return queryset.filter(
-            provider_to_organization__individual__individual__individualtoname__search_vector=query
+        return filter_individual_name(
+            queryset,
+            name,
+            value,
+            "provider_to_organization__individual",
         ).distinct()
 
     def filter_practitioner_gender(self, queryset, name, value):
-        if value in genderMapping.keys():
-            gender = genderMapping.toNPD(value)
-            return queryset.filter(provider_to_organization__individual__individual__gender=gender)
-        return queryset
+        return generic_filter_gender(queryset, name, value, "provider_to_organization__individual")
 
     def filter_practitioner_type(self, queryset, name, value):
-        query = SearchQuery(value, search_type="websearch", config="english")
-        return queryset.filter(
-            provider_to_organization__individual__providertotaxonomy__nucc_code__search_vector=query
+        return field_based_vector_search(
+            queryset,
+            name,
+            value,
+            "provider_to_organization__individual__providertotaxonomy__nucc_code__search_vector",
         )
 
     def filter_organization_name(self, queryset, name, value):
-        return queryset.annotate(
-            search=SearchVector("provider_to_organization__organization__organizationtoname__name")
-        ).filter(search=value)
+        return filter_organization_name_gen(
+            queryset, name, value, prefix="provider_to_organization__organization__"
+        )
 
     def filter_distance(self, queryset, name, value):
-        pattern = r"(-?\d+\.?\d*)\|(-?\d+\.?\d*)\|(\d+\.?\d*)\|?(km|mi|ft)?"
-        match = re.fullmatch(pattern, value)
-        if match:
-            lat, lon, distance, units = match.groups()
-            lon = float(lon)
-            lat = float(lat)
-            distance = float(distance)
-            user_location = Point(lon, lat, srid=4326)
-            match units:
-                case "mi":
-                    distance_function = D(mi=distance)
-                case "ft":
-                    distance_function = D(ft=distance)
-                case _:
-                    distance_function = D(km=distance)
-            return queryset.filter(
-                location__address__address_us__geolocation__distance_lte=(
-                    user_location,
-                    distance_function,
-                )
-            )
-        else:
-            return ProviderToLocationView.objects.none()
+        return general_filter_distance(queryset, name, value, prefix="location__")
 
     def filter_organization_type(self, queryset, name, value):
-        return queryset.filter(
-            Q(
-                provider_to_organization__organization__clinicalorganization__organizationtotaxonomy__nucc_code__display_name=value
-            )
-        ).distinct()
+        return gen_nucc_display_filter(queryset, name, value, prefix="provider_to_organization__")
 
     def filter_practitioner_identifier(self, queryset, name, value):
-        system, identifier_id = parse_identifier_query(value)
-        queries = Q(pk__isnull=True)
-
-        if system:  # specific identifier search requested
-            if system.upper() == "NPI":
-                try:
-                    queries = Q(provider_to_organization__individual__npi__npi=int(identifier_id))
-                except (ValueError, TypeError):
-                    pass
-        else:  # general identifier search requested
-            try:
-                queries |= Q(provider_to_organization__individual__npi__npi=int(identifier_id))
-            except (ValueError, TypeError):
-                pass
-
-            queries |= Q(
-                provider_to_organization__individual__providertootherid__other_id__icontains=identifier_id
-            )
-
-        return queryset.filter(queries).distinct()
+        return filter_identifier_general(
+            queryset,
+            name,
+            value,
+            npi_prefix="provider_to_organization__individual__npi__",
+            other_prefix="provider_to_organization__individual__providertootherid__",
+        )
 
     def filter_specialty(self, queryset, name, value):
         return queryset.filter(Q(specialty_id__iexact=value)).distinct()
@@ -223,28 +193,18 @@ class PractitionerRoleFilterSet(filters.FilterSet):
 
     def filter_endpoint_organization_name(self, queryset, name, value):
         # The parent of the organization that owns the location the endpoint is attached to
-        return queryset.filter(location__organization__organizationtoname__name=value)
+        return filter_organization_name_gen(
+            queryset, name, value, prefix="location__organization__"
+        )
 
     def filter_address(self, queryset, name, value):
-        return queryset.annotate(
-            search=SearchVector(
-                "location__address__address_us__delivery_line_1",
-                "location__address__address_us__delivery_line_2",
-                "location__address__address_us__city_name",
-                "location__address__address_us__state_code__abbreviation",
-                "location__address__address_us__zipcode",
-            )
-        ).filter(search=SearchQuery(value, search_type="websearch", config="english"))
+        return broad_address_match(queryset, name, value, prefix="location__")
 
     def filter_address_city(self, queryset, name, value):
-        return queryset.annotate(
-            search=SearchVector("location__address__address_us__city_name")
-        ).filter(search=SearchQuery(value))
+        return city_address_search(queryset, name, value, prefix="location__")
 
     def filter_address_state(self, queryset, name, value):
-        return queryset.annotate(
-            search=SearchVector("location__address__address_us__state_code__abbreviation")
-        ).filter(search=value)
+        return state_address_search(queryset, name, value, prefix="location__")
 
     def filter_address_postalcode(self, queryset, name, value):
-        return queryset.filter(location__address__address_us__zipcode=value)
+        return postalcode_address_search(queryset, name, value, prefix="location__")
