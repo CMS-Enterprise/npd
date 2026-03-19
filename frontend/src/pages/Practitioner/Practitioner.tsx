@@ -1,4 +1,4 @@
-import { Alert } from "@cmsgov/design-system"
+import { Accordion, AccordionItem, Alert } from "@cmsgov/design-system"
 import classNames from "classnames"
 import { useTranslation } from "react-i18next"
 import { useLocation, useParams } from "react-router"
@@ -17,6 +17,7 @@ import {
   TableHead,
   TableRow,
 } from "@cmsgov/design-system"
+import { formatAddress } from "../../helpers/formatters"
 
 export const Practitioner = () => {
   const { t } = useTranslation()
@@ -176,11 +177,59 @@ export const Practitioner = () => {
           </section>
 
           <section className={layout.section}>
-            <h2>Organization(s)</h2>
+            <h2>{t("practitioners.detail.organizations")}</h2>
             {Object.entries(practitioner.organizations).map(([id, obj]) => (
-                    <p>{`${obj.organization.name}`}</p>
+              <>
+                    <h3>{`${obj.organization.name}`}</h3>
+                    <h4>{t("practitioners.detail.locations.title")}</h4>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>
+                            {t("practitioners.detail.locations.name")}
+                          </TableCell>
+                          <TableCell>
+                            {t("practitioners.detail.locations.address")}
+                          </TableCell>
+                          <TableCell>
+                            {t("practitioners.detail.locations.contact")}
+                          </TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                      {Object.entries(obj.locations).length > 0 ? Object.entries(obj.locations).map(([id,location]) => (
+                        <TableRow key={id}>
+                          <TableCell>{location.name}</TableCell>
+                          <TableCell>{formatAddress(location.address)}</TableCell>
+                          <TableCell><strong>Phone:</strong><br></br><strong>Fax:</strong></TableCell>
+                        </TableRow>
+                      )) : (
+                        <p className="ds-u-color--gray">
+                          {t("practitioners.detail.locations.fallback")}
+                        </p> )
+                    }
+                    </TableBody>
+                    </Table>
+                    
+                    <h4>Endpoints</h4>
+                     {Object.entries(obj.endpoints).length > 0 ? 
+                     <Accordion>
+                      {Object.entries(obj.endpoints).map(([id,endpoint]) => (
+                        <AccordionItem key={endpoint.id} heading={endpoint.name}>
+                          <p>{t("practitioners.detail.endpoints.address")}</p>
+                          <p>
+                            {endpoint.address}
+                          </p>
+                        </AccordionItem>
+                      ))
+                      }
+                     </Accordion> : (
+                        <p className="ds-u-color--gray">
+                          {t("practitioners.detail.endpoints.fallback")}
+                        </p> )
+                    }
+                </>
                   ))}
-            <p>[endpoint information]</p>
           </section>
         </FeatureFlag>
 

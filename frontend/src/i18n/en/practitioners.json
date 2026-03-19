@@ -1,6 +1,5 @@
 {
   "npi": "NPI",
-
   "detail": {
     "unavailable": "This content is not currently available.",
     "update": {
@@ -40,22 +39,28 @@
       "fallback": "No taxonomy information available"
     },
     "organizations": "Organization(s)",
-    "endpoints": "Endpoint(s)",
-    "locations": "Locations"
+    "endpoints": {
+      "title": "Endpoint(s)",
+      "fallback": "No endpoint information available"
+    },
+    "locations": {
+      "title": "Locations",
+      "name": "Name",
+      "address": "Address",
+      "contact": "Contact",
+      "fallback": "No location information available"
+    }
   },
-
   "listing": {
     "title": "All Practitioners",
     "taxonomy": "Primary taxonomy",
     "location": "Location"
   },
-
   "search": {
     "title": "Practitioner search",
     "inputLabel": "Name or NPI",
     "button": "Search practitioners"
   },
-
   "sort": {
     "by": "Sort by",
     "first-asc": "First Name (A-Z)",
@@ -63,7 +68,6 @@
     "last-asc": "Last Name (A-Z)",
     "last-desc": "Last Name (Z-A)"
   },
-
   "alert": {
     "heading": "Are you looking for an organization?",
     "body": "Visit the [Organization search](/organizations/search) page."
