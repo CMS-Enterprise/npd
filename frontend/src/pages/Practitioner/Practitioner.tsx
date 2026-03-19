@@ -215,7 +215,7 @@ export const Practitioner = () => {
                      {Object.entries(obj.endpoints).length > 0 ? 
                      <Accordion>
                       {Object.entries(obj.endpoints).map(([id,endpoint]) => (
-                        <AccordionItem key={endpoint.id} heading={endpoint.name}>
+                        <AccordionItem key={endpoint.id} heading={endpoint.connectionType.display}>
                           <p>{t("practitioners.detail.endpoints.address")}</p>
                           <p>
                             {endpoint.address}

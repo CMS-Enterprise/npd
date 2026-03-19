@@ -154,10 +154,12 @@ export const usePractitionerAPI = (practitionerId: string | undefined) => {
       }
     }
   })
-  const endpointIdDups: Array<string> = practitionerRole?.results.entry.map((role: FHIRPractitionerRole) => {return role.resource.endpoint?.map(endpoint => endpoint.reference.split('/').pop())});
+  let endpointIdDups: Array<string> = practitionerRole?.results.entry.flatMap((role: FHIRPractitionerRole) => {return role.resource.endpoint?.map(endpoint => endpoint.reference.split('/').pop())});
   const endpointIds: Array<string> = [...new Set(endpointIdDups)];
+  console.log(endpointIds)
   const endpointQueries = useQueries({
     queries: endpointIds.map((endpointId: string) => {
+      console.log(endpointId)
       return {
         queryKey: ["endpoint", npi, endpointId],
         queryFn: () => fetchEndpoint(endpointId),
