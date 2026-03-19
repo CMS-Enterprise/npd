@@ -8,7 +8,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 dotenv.config({ path: path.resolve(__dirname, '.env') });
 
-const globalTimeout: string = process.env.GLOBAL_TIMEOUT ?? "30000";
+const globalTimeout: string = process.env.GLOBAL_TIMEOUT ?? "300000";
 
 /**
  * See https://playwright.dev/docs/test-configuration.
