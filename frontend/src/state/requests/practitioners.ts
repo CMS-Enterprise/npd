@@ -1,5 +1,5 @@
 import { skipToken, useQuery, keepPreviousData, useQueries } from "@tanstack/react-query"
-import { FHIRPractitionerRole, type FHIRCollection, type FHIRPractitioner, type FHIROrganization } from "../../@types/fhir"
+import { FHIRPractitionerRole, type FHIRCollection, type FHIRPractitioner, type FHIROrganization, type FHIREndpoint, type FHIRLocation } from "../../@types/fhir"
 import { apiUrl } from "../api"
 import { fetchOrganization } from "./organizations"
 import type { SortOption } from "../../@types/search"
@@ -28,13 +28,19 @@ export const PRACTITIONER_SORT_OPTIONS: Record<string, SortOption> = {
 
 export type PractitionerSortKey = keyof typeof PRACTITIONER_SORT_OPTIONS
 
-export interface ExpandedPractitionerRole extends FHIRPractitionerRole {
-  orgInfo: FHIROrganization
+export type OrganizationDetails = {
+  [key: string]: {
+    organization: FHIROrganization,
+    endpoints: Array<FHIREndpoint>,
+    locations: Array<FHIRLocation>
+  }
 }
 
-export type PractitionerDetailsType = {
-    practitioner: FHIRPractitioner | undefined;
-    practitionerRole: ExpandedPractitionerRole;
+export interface PractitionerDetailsType extends FHIRPractitioner {
+      practitionerRoleData: FHIRCollection<FHIRPractitionerRole>,
+      organizationData: {[key:string]: FHIROrganization},
+      locationData: Array<FHIRLocation>,
+      endpointData: Array<FHIREndpoint>
   }
 
 const fetchPractitioner = async (
@@ -50,6 +56,36 @@ const fetchPractitioner = async (
   }
 
   return response.json() as Promise<FHIRPractitioner>
+}
+
+const fetchLocation = async (
+  locationId: string,
+): Promise<FHIRLocation> => {
+  const url = apiUrl("/fhir/Location/:locationId/", { locationId })
+
+  const response = await fetch(url)
+
+  if (!response.ok) {
+    console.error(await response.text())
+    return Promise.reject(`error in ${url} request`)
+  }
+
+  return response.json() as Promise<FHIRLocation>
+}
+
+const fetchEndpoint = async (
+  endpointId: string,
+): Promise<FHIREndpoint> => {
+  const url = apiUrl("/fhir/Endpoint/:endpointId/", { endpointId })
+
+  const response = await fetch(url)
+
+  if (!response.ok) {
+    console.error(await response.text())
+    return Promise.reject(`error in ${url} request`)
+  }
+
+  return response.json() as Promise<FHIREndpoint>
 }
 
 const fetchPractitionerRole = async (
@@ -84,7 +120,7 @@ export const usePractitionerAPI = (practitionerId: string | undefined) => {
     queryFn: () => fetchPractitionerRole(npi),
     enabled: !!npi,
   })
-  const organizationIdDups: Array<string> = practitionerRole.map((role: FHIRPractitionerRole) => {return role.organization.reference.split('/').pop();});
+  const organizationIdDups: Array<string> = practitionerRole?.results.entry.map((role: FHIRPractitionerRole) => {return role.resource.organization.reference.split('/').pop();});
   const organizationIds: Array<string> = [...new Set(organizationIdDups)];
   const organizationQueries = useQueries({
     queries: organizationIds.map((organizationId: string) => {
@@ -96,60 +132,52 @@ export const usePractitionerAPI = (practitionerId: string | undefined) => {
     }),
     combine: (results) => {
       return {
-        data: results.map((result) => [result.data?.id, result.data] ),
+        data: Object.fromEntries(results.map((result) => [result.data?.id, result.data])),
         loading: results.some((result) => result.isLoading) 
       }
     }
   })
-  const locationIdDups: Array<string> = practitionerRole.map((role: FHIRPractitionerRole) => {return role.location[0].reference.split('/').pop();});
+  const locationIdDups: Array<string> = practitionerRole?.results.entry.map((role: FHIRPractitionerRole) => {return role.resource.location[0].reference.split('/').pop();});
   const locationIds: Array<string> = [...new Set(locationIdDups)];
   const locationQueries = useQueries({
     queries: locationIds.map((locationId: string) => {
       return {
         queryKey: ["location", npi, locationId],
-        queryFn: () => fetchOrganization(locationId),
+        queryFn: () => fetchLocation(locationId),
         enabled: !!practitionerRole,
       }
     }),
     combine: (results) => {
       return {
-        data: results.map((result) => [result.data?.id, result.data] ),
+        data: Object.fromEntries(results.map((result) => [result.data?.id, result.data])),
         loading: results.some((result) => result.isLoading) 
       }
     }
   })
-  const endpointIdDups = practitionerRole.map((role: FHIRPractitionerRole) => {return role.endpoint.map(endpoint => endpoint.reference.split('/').pop())});
+  const endpointIdDups: Array<string> = practitionerRole?.results.entry.map((role: FHIRPractitionerRole) => {return role.resource.endpoint?.map(endpoint => endpoint.reference.split('/').pop())});
   const endpointIds: Array<string> = [...new Set(endpointIdDups)];
   const endpointQueries = useQueries({
     queries: endpointIds.map((endpointId: string) => {
       return {
-        queryKey: ["location", npi, endpointId],
-        queryFn: () => fetchOrganization(endpointId),
-        enabled: !!practitionerRole,
+        queryKey: ["endpoint", npi, endpointId],
+        queryFn: () => fetchEndpoint(endpointId),
+        enabled: !!practitionerRole && !!endpointId,
       }
     }),
     combine: (results) => {
       return {
-        data: results.map((result) => [result.data?.id, result.data] ),
+        data: Object.fromEntries(results.map((result) => [result.data?.id, result.data])),
         loading: results.some((result) => result.isLoading) 
       }
     }
   })
-
-  let organizationDetailData = practitionerRole.map((role: FHIRPractitionerRole) => {
-    const organizationId = role.organization.reference.split('/').pop();
-    const locationId = role.location.reference.split('/').pop();
-    const endpointIds = role.endpoint.map((endpoint) => {return endpoint.reference.split('/').pop();})
-    return {
-      organizationData: organizationQueries.data[organizationId],
-      locationData: locationQueries.data[locationId],
-      endpointData: endpointIds.map((endpointId: string) => {return endpointQueries.data[endpointId]})
-    }
-  })
   return {
     data: {
-      practitioner: practitioner,
-      organizations: organizationDetailData,
+      ...practitioner,
+      practitionerRoleData: practitionerRole,
+      organizationData: organizationQueries.data,
+      locationData: locationQueries.data,
+      endpointData: endpointQueries.data
     },
     error: practitionerError ?? practitionerRoleError,
     isLoading: practitionerLoading || practitionerRoleLoading || organizationQueries.loading

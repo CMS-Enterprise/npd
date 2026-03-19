@@ -1,4 +1,5 @@
-import type { PractitionerDetailsType } from "../state/requests/practitioners"
+import type { FHIREndpoint, FHIRLocation, FHIRPractitionerRole } from "../@types/fhir"
+import type { OrganizationDetails, PractitionerDetailsType } from "../state/requests/practitioners"
 import {
   formatAddress,
   formatDetails,
@@ -6,52 +7,52 @@ import {
 } from "../helpers/formatters"
 
 export class PractitionerPresenter {
-  record: PractitionerDetailsType;
-  constructor(record: PractitionerDetailsType ) { this.record = record; }
+  private record: PractitionerDetailsType
+  constructor(record: PractitionerDetailsType) {this.record = record}
 
   get name(): string {
-    const name = this.record.practitioner?.name?.[0]
+    const name = this.record.name?.[0]
     return name?.text || "No name available"
   }
 
   get npi(): string | null {
-    const npiIdentifier = this.record.practitioner?.identifier?.find(
+    const npiIdentifier = this.record.identifier?.find(
       (id) => id.system === "http://terminology.hl7.org/NamingSystem/npi",
     )
     return npiIdentifier?.value ?? null
   }
 
   get address(): string {
-    const addr = this.record.practitioner?.address?.[0]
+    const addr = this.record.address?.[0]
     return addr ? formatAddress(addr) : ""
   }
 
   get gender(): string | null {
-    return this.record.practitioner?.gender ?? null
+    return this.record.gender ?? null
   }
 
   get isDeceased(): string {
-    return this.record.practitioner?.deceasedBoolean ? "Yes" : "No"
+    return this.record.deceasedBoolean ? "Yes" : "No"
   }
 
   get isActive(): string {
-    return this.record.practitioner?.active ? "Yes" : "No"
+    return this.record.active ? "Yes" : "No"
   }
 
   get phone(): string | null {
-    const phoneTelecom = this.record.practitioner?.telecom?.find((t) => t.system === "phone")
+    const phoneTelecom = this.record.telecom?.find((t) => t.system === "phone")
     return phoneTelecom?.value ?? null
   }
 
   get fax(): string | null {
-    const faxTelecom = this.record.practitioner?.telecom?.find((t) => t.system === "fax")
+    const faxTelecom = this.record.telecom?.find((t) => t.system === "fax")
     return faxTelecom?.value ?? null
   }
 
   get identifiers() {
-    if (!this.record.practitioner?.identifier?.length) return []
+    if (!this.record.identifier?.length) return []
 
-    return this.record.practitioner?.identifier.map((identity) => ({
+    return this.record.identifier.map((identity) => ({
       type: identity.type?.coding?.[0]?.display || "Unknown",
       number: identity.value,
       details: identity.period ? formatDetails(identity.period) : "",
@@ -60,12 +61,46 @@ export class PractitionerPresenter {
   }
 
   get taxonomy() {
-    if (!this.record.practitioner?.qualification?.length) return []
+    if (!this.record.qualification?.length) return []
 
-    return this.record.practitioner?.qualification.map((taxonomy) => ({
+    return this.record.qualification.map((taxonomy) => ({
       state: "", // we arent capturing this currently, we could use the state they're from?
-      licenseNumber: taxonomy.code?.coding?.[0]?.code || "Unknown",
+      licenseNumber: "", // we arent capturing this either
       displayCode: taxonomy.code?.coding?.[0]?.display || "Unknown",
     }))
+  }
+
+  get organizations() {
+    if (!this.record.practitionerRoleData?.results?.entry?.length) return []
+    let organizationDetailData: OrganizationDetails = {};
+    this.record.practitionerRoleData.results.entry.forEach((role: FHIRPractitionerRole) => {
+      const organizationId = role.resource.organization.reference.split('/').pop();
+      const locationId = role.resource.location[0].reference.split('/').pop();
+      const endpointIds = role.resource.endpoint?.map((endpoint: FHIREndpoint) => { return endpoint.reference.split('/').pop();})
+      if (Object.keys(organizationDetailData).includes(organizationId)) {
+        var existingEndpointIds: Array<string> = organizationDetailData[organizationId].endpoints?.map((endpoint: FHIREndpoint) => endpoint.id)
+        endpointIds.forEach( (id: string) => {
+          if (!existingEndpointIds.includes(id)) {
+            organizationDetailData[organizationId].endpoints.push(this.record.endpointData[id])
+          }
+        })
+        var existingLocationIds: Array<string> = organizationDetailData[organizationId].locations.map((location: FHIRLocation) => location.id)
+        if (!existingLocationIds.includes(locationId)) {
+          organizationDetailData[organizationId].locations.push(this.record.locationData[locationId])
+        }
+      }
+      else {
+        organizationDetailData[organizationId] = {
+          organization: this.record.organizationData[organizationId],
+          endpoints: endpointIds?.map((endpointId: string) => {return this.record.endpointData[endpointId]}) ?? [],
+          locations: [this.record.locationData[locationId]]
+        };
+        console.log(organizationDetailData);
+        console.log(this.record.locationData);
+      }
+  })
+  return {
+    ...organizationDetailData
+  }
   }
 }

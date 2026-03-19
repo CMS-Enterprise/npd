@@ -177,6 +177,9 @@ export const Practitioner = () => {
 
           <section className={layout.section}>
             <h2>Organization(s)</h2>
+            {Object.entries(practitioner.organizations).map(([id, obj]) => (
+                    <p>{`${obj.organization.name}`}</p>
+                  ))}
             <p>[endpoint information]</p>
           </section>
         </FeatureFlag>
