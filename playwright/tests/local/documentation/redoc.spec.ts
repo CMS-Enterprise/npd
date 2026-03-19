@@ -5,16 +5,15 @@ test.describe("Redoc", () => {
   test("loads successfully", async ({ page }) => {
     await page.goto("/fhir/docs/redoc/")
 
-    await expect(page.locator(".redoc-wrap")).toBeVisible()
-    await expect(page.locator(".api-info h1")).toBeVisible()
+    await expect(page.getByRole("heading", { name: "NPD FHIR API (beta)" })).toBeVisible()
   })
 
   test("displays all FHIR resource sections in navigation", async ({ page }) => {
     await page.goto("/fhir/docs/redoc/")
-    await expect(page.locator(".redoc-wrap")).toBeVisible()
+    await expect(page.getByRole("heading", { name: "NPD FHIR API (beta)" })).toBeVisible()
 
     for (const resource of FHIR_RESOURCES) {
-      const navItem = page.locator(`li[data-item-id="tag/${resource}"]`)
+      const navItem = page.locator("label").filter({ hasText: new RegExp(`^${resource}$`) })
       await expect(navItem).toBeVisible()
     }
   })
@@ -22,78 +21,70 @@ test.describe("Redoc", () => {
   // regression test: "search" parameter should not appear in any endpoint
   test("does not display invalid 'search' parameter", async ({ page }) => {
     await page.goto("/fhir/docs/redoc/")
-    await expect(page.locator(".redoc-wrap")).toBeVisible()
+    await expect(page.getByRole("heading", { name: "NPD FHIR API (beta)" })).toBeVisible()
 
     // check Organization endpoint
-    const orgSection = page.locator("#tag\\/Organization\\/operation\\/Organization_list")
-    await expect(orgSection.getByText("query Parameters")).toBeVisible()
+    const orgSection = page.locator('[id="operation/Organization_list"]')
+    await expect(orgSection.getByRole("heading", { name: "query Parameters" })).toBeVisible()
     await expect(orgSection.locator("td").filter({ hasText: /^search$/ })).not.toBeVisible()
 
     // check Practitioner endpoint
-    const practitionerSection = page.locator("#tag\\/Practitioner\\/operation\\/Practitioner_list")
-    await expect(practitionerSection.getByText("query Parameters")).toBeVisible()
+    const practitionerSection = page.locator('[id="operation/Practitioner_list"]')
+    await expect(practitionerSection.getByRole("heading", { name: "query Parameters" })).toBeVisible()
     await expect(practitionerSection.locator("td").filter({ hasText: /^search$/ })).not.toBeVisible()
-
   })
 
   test("can navigate to Organization section", async ({ page }) => {
     await page.goto("/fhir/docs/redoc/")
-    await expect(page.locator(".redoc-wrap")).toBeVisible()
+    await expect(page.getByRole("heading", { name: "NPD FHIR API (beta)" })).toBeVisible()
 
-    const navItem = page.locator('li[data-item-id="tag/Organization"] > label')
-    await navItem.click()
+    await page.locator("label").filter({ hasText: /^Organization$/ }).click()
 
-    await expect(page.locator("#tag\\/Organization h2")).toBeVisible()
+    await expect(page.getByRole("heading", { name: "tag/Organization Organization" })).toBeVisible()
   })
 
   test("can navigate to Practitioner section", async ({ page }) => {
     await page.goto("/fhir/docs/redoc/")
-    await expect(page.locator(".redoc-wrap")).toBeVisible()
+    await expect(page.getByRole("heading", { name: "NPD FHIR API (beta)" })).toBeVisible()
 
-    const navItem = page.locator('li[data-item-id="tag/Practitioner"] > label')
-    await navItem.click()
+    await page.locator("label").filter({ hasText: /^Practitioner$/ }).click()
 
-    await expect(page.locator("#tag\\/Practitioner h2")).toBeVisible()
+    await expect(page.getByRole("heading", { name: "tag/Practitioner Practitioner" })).toBeVisible()
   })
 
   test("can navigate to Location section", async ({ page }) => {
     await page.goto("/fhir/docs/redoc/")
-    await expect(page.locator(".redoc-wrap")).toBeVisible()
+    await expect(page.getByRole("heading", { name: "NPD FHIR API (beta)" })).toBeVisible()
 
-    const navItem = page.locator('li[data-item-id="tag/Location"] > label')
-    await navItem.click()
+    await page.locator("label").filter({ hasText: /^Location$/ }).click()
 
-    await expect(page.locator("#tag\\/Location h2")).toBeVisible()
+    await expect(page.getByRole("heading", { name: "tag/Location Location" })).toBeVisible()
   })
 
   test("can navigate to Endpoint section", async ({ page }) => {
     await page.goto("/fhir/docs/redoc/")
-    await expect(page.locator(".redoc-wrap")).toBeVisible()
+    await expect(page.getByRole("heading", { name: "NPD FHIR API (beta)" })).toBeVisible()
 
-    const navItem = page.locator('li[data-item-id="tag/Endpoint"] > label')
-    await navItem.click()
+    await page.locator("label").filter({ hasText: /^Endpoint$/ }).click()
 
-    await expect(page.locator("#tag\\/Endpoint h2")).toBeVisible()
+    await expect(page.getByRole("heading", { name: "tag/Endpoint Endpoint" })).toBeVisible()
   })
 
   test("can navigate to PractitionerRole section", async ({ page }) => {
     await page.goto("/fhir/docs/redoc/")
-    await expect(page.locator(".redoc-wrap")).toBeVisible()
+    await expect(page.getByRole("heading", { name: "NPD FHIR API (beta)" })).toBeVisible()
 
-    const navItem = page.locator('li[data-item-id="tag/PractitionerRole"] > label')
-    await navItem.click()
+    await page.locator("label").filter({ hasText: /^PractitionerRole$/ }).click()
 
-    await expect(page.locator("#tag\\/PractitionerRole h2")).toBeVisible()
+    await expect(page.getByRole("heading", { name: "tag/PractitionerRole PractitionerRole" })).toBeVisible()
   })
 
   test("can navigate to metadata section", async ({ page }) => {
     await page.goto("/fhir/docs/redoc/")
-    await expect(page.locator(".redoc-wrap")).toBeVisible()
+    await expect(page.getByRole("heading", { name: "NPD FHIR API (beta)" })).toBeVisible()
 
-    const navItem = page.locator('li[data-item-id="tag/metadata"] > label')
-    await navItem.click()
+    await page.locator("label").filter({ hasText: /^metadata$/ }).click()
 
-    await expect(page.locator("#tag\\/metadata h2")).toBeVisible()
+    await expect(page.getByRole("heading", { name: "tag/metadata metadata" })).toBeVisible()
   })
-
 })
