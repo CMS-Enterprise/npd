@@ -47,7 +47,7 @@ describe("Practitioner", () => {
       })
 
       // ensure loading has finished
-      await screen.findByText(EXPECTED_NAME)
+      await screen.findByTestId("practitioner-name")
 
       expect(screen.queryByText(`NPI: ${EXPECTED_NPI}`)).toBeInTheDocument()
       expect(

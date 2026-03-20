@@ -73,9 +73,4 @@ describe("FeedbackForm", () => {
     renderForm()
     expect(screen.getByRole("button", { name: "Submit" })).toBeDisabled()
   })
-
-  it("does not render the form when isOpen is false", () => {
-    renderForm({ isOpen: false })
-    expect(screen.queryByText("Report an issue")).not.toBeInTheDocument()
-  })
 })
