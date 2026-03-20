@@ -175,7 +175,32 @@ export const Organization = () => {
 
           <section className={layout.section}>
             <h2>{t("organizations.practitioners")}</h2>
-            <p className={styles.emptyState}>No practitioners available</p>
+            {organization.identifiers.length > 0 ? (
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>
+                      Name
+                    </TableCell>
+                    <TableCell>
+                      Specialties
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {organization.practitioners.map((practitioner, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{practitioner.name?.slice(0).text}</TableCell>
+                      <TableCell>{practitioner.qualification?[0].slice(0).code.coding[0].display}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <p className="ds-u-color--gray">
+                No Practitioners Available
+              </p>
+            )}
           </section>
         </FeatureFlag>
 

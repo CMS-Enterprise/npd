@@ -1,7 +1,10 @@
 import { skipToken, useQuery, keepPreviousData, useQueries } from "@tanstack/react-query"
-import { FHIRPractitionerRole, type FHIRCollection, type FHIRPractitioner, type FHIROrganization, type FHIREndpoint, type FHIRLocation } from "../../@types/fhir"
+import { type FHIRLocation, type FHIREndpoint, type FHIRPractitionerRole, type FHIRCollection, type FHIRPractitioner, type FHIROrganization } from "../../@types/fhir"
 import { apiUrl } from "../api"
 import { fetchOrganization } from "./organizations"
+import { fetchEndpoint } from "./endpoints"
+import { fetchLocation } from "./locations"
+import { fetchPractitionerRole } from "./practitionerrole"
 import type { SortOption } from "../../@types/search"
 
 // NOTE: (@abachman-dsac) due to limitations in the fhir.resource.R4B model
@@ -58,50 +61,6 @@ const fetchPractitioner = async (
   return response.json() as Promise<FHIRPractitioner>
 }
 
-const fetchLocation = async (
-  locationId: string,
-): Promise<FHIRLocation> => {
-  const url = apiUrl("/fhir/Location/:locationId/", { locationId })
-
-  const response = await fetch(url)
-
-  if (!response.ok) {
-    console.error(await response.text())
-    return Promise.reject(`error in ${url} request`)
-  }
-
-  return response.json() as Promise<FHIRLocation>
-}
-
-const fetchEndpoint = async (
-  endpointId: string,
-): Promise<FHIREndpoint> => {
-  const url = apiUrl("/fhir/Endpoint/:endpointId/", { endpointId })
-
-  const response = await fetch(url)
-
-  if (!response.ok) {
-    console.error(await response.text())
-    return Promise.reject(`error in ${url} request`)
-  }
-
-  return response.json() as Promise<FHIREndpoint>
-}
-
-const fetchPractitionerRole = async (
-  practitionerNPI: string | undefined,
-): Promise<FHIRPractitionerRole> => {
-  const url = apiUrl(`/fhir/PractitionerRole/?practitioner_identifier=NPI|${practitionerNPI}`)
-
-  const response = await fetch(url)
-
-  if (!response.ok) {
-    console.error(await response.text())
-    return Promise.reject(`error in ${url} request`)
-  }
-
-  return response.json() as Promise<FHIRCollection<FHIRPractitionerRole>>
-}
 
 export const usePractitionerAPI = (practitionerId: string | undefined) => {
   const {data: practitioner, isLoading: practitionerLoading, error: practitionerError} = useQuery<FHIRPractitioner>({
@@ -117,7 +76,7 @@ export const usePractitionerAPI = (practitionerId: string | undefined) => {
   const npi = practitioner?.identifier?.filter(identifier => identifier.system = "http://terminology.hl7.org/NamingSystem/npi")[0].value?.toString();
   const {data: practitionerRole, isLoading: practitionerRoleLoading, error: practitionerRoleError} = useQuery<FHIRPractitionerRole>({
     queryKey: ["practitionerRole", npi, practitionerId],
-    queryFn: () => fetchPractitionerRole(npi),
+    queryFn: () => fetchPractitionerRole(practitionerNpi = npi),
     enabled: !!npi,
   })
   const organizationIdDups: Array<string> = practitionerRole?.results.entry.map((role: FHIRPractitionerRole) => {return role.resource.organization.reference.split('/').pop();});

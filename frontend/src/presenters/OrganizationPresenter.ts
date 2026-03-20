@@ -1,12 +1,13 @@
-import type { FHIROrganization } from "../@types/fhir"
 import {
   formatAddress,
   formatDetails,
   formatIdentifierType,
 } from "../helpers/formatters"
+import type { OrganizationDetailsType } from "../state/requests/organizations"
 
 export class OrganizationPresenter {
-  constructor(private record: FHIROrganization) {}
+  private record: OrganizationDetailsType
+  constructor(record: OrganizationDetailsType) { this.record = record}
 
   get name(): string {
     return this.record.name ?? ""
@@ -60,5 +61,9 @@ export class OrganizationPresenter {
       details: identity.period ? formatDetails(identity.period) : "",
       system: formatIdentifierType(identity.system as string) || "Unknown",
     }))
+  }
+  get practitioners() {
+    if (!this.record.practitionerData?.length) return []
+    return this.record.practitionerData
   }
 }
