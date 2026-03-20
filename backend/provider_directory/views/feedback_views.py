@@ -10,6 +10,7 @@ from drf_spectacular.utils import extend_schema
 import hashlib
 import json
 from .feedback_serializer import FeedbackSerializer
+from npdfhir.models import Feedback
 
 
 class FeedbackFlowThrottle(AnonRateThrottle):
@@ -48,11 +49,11 @@ class FeedbackView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        altcha_payload = serializer.validated_data
+        validated_payload = serializer.validated_data
 
         try:
             verified = verify_solution(
-                altcha_payload,
+                validated_payload,
                 settings.ALTCHA_HMAC_KEY,
                 check_expires=True,
             )
@@ -70,7 +71,7 @@ class FeedbackView(APIView):
 
         # replay prevention
         payload_hash = hashlib.sha256(
-            json.dumps(altcha_payload["altcha"], sort_keys=True).encode()
+            json.dumps(validated_payload["altcha"], sort_keys=True).encode()
         ).hexdigest()
         cache_key = f"altcha_used:{payload_hash}"
 
@@ -82,19 +83,15 @@ class FeedbackView(APIView):
 
         cache.set(cache_key, True, timeout=60 * 10)
 
-        feedback_data = {
-            "npi": request.data.get("npi"),
-            "record_name": request.data.get("recordName"),
-            "issues": request.data.get("issues", []),
-            "details": request.data.get("details", ""),
-            "email": request.data.get("email", ""),
-        }
-
-        print("---------------RESPONSE HERE---------------")
-        print(feedback_data)
-        # send this data to email at this point
+        Feedback.objects.create(
+            npi=validated_payload.get("npi"),
+            record_name=validated_payload.get("recordName", ""),
+            issues=validated_payload.get("issues", []),
+            details=validated_payload.get("details", ""),
+            email=validated_payload.get("email", ""),
+        )
 
         return Response(
-            {"message": f"Feedback submitted succcessfuly: {feedback_data}"},
+            {"message": "Feedback submitted successfuly!"},
             status=status.HTTP_201_CREATED,
         )
