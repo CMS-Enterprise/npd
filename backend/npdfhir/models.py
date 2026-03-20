@@ -892,6 +892,9 @@ class Feedback(models.Model):
     email = models.EmailField(blank=True, default="")
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return self.npi or f"Feedback ID: {self.id}"
+
     class Meta:
         managed = False
         db_table = "feedback"

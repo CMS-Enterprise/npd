@@ -13,7 +13,7 @@ VALID_ISSUES = [
 
 class FeedbackSerializer(serializers.Serializer):
     npi = serializers.CharField()
-    record_name = serializers.CharField(max_length=255, required=False, allow_blank=True)
+    recordName = serializers.CharField(max_length=255, required=False, allow_blank=True)
     issues = serializers.ListField(
         child=serializers.ChoiceField(choices=VALID_ISSUES),
         min_length=1,
