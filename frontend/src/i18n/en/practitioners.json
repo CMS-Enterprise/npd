@@ -41,6 +41,8 @@
     "organizations": "Organization(s)",
     "endpoints": {
       "title": "Endpoint(s)",
+      "connectionType": "Connection Type",
+      "address": "Address",
       "fallback": "No endpoint information available"
     },
     "locations": {
@@ -48,6 +50,8 @@
       "name": "Name",
       "address": "Address",
       "contact": "Contact",
+      "phone": "Phone",
+      "fax": "Fax",
       "fallback": "No location information available"
     }
   },

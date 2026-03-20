@@ -1,4 +1,4 @@
-import { Accordion, AccordionItem, Alert } from "@cmsgov/design-system"
+import { Alert } from "@cmsgov/design-system"
 import classNames from "classnames"
 import { useTranslation } from "react-i18next"
 import { useLocation, useParams } from "react-router"
@@ -180,9 +180,11 @@ export const Practitioner = () => {
             <h2>{t("practitioners.detail.organizations")}</h2>
             {Object.entries(practitioner.organizations).map(([id, obj]) => (
               <>
-                    <h3>{`${obj.organization.name}`}</h3>
+                    <h3>{`${obj.organization.name} (NPI: ${obj.organization.identifier?.filter(identifier => identifier.system = "http://terminology.hl7.org/NamingSystem/npi")[0].value})`}</h3>
                     <h4>{t("practitioners.detail.locations.title")}</h4>
-                    <Table>
+                    
+                      {Object.entries(obj.locations).length > 0 ? 
+                      <Table>
                       <TableHead>
                         <TableRow>
                           <TableCell>
@@ -197,36 +199,48 @@ export const Practitioner = () => {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                      {Object.entries(obj.locations).length > 0 ? Object.entries(obj.locations).map(([id,location]) => (
+                      {Object.entries(obj.locations).map(([id,location]) => (
                         <TableRow key={id}>
                           <TableCell>{location.name}</TableCell>
                           <TableCell>{formatAddress(location.address)}</TableCell>
-                          <TableCell><strong>Phone:</strong><br></br><strong>Fax:</strong></TableCell>
+                          <TableCell><strong>{t("practitioners.detail.locations.phone")}:</strong><br></br><strong>{t("practitioners.detail.locations.fax")}:</strong></TableCell>
                         </TableRow>
-                      )) : (
+                      )) }
+                      </TableBody>
+                    </Table>
+                    : (
                         <p className="ds-u-color--gray">
                           {t("practitioners.detail.locations.fallback")}
-                        </p> )
+                        </p> 
+                        )
                     }
-                    </TableBody>
-                    </Table>
-                    
-                    <h4>Endpoints</h4>
+                    <h4>{t("practitioners.detail.endpoints.title")}</h4>
                      {Object.entries(obj.endpoints).length > 0 ? 
-                     <Accordion>
+                     <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>
+                            {t("practitioners.detail.endpoints.connectionType")}
+                          </TableCell>
+                          <TableCell>
+                            {t("practitioners.detail.endpoints.address")}
+                          </TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
                       {Object.entries(obj.endpoints).map(([id,endpoint]) => (
-                        <AccordionItem key={endpoint.id} heading={endpoint.connectionType.display}>
-                          <p>{t("practitioners.detail.endpoints.address")}</p>
-                          <p>
-                            {endpoint.address}
-                          </p>
-                        </AccordionItem>
+                          <TableRow key={id}>
+                          <TableCell>{endpoint?.connectionType.display}</TableCell>
+                          <TableCell>{endpoint?.address}</TableCell>
+                        </TableRow>
                       ))
-                      }
-                     </Accordion> : (
+                    }
+                     </TableBody>
+                    </Table> : (
                         <p className="ds-u-color--gray">
                           {t("practitioners.detail.endpoints.fallback")}
-                        </p> )
+                        </p> 
+                        )
                     }
                 </>
                   ))}

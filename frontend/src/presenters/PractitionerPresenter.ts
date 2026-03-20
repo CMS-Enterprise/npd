@@ -1,10 +1,13 @@
-import type { FHIREndpoint, FHIRLocation, FHIRPractitionerRole } from "../@types/fhir"
+import type { FHIREndpoint, FHIRLocation, FHIRPractitionerRole, FHIRReference } from "../@types/fhir"
 import type { OrganizationDetails, PractitionerDetailsType } from "../state/requests/practitioners"
 import {
   formatAddress,
   formatDetails,
   formatIdentifierType,
 } from "../helpers/formatters"
+import type { PractitionerRoleEntry } from "../state/requests/practitionerrole"
+import type { LogicalIdOfThisArtifact } from "../@types/fhir/Endpoint"
+import type { StringToNumber } from "lodash"
 
 export class PractitionerPresenter {
   private record: PractitionerDetailsType
@@ -73,30 +76,40 @@ export class PractitionerPresenter {
   get organizations() {
     if (!this.record.practitionerRoleData?.results?.entry?.length) return []
     let organizationDetailData: OrganizationDetails = {};
-    this.record.practitionerRoleData.results.entry.forEach((role: FHIRPractitionerRole) => {
+    this.record.practitionerRoleData.results.entry.forEach((role: PractitionerRoleEntry) => {
       const organizationId = role.resource.organization.reference.split('/').pop();
       const locationId = role.resource.location[0].reference.split('/').pop();
-      const endpointIds = role.resource.endpoint?.map((endpoint: FHIREndpoint) => { return endpoint.reference.split('/').pop();})
-      if (Object.keys(organizationDetailData).includes(organizationId)) {
-        var existingEndpointIds: Array<string> = organizationDetailData[organizationId].endpoints?.map((endpoint: FHIREndpoint) => endpoint.id)
-        endpointIds.forEach( (id: string) => {
-          if (!existingEndpointIds.includes(id)) {
-            organizationDetailData[organizationId].endpoints.push(this.record.endpointData[id])
+      const endpointIds = role.resource.endpoint?.map((endpoint: FHIRReference) => { return endpoint.reference.split('/').pop()});
+      if (organizationId && Object.keys(organizationDetailData).includes(organizationId)) {
+        var existingEndpointIds: Array<string | undefined> = organizationDetailData[organizationId].endpoints?.map((endpoint) => endpoint?.id )
+        endpointIds?.forEach( (endpointId) => {
+          if (endpointId && !existingEndpointIds.includes(endpointId)) {
+            organizationDetailData[organizationId].endpoints.push(this.record.endpointData[endpointId])
           }
         })
-        var existingLocationIds: Array<string> = organizationDetailData[organizationId].locations.map((location: FHIRLocation) => location.id)
-        if (!existingLocationIds.includes(locationId)) {
+        var existingLocationIds: Array<LogicalIdOfThisArtifact | undefined> = organizationDetailData[organizationId].locations.map((location: FHIRLocation) => location.id)
+        if (locationId && !existingLocationIds.includes(locationId)) {
           organizationDetailData[organizationId].locations.push(this.record.locationData[locationId])
         }
       }
       else {
-        organizationDetailData[organizationId] = {
-          organization: this.record.organizationData[organizationId],
-          endpoints: endpointIds?.map((endpointId: string) => {return this.record.endpointData[endpointId]}) ?? [],
-          locations: [this.record.locationData[locationId]]
-        };
-        console.log(organizationDetailData);
-        console.log(this.record.locationData);
+        if (organizationId && locationId){
+          console.log(`org: ${organizationId}`);
+          console.log(`endpoint: ${endpointIds}`);
+          console.log(`loc: ${locationId}`);
+          organizationDetailData[organizationId] = {
+            organization: this.record.organizationData[organizationId],
+            endpoints: endpointIds?.map(endpointId => {
+              if (endpointId) {
+                return this.record.endpointData[endpointId]
+              }
+              else {
+                return null
+              }
+            }) ?? [],
+            locations: [this.record.locationData[locationId]]
+          };
+        }
       }
   })
   return {

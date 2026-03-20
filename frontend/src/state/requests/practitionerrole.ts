@@ -1,10 +1,19 @@
 import { type FHIRPractitionerRole, type FHIRCollection } from "../../@types/fhir"
 import { apiUrl } from "../api"
 
-export const fetchPractitionerRole = async (
-  practitionerNPI?: string | undefined,
-  organizationNPI?: string | undefined,
-): Promise<FHIRPractitionerRole> => {
+interface PractitionerRoleParams {
+    practitionerNPI?: string | undefined,
+    organizationNPI?: string | undefined,
+}
+
+export type PractitionerRoleEntry = {
+    fullUrl: string,
+    resource: FHIRPractitionerRole
+}
+
+export const fetchPractitionerRoles = async (
+  {practitionerNPI, organizationNPI}: PractitionerRoleParams
+): Promise<FHIRCollection<FHIRPractitionerRole>> => {
   var query: Array<string> = []
   if (practitionerNPI !== undefined) {
     query.push(`practitioner_identifier=NPI|${practitionerNPI}`);

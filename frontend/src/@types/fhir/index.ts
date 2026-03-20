@@ -9,6 +9,10 @@ import type { Organization } from "./Organization"
 import type { Period } from "./Period"
 import type { Practitioner } from "./Practitioner"
 import type { Extension } from "./Extension"
+import type { PractitionerRole } from "./PractitionerRole"
+import type { Endpoint, ProtocolProfileStandardToBeUsedWithThisEndpointConnection } from "./Endpoint"
+import type { Location } from "./Location"
+import type { Reference } from "./Reference"
 
 // NOTE: (@abachman-dsac) due to limitations in the fhir.resource.R4B model
 // definitions, we cannot fully generate response types automatically
@@ -33,11 +37,36 @@ export interface FHIRCodeableConcept extends CodeableConcept {
   text?: string
 }
 
+export interface FHIRReference extends Reference {
+  reference: string
+}
+
 export interface FHIRPractitioner extends Practitioner {
   name?: HumanName[] | null
   identifier?: FHIRIdentifer[] | null
   telecom?: ContactPoint[] | null
   qualification?: FHIRPractitionerQualification[] | null
+}
+
+export interface FHIRPractitionerRole extends PractitionerRole {
+  organization: FHIRReference
+  practitioner: FHIRReference
+  endpoint?: Array<FHIRReference>
+  location: Array<FHIRReference>
+}
+
+export interface FHIRProtocol extends ProtocolProfileStandardToBeUsedWithThisEndpointConnection {
+  [key: string]: string | any
+}
+
+export interface FHIREndpoint extends Endpoint {
+  id: string
+  connectionType: FHIRProtocol
+}
+
+export interface FHIRLocation extends Location {
+  id: string
+  address: Address
 }
 
 // generated base type is too loosely typed so made this manually

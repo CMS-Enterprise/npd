@@ -1,9 +1,7 @@
-import { skipToken, useQuery, keepPreviousData, useQueries } from "@tanstack/react-query"
+import { skipToken, useQuery, keepPreviousData } from "@tanstack/react-query"
 import type { FHIRCollection, FHIROrganization, FHIRPractitioner, FHIRPractitionerRole } from "../../@types/fhir"
 import { apiUrl } from "../api"
-import { fetchPractitioner } from "./practitioners"
-import { fetchPractitionerRole } from "./practitionerrole"
-import type { SortOption } from "../../@types/search"
+import type { SortOption, SearchParams } from "../../@types/search"
 
 export const ORGANIZATION_SORT_OPTIONS: Record<string, SortOption> = {
   "name-asc": {
@@ -24,7 +22,7 @@ export interface OrganizationDetailsType extends FHIROrganization {
   }
 
 export const fetchOrganization = async (
-  organizationId: string,
+  organizationId: string ,
 ): Promise<FHIROrganization> => {
   const url = apiUrl("/fhir/Organization/:organizationId/", { organizationId })
 
@@ -39,7 +37,7 @@ export const fetchOrganization = async (
 }
 
 export const useOrganizationAPI = (organizationId: string | undefined) => {
-  const {data: organization, isLoading: organizationLoading, error: organizationError} = useQuery<FHIROrganization>({
+  return useQuery<FHIROrganization>({
     queryKey: ["organization", organizationId],
     queryFn: () => {
       if (!organizationId) {
@@ -49,38 +47,6 @@ export const useOrganizationAPI = (organizationId: string | undefined) => {
       return fetchOrganization(organizationId)
     },
   })
-  const npi = organization?.identifier?.filter(identifier => identifier.system = "http://terminology.hl7.org/NamingSystem/npi")[0].value?.toString();
-    const {data: practitionerRole, isLoading: practitionerRoleLoading, error: practitionerRoleError} = useQuery<FHIRPractitionerRole>({
-      queryKey: ["practitionerRole", npi, organizationId],
-      queryFn: () => fetchPractitionerRole(organizationNpi = npi),
-      enabled: !!npi,
-    })
-  const practitionerIdDups: Array<string> = practitionerRole?.results.entry.map((role: FHIRPractitionerRole) => {return role.resource.practitioner.reference.split('/').pop();});
-  const practitionerIds: Array<string> = [...new Set(practitionerIdDups)];
-  const practitionerQueries = useQueries({
-    queries: practitionerIds.map((practitionerId: string) => {
-      return {
-        queryKey: ["practitioner", npi, practitionerId],
-        queryFn: () => fetchPractitioner(practitionerId),
-        enabled: !!practitionerRole,
-      }
-    }),
-    combine: (results) => {
-      return {
-        data: Object.fromEntries(results.map((result) => [result.data?.id, result.data])),
-        loading: results.some((result) => result.isLoading) 
-      }
-    }
-  })
-  return {
-    data: {
-      ...organization,
-      practitionerRoleData: practitionerRole,
-      practitionerData: practitionerQueries.data,
-    },
-    error: organizationError ?? practitionerRoleError,
-    isLoading: organizationLoading || practitionerRoleLoading || practitionerQueries.loading
-  }
 }
 
 const detectQueryKey = (value: string): "identifier" | "name" => {
@@ -140,7 +106,7 @@ type QueryOptions = {
 }
 
 export const useOrganizationsAPI = (
-  params: PaginationParams & SearchParams,
+  params: PaginationParams & SearchParams, 
   options?: QueryOptions,
 ) => {
   return useQuery<FHIRCollection<FHIROrganization>>({
