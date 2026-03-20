@@ -164,7 +164,7 @@ export const Practitioner = () => {
                     <TableRow key={index}>
                       <TableCell>{taxonomy.state}</TableCell>
                       <TableCell>{taxonomy.licenseNumber}</TableCell>
-                      <TableCell>{taxonomy.displayCode}</TableCell>
+                      <TableCell>{taxonomy.displayCode} ({taxonomy.nuccCode})</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

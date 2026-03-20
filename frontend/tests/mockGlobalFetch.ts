@@ -1,6 +1,8 @@
 import { vi } from "vitest"
 import type { Organization } from "../src/@types/fhir/Organization"
 import type { Practitioner } from "../src/@types/fhir/Practitioner"
+import type { Location } from "../src/@types/fhir/Location"
+import type { FHIRCollection, FHIRPractitionerRole } from "../src/@types/fhir"
 import { DEFAULT_FRONTEND_SETTINGS } from "./fixtures"
 
 export const settingsResponseWithFeature = (
@@ -22,7 +24,7 @@ export const settingsResponseWithFeature = (
 
 type UrlMatch = string
 // new API response types should be added as a union to ApiResponseType
-type ApiResponseType = FrontendSettings | Organization | Practitioner
+type ApiResponseType = FrontendSettings | Organization | Practitioner | FHIRCollection<FHIRPractitionerRole> | Location
 
 export type MockResponse = [UrlMatch, ApiResponseType]
 

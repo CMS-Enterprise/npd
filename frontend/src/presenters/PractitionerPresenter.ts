@@ -67,9 +67,10 @@ export class PractitionerPresenter {
     if (!this.record.qualification?.length) return []
 
     return this.record.qualification.map((taxonomy) => ({
-      state: "", // we arent capturing this currently, we could use the state they're from?
-      licenseNumber: "", // we arent capturing this either
+      state: taxonomy.identifier?.[0]?.assigner?.display ?? "",
+      licenseNumber: taxonomy.identifier?.[0]?.value ?? "",
       displayCode: taxonomy.code?.coding?.[0]?.display || "Unknown",
+      nuccCode: taxonomy.code?.coding?.[0]?.code || "Unknown",
     }))
   }
 

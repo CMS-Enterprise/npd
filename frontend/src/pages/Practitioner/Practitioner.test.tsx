@@ -1,7 +1,7 @@
 import { screen } from "@testing-library/react"
 import { MemoryRouter, Route, Routes } from "react-router"
 import { beforeEach, describe, expect, it } from "vitest"
-import { DEFAULT_PRACTITIONER } from "../../../tests/fixtures"
+import { DEFAULT_ORGANIZATION, DEFAULT_PRACTITIONER, DEFAULT_LOCATION, DEFAULT_PRACTITIONERROLE } from "../../../tests/fixtures"
 import {
   mockGlobalFetch,
   type MockResponse,
@@ -13,6 +13,21 @@ import { Practitioner } from "./Practitioner"
 const practitionerApiResponse: MockResponse = [
   "^/fhir/Practitioner/.*",
   DEFAULT_PRACTITIONER,
+]
+
+const practitionerRoleApiResponse: MockResponse = [
+  "^/fhir/PractitionerRole/.*",
+  DEFAULT_PRACTITIONERROLE,
+]
+
+const organizationApiResponse: MockResponse = [
+  "^/fhir/Organization/.*",
+  DEFAULT_ORGANIZATION,
+]
+
+const locationApiResponse: MockResponse = [
+  "^/fhir/Location/.*",
+  DEFAULT_LOCATION,
 ]
 
 const EXPECTED_NPI =
@@ -38,7 +53,7 @@ const RoutedPractitioner = ({ path }: { path: string }) => {
 describe("Practitioner", () => {
   describe("without PRACTITIONER_LOOKUP_DETAILS feature flag", () => {
     beforeEach(() => {
-      mockGlobalFetch([practitionerApiResponse])
+      mockGlobalFetch([practitionerApiResponse, practitionerRoleApiResponse, organizationApiResponse, locationApiResponse])
     })
 
     it("does not render content when feature flag is unset", async () => {
