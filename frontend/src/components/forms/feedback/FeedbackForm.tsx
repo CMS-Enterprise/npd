@@ -8,23 +8,18 @@ import {
 import { useRef, useState } from "react"
 import { useForm, Controller } from "react-hook-form"
 import type { SubmitHandler } from "react-hook-form"
+import { useTranslation } from "react-i18next"
 import { Altcha } from "./Altcha"
 
-const ISSUE_CHOICES = [
-  { label: "Practice location(s)", value: "incorrect_practice_locations" },
-  { label: "Phone number(s)", value: "incorrect_phone_numbers" },
-  {
-    label: "Taxonomy(-ies)/specialty(-ies)",
-    value: "incorrect_taxonomy_or_speciality",
-  },
-  {
-    label: "Organization affiliation (s)",
-    value: "incorrect_organization_affiliation",
-  },
-  { label: "FHIR endpoint", value: "incorrect_endpoint" },
-  { label: "Missing information", value: "missing_information" },
-  { label: "Other (specify below)", value: "other" },
-]
+const ISSUE_KEYS = [
+  "incorrect_practice_locations",
+  "incorrect_phone_numbers",
+  "incorrect_taxonomy_or_speciality",
+  "incorrect_organization_affiliation",
+  "incorrect_endpoint",
+  "missing_information",
+  "other",
+] as const
 
 type PresenterData = {
   recordName?: string
@@ -44,6 +39,7 @@ type Props = {
 }
 
 export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
+  const { t } = useTranslation()
   const [dialogStatus, setDialogStatus] = useState<"form" | "success">("form")
   const [submitError, setSubmitError] = useState<string | null>(null)
   const altchaRef = useRef<{ value: string | null; reset: () => void }>(null)
@@ -69,6 +65,11 @@ export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
   const isSubmitDisabled =
     selectedIssues.length === 0 || (hasOther && detailsLength === 0)
 
+  const issueChoices = ISSUE_KEYS.map((key) => ({
+    label: t(`feedback.form.issues.${key}`),
+    value: key,
+  }))
+
   const errorMessages = [
     ...(Object.values(errors)
       .map((error) => error?.message)
@@ -83,7 +84,7 @@ export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
       const altchaValue = altchaRef.current?.value
 
       if (!altchaValue) {
-        setSubmitError("Please complete the CAPTCHA verification")
+        setSubmitError(t("feedback.form.captchaRequired"))
         return
       }
 
@@ -99,7 +100,7 @@ export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
 
       if (!response.ok) {
         const data = await response.json()
-        setSubmitError(data.error || "Something went wrong. Please try again.")
+        setSubmitError(data.error || t("feedback.form.submitError"))
 
         // reset CAPTCHA on failure so user must re verify
         altchaRef.current?.reset()
@@ -108,9 +109,7 @@ export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
 
       setDialogStatus("success")
     } catch (e) {
-      setSubmitError(
-        "There was an error in submitting the form. Please try again.",
-      )
+      setSubmitError(t("feedback.form.submitError"))
       console.error(e)
     }
   }
@@ -119,22 +118,17 @@ export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
     <Dialog
       onExit={onExit}
       isOpen={isOpen}
-      heading="Report an issue"
+      heading={t("feedback.form.heading")}
       backdropClickExits={false}
     >
       {dialogStatus === "form" ? (
         <form onSubmit={handleSubmit(onSubmit)}>
           <p className="ds-u-margin-bottom--3 ds-u-margin-top--0">
-            Report inaccurate provider information to help us maintain the
-            quality of the National Provider Directory. We may use this
-            information to improve our data collection in the future.
+            {t("feedback.form.description")}
           </p>
 
           {errorMessages.length > 0 && (
-            <Alert
-              heading="This form contains the following errors"
-              variation="error"
-            >
+            <Alert heading={t("feedback.form.errorHeading")} variation="error">
               <ul className="ds-c-list ds-c-list--bare">
                 {errorMessages.map((message, index) => (
                   <li key={index}>{message}</li>
@@ -144,7 +138,7 @@ export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
           )}
 
           <p className="ds-u-margin-bottom--3">
-            <strong>Provider name</strong> <br />
+            <strong>{t("feedback.form.providerName")}</strong> <br />
             {presenterData.recordName}
           </p>
 
@@ -152,23 +146,24 @@ export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
             name="issues"
             control={control}
             rules={{
-              validate: (v) => v.length > 0 || "Select at least one issue",
+              validate: (v) =>
+                v.length > 0 || t("feedback.form.issuesRequired"),
             }}
             render={({ field }) => (
               <ChoiceList
                 type="checkbox"
                 errorMessage={errors.issues?.message}
-                hint="Select all that apply"
+                hint={t("feedback.form.issuesHint")}
                 label={
                   <>
-                    What issue(s) do you want to report on this profile?
+                    {t("feedback.form.issuesLabel")}
                     <span className="ds-u-color--error" aria-hidden="true">
                       *
                     </span>
                   </>
                 }
                 name="issues"
-                choices={ISSUE_CHOICES.map((choice) => ({
+                choices={issueChoices.map((choice) => ({
                   ...choice,
                   checked: field.value?.includes(choice.value),
                 }))}
@@ -188,15 +183,16 @@ export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
             <TextField
               {...register("details", {
                 validate: (value) => {
-                  if (value.length > maxChars) return "Reduce character count"
+                  if (value.length > maxChars)
+                    return t("feedback.form.detailsReduceCount")
                   if (hasOther && !value.trim())
-                    return "Please provide details for 'Other"
+                    return t("feedback.form.detailsOtherRequired")
                   return true
                 },
               })}
               label={
                 <>
-                  Please provide details about the issue(s)
+                  {t("feedback.form.detailsLabel")}
                   {hasOther && (
                     <span className="ds-u-color--error" aria-hidden="true">
                       *
@@ -204,7 +200,7 @@ export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
                   )}
                 </>
               }
-              hint="Describe what information is incorrect or outdated and what corrections should be made, if known"
+              hint={t("feedback.form.detailsHint")}
               multiline
               rows={4}
               maxLength={maxChars}
@@ -220,19 +216,17 @@ export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
             {...register("email", {
               pattern: {
                 value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                message: "Enter a valid email address",
+                message: t("feedback.form.emailInvalid"),
               },
             })}
-            label="Email address"
+            label={t("feedback.form.emailLabel")}
             errorMessage={errors.email?.message}
             className="ds-u-margin-top--3 ds-u-margin-bottom--3"
           />
 
-          <Alert heading="Privacy notice" hideIcon>
+          <Alert heading={t("feedback.form.privacyHeading")} hideIcon>
             <p className="ds-u-margin-bottom--3">
-              The information you provide will be used solely to improve the
-              accuracy of the National Provider Directory. Your email will only
-              be used to send you updates about this specific issue submission.
+              {t("feedback.form.privacyBody")}
             </p>
           </Alert>
 
@@ -242,7 +236,7 @@ export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
 
           <div className="ds-u-margin-top--4 ds-u-display--flex ds-u-justify-content--end">
             <Button variation="ghost" onClick={onExit} type="button">
-              Cancel
+              {t("feedback.form.cancel")}
             </Button>
 
             <Button
@@ -251,22 +245,19 @@ export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
               className="ds-u-margin-left--2"
               disabled={isSubmitDisabled}
             >
-              Submit
+              {t("feedback.form.submit")}
             </Button>
           </div>
         </form>
       ) : (
-        <Alert heading="Issue reported" variation="success">
-          <p>
-            Thanks for helping improve the directory. Your report has been
-            submitted and our team will review it.
-          </p>
+        <Alert heading={t("feedback.form.successHeading")} variation="success">
+          <p>{t("feedback.form.successBody")}</p>
           <Button
             variation="solid"
             onClick={onExit}
             className="ds-u-margin-top--3"
           >
-            Close
+            {t("feedback.form.close")}
           </Button>
         </Alert>
       )}

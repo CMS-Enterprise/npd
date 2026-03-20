@@ -1,0 +1,41 @@
+{
+  "feedback": {
+    "cta": {
+      "heading": "Help improve the directory",
+      "button": "Report an issue"
+    },
+    "form": {
+      "heading": "Report an issue",
+      "description": "Report inaccurate provider information to help us maintain the quality of the National Provider Directory. We may use this information to improve our data collection in the future.",
+      "errorHeading": "This form contains the following errors",
+      "providerName": "Provider name",
+      "issuesLabel": "What issue(s) do you want to report on this profile?",
+      "issuesHint": "Select all that apply",
+      "issuesRequired": "Select at least one issue",
+      "issues": {
+        "incorrect_practice_locations": "Practice location(s)",
+        "incorrect_phone_numbers": "Phone number(s)",
+        "incorrect_taxonomy_or_speciality": "Taxonomy(-ies)/specialty(-ies)",
+        "incorrect_organization_affiliation": "Organization affiliation (s)",
+        "incorrect_endpoint": "FHIR endpoint",
+        "missing_information": "Missing information",
+        "other": "Other (specify below)"
+      },
+      "detailsLabel": "Please provide details about the issue(s)",
+      "detailsHint": "Describe what information is incorrect or outdated and what corrections should be made, if known",
+      "detailsReduceCount": "Reduce character count",
+      "detailsOtherRequired": "Please provide details for 'Other'",
+      "emailLabel": "Email address",
+      "emailInvalid": "Enter a valid email address",
+      "privacyHeading": "Privacy notice",
+      "privacyBody": "The information you provide will be used solely to improve the accuracy of the National Provider Directory. Your email will only be used to send you updates about this specific issue submission.",
+      "captchaRequired": "Please complete the CAPTCHA verification",
+      "submitError": "There was an error in submitting the form. Please try again.",
+      "cancel": "Cancel",
+      "submit": "Submit",
+      "successHeading": "Issue reported",
+      "successBody": "Thanks for helping improve the directory. Your report has been submitted and our team will review it.",
+      "close": "Close"
+    }
+  }
+}

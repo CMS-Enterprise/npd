@@ -22,11 +22,11 @@ export const FeedbackCTA = ({
   return (
     <div className={cardClass}>
       <h3 className="ds-text-heading--lg ds-u-margin-bottom--1">
-        Help improve the directory
+        {t("feedback.cta.heading")}
       </h3>
       <p className="ds-u-color--muted ds-u-margin-bottom--3">{subtitle}</p>
       <Button variation="solid" onClick={onButtonClick} disabled={isDisabled}>
-        Report an issue
+        {t("feedback.cta.button")}
       </Button>
     </div>
   )

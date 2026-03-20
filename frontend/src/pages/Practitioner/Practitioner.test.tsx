@@ -53,6 +53,9 @@ describe("Practitioner", () => {
       expect(
         screen.queryByText("About", { selector: "section h2" }),
       ).not.toBeInTheDocument()
+      expect(
+        screen.queryByRole("button", { name: "Report an issue" }),
+      ).not.toBeInTheDocument()
     })
   })
 
@@ -73,6 +76,23 @@ describe("Practitioner", () => {
       await screen.findByText("Contact information", { selector: "section h2" })
       await screen.findByText("Identifiers", { selector: "section h2" })
       await screen.findByText("Taxonomy", { selector: "section h2" })
+    })
+
+    it("renders the feedback CTA", async () => {
+      render(<RoutedPractitioner path="/practitioners/12345" />, {
+        settings: { feature_flags: { PRACTITIONER_LOOKUP_DETAILS: true } },
+      })
+
+      await screen.findByTestId("practitioner-name")
+
+      expect(
+        screen.getByText(
+          "Let us know if you see any problems with this provider record.",
+        ),
+      ).toBeInTheDocument()
+      expect(
+        screen.getByRole("button", { name: "Report an issue" }),
+      ).toBeInTheDocument()
     })
   })
 
