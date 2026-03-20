@@ -2,6 +2,7 @@ from django.db import connection, models
 from django.contrib.gis.db import models as geomodels
 from django.contrib.postgres.search import SearchVectorField
 from django.contrib.postgres.fields import ArrayField
+import uuid
 
 
 class Address(models.Model):
@@ -880,3 +881,17 @@ class RelationshipType(models.Model):
     class Meta:
         managed = False
         db_table = "relationship_type"
+
+
+class Feedback(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    npi = models.CharField(max_length=10, blank=True, null=True)
+    record_name = models.TextField(blank=True, null=True)
+    issues = ArrayField(models.TextField())
+    details = models.TextField(blank=True, default="")
+    email = models.EmailField(blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        managed = False
+        db_table = "feedback"

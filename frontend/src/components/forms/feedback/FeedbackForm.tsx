@@ -28,6 +28,7 @@ const ISSUE_CHOICES = [
 
 type PresenterData = {
   recordName?: string
+  npi?: string | null
 }
 
 type ReportIssueFormData = {
@@ -90,7 +91,6 @@ export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          uuid: crypto.randomUUID(),
           ...presenterData,
           ...formData,
           altcha: altchaRef.current?.value,

@@ -205,6 +205,7 @@ export const Practitioner = () => {
           onExit={() => setIsReportIssueOpen(false)}
           presenterData={{
             recordName: practitioner.name,
+            npi: practitioner.npi,
           }}
         />
 

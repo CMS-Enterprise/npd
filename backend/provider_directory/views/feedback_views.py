@@ -6,15 +6,17 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.conf import settings
 from django.core.cache import cache
-from .feedback_serializer import FeedbackSerializer
+from drf_spectacular.utils import extend_schema
 import hashlib
 import json
+from .feedback_serializer import FeedbackSerializer
 
 
 class FeedbackFlowThrottle(AnonRateThrottle):
     rate = "10/min"
 
 
+@extend_schema(exclude=True)
 class AltchaChallengeView(APIView):
     authentication_classes = []
     permission_classes = []
@@ -31,6 +33,7 @@ class AltchaChallengeView(APIView):
         return Response(challenge.__dict__)
 
 
+@extend_schema(exclude=True)
 class FeedbackView(APIView):
     authentication_classes = []
     permission_classes = []
@@ -80,13 +83,14 @@ class FeedbackView(APIView):
         cache.set(cache_key, True, timeout=60 * 10)
 
         feedback_data = {
-            "uuid": request.data.get("uuid"),
+            "npi": request.data.get("npi"),
             "record_name": request.data.get("recordName"),
             "issues": request.data.get("issues", []),
             "details": request.data.get("details", ""),
             "email": request.data.get("email", ""),
         }
 
+        print("---------------RESPONSE HERE---------------")
         print(feedback_data)
         # send this data to email at this point
 
