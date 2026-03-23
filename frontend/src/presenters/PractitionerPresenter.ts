@@ -80,13 +80,13 @@ export class PractitionerPresenter {
       const locationId = role?.resource.location[0].reference.split('/').pop();
       const endpointIds = role?.resource.endpoint?.map((endpoint: FHIRReference) => { return endpoint.reference.split('/').pop()});
       if (organizationId && Object.keys(organizationDetailData).includes(organizationId)) {
-        let existingEndpointIds: Array<string | undefined> = organizationDetailData[organizationId].endpoints?.map((endpoint) => endpoint?.id )
+        const existingEndpointIds: Array<string | undefined> = organizationDetailData[organizationId].endpoints?.map((endpoint) => endpoint?.id )
         endpointIds?.forEach( (endpointId) => {
           if (endpointId && !existingEndpointIds.includes(endpointId)) {
             organizationDetailData[organizationId].endpoints.push(this.record.endpointData[endpointId])
           }
         })
-        let existingLocationIds: Array<LogicalIdOfThisArtifact | undefined> = organizationDetailData[organizationId].locations.map((location: FHIRLocation) => location.id)
+        const existingLocationIds: Array<LogicalIdOfThisArtifact | undefined> = organizationDetailData[organizationId].locations.map((location: FHIRLocation) => location.id)
         if (locationId && !existingLocationIds.includes(locationId)) {
           organizationDetailData[organizationId].locations.push(this.record.locationData[locationId])
         }
