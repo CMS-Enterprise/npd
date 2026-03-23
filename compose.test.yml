@@ -36,5 +36,12 @@ services:
       - db
       - db-migrations
 
+  test-server:
+    extends:
+      service: django-web
+    command: python manage.py runserver 0.0.0.0:8008
+    ports:
+      - "8008:8008" 
+
 volumes:
   postgres_data:
