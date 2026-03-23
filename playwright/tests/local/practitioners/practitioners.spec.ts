@@ -301,7 +301,10 @@ test.describe("Practitioner feedback", () => {
 
     const captcha = dialog.getByRole("checkbox", { name: /I'm not a robot/i })
     await captcha.click()
-    await expect(captcha).toBeChecked({ timeout: 10000 })
+    
+    await expect(
+      dialog.getByRole("checkbox", { name: /Verified/i })
+    ).toBeChecked({ timeout: 10000 })
 
     await dialog.getByRole("button", { name: "Submit" }).click()
 
