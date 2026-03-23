@@ -185,9 +185,11 @@ test.describe("Practitioner show", () => {
     await expect(page.getByText("No organization relationship found")).not.toBeVisible()
     await expect(page.getByText("NPI: 1000000004")).toBeVisible()
     await expect(page.getByText("NPI: 1000000005")).toBeVisible()
-    await expect(page.getByText("Location(s)")).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Location(s)' }).first()).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Location(s)' }).nth(1)).toBeVisible()
     await expect(page.getByText("No location information available")).not.toBeVisible()
-    await expect(page.getByText("Endpoint(s)")).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Endpoint(s)' }).first()).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Endpoint(s)' }).nth(1)).toBeVisible()
     await expect(page.getByText("No endpoint information available")).not.toBeVisible()
   })
 
