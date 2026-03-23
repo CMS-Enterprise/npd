@@ -202,7 +202,7 @@ test: test-setup
 .PHONY: playwright-local
 playwright-local: test-system-setup build-frontend-test-assets
 	@cd playwright; \
-		npx playwright test --project=local
+		npx playwright test --project=local --ui
 
 .PHONY: playwright-uat
 playwright-uat: 

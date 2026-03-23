@@ -88,12 +88,10 @@ export const Practitioner = () => {
                 className="ds-l-col--12 ds-l-md-col--3 ds-u-margin-bottom--2"
                 style={{ whiteSpace: "pre-line " }}
               >
-                <pre>
                   <InfoItem
                     label={t("practitioners.detail.contact.address")}
                     value={practitioner.address}
                   />
-                </pre>
               </div>
               <div className="ds-l-col--12 ds-l-md-col--3 ds-u-margin-bottom--2">
                 <InfoItem

@@ -57,31 +57,35 @@ class Command(BaseCommand):
     def generate_sample_practitioner_roles(self):
         # Generate a practitioner with a relationship with one organization
         DefaultPractitionerRole(
-            practitioner=DefaultPractitionerRole(
-                id="6846963d-7814-4c70-ae3d-8a8419a7c9c6", npi=DefaultNPI(npi=1000000001)
+            practitioner=DefaultPractitioner(
+                individual=DefaultIndividual(id="6846963d-7814-4c70-ae3d-8a8419a7c9c6"),
+                npi=DefaultNPI(npi=1000000001),
             ),
             organization=DefaultOrganization(npi=DefaultNPI(npi=1000000002)),
         )
 
         # Generate a practitioner with a relationship with an organization, but no associated endpoints
         DefaultPractitionerRole(
-            practitioner=DefaultPractitionerRole(
-                id="f1579a55-b5e1-4717-988d-6e014acbe348", npi=DefaultNPI(npi=1000000011)
+            practitioner=DefaultPractitioner(
+                individual=DefaultIndividual(id="f1579a55-b5e1-4717-988d-6e014acbe348"),
+                npi=DefaultNPI(npi=1000000011),
             ),
             organization=DefaultOrganization(npi=DefaultNPI(npi=1000000012)),
-            location=DefaultLocation(has_endpoints=False),
+            location=DefaultLocation(has_endpoint=False),
         )
 
         # Generate a practitioner with a relationship with multiple organizations
         DefaultPractitionerRole(
-            practitioner=DefaultPractitionerRole(
-                id="1d58f0f5-2075-4e9f-b7a5-2245e74f6a16", npi=DefaultNPI(npi=1000000003)
+            practitioner=DefaultPractitioner(
+                individual=DefaultIndividual(id="1d58f0f5-2075-4e9f-b7a5-2245e74f6a16"),
+                npi=DefaultNPI(npi=1000000003),
             ),
             organization=DefaultOrganization(npi=DefaultNPI(npi=1000000004)),
         )
         DefaultPractitionerRole(
-            practitioner=DefaultPractitionerRole(
-                id="1d58f0f5-2075-4e9f-b7a5-2245e74f6a16", npi=DefaultNPI(npi=1000000003)
+            practitioner=DefaultPractitioner(
+                individual=DefaultIndividual(id="1d58f0f5-2075-4e9f-b7a5-2245e74f6a16"),
+                npi=DefaultNPI(npi=1000000003),
             ),
             organization=DefaultOrganization(npi=DefaultNPI(npi=1000000005)),
         )

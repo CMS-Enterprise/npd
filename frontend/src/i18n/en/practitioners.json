@@ -50,7 +50,7 @@
       "fallback": "No endpoint information available"
     },
     "locations": {
-      "title": "Locations",
+      "title": "Location(s)",
       "name": "Name",
       "address": "Address",
       "contact": "Contact",
