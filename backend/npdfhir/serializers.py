@@ -39,7 +39,7 @@ from .models import (
     OrganizationToName,
     ProviderToOrganization,
 )
-from .utils import genReference, get_schema_data
+from .utils import genReference, get_schema_data, other_id_type_to_fhir
 
 if "runserver" or "test" in sys.argv:
     from .cache import (
@@ -167,6 +167,7 @@ class OtherIdentifierSerializer(serializers.Serializer):
         ]
 
     def to_representation(self, instance):
+        fhir_type = other_id_type_to_fhir(str(instance.other_id_type.id))
         license_identifier = Identifier(
             # system="", TODO: Figure out how to associate a system with each identifier
             value=instance.other_id,
@@ -174,8 +175,8 @@ class OtherIdentifierSerializer(serializers.Serializer):
                 coding=[
                     Coding(
                         system="http://terminology.hl7.org/CodeSystem/v2-0203",
-                        code=str(instance.other_id_type.value),
-                        display=instance.other_id,
+                        code=fhir_type["code"],
+                        display=fhir_type["display"],
                     )
                 ]
             ),
@@ -348,8 +349,8 @@ class OrganizationSerializer(serializers.Serializer):
                         coding=[
                             Coding(
                                 system="http://terminology.hl7.org/CodeSystem/v2-0203",
-                                code="PRN",
-                                display="Provider number",
+                                code="NPI",
+                                display="National provider identifier",
                             )
                         ]
                     ),
@@ -545,8 +546,8 @@ class PractitionerSerializer(serializers.Serializer):
                 coding=[
                     Coding(
                         system="http://terminology.hl7.org/CodeSystem/v2-0203",
-                        code="PRN",
-                        display="Provider number",
+                        code="NPI",
+                        display="National provider identifier",
                     )
                 ]
             ),

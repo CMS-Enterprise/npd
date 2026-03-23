@@ -129,7 +129,7 @@ export const Practitioner = () => {
                 <TableBody>
                   {practitioner.identifiers.map((identifier, index) => (
                     <TableRow key={index}>
-                      <TableCell>{identifier.system}</TableCell>
+                      <TableCell>{identifier.type}</TableCell>
                       <TableCell>{identifier.number}</TableCell>
                       <TableCell>{identifier.details}</TableCell>
                     </TableRow>

@@ -3,7 +3,6 @@ import type { OrganizationDetails, PractitionerDetailsType } from "../state/requ
 import {
   formatAddress,
   formatDetails,
-  formatIdentifierType,
 } from "../helpers/formatters"
 import type { LogicalIdOfThisArtifact } from "../@types/fhir/Endpoint"
 
@@ -57,7 +56,6 @@ export class PractitionerPresenter {
       type: identity.type?.coding?.[0]?.display || "Unknown",
       number: identity.value,
       details: identity.period ? formatDetails(identity.period) : "",
-      system: formatIdentifierType(identity.system as string) || "Unknown",
     }))
   }
 
