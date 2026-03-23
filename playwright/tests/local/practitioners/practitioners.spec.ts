@@ -298,7 +298,11 @@ test.describe("Practitioner feedback", () => {
     await expect(dialog).toBeVisible()
 
     await dialog.getByRole("checkbox", { name: /Practice location/i }).check()
-    await dialog.getByRole("checkbox", { name: /I'm not a robot/i }).check()
+
+    const captcha = dialog.getByRole("checkbox", { name: /I'm not a robot/i })
+    await captcha.click()
+    await expect(captcha).toBeChecked({ timeout: 10000 })
+
     await dialog.getByRole("button", { name: "Submit" }).click()
 
     await expect(dialog.getByText(/success/i)).toBeVisible()
