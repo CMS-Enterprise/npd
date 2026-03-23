@@ -163,6 +163,20 @@ test.describe("Practitioner show", () => {
     await expect(page.getByText("No endpoint information available")).not.toBeVisible()
   })
 
+  test("view organization relationship information - single organization, no endpoints", async ({ page }) => {
+    await page.goto("/practitioners/f1579a55-b5e1-4717-988d-6e014acbe348")
+
+    await expect(page).toHaveURL("/practitioners/f1579a55-b5e1-4717-988d-6e014acbe348")
+    await expect(page.getByTestId("practitioner-npi")).toContainText(`NPI: 1000000011`)
+    await expect(page.getByText("No organization relationship found")).not.toBeVisible()
+    await expect(page.getByText("NPI: 1000000012")).toBeVisible()
+    await expect(page.getByText("Location(s)")).toBeVisible()
+    await expect(page.getByText("No location information available")).not.toBeVisible()
+    await expect(page.getByText("Endpoint(s)")).toBeVisible()
+    await expect(page.getByText("No endpoint information available")).toBeVisible()
+  })
+  
+
   test("view organization relationship information - multiple organizations", async ({ page }) => {
     await page.goto("/practitioners/1d58f0f5-2075-4e9f-b7a5-2245e74f6a16")
 

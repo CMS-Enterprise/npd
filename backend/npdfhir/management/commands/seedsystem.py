@@ -7,7 +7,7 @@ from django.db import IntegrityError
 from faker import Faker
 
 
-from npdfhir.tests.fixtures.organization import DefaultOrganization
+from npdfhir.tests.fixtures.organization import DefaultOrganization, DefaultLocation
 from npdfhir.tests.fixtures.practitioner import (
     DefaultPractitioner,
     DefaultIndividual,
@@ -61,6 +61,15 @@ class Command(BaseCommand):
                 id="6846963d-7814-4c70-ae3d-8a8419a7c9c6", npi=DefaultNPI(npi=1000000001)
             ),
             organization=DefaultOrganization(npi=DefaultNPI(npi=1000000002)),
+        )
+
+        # Generate a practitioner with a relationship with an organization, but no associated endpoints
+        DefaultPractitionerRole(
+            practitioner=DefaultPractitionerRole(
+                id="f1579a55-b5e1-4717-988d-6e014acbe348", npi=DefaultNPI(npi=1000000011)
+            ),
+            organization=DefaultOrganization(npi=DefaultNPI(npi=1000000012)),
+            location=DefaultLocation(has_endpoints=False),
         )
 
         # Generate a practitioner with a relationship with multiple organizations
@@ -144,7 +153,7 @@ class Command(BaseCommand):
 
         self.generate_sample_organizations(25)
         self.generate_sample_practitioners(25)
-        self.generate_sample_practitioner_role()
+        self.generate_sample_practitioner_roles()
         OrganizationView.refresh_materialized_view()
         ProviderView.refresh_materialized_view()
         ProviderToLocationView.refresh_materialized_view()
