@@ -1,13 +1,17 @@
-import re
-from django.contrib.postgres.search import SearchVector, SearchQuery
 from django_filters import rest_framework as filters
-from django.contrib.gis.geos import Point
-from django.contrib.gis.measure import D
-from django.db.models import F
 
 from ..documentation_content import docs
 from ..mappings import addressUseMapping
 from ..models import Location
+from .filter_utils import (
+    broad_address_match,
+    city_address_search,
+    state_address_search,
+    postalcode_address_search,
+    address_use_search,
+    general_filter_distance,
+    gen_nucc_code_filter,
+)
 
 
 class LocationFilterSet(filters.FilterSet):
@@ -66,60 +70,24 @@ class LocationFilterSet(filters.FilterSet):
         ]
 
     def filter_organization_type(self, queryset, name, value):
-        return queryset.annotate(
-            search=SearchVector(
-                "organization__clinicalorganization__organizationtotaxonomy__nucc_code__code"
-            )
-        ).filter(search=value)
+        return gen_nucc_code_filter(queryset, name, value)
 
     def filter_address(self, queryset, name, value):
-        return queryset.annotate(
-            search=SearchVector(
-                "address__address_us__delivery_line_1",
-                "address__address_us__delivery_line_2",
-                "address__address_us__city_name",
-                "address__address_us__state_code__abbreviation",
-                "address__address_us__zipcode",
-            )
-        ).filter(search=SearchQuery(value, search_type="websearch", config="english"))
+        return broad_address_match(queryset, name, value)
 
     def filter_address_city(self, queryset, name, value):
-        return queryset.annotate(search=SearchVector("address__address_us__city_name")).filter(
-            search=value
-        )
+        return city_address_search(queryset, name, value)
 
     def filter_address_state(self, queryset, name, value):
-        return queryset.annotate(
-            search=SearchVector("address__address_us__state_code__abbreviation")
-        ).filter(search=value)
+        return state_address_search(queryset, name, value)
 
     def filter_address_postalcode(self, queryset, name, value):
-        return queryset.filter(address__address_us__zipcode=value)
+        return postalcode_address_search(queryset, name, value)
 
     def filter_address_use(self, queryset, name, value):
-        return queryset.filter(
-            organization__organizationtoaddress__address=F("address"),
-            organization__organizationtoaddress__address_use__value=value,
+        return address_use_search(
+            queryset, name, value, prefix="organization__organizationtoaddress"
         ).distinct()
 
     def filter_distance(self, queryset, name, value):
-        pattern = r"(-?\d+\.?\d*)\|(-?\d+\.?\d*)\|(\d+\.?\d*)\|?(km|mi|ft)?"
-        match = re.fullmatch(pattern, value)
-        if match:
-            lat, lon, distance, units = match.groups()
-            lon = float(lon)
-            lat = float(lat)
-            distance = float(distance)
-            user_location = Point(lon, lat, srid=4326)
-            match units:
-                case "mi":
-                    distance_function = D(mi=distance)
-                case "ft":
-                    distance_function = D(ft=distance)
-                case _:
-                    distance_function = D(km=distance)
-            return queryset.filter(
-                address__address_us__geolocation__distance_lte=(user_location, distance_function)
-            )
-        else:
-            return Location.objects.none()
+        return general_filter_distance(queryset, name, value)

@@ -8,10 +8,15 @@ import dotenv from 'dotenv';
 import path from 'path';
 dotenv.config({ path: path.resolve(__dirname, '.env') });
 
+const globalTimeout: string = process.env.GLOBAL_TIMEOUT ?? "300000";
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
+
+  globalTimeout: parseFloat(globalTimeout),
+  
   testDir: "./tests",
 
   /* Run tests in files in parallel */
@@ -55,6 +60,10 @@ export default defineConfig({
     },
     {
       name: 'uat',
+      use: {
+        storageState: "tests/.auth/user.json",
+        actionTimeout: 30000,
+      },
       dependencies: ["setup"],
       testDir: './tests/uat',
     },

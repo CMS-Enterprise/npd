@@ -6,7 +6,9 @@
   "scripts": {
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "format": "npx prettier . --write"
+    "format": "npx prettier . --write",
+    "get-data-and-test": "ts-node get-test-data.ts && npx playwright test --project=uat",
+    "get-data-and-test-ui": "ts-node get-test-data.ts && npx playwright test --project=uat --ui"
   },
   "keywords": [],
   "author": "",
@@ -15,7 +17,7 @@
   "devDependencies": {
     "@eslint/js": "^9.39.1",
     "@playwright/test": "^1.56.1",
-    "@types/node": "^24.10.1",
+    "@types/node": "^24.12.0",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
     "globals": "^16.5.0",
@@ -23,6 +25,7 @@
     "typescript-eslint": "^8.47.0"
   },
   "dependencies": {
-    "dotenv": "^17.3.1"
+    "dotenv": "^17.3.1",
+    "ts-node": "^10.9.2"
   }
 }
