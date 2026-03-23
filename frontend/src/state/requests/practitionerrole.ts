@@ -9,7 +9,7 @@ interface PractitionerRoleParams {
 export const fetchPractitionerRoles = async (
   {practitionerNPI, organizationNPI}: PractitionerRoleParams
 ): Promise<FHIRCollection<FHIRPractitionerRole>> => {
-  var query: Array<string> = []
+  let query: Array<string> = []
   if (practitionerNPI !== undefined) {
     query.push(`practitioner_identifier=NPI|${practitionerNPI}`);
   }

@@ -58,7 +58,7 @@ export interface FHIRPractitionerRole extends PractitionerRole {
 }
 
 export interface FHIRProtocol extends ProtocolProfileStandardToBeUsedWithThisEndpointConnection {
-  [key: string]: string | any
+  [key: string]: string
 }
 
 export interface FHIREndpoint extends Endpoint {
