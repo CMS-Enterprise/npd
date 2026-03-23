@@ -1,11 +1,19 @@
-from django.contrib.postgres.search import SearchQuery
-from django.db.models import Q
 from django_filters import rest_framework as filters
 
 from ..documentation_content import docs
 from ..mappings import addressUseMapping, genderMapping
 from ..models import ProviderView
-from ..utils import parse_identifier_query
+from .filter_utils import (
+    filter_identifier_general,
+    generic_filter_gender,
+    simple_generic_field_search,
+    filter_individual_name,
+    address_use_search,
+    broad_address_match,
+    city_address_search,
+    state_address_search,
+    postalcode_address_search,
+)
 
 
 class PractitionerFilterSet(filters.FilterSet):
@@ -73,65 +81,46 @@ class PractitionerFilterSet(filters.FilterSet):
         ]
 
     def filter_gender(self, queryset, name, value):
-        if value in genderMapping.keys():
-            value = genderMapping.toNPD(value)
-
-        return queryset.filter(provider__individual__gender=value)
+        return generic_filter_gender(queryset, name, value, "provider")
 
     def filter_identifier(self, queryset, name, value):
-        system, identifier_id = parse_identifier_query(value)
-        queries = Q(pk__isnull=True)
-
-        if system:  # specific identifier search requested
-            if system.upper() == "NPI":
-                try:
-                    queries = Q(npi__npi=int(identifier_id))
-                except (ValueError, TypeError):
-                    pass
-        else:  # general identifier search requested
-            try:
-                queries |= Q(npi__npi=int(identifier_id))
-            except (ValueError, TypeError):
-                pass
-
-            queries |= Q(provider__providertootherid__other_id=identifier_id)
-
-        return queryset.filter(queries).distinct()
+        return filter_identifier_general(
+            queryset,
+            name,
+            value,
+            npi_prefix="npi__",
+            other_prefix="provider__providertootherid__",
+        )
 
     def filter_practitioner_name(self, queryset, name, value):
-        query = SearchQuery(value, search_type="websearch", config="english")
-        return queryset.filter(
-            provider__individual__individualtoname__search_vector=query
-        ).distinct()
+        return filter_individual_name(queryset, name, value, "provider").distinct()
 
     def filter_practitioner_type(self, queryset, name, value):
-        query = SearchQuery(value, search_type="websearch", config="english")
-        return queryset.filter(provider__providertotaxonomy__nucc_code__search_vector=query)
+        return simple_generic_field_search(
+            queryset, name, value, "provider__providertotaxonomy__nucc_code__search_vector"
+        )
 
     def filter_address(self, queryset, name, value):
-        query = SearchQuery(value, search_type="websearch", config="english")
-        return queryset.filter(
-            provider__individual__individualtoaddress__address__address_us__search_vector=query
+        return broad_address_match(
+            queryset, name, value, prefix="provider__individual__individualtoaddress__"
         )
 
     def filter_address_city(self, queryset, name, value):
-        return queryset.filter(
-            provider__individual__individualtoaddress__address__address_us__city_name=value
+        return city_address_search(
+            queryset, name, value, prefix="provider__individual__individualtoaddress__"
         )
 
     def filter_address_state(self, queryset, name, value):
-        return queryset.filter(
-            provider__individual__individualtoaddress__address__address_us__state_code__abbreviation=value
+        return state_address_search(
+            queryset, name, value, prefix="provider__individual__individualtoaddress__"
         )
 
     def filter_address_postalcode(self, queryset, name, value):
-        return queryset.filter(
-            provider__individual__individualtoaddress__address__address_us__zipcode=value
+        return postalcode_address_search(
+            queryset, name, value, prefix="provider__individual__individualtoaddress__"
         )
 
     def filter_address_use(self, queryset, name, value):
-        if value in addressUseMapping.keys():
-            value = addressUseMapping.toNPD(value)
-        else:
-            value = -1
-        return queryset.filter(provider__individual__individualtoaddress__address_use_id=value)
+        return address_use_search(
+            queryset, name, value, prefix="provider__individual__individualtoaddress"
+        )
