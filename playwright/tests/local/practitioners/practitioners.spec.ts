@@ -221,3 +221,100 @@ test.describe("sort Practitioners", () => {
     await expect(sortButton).toContainText("Last Name (A-Z)")
   })
 })
+
+test.describe("Practitioner feedback", () => {
+  test("report an issue button opens the feedback dialog", async ({ page }) => {
+    await page.goto(`/practitioners/${practitioner.id}`)
+
+    await page.getByRole("button", { name: "Report an issue" }).click()
+
+    const dialog = page.getByRole("dialog")
+    await expect(dialog).toBeVisible()
+    await expect(dialog.getByText(practitioner.name)).toBeVisible()
+  })
+
+  test("submit is disabled when no issues are selected", async ({ page }) => {
+    await page.goto(`/practitioners/${practitioner.id}`)
+
+    await page.getByRole("button", { name: "Report an issue" }).click()
+
+    const dialog = page.getByRole("dialog")
+    await expect(dialog).toBeVisible()
+
+    await expect(dialog.getByRole("button", { name: "Submit" })).toBeDisabled()
+  })
+
+  test("submit is enabled after selecting an issue", async ({ page }) => {
+    await page.goto(`/practitioners/${practitioner.id}`)
+
+    await page.getByRole("button", { name: "Report an issue" }).click()
+
+    const dialog = page.getByRole("dialog")
+    await expect(dialog).toBeVisible()
+
+    await dialog.getByRole("checkbox", { name: /Practice location/i }).check()
+
+    await expect(dialog.getByRole("button", { name: "Submit" })).toBeEnabled()
+  })
+
+  test("selecting 'Other' requires details text", async ({ page }) => {
+    await page.goto(`/practitioners/${practitioner.id}`)
+
+    await page.getByRole("button", { name: "Report an issue" }).click()
+
+    const dialog = page.getByRole("dialog")
+    await expect(dialog).toBeVisible()
+
+    await dialog.getByRole("checkbox", { name: /Other/i }).check()
+
+    // submit should be disabled because details is empty when "other" is selected
+    await expect(dialog.getByRole("button", { name: "Submit" })).toBeDisabled()
+
+    // fill in details to enable submit
+    await dialog.getByRole("textbox", { name: /details/i }).fill("Additional details about the issue")
+
+    await expect(dialog.getByRole("button", { name: "Submit" })).toBeEnabled()
+  })
+
+  test("cancel closes the feedback dialog", async ({ page }) => {
+    await page.goto(`/practitioners/${practitioner.id}`)
+
+    await page.getByRole("button", { name: "Report an issue" }).click()
+
+    const dialog = page.getByRole("dialog")
+    await expect(dialog).toBeVisible()
+
+    await dialog.getByRole("button", { name: "Cancel" }).click()
+
+    await expect(dialog).not.toBeVisible()
+  })
+
+  test("submitting feedback shows success message", async ({ page }) => {
+    await page.goto(`/practitioners/${practitioner.id}`)
+
+    await page.getByRole("button", { name: "Report an issue" }).click()
+
+    const dialog = page.getByRole("dialog")
+    await expect(dialog).toBeVisible()
+
+    await dialog.getByRole("checkbox", { name: /Practice location/i }).check()
+    await dialog.getByRole("checkbox", { name: /I'm not a robot/i }).check()
+    await dialog.getByRole("button", { name: "Submit" }).click()
+
+    await expect(dialog.getByText(/success/i)).toBeVisible()
+    await dialog.getByRole("button", { name: "Close", exact: true }).click()
+
+    await expect(dialog).not.toBeVisible()
+  })
+
+  test("feedback form shows practitioner name", async ({ page }) => {
+    await page.goto(`/practitioners/${practitioner.id}`)
+
+    await page.getByRole("button", { name: "Report an issue" }).click()
+
+    const dialog = page.getByRole("dialog")
+    await expect(dialog).toBeVisible()
+
+    await expect(dialog.getByText(practitioner.name)).toBeVisible()
+  })
+})
