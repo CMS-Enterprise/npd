@@ -23,11 +23,7 @@
                             "reference": "/fhir/Location/d4ce5ce0-ba4b-5f49-925d-adb6fdd0be30"
                         }
                     ],
-                    "endpoint": [
-                        {
-                            "reference": "/fhir/Endpoint/123"
-                        }
-                    ],
+                    "endpoint": [],
                     "telecom": [
                         {
                             "system": "phone",

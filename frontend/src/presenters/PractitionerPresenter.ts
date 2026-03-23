@@ -1,13 +1,11 @@
-import type { FHIREndpoint, FHIRLocation, FHIRPractitionerRole, FHIRReference } from "../@types/fhir"
+import type { FHIRLocation, FHIRReference } from "../@types/fhir"
 import type { OrganizationDetails, PractitionerDetailsType } from "../state/requests/practitioners"
 import {
   formatAddress,
   formatDetails,
   formatIdentifierType,
 } from "../helpers/formatters"
-import type { PractitionerRoleEntry } from "../state/requests/practitionerrole"
 import type { LogicalIdOfThisArtifact } from "../@types/fhir/Endpoint"
-import type { StringToNumber } from "lodash"
 
 export class PractitionerPresenter {
   private record: PractitionerDetailsType
@@ -69,18 +67,18 @@ export class PractitionerPresenter {
     return this.record.qualification.map((taxonomy) => ({
       state: taxonomy.identifier?.[0]?.assigner?.display ?? "",
       licenseNumber: taxonomy.identifier?.[0]?.value ?? "",
-      displayCode: taxonomy.code?.coding?.[0]?.display || "Unknown",
-      nuccCode: taxonomy.code?.coding?.[0]?.code || "Unknown",
+      display: taxonomy.code?.coding?.[0]?.display ?? "Unknown",
+      nuccCode: taxonomy.code?.coding?.[0]?.code ?? "Unknown",
     }))
   }
 
   get organizations() {
     if (!this.record.practitionerRoleData?.results?.entry?.length) return []
     let organizationDetailData: OrganizationDetails = {};
-    this.record.practitionerRoleData.results.entry.forEach((role: PractitionerRoleEntry) => {
-      const organizationId = role.resource.organization.reference.split('/').pop();
-      const locationId = role.resource.location[0].reference.split('/').pop();
-      const endpointIds = role.resource.endpoint?.map((endpoint: FHIRReference) => { return endpoint.reference.split('/').pop()});
+    this.record.practitionerRoleData.results.entry.forEach((role) => {
+      const organizationId = role?.resource.organization.reference.split('/').pop();
+      const locationId = role?.resource.location[0].reference.split('/').pop();
+      const endpointIds = role?.resource.endpoint?.map((endpoint: FHIRReference) => { return endpoint.reference.split('/').pop()});
       if (organizationId && Object.keys(organizationDetailData).includes(organizationId)) {
         var existingEndpointIds: Array<string | undefined> = organizationDetailData[organizationId].endpoints?.map((endpoint) => endpoint?.id )
         endpointIds?.forEach( (endpointId) => {
@@ -95,12 +93,9 @@ export class PractitionerPresenter {
       }
       else {
         if (organizationId && locationId){
-          console.log(`org: ${organizationId}`);
-          console.log(`endpoint: ${endpointIds}`);
-          console.log(`loc: ${locationId}`);
           organizationDetailData[organizationId] = {
             organization: this.record.organizationData[organizationId],
-            endpoints: endpointIds?.map(endpointId => {
+            endpoints: endpointIds?.map((endpointId) => {
               if (endpointId) {
                 return this.record.endpointData[endpointId]
               }
@@ -108,7 +103,8 @@ export class PractitionerPresenter {
                 return null
               }
             }) ?? [],
-            locations: [this.record.locationData[locationId]]
+            locations: [this.record.locationData[locationId]],
+            roleDetails: role?.resource
           };
         }
       }

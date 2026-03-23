@@ -2,9 +2,9 @@ import { skipToken, useQuery, keepPreviousData, useQueries } from "@tanstack/rea
 import { type FHIRLocation, type FHIREndpoint, type FHIRPractitionerRole, type FHIRCollection, type FHIRPractitioner, type FHIROrganization } from "../../@types/fhir"
 import { apiUrl } from "../api"
 import { fetchOrganization } from "./organizations"
-import { fetchEndpoint } from "./endpoints"
+import { fetchEndpoint, type EndpointQueryResultType } from "./endpoints"
 import { fetchLocation } from "./locations"
-import { fetchPractitionerRoles, type PractitionerRoleEntry } from "./practitionerrole"
+import { fetchPractitionerRoles } from "./practitionerrole"
 import type { SortOption, SearchParams } from "../../@types/search"
 
 // NOTE: (@abachman-dsac) due to limitations in the fhir.resource.R4B model
@@ -35,7 +35,8 @@ export type OrganizationDetails = {
   [key: string]: {
     organization: FHIROrganization,
     endpoints: Array<FHIREndpoint | null>,
-    locations: Array<FHIRLocation>
+    locations: Array<FHIRLocation>,
+    roleDetails: FHIRPractitionerRole | undefined,
   }
 }
 
@@ -79,7 +80,7 @@ export const usePractitionerAPI = (practitionerId: string | undefined) => {
     queryFn: () => fetchPractitionerRoles({practitionerNPI: npi}),
     enabled: !!npi,
   })
-  const organizationIdDups: Array<string> | undefined= practitionerRole?.results.entry.map((role: PractitionerRoleEntry ) => {return role.resource.organization.reference.split('/').pop() ?? ""});
+  const organizationIdDups: Array<string> | undefined = practitionerRole?.results.entry.map((role) => { return role?.resource.organization.reference.split('/').pop() ?? ""});
   const organizationIds: Array<string> = [...new Set(organizationIdDups)];
   const organizationQueries = useQueries({
     queries: organizationIds.map((organizationId: string) => {
@@ -96,7 +97,7 @@ export const usePractitionerAPI = (practitionerId: string | undefined) => {
       }
     }
   })
-  const locationIdDups: Array<string> | undefined = practitionerRole?.results.entry.map((role: PractitionerRoleEntry) => {return role.resource.location[0].reference.split('/').pop() ?? ""});
+  const locationIdDups: Array<string> | undefined = practitionerRole?.results.entry.map((role) => {return role?.resource.location[0].reference.split('/').pop() ?? ""});
   const locationIds: Array<string> = [...new Set(locationIdDups)];
   const locationQueries = useQueries({
     queries: locationIds.map((locationId: string) => {
@@ -113,7 +114,7 @@ export const usePractitionerAPI = (practitionerId: string | undefined) => {
       }
     }
   })
-  const endpointIdDups: Array<string | undefined> | undefined = practitionerRole?.results.entry.flatMap((role: PractitionerRoleEntry) => {return role.resource.endpoint?.map(endpoint => endpoint.reference.split('/').pop() ?? "") }) ?? undefined;
+  const endpointIdDups: Array<string | undefined> | undefined = practitionerRole?.results.entry.flatMap((role) => {return role?.resource.endpoint?.map(endpoint => endpoint.reference.split('/').pop() ?? "") }) ?? undefined;
   const endpointIds: Array<string | undefined> = [...new Set(endpointIdDups)];
   const endpointQueries = useQueries({
     queries: endpointIds.map((endpointId: string | undefined) => {
@@ -121,7 +122,7 @@ export const usePractitionerAPI = (practitionerId: string | undefined) => {
         queryKey: ["endpoint", npi, endpointId],
         queryFn: () => { 
           if (endpointId !== undefined) {
-            fetchEndpoint(endpointId)
+            return fetchEndpoint(endpointId)
           }
           else {
             return undefined
@@ -132,7 +133,7 @@ export const usePractitionerAPI = (practitionerId: string | undefined) => {
     }),
     combine: (results) => {
       return {
-        data: Object.fromEntries(results.map((result) => [result.data?.id, result.data])),
+        data: Object.fromEntries(results.map((result: EndpointQueryResultType ) => [result.data?.id, result.data])),
         loading: results.some((result) => result.isLoading) 
       }
     }

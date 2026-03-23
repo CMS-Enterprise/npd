@@ -35,10 +35,14 @@
       "title": "Taxonomy",
       "state": "State",
       "licenseNumber": "License number",
-      "taxonomy": "Taxonomy",
+      "nuccCode": "NUCC Code",
+      "taxonomy": "Description",
       "fallback": "No taxonomy information available"
     },
-    "organizations": "Organization(s)",
+    "organizations": {
+      "title": "Organization(s)",
+      "notFound": "No organization relationship found"
+    },
     "endpoints": {
       "title": "Endpoint(s)",
       "connectionType": "Connection Type",
@@ -52,6 +56,7 @@
       "contact": "Contact",
       "phone": "Phone",
       "fax": "Fax",
+      "noContact": "Contact information not available",
       "fallback": "No location information available"
     }
   },

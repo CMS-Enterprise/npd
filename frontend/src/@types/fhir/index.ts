@@ -54,6 +54,7 @@ export interface FHIRPractitionerRole extends PractitionerRole {
   practitioner: FHIRReference
   endpoint?: Array<FHIRReference>
   location: Array<FHIRReference>
+  telecom?: ContactPoint[] | null
 }
 
 export interface FHIRProtocol extends ProtocolProfileStandardToBeUsedWithThisEndpointConnection {
@@ -77,6 +78,11 @@ export interface FHIRPractitionerQualification {
   period?: Period | null
 }
 
+export interface FHIREntry<T> {
+  fullUrl: string
+  resource: T
+}
+
 export interface FHIRCollection<T> {
   count: number
   next: string | null
@@ -85,9 +91,17 @@ export interface FHIRCollection<T> {
     resourceType: "Bundle" | string
     type: "searchset" | string
     total: number
-    entry: Array<{
-      fullUrl: string
-      resource: T
-    }>
+    entry: Array<FHIREntry<T> | undefined >
+  }
+}
+export interface FHIREmptyCollection {
+  count: number
+  next: string | null
+  previous: string | null
+  results: {
+    resourceType: "Bundle" | string
+    type: "searchset" | string
+    total: number
+    entry: FHIREntry<never>[]
   }
 }

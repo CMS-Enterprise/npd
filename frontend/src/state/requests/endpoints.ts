@@ -9,9 +9,15 @@ export const fetchEndpoint = async (
   const response = await fetch(url)
 
   if (!response.ok) {
-    console.error(await response.text())
+    console.error(`Endpoint error: ${await response.text()}`)
     return Promise.reject(`error in ${url} request`)
   }
 
   return response.json() as Promise<FHIREndpoint>
+}
+
+export type EndpointQueryResultType = {
+  data: FHIREndpoint | undefined,
+  error: Error | null,
+  status: 'loading' | 'error' | 'success' | 'pending'
 }

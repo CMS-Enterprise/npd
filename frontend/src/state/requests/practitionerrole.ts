@@ -6,11 +6,6 @@ interface PractitionerRoleParams {
     organizationNPI?: string | undefined,
 }
 
-export type PractitionerRoleEntry = {
-    fullUrl: string,
-    resource: FHIRPractitionerRole
-}
-
 export const fetchPractitionerRoles = async (
   {practitionerNPI, organizationNPI}: PractitionerRoleParams
 ): Promise<FHIRCollection<FHIRPractitionerRole>> => {
