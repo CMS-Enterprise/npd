@@ -167,7 +167,7 @@ class OtherIdentifierSerializer(serializers.Serializer):
         ]
 
     def to_representation(self, instance):
-        fhir_type = other_id_type_to_fhir(str(instance.other_id_type.id))
+        fhir_type = other_id_type_to_fhir(instance.other_id_type.id)
         license_identifier = Identifier(
             # system="", TODO: Figure out how to associate a system with each identifier
             value=instance.other_id,
