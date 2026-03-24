@@ -1,0 +1,38 @@
+{
+    "count": 1,
+    "next": null,
+    "previous": null,
+    "results": {
+        "resourceType": "Bundle",
+        "type": "searchset",
+        "total": 1,
+        "entry": [
+            {
+                "fullUrl": "/fhir/PractitionerRole/123456",
+                "resource": {
+                    "resourceType": "PractitionerRole",
+                    "id": "123456",
+                    "practitioner": {
+                        "reference": "/fhir/Practitioner/c3a56586-40a8-4fef-9394-2dd0c0ba0b60"
+                    },
+                    "organization": {
+                        "reference": "/fhir/Organization/12345"
+                    },
+                    "location": [
+                        {
+                            "reference": "/fhir/Location/d4ce5ce0-ba4b-5f49-925d-adb6fdd0be30"
+                        }
+                    ],
+                    "endpoint": [],
+                    "telecom": [
+                        {
+                            "system": "phone",
+                            "value": "555-555-5555",
+                            "use": "work"
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}
