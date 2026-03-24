@@ -6,6 +6,7 @@ from geopy.distance import geodesic
 from .api_test_case import APITestCase
 from .fixtures.address import DefaultAddress
 from .fixtures.organization import DefaultOrganization, DefaultLocation
+from .fixtures.practitioner import DefaultNPI, DefaultOtherID
 from .helpers import (
     assert_fhir_response,
     assert_has_results,
@@ -13,6 +14,7 @@ from .helpers import (
     extract_resource_names,
     concat_address_string,
 )
+from ..models import OrganizationView
 
 
 class LocationViewSetTestCase(APITestCase):
@@ -115,8 +117,17 @@ class LocationViewSetTestCase(APITestCase):
         # Generate test data for retrieving specific Location
         DefaultOrganization(locations=[DefaultLocation(id="1d5d7925-d205-4dbc-be31-5a339c9fb9af")])
 
-        # Generate test data for testing organization type filtering...
+        # Generate test data for testing organization type filtering
         DefaultOrganization(id="62564fd9-072e-416e-a197-7cb512ce0433", taxonomies=["283Q00000X"])
+
+        # Generate test data for testing organization name filtering
+        DefaultOrganization(names=["Filter Org"])
+
+        # Generate test data for testing organization identifier filtering
+        DefaultOrganization(npi=DefaultNPI(npi=1000000001))
+        DefaultOrganization(other_ids=[DefaultOtherID(other_id=1000000001)])
+
+        OrganizationView.refresh_materialized_view()
 
         return super().setUpTestData()
 
@@ -287,6 +298,101 @@ class LocationViewSetTestCase(APITestCase):
             parsed_org_id = location_entry["managingOrganization"]["reference"].split("/")[-1]
             # Assert that correct org was referenced by org type
             self.assertEqual("62564fd9-072e-416e-a197-7cb512ce0433", parsed_org_id)
+
+    def test_filter_by_org_name(self):
+        org_name = "Filter Org"
+
+        url = reverse("fhir-location-list")
+        response = self.client.get(url, {"organization_name": org_name})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert_has_results(self, response)
+
+        bundle = response.data["results"]
+
+        for entry in bundle["entry"]:
+            org_names = []
+            self.assertIn("resource", entry)
+            location_entry = entry["resource"]
+            self.assertEqual(location_entry["resourceType"], "Location")
+            self.assertIn("id", location_entry)
+            self.assertIn("status", location_entry)
+            self.assertIn("managingOrganization", location_entry)
+            self.assertIn("address", location_entry)
+            self.assertIn("name", location_entry)
+
+            organizationResponse = self.client.get(
+                location_entry["managingOrganization"]["reference"]
+            )
+            organization = organizationResponse.data
+            if "alias" in organization.keys():
+                alias = organization["alias"]
+            else:
+                alias = []
+            for name in [organization["name"]] + alias:
+                org_names.append(name)
+            self.assertIn(org_name, org_names)
+
+    def test_filter_by_org_npi(self):
+        org_npi = "1000000001"
+
+        url = reverse("fhir-location-list")
+        response = self.client.get(url, {"organization_identifier": f"NPI|{org_npi}"})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert_has_results(self, response)
+
+        bundle = response.data["results"]
+
+        self.assertEqual(1, len(bundle["entry"]))
+
+        for entry in bundle["entry"]:
+            self.assertIn("resource", entry)
+            location_entry = entry["resource"]
+            self.assertEqual(location_entry["resourceType"], "Location")
+            self.assertIn("id", location_entry)
+            self.assertIn("status", location_entry)
+            self.assertIn("managingOrganization", location_entry)
+            self.assertIn("address", location_entry)
+            self.assertIn("name", location_entry)
+
+            organizationResponse = self.client.get(
+                location_entry["managingOrganization"]["reference"]
+            )
+            organization = organizationResponse.data
+            npi_response = [
+                identifier["value"]
+                for identifier in organization["identifier"]
+                if identifier["type"]["coding"][0]["code"] == "NPI"
+            ]
+            self.assertIn(org_npi, npi_response)
+
+    def test_filter_by_org_identifier(self):
+        org_other_id = "1000000001"
+
+        url = reverse("fhir-location-list")
+        response = self.client.get(url, {"organization_identifier": org_other_id})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert_has_results(self, response)
+
+        bundle = response.data["results"]
+
+        self.assertEqual(2, len(bundle["entry"]))
+
+        for entry in bundle["entry"]:
+            self.assertIn("resource", entry)
+            location_entry = entry["resource"]
+            self.assertEqual(location_entry["resourceType"], "Location")
+            self.assertIn("id", location_entry)
+            self.assertIn("status", location_entry)
+            self.assertIn("managingOrganization", location_entry)
+            self.assertIn("address", location_entry)
+            self.assertIn("name", location_entry)
+
+            organizationResponse = self.client.get(
+                location_entry["managingOrganization"]["reference"]
+            )
+            organization = organizationResponse.data
+            identifiers = [identifier["value"] for identifier in organization["identifier"]]
+            self.assertIn(org_other_id, identifiers)
 
     def test_list_filter_by_address(self):
         address_search = "Amazing Avenue"

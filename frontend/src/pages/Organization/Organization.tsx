@@ -164,18 +164,98 @@ export const Organization = () => {
           </section>
 
           <section className={layout.section}>
-            <h2>{t("organizations.endpoints")}</h2>
-            <p className={styles.emptyState}>No endpoints available</p>
+            <h2>{t("organizations.endpoints.title")}</h2>
+            {organization.endpoints.length > 0 ? (
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>
+                      {t("organizations.endpoints.connectionType")}
+                    </TableCell>
+                    <TableCell>{t("organizations.endpoints.address")}</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {organization.endpoints.map((endpoint, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{endpoint.connectionType}</TableCell>
+                      <TableCell>{endpoint.address}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <p className="ds-u-color--gray">
+                {t("organizations.endpoints.fallback")}
+              </p>
+            )}
           </section>
 
           <section className={layout.section}>
-            <h2>{t("organizations.locations")}</h2>
-            <p className={styles.emptyState}>No locations available</p>
+            <h2>{t("organizations.locations.title")}</h2>
+            {organization.locations.length > 0 ? (
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>{t("organizations.locations.name")}</TableCell>
+                    <TableCell>
+                      {t("organizations.locations.address")}
+                    </TableCell>
+                    <TableCell>
+                      {t("organizations.locations.contact")}
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {organization.locations.map((location, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{location.name}</TableCell>
+                      <TableCell>{location.address}</TableCell>
+                            {location.contact?.length !== undefined && location.contact?.length > 0 ? (
+                            <TableCell>
+                              <strong>{t("organizations.detail.locations.phone")}: </strong>
+                              {location.contact.filter(contact => contact.system == 'phone')[0]?.value}
+                              <br></br>
+                              <strong>{t("organizations.detail.locations.fax")}: </strong>
+                              {location.contact.filter(contact => contact.system == 'fax')[0]?.value}
+                          </TableCell>) : (<TableCell>{t("organizations.detail.locations.noContact")}</TableCell>)}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <p className="ds-u-color--gray">
+                {t("organizations.locations.fallback")}
+              </p>
+            )}
           </section>
 
           <section className={layout.section}>
-            <h2>{t("organizations.practitioners")}</h2>
-            <p className={styles.emptyState}>No practitioners available</p>
+            <h2>{t("organizations.practitioners.title")}</h2>
+            {organization.practitioners.length > 0 ? (
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>{t("organizations.practitioners.name")}</TableCell>
+                    <TableCell>
+                      {t("organizations.practitioners.taxonomy")}
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {organization.practitioners.map((practitioner, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{practitioner.name}</TableCell>
+                      <TableCell>{practitioner.taxonomy}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <p className="ds-u-color--gray">
+                {t("organizations.practitioners.fallback")}
+              </p>
+            )}
           </section>
         </FeatureFlag>
 

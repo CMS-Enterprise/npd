@@ -47,7 +47,7 @@ export interface PractitionerDetailsType extends FHIRPractitioner {
       endpointData: {[key:string]: FHIREndpoint}
   }
 
-const fetchPractitioner = async (
+export const fetchPractitioner = async (
   practitionerId: string,
 ): Promise<FHIRPractitioner> => {
   const url = apiUrl("/fhir/Practitioner/:practitionerId/", { practitionerId })
