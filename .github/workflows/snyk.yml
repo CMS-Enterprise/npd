@@ -23,4 +23,4 @@ jobs:
               env:
                 SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
               run: |
-                snyk test --all-projects
+                snyk test --all-projects --policy-path=.snyk
