@@ -1,0 +1,19 @@
+{
+    "resourceType": "Location",
+    "id": "d4ce5ce0-ba4b-5f49-925d-adb6fdd0be30",
+    "status": "active",
+    "name": "0006 Aspen Glen Court",
+    "address": {
+        "use": "work",
+        "line": [
+            "0006 Aspen Glen Court"
+        ],
+        "city": "Edwards",
+        "state": "CO",
+        "postalCode": "81632",
+        "country": "US"
+    },
+    "managingOrganization": {
+        "reference": "/fhir/Organization/12345"
+    }
+}
