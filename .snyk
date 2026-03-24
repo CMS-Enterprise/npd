@@ -1,0 +1,5 @@
+ignore:
+  SNYK-PYTHON-PYGMENTS-15746419:
+    - '*' :
+        reason: 'No remediation available'
+        expires: '2026-04-04T17:33:45.004Z'
