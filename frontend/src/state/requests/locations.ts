@@ -19,7 +19,7 @@ export const fetchLocation = async (
 export const fetchLocations = async (
   organizationNPI: string | undefined,
 ): Promise<FHIRCollection<FHIRLocation>> => {
-  const url = apiUrl(`/fhir/Location?organization_identifier=NPI|${organizationNPI}`)
+  const url = apiUrl(`/fhir/Location/?organization_identifier=NPI|${organizationNPI}`)
 
   const response = await fetch(url)
 

@@ -1,4 +1,4 @@
-import type { FHIRLocation, FHIRReference } from "../@types/fhir"
+import type { FHIRReference } from "../@types/fhir"
 import type { OrganizationDetails, PractitionerDetailsType } from "../state/requests/practitioners"
 import {
   formatAddress,
@@ -81,32 +81,56 @@ export class PractitionerPresenter {
         const existingEndpointIds: Array<string | undefined> = organizationDetailData[organizationId].endpoints?.map((endpoint) => endpoint?.id )
         endpointIds?.forEach( (endpointId) => {
           if (endpointId && !existingEndpointIds.includes(endpointId)) {
-            organizationDetailData[organizationId].endpoints.push(this.record.endpointData[endpointId])
+            const endpoint = this.record.endpointData[endpointId]
+            const endpointRecord = {
+              id: endpoint.id,
+              address: endpoint.address,
+              connectionType: endpoint.connectionType.display
+            }
+            organizationDetailData[organizationId].endpoints.push(endpointRecord)
           }
         })
-        const existingLocationIds: Array<LogicalIdOfThisArtifact | undefined> = organizationDetailData[organizationId].locations.map((location: FHIRLocation) => location.id)
+        const existingLocationIds: Array<LogicalIdOfThisArtifact | undefined> = organizationDetailData[organizationId].locations.map((location) => location.id)
         if (locationId && !existingLocationIds.includes(locationId)) {
-          organizationDetailData[organizationId].locations.push(this.record.locationData[locationId])
+          const loc = this.record.locationData[locationId]
+          const locRecord = {
+            id: loc.id,
+            name: loc.name,
+            address: formatAddress(loc.address, false),
+            contact: loc.telecom
+          }
+          organizationDetailData[organizationId].locations.push(locRecord)
         }
       }
       else {
         if (organizationId && locationId){
+          const loc = this.record.locationData[locationId]
+          const locRecord = {
+            id: loc.id,
+            name: loc.name,
+            address: formatAddress(loc.address, false),
+            contact: loc.telecom
+          }
           organizationDetailData[organizationId] = {
             organization: this.record.organizationData[organizationId],
             endpoints: endpointIds?.map((endpointId) => {
               if (endpointId) {
-                return this.record.endpointData[endpointId]
-              }
-              else {
-                return null
+                const endpoint = this.record.endpointData[endpointId]
+                const endpointRecord = {
+                  id: endpoint.id,
+                  address: endpoint.address,
+                  connectionType: endpoint.connectionType.display
+                }
+                return endpointRecord
               }
             }) ?? [],
-            locations: [this.record.locationData[locationId]],
+            locations: [locRecord],
             roleDetails: role?.resource
           };
         }
       }
-  })
+    })
+
   return {
     ...organizationDetailData
   }

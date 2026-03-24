@@ -7,6 +7,8 @@ from django.contrib.gis.measure import D
 from ..utils import parse_identifier_query
 from ..mappings import genderMapping, addressUseMapping
 
+from uuid import UUID
+
 
 def broad_address_match(queryset, name, value, prefix=""):
     location_filter_paths = [
@@ -85,8 +87,6 @@ def general_filter_distance(queryset, name, value, prefix=""):
 def filter_identifier_general(
     queryset, name, value, npi_prefix=None, ein_prefix=None, other_prefix=None
 ):
-    from uuid import UUID
-
     system, identifier_id = parse_identifier_query(value)
     queries = Q(pk__isnull=True)
 

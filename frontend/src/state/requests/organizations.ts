@@ -59,6 +59,11 @@ export const useOrganizationAPI = (organizationId: string | undefined) => {
     queryFn: () => fetchPractitionerRoles({organizationNPI: npi}),
     enabled: !!npi,
   })
+  const {data: locations, isLoading: locationsLoading, error: locationsError} = useQuery<FHIRCollection<FHIRLocation>>({
+    queryKey: ["locations", npi, organizationId],
+    queryFn: () => fetchLocations(npi),
+    enabled: !!npi,
+  })
   const practitionerIdDups: Array<string> | undefined = practitionerRole?.results.entry.map((role) => { return role?.resource.practitioner.reference.split('/').pop() ?? ""});
   const practitionerIds: Array<string> = [...new Set(practitionerIdDups)];
   const practitionerQueries = useQueries({
@@ -75,11 +80,6 @@ export const useOrganizationAPI = (organizationId: string | undefined) => {
         loading: results.some((result) => result.isLoading) 
       }
     }
-  })
-  const {data: locations, isLoading: locationsLoading, error: locationsError} = useQuery<FHIRCollection<FHIRLocation>>({
-    queryKey: ["locations", organizationId],
-    queryFn: () => fetchLocations(npi),
-    enabled: !!npi
   })
   const endpointIdDups: Array<string | undefined> | undefined = locations?.results.entry.flatMap((role) => { return role?.resource.endpoint?.map((endpoint)=> {return endpoint.reference.split('/').pop() ?? ""})});
   const endpointIds: Array<string | undefined> = [...new Set(endpointIdDups)];

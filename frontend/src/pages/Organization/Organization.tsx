@@ -18,7 +18,10 @@ import { FeatureFlag } from "../../components/FeatureFlag"
 import { InfoItem } from "../../components/InfoItem"
 import { LoadingIndicator } from "../../components/LoadingIndicator"
 import layout from "../Layout.module.css"
-import styles from "./Organization.module.css"
+import { LocationSection } from "../../components/detailSections/LocationSection"
+import { EndpointSection } from "../../components/detailSections/EndpointSection"
+import { SectionWithContentOrFallback } from "../../components/detailSections/SectionWithContentOrFallback"
+import { IdentifierSection } from "../../components/detailSections/IdentifierSection"
 
 export const Organization = () => {
   const { t } = useTranslation()
@@ -106,43 +109,10 @@ export const Organization = () => {
               </div>
             </div>
           </section>
-
-          <section className={layout.section}>
-            <h2>{t("organizations.identifiers.title")}</h2>
-            {organization.identifiers.length > 0 ? (
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>{t("organizations.identifiers.type")}</TableCell>
-                    <TableCell>
-                      {t("organizations.identifiers.number")}
-                    </TableCell>
-                    <TableCell>
-                      {t("organizations.identifiers.details")}
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {organization.identifiers.map((identifier, index) => (
-                    <TableRow key={index}>
-                      <TableCell>{identifier.type}</TableCell>
-                      <TableCell>{identifier.number}</TableCell>
-                      <TableCell>{identifier.details}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            ) : (
-              <p className="ds-u-color--gray">
-                {t("organizations.identifiers.fallback")}
-              </p>
-            )}
-          </section>
-
-          <section className={layout.section}>
-            <h2>{t("organizations.taxonomy.title")}</h2>
-            {organization.types.length > 0 ? (
-              <div className="ds-l-row">
+          <IdentifierSection identifierData={organization.identifiers}/>
+          
+          <SectionWithContentOrFallback title={t("organizations.taxonomy.title")} fallback={t("organizations.taxonomy.fallback")} arrayData={organization.types}>
+            <div className="ds-l-row">
                 <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
                   <InfoItem
                     label={t("organizations.taxonomy.primary")}
@@ -156,79 +126,11 @@ export const Organization = () => {
                   />
                 </div>
               </div>
-            ) : (
-              <p className={styles.emptyState}>
-                {t("organizations.taxonomy.fallback")}
-              </p>
-            )}
-          </section>
+          </SectionWithContentOrFallback>
 
-          <section className={layout.section}>
-            <h2>{t("organizations.endpoints.title")}</h2>
-            {organization.endpoints.length > 0 ? (
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>
-                      {t("organizations.endpoints.connectionType")}
-                    </TableCell>
-                    <TableCell>{t("organizations.endpoints.address")}</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {organization.endpoints.map((endpoint, index) => (
-                    <TableRow key={index}>
-                      <TableCell>{endpoint.connectionType}</TableCell>
-                      <TableCell>{endpoint.address}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            ) : (
-              <p className="ds-u-color--gray">
-                {t("organizations.endpoints.fallback")}
-              </p>
-            )}
-          </section>
+          <EndpointSection endpointData={organization.endpoints}/>
 
-          <section className={layout.section}>
-            <h2>{t("organizations.locations.title")}</h2>
-            {organization.locations.length > 0 ? (
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>{t("organizations.locations.name")}</TableCell>
-                    <TableCell>
-                      {t("organizations.locations.address")}
-                    </TableCell>
-                    <TableCell>
-                      {t("organizations.locations.contact")}
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {organization.locations.map((location, index) => (
-                    <TableRow key={index}>
-                      <TableCell>{location.name}</TableCell>
-                      <TableCell>{location.address}</TableCell>
-                            {location.contact?.length !== undefined && location.contact?.length > 0 ? (
-                            <TableCell>
-                              <strong>{t("organizations.detail.locations.phone")}: </strong>
-                              {location.contact.filter(contact => contact.system == 'phone')[0]?.value}
-                              <br></br>
-                              <strong>{t("organizations.detail.locations.fax")}: </strong>
-                              {location.contact.filter(contact => contact.system == 'fax')[0]?.value}
-                          </TableCell>) : (<TableCell>{t("organizations.detail.locations.noContact")}</TableCell>)}
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            ) : (
-              <p className="ds-u-color--gray">
-                {t("organizations.locations.fallback")}
-              </p>
-            )}
-          </section>
+          <LocationSection locationData={organization.locations} />
 
           <section className={layout.section}>
             <h2>{t("organizations.practitioners.title")}</h2>

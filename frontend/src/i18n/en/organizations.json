@@ -22,39 +22,16 @@
     "authorizedOfficial": "Authorized official",
     "authorizedOfficialPhone": "Authorized official phone"
   },
-  "identifiers": {
-    "title": "Identifiers",
-    "type": "Type",
-    "number": "Number",
-    "details": "Details",
-    "fallback": "No identifiers available"
-  },
   "taxonomy": {
     "title": "Taxonomy",
     "primary": "Primary",
     "secondary": "Secondary",
     "fallback": "No taxonomy available"
   },
-  "endpoints": {
-    "title": "Endpoint(s)",
-    "connectionType": "Connection Type",
-    "address": "Address",
-    "fallback": "No endpoint information available"
-  },
-  "locations": {
-    "title": "Locations",
-    "name": "Name",
-    "address": "Address",
-    "contact": "Contact",
-    "phone": "Phone",
-    "fax": "Fax",
-    "noContact": "Contact information not available",
-    "fallback": "No location information available"
-  },
   "practitioners": {
     "title": "Practitioners",
     "name": "Name",
-    "taxonomy": "taxonomy",
+    "taxonomy": "Taxonomy",
     "fallback": "No practitioner information available"
   },
   "listing": {

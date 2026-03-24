@@ -1,7 +1,7 @@
-import { screen, within } from "@testing-library/react"
+import { screen, within, waitFor } from "@testing-library/react"
 import { MemoryRouter, Route, Routes } from "react-router"
 import { beforeEach, describe, expect, it, afterEach } from "vitest"
-import { DEFAULT_ORGANIZATION, DEFAULT_PRACTITIONERROLE, EMPTY_BUNDLE, DEFAULT_LOCATION, DEFAULT_ENDPOINT, DEFAULT_LOCATION_NOENDPOINTS } from "../../../tests/fixtures"
+import { DEFAULT_ORGANIZATION, DEFAULT_PRACTITIONERROLE, DEFAULT_PRACTITIONER, EMPTY_BUNDLE, DEFAULT_LOCATIONS, DEFAULT_ENDPOINT, DEFAULT_LOCATIONS_NOENDPOINTS } from "../../../tests/fixtures"
 import {
   mockGlobalFetch,
   type MockResponse,
@@ -25,14 +25,24 @@ const emptyPractitionerRoleApiResponse: MockResponse = [
   EMPTY_BUNDLE,
 ]
 
-const locationApiResponse: MockResponse = [
-  "^/fhir/Location/.*",
-  DEFAULT_LOCATION,
+const practitionerApiResponse: MockResponse = [
+  "^/fhir/Practitioner/.*",
+  DEFAULT_PRACTITIONER,
 ]
 
-const locationApiResponseNoEndpoints: MockResponse = [
+const locationsApiResponse: MockResponse = [
   "^/fhir/Location/.*",
-  DEFAULT_LOCATION_NOENDPOINTS,
+  DEFAULT_LOCATIONS,
+]
+
+const locationsApiResponseNoEndpoints: MockResponse = [
+  "^/fhir/Location/.*",
+  DEFAULT_LOCATIONS_NOENDPOINTS,
+]
+
+const emptyLocationsApiResponse: MockResponse = [
+  "^/fhir/Location/.*",
+  EMPTY_BUNDLE,
 ]
 
 const endpointApiResponse: MockResponse = [
@@ -56,7 +66,7 @@ const RoutedOrganization = ({ path }: { path: string }) => {
 describe("Organization", () => {
   describe("with full data attribution", () => {
     beforeEach(() => {
-      mockGlobalFetch([orgApiResponse, practitionerRoleApiResponse, locationApiResponse, endpointApiResponse])
+      mockGlobalFetch([orgApiResponse, practitionerRoleApiResponse, practitionerApiResponse, locationsApiResponse, endpointApiResponse])
     })
     afterEach(() => {
       vi.resetAllMocks()
@@ -68,7 +78,7 @@ describe("Organization", () => {
       })
 
       // ensure FeatureFlag components have finished loading
-      await screen.findByText("Content not available")
+      await waitFor(() => screen.findByText("Content not available"))
 
       expect(await screen.queryByText("About", { selector: "section h2" })).toBeNull()
     })
@@ -77,8 +87,8 @@ describe("Organization", () => {
         settings: { feature_flags: { ORGANIZATION_LOOKUP_DETAILS: true } },
       })
 
-      // ensure FeatureFlag components have finished loading
-      await screen.findByText("About")
+      // ensure FeatureFlag and org details components have finished loading
+      await waitFor(() => screen.getByTestId('location-table'))
 
       expect(
       await screen.queryByText("About", { selector: "section h2" }),
@@ -93,7 +103,7 @@ describe("Organization", () => {
       await screen.queryByText("Taxonomy", { selector: "section h2" }),
       ).toBeInTheDocument()
 
-      const table = await screen.getByRole("table")
+      const table = await screen.getByTestId("identifier-table")
       expect(table).toBeInTheDocument()
 
       expect(
@@ -128,18 +138,19 @@ describe("Organization", () => {
   })
   describe("without practitioner role data", () => {
   beforeEach(() => {
-    mockGlobalFetch([orgApiResponse, emptyPractitionerRoleApiResponse, locationApiResponse, endpointApiResponse])
+    mockGlobalFetch([orgApiResponse, emptyPractitionerRoleApiResponse, locationsApiResponse, endpointApiResponse])
   })
   afterEach(() => {
       vi.resetAllMocks()
     })
 
   it("does not render practitioner table", async () => {
-    render(<RoutedOrganization path="/organizations/12345" />, {
+    render(<RoutedOrganization path="/organizations/1234567" />, {
       settings: { feature_flags: { ORGANIZATION_LOOKUP_DETAILS: true } },
     })
 
-
+      // ensure FeatureFlag and org details components have finished loading
+      await waitFor(() => screen.getByTestId('location-table'))
       expect(await screen.getByText("0006 Aspen Glen Court, Edwards, CO 81632")).toBeInTheDocument()
       expect (await screen.getByText("555-555-5555", {exact: false})).toBeInTheDocument()
       expect (await screen.getByText("fhir.test-org.org")).toBeInTheDocument()
@@ -149,23 +160,24 @@ describe("Organization", () => {
       expect(await screen.queryByText("No endpoint information available")).not.toBeInTheDocument()
 
       expect(await screen.getByText("No practitioner information available")).toBeInTheDocument()
-      expect(await screen.findByText("DR. KIRK AADALEN")).not.toBeInTheDocument()
+      expect(await screen.queryByText("DR. KIRK AADALEN")).not.toBeInTheDocument()
     
   })
   })
 describe("without endpoint data", () => {
   beforeEach(() => {
-    mockGlobalFetch([orgApiResponse, locationApiResponseNoEndpoints])
+    mockGlobalFetch([orgApiResponse, emptyPractitionerRoleApiResponse, locationsApiResponseNoEndpoints])
   })
   afterEach(() => {
       vi.resetAllMocks()
     })
 
   it("does not render endpoint table", async () => {
-    render(<RoutedOrganization path="/organizations/12345" />, {
+    render(<RoutedOrganization path="/organizations/123456" />, {
       settings: { feature_flags: { ORGANIZATION_LOOKUP_DETAILS: true } },
     })
-
+      // ensure FeatureFlag and org details components have finished loading
+      await waitFor(() => screen.getByTestId('location-table'))
       expect(await screen.getByText("0006 Aspen Glen Court, Edwards, CO 81632")).toBeInTheDocument()
       expect (await screen.getByText("555-555-5555", {exact: false})).toBeInTheDocument()
       expect (await screen.queryByText("fhir.test-org.org")).not.toBeInTheDocument()
@@ -179,7 +191,7 @@ describe("without endpoint data", () => {
   })
   describe("without location data", () => {
   beforeEach(() => {
-    mockGlobalFetch([orgApiResponse, locationApiResponseNoEndpoints])
+    mockGlobalFetch([orgApiResponse, emptyPractitionerRoleApiResponse, emptyLocationsApiResponse])
   })
   afterEach(() => {
       vi.resetAllMocks()
@@ -189,7 +201,8 @@ describe("without endpoint data", () => {
     render(<RoutedOrganization path="/organizations/12345" />, {
       settings: { feature_flags: { ORGANIZATION_LOOKUP_DETAILS: true } },
     })
-
+      // ensure FeatureFlag components have finished loading
+      await waitFor(() => screen.findByText("About"))
       expect(await screen.queryByText("0006 Aspen Glen Court, Edwards, CO 81632")).not.toBeInTheDocument()
       expect (await screen.queryByText("555-555-5555", {exact: false})).not.toBeInTheDocument()
       expect (await screen.queryByText("fhir.test-org.org")).not.toBeInTheDocument()

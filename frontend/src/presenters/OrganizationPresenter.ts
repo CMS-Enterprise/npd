@@ -6,7 +6,7 @@ import type { OrganizationDetailsType } from "../state/requests/organizations"
 
 export class OrganizationPresenter {
   private record: OrganizationDetailsType
-  constructor(record: OrganizationDetailsType) { this.record = record}
+  constructor(record: OrganizationDetailsType) { this.record = record; console.log(this.record) }
 
   get name(): string {
     return this.record.name ?? ""
@@ -74,8 +74,9 @@ export class OrganizationPresenter {
     if (!this.record.locationData?.results.entry.length) return []
 
     return this.record.locationData.results.entry.map((location) => ({
+      id: location?.resource.id,
       name: location?.resource.name,
-      address: formatAddress(location?.resource.address),
+      address: formatAddress(location?.resource.address, false),
       contact: location?.resource.telecom
     }))
   }
@@ -84,8 +85,9 @@ export class OrganizationPresenter {
     if (!this.record.endpointData?.length || this.record.endpointData[0] == undefined) return []
 
     return this.record.endpointData.map((endpoint) => ({
+      id: endpoint?.id,
       address: endpoint?.address,
-      connectionType: endpoint?.connectionType.value
+      connectionType: endpoint?.connectionType.display
     }))
   }
 
