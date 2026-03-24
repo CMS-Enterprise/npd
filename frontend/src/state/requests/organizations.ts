@@ -1,7 +1,7 @@
 import { skipToken, useQuery, keepPreviousData } from "@tanstack/react-query"
-import type { FHIRCollection, FHIROrganization } from "../../@types/fhir"
+import type { FHIRCollection, FHIROrganization, FHIRPractitioner, FHIRPractitionerRole } from "../../@types/fhir"
 import { apiUrl } from "../api"
-import type { SortOption } from "../../@types/search"
+import type { SortOption, SearchParams } from "../../@types/search"
 
 export const ORGANIZATION_SORT_OPTIONS: Record<string, SortOption> = {
   "name-asc": {
@@ -16,8 +16,13 @@ export const ORGANIZATION_SORT_OPTIONS: Record<string, SortOption> = {
 
 export type OrganizationSortKey = keyof typeof ORGANIZATION_SORT_OPTIONS
 
-const fetchOrganization = async (
-  organizationId: string,
+export interface OrganizationDetailsType extends FHIROrganization {
+      practitionerRoleData: FHIRCollection<FHIRPractitionerRole>,
+      practitionerData: Array<FHIRPractitioner>,
+  }
+
+export const fetchOrganization = async (
+  organizationId: string ,
 ): Promise<FHIROrganization> => {
   const url = apiUrl("/fhir/Organization/:organizationId/", { organizationId })
 
@@ -101,7 +106,7 @@ type QueryOptions = {
 }
 
 export const useOrganizationsAPI = (
-  params: PaginationParams & SearchParams,
+  params: PaginationParams & SearchParams, 
   options?: QueryOptions,
 ) => {
   return useQuery<FHIRCollection<FHIROrganization>>({
