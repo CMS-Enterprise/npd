@@ -19,9 +19,12 @@ import { FeatureFlag } from "../../components/FeatureFlag"
 import { InfoItem } from "../../components/InfoItem"
 import { LoadingIndicator } from "../../components/LoadingIndicator"
 import layout from "../Layout.module.css"
-import styles from "./Organization.module.css"
-import { FeedbackForm } from "../../components/forms/feedback/FeedbackForm"
+import { LocationSection } from "../../components/detailSections/LocationSection"
+import { EndpointSection } from "../../components/detailSections/EndpointSection"
+import { SectionWithContentOrFallback } from "../../components/detailSections/SectionWithContentOrFallback"
+import { IdentifierSection } from "../../components/detailSections/IdentifierSection"
 import { FeedbackCTA } from "../../components/forms/feedback/FeedbackCTA"
+import { FeedbackForm } from "../../components/forms/feedback/FeedbackForm"
 
 export const Organization = () => {
   const { t } = useTranslation()
@@ -64,7 +67,9 @@ export const Organization = () => {
           <section className={layout.section}>
             <div className="ds-l-row ds-u-align-items--start">
               <div className="ds-l-col--12 ds-l-md-col--8">
-                <h2>{t("organizations.about.title")}</h2>
+                <h2 className="ds-u-margin-top--0">
+                  {t("organizations.about.title")}
+                </h2>
                 <div className="ds-l-row">
                   <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
                     <InfoItem
@@ -89,7 +94,7 @@ export const Organization = () => {
 
               <div className="ds-l-col--12 ds-l-md-col--4">
                 <FeedbackCTA
-                  subtitle={t("organizations.feedback.subtitle")}
+                  subtitle={t("practitioners.detail.feedback.subtitle")}
                   onButtonClick={() => setIsReportIssueOpen(true)}
                 />
               </div>
@@ -122,76 +127,61 @@ export const Organization = () => {
               </div>
             </div>
           </section>
+          <IdentifierSection identifierData={organization.identifiers} />
+
+          <SectionWithContentOrFallback
+            title={t("organizations.taxonomy.title")}
+            fallback={t("organizations.taxonomy.fallback")}
+            arrayData={organization.types}
+          >
+            <div className="ds-l-row">
+              <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
+                <InfoItem
+                  label={t("organizations.taxonomy.primary")}
+                  value={organization.types[0]}
+                />
+              </div>
+              <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
+                <InfoItem
+                  label={t("organizations.taxonomy.secondary")}
+                  value={organization.types[1]}
+                />
+              </div>
+            </div>
+          </SectionWithContentOrFallback>
+
+          <EndpointSection endpointData={organization.endpoints} />
+
+          <LocationSection locationData={organization.locations} />
 
           <section className={layout.section}>
-            <h2>{t("organizations.identifiers.title")}</h2>
-            {organization.identifiers.length > 0 ? (
-              <Table>
+            <h2>{t("organizations.practitioners.title")}</h2>
+            {organization.practitioners.length > 0 ? (
+              <Table data-testid="practitioner-table">
                 <TableHead>
                   <TableRow>
-                    <TableCell>{t("organizations.identifiers.type")}</TableCell>
                     <TableCell>
-                      {t("organizations.identifiers.number")}
+                      {t("organizations.practitioners.name")}
                     </TableCell>
                     <TableCell>
-                      {t("organizations.identifiers.details")}
+                      {t("organizations.practitioners.taxonomy")}
                     </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {organization.identifiers.map((identifier, index) => (
+                  {organization.practitioners.map((practitioner, index) => (
                     <TableRow key={index}>
-                      <TableCell>{identifier.type}</TableCell>
-                      <TableCell>{identifier.number}</TableCell>
-                      <TableCell>{identifier.details}</TableCell>
+                      <TableCell>{practitioner.name}</TableCell>
+                      <TableCell>{practitioner.taxonomy}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
             ) : (
               <p className="ds-u-color--gray">
-                {t("organizations.identifiers.fallback")}
+                {t("organizations.practitioners.fallback")}
               </p>
             )}
-          </section>
-
-          <section className={layout.section}>
-            <h2>{t("organizations.taxonomy.title")}</h2>
-            {organization.types.length > 0 ? (
-              <div className="ds-l-row">
-                <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
-                  <InfoItem
-                    label={t("organizations.taxonomy.primary")}
-                    value={organization.types[0]}
-                  />
-                </div>
-                <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
-                  <InfoItem
-                    label={t("organizations.taxonomy.secondary")}
-                    value={organization.types[1]}
-                  />
-                </div>
-              </div>
-            ) : (
-              <p className={styles.emptyState}>
-                {t("organizations.taxonomy.fallback")}
-              </p>
-            )}
-          </section>
-
-          <section className={layout.section}>
-            <h2>{t("organizations.endpoints")}</h2>
-            <p className={styles.emptyState}>No endpoints available</p>
-          </section>
-
-          <section className={layout.section}>
-            <h2>{t("organizations.locations")}</h2>
-            <p className={styles.emptyState}>No locations available</p>
-          </section>
-
-          <section className={layout.section}>
-            <h2>{t("organizations.practitioners")}</h2>
-            <p className={styles.emptyState}>No practitioners available</p>
           </section>
         </FeatureFlag>
 

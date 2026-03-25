@@ -1,0 +1,33 @@
+{
+    "endpoints": {
+        "title": "Endpoint(s)",
+        "connectionType": "Connection Type",
+        "address": "Address",
+        "fallback": "No endpoint information available"
+    },
+    "identifiers": {
+        "title": "Identifiers",
+        "type": "Type",
+        "number": "Number",
+        "details": "Details",
+        "fallback": "No identifiers available"
+    },
+    "locations": {
+        "title": "Location(s)",
+        "name": "Name",
+        "address": "Address",
+        "contact": "Contact",
+        "phone": "Phone",
+        "fax": "Fax",
+        "noContact": "Contact information not available",
+        "fallback": "No location information available"
+    },
+    "taxonomy": {
+        "title": "Taxonomy",
+        "state": "State",
+        "licenseNumber": "License number",
+        "nuccCode": "NUCC Code",
+        "taxonomy": "Description",
+        "fallback": "No taxonomy information available"
+    }
+}

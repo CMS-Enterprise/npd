@@ -4,66 +4,51 @@
     "npi": "NPI",
     "search": "Back to search results"
   },
-
   "unavailable": "This content is not currently available.",
-
   "update": {
     "title": "Are you the practitioner listed?",
     "subtitle": "Learn how to",
     "link": "update your information."
   },
-
   "about": {
     "title": "About",
     "otherNames": "Other name(s)",
     "type": "Type",
     "parentOrganization": "Parent organization"
   },
-
   "contact": {
     "title": "Contact information",
     "address": "Mailing address",
     "authorizedOfficial": "Authorized official",
     "authorizedOfficialPhone": "Authorized official phone"
   },
-
-  "identifiers": {
-    "title": "Identifiers",
-    "type": "Type",
-    "number": "Number",
-    "details": "Details",
-    "fallback": "No identifiers available"
-  },
-
   "taxonomy": {
     "title": "Taxonomy",
     "primary": "Primary",
     "secondary": "Secondary",
     "fallback": "No taxonomy available"
   },
-
-  "endpoints": "Endpoints",
-  "locations": "Locations",
-  "practitioners": "Practitioners",
-
+  "practitioners": {
+    "title": "Practitioners",
+    "name": "Name",
+    "taxonomy": "Taxonomy",
+    "fallback": "No practitioner information available"
+  },
   "listing": {
     "title": "All Organizations",
     "taxonomy": "Primary taxonomy",
     "location": "Location"
   },
-
   "search": {
     "title": "Organization search",
     "inputLabel": "Name or NPI",
     "button": "Search organizations"
   },
-
   "sort": {
     "by": "Sort by",
     "name-asc": "Name (A-Z)",
     "name-desc": "Name (Z-A)"
   },
-
   "alert": {
     "heading": "Are you looking for an practitioner?",
     "body": "Visit the [Practitioner search](/practitioners/search) page."

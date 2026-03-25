@@ -88,7 +88,7 @@ class PractitionerFilterSet(filters.FilterSet):
             queryset,
             name,
             value,
-            npi_prefix="npi__",
+            npi_prefix="provider__npi__",
             other_prefix="provider__providertootherid__",
         )
 

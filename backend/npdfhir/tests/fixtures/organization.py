@@ -30,7 +30,7 @@ class DefaultLocation:
         if address is None:
             address = DefaultAddress()
         self.address = address
-        if endpoint_instance is None:
+        if has_endpoint and endpoint_instance is None:
             endpoint_instance = DefaultEndpointInstance()
         self.endpoint_instance = endpoint_instance
         self.name = name

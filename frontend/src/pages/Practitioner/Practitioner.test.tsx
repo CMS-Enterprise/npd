@@ -19,7 +19,6 @@ import { render } from "../../../tests/render"
 import type { FHIRPractitioner } from "../../@types/fhir"
 import { Practitioner } from "./Practitioner"
 import { vi } from "vitest"
-
 const practitionerApiResponse: MockResponse = [
   "^/fhir/Practitioner/.*",
   DEFAULT_PRACTITIONER,
