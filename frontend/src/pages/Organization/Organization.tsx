@@ -11,20 +11,20 @@ import { useOrganizationAPI } from "../../state/requests/organizations"
 import { OrganizationPresenter } from "../../presenters/OrganizationPresenter"
 
 import classNames from "classnames"
+import layout from "../Layout.module.css"
 import { useTranslation } from "react-i18next"
 import { useLocation, useParams } from "react-router"
 import { DetailPageBanner } from "../../components/DetailPageBanner"
 import { FeatureFlag } from "../../components/FeatureFlag"
 import { InfoItem } from "../../components/InfoItem"
 import { LoadingIndicator } from "../../components/LoadingIndicator"
-import layout from "../Layout.module.css"
 import { LocationSection } from "../../components/detailSections/LocationSection"
 import { EndpointSection } from "../../components/detailSections/EndpointSection"
 import { SectionWithContentOrFallback } from "../../components/detailSections/SectionWithContentOrFallback"
 import { IdentifierSection } from "../../components/detailSections/IdentifierSection"
 import { FeedbackCTA } from "../../components/forms/feedback/FeedbackCTA"
-import { useState } from "react"
 import { FeedbackForm } from "../../components/forms/feedback/FeedbackForm"
+import { useState } from "react"
 
 export const Organization = () => {
   const { t } = useTranslation()

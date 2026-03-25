@@ -274,3 +274,108 @@ test("search by NPI excludes organizations with matching other_id", async ({ pag
   await expect(page.getByRole("link", { name: "AAA Test Org" })).toBeVisible()
   await expect(page.getByRole("link", { name: "BBB Other ID Org" })).not.toBeVisible()
 })
+
+
+test.describe("Organization feedback", () => {
+  test("report an issue button opens the feedback dialog", async ({ page }) => {
+    await page.goto(`/organizations/${organization.id}`)
+
+    await page.getByRole("button", { name: "Report an issue" }).click()
+
+    const dialog = page.getByRole("dialog")
+    await expect(dialog).toBeVisible()
+    await expect(dialog.getByText(organization.name)).toBeVisible()
+  })
+
+  test("submit is disabled when no issues are selected", async ({ page }) => {
+    await page.goto(`/organizations/${organization.id}`)
+
+    await page.getByRole("button", { name: "Report an issue" }).click()
+
+    const dialog = page.getByRole("dialog")
+    await expect(dialog).toBeVisible()
+
+    await expect(dialog.getByRole("button", { name: "Submit" })).toBeDisabled()
+  })
+
+  test("submit is enabled after selecting an issue", async ({ page }) => {
+    await page.goto(`/organizations/${organization.id}`)
+
+    await page.getByRole("button", { name: "Report an issue" }).click()
+
+    const dialog = page.getByRole("dialog")
+    await expect(dialog).toBeVisible()
+
+    await dialog.getByRole("checkbox", { name: /Practice location/i }).check()
+
+    await expect(dialog.getByRole("button", { name: "Submit" })).toBeEnabled()
+  })
+
+  test("selecting 'Other' requires details text", async ({ page }) => {
+    await page.goto(`/organizations/${organization.id}`)
+
+    await page.getByRole("button", { name: "Report an issue" }).click()
+
+    const dialog = page.getByRole("dialog")
+    await expect(dialog).toBeVisible()
+
+    await dialog.getByRole("checkbox", { name: /Other/i }).check()
+
+    await expect(dialog.getByRole("button", { name: "Submit" })).toBeDisabled()
+
+    await dialog
+      .getByRole("textbox", { name: /details/i })
+      .fill("Additional details about the issue")
+
+    await expect(dialog.getByRole("button", { name: "Submit" })).toBeEnabled()
+  })
+
+  test("cancel closes the feedback dialog", async ({ page }) => {
+    await page.goto(`/organizations/${organization.id}`)
+
+    await page.getByRole("button", { name: "Report an issue" }).click()
+
+    const dialog = page.getByRole("dialog")
+    await expect(dialog).toBeVisible()
+
+    await dialog.getByRole("button", { name: "Cancel" }).click()
+
+    await expect(dialog).not.toBeVisible()
+  })
+
+  test("submitting feedback shows success message", async ({ page }) => {
+    await page.goto(`/organizations/${organization.id}`)
+
+    await page.getByRole("button", { name: "Report an issue" }).click()
+
+    const dialog = page.getByRole("dialog")
+    await expect(dialog).toBeVisible()
+
+    await dialog.getByRole("checkbox", { name: /Practice location/i }).check()
+
+    const captcha = dialog.getByRole("checkbox", { name: /I'm not a robot/i })
+    await captcha.click()
+
+    await expect(
+      dialog.getByRole("checkbox", { name: /Verified/i })
+    ).toBeChecked({ timeout: 10000 })
+
+    await dialog.getByRole("button", { name: "Submit" }).click()
+
+    await expect(dialog.getByText(/success/i)).toBeVisible()
+    await dialog.getByRole("button", { name: "Close", exact: true }).click()
+
+    await expect(dialog).not.toBeVisible()
+  })
+
+  test("feedback form shows organization name", async ({ page }) => {
+    await page.goto(`/organizations/${organization.id}`)
+
+    await page.getByRole("button", { name: "Report an issue" }).click()
+
+    const dialog = page.getByRole("dialog")
+    await expect(dialog).toBeVisible()
+
+    await expect(dialog.getByText(organization.name)).toBeVisible()
+  })
+})
