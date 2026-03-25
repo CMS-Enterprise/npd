@@ -111,7 +111,7 @@ test.describe("Practitioner search", () => {
     await page.getByRole("button", { name: "Search" }).click()
     await expect(page.getByRole("link", { name: /AAA Test Practitioner/i })).toBeVisible()
     await expect(page.getByRole("caption")).toContainText(
-      "Showing 1 - 10 of 26",
+      "Showing 1 - 10 of 28",
     )
 
     await expect(
@@ -122,7 +122,7 @@ test.describe("Practitioner search", () => {
 
     await expect(page).toHaveURL(/page=2/)
     await expect(page.getByRole("caption")).toContainText(
-      "Showing 11 - 20 of 26",
+      "Showing 11 - 20 of 28",
     )
     await expect(
       page.locator("[data-testid='searchresults']").getByRole("listitem"),
@@ -132,7 +132,7 @@ test.describe("Practitioner search", () => {
 
     await expect(page).toHaveURL(/page=3/)
     await expect(page.locator("span[role='caption']")).toContainText(
-      "Showing 21 - 26 of 26",
+      "Showing 21 - 28 of 28",
     )
     await expect(
       page.locator("[data-testid='searchresults']").getByRole("listitem"),
