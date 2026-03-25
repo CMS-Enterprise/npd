@@ -3,7 +3,7 @@ CREATE SCHEMA IF NOT EXISTS app;
 CREATE TABLE app.feedback (
     id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
     record_id uuid,
-    npi archar(10),
+    npi varchar(10),
     record_name text,
     issues text[],
     details text,
