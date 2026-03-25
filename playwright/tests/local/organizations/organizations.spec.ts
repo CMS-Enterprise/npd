@@ -131,7 +131,7 @@ test.describe("Organization show", () => {
     await expect(page.getByTestId("organization-npi")).toContainText(`NPI: ${organization.npi}`)
     await expect(page.getByTestId("location-table")).toBeVisible();
     await expect(page.getByTestId("identifier-table")).toBeVisible();
-    //await expect(page.getByTestId("endpoint-table")).toBeVisible();
+    await expect(page.getByTestId("endpoint-table")).toBeVisible();
   })
 
   test("displays resource type label", async ({ page }) => {
@@ -203,7 +203,7 @@ test.describe("Organization show", () => {
     await expect(practitionerTable.getByRole('cell', { name: 'Test Practitioner 1' })).toBeVisible()
   })
   test("View an organization with a location but no endpoints", async ({page}) => {
-    await page.goto(`/organizations/0c1f8f84-0502-4444-b636-8fee4ab76e32`)
+    await page.goto(`/organizations/53202937-ac54-4c71-b3dc-9a773bd51fc2`)
 
     await expect(page.getByRole("heading", {name: "Endpoint(s)"})).toBeVisible()
     await expect(page.getByText("No endpoint information available")).toBeVisible()

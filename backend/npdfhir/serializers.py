@@ -613,6 +613,15 @@ class LocationSerializer(serializers.Serializer):
         location.managingOrganization = genReference(
             "fhir-organization-detail", instance.organization_id, request
         )
+        if len(instance.locationtoendpointinstance_set.all()) > 0:
+            endpoints = []
+            for loc_to_endpoint in instance.locationtoendpointinstance_set.all():
+                endpoints.append(
+                    genReference(
+                        "fhir-endpoint-detail", loc_to_endpoint.endpoint_instance_id, request
+                    )
+                )
+            location.endpoint = endpoints
         return location.model_dump()
 
 

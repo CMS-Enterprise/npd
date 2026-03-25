@@ -167,7 +167,6 @@ class Command(BaseCommand):
             )
             self.stdout.write(
                 f"created Organization: {self.to_json(id=organization.id, organizationtoname__name=name)}"
-                f"endpoint instance: {organization.locations[0].endpoint_instance}"
             )
         except IntegrityError:
             organization = None

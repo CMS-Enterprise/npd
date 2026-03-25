@@ -6,7 +6,7 @@ import type { OrganizationDetailsType } from "../state/requests/organizations"
 
 export class OrganizationPresenter {
   private record: OrganizationDetailsType
-  constructor(record: OrganizationDetailsType) { this.record = record; console.log(this.record) }
+  constructor(record: OrganizationDetailsType) { this.record = record }
 
   get name(): string {
     return this.record.name ?? ""
