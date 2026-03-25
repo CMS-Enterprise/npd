@@ -263,7 +263,7 @@ test-system-setup: test-setup
 
 .PHONY: test-server
 test-server: test-system-setup build-frontend-test-assets
-	docker compose -f compose.test.yml up test-server
+	docker compose -f compose.test.yml up django-web
 
 ###
 # whole project concerns
