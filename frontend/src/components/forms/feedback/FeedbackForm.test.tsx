@@ -41,6 +41,16 @@ describe("FeedbackForm", () => {
     expect(screen.getByLabelText("Other (specify below)")).toBeInTheDocument()
   })
 
+  it("renders the issues question as required", () => {
+    renderForm()
+    const issuesFieldset = screen.getByRole("group", {
+      name: /What issue\(s\) do you want to report on this profile\?/,
+    })
+    expect(
+      issuesFieldset.querySelector('[aria-hidden="true"]'),
+    ).toHaveTextContent("*")
+  })
+
   it("renders the details textarea", () => {
     renderForm()
     expect(

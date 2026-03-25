@@ -58,6 +58,9 @@
       "fax": "Fax",
       "noContact": "Contact information not available",
       "fallback": "No location information available"
+    },
+    "feedback": {
+      "subtitle": "Let us know if you see any problems with this provider record."
     }
   },
   "listing": {

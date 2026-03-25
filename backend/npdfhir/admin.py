@@ -5,13 +5,14 @@ from .models import Feedback
 # read only audit log of users feedback
 @admin.register(Feedback)
 class FeedbackAdmin(admin.ModelAdmin):
-    list_display = ("npi", "record_name", "formatted_issues", "email", "created_at")
-    list_filter = ("created_at", "npi")
-    search_fields = ("npi", "record_name", "email")
+    list_display = ("npi", "record_name", "record_id", "formatted_issues", "email", "created_at")
+    list_filter = ("created_at", "npi", "record_id")
+    search_fields = ("npi", "record_name", "email", "record_id")
     readonly_fields = (
         "id",
         "npi",
         "record_name",
+        "record_id",
         "formatted_issues",
         "details",
         "email",

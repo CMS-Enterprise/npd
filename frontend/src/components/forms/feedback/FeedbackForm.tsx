@@ -23,6 +23,7 @@ const ISSUE_KEYS = [
 
 type PresenterData = {
   recordName?: string
+  recordId?: string
   npi?: string | null
 }
 

@@ -14,7 +14,7 @@ from npdfhir.models import Feedback
 
 
 class FeedbackFlowThrottle(AnonRateThrottle):
-    rate = "10/min"
+    rate = "5/min"
 
 
 @extend_schema(exclude=True)
@@ -86,12 +86,13 @@ class FeedbackView(APIView):
         Feedback.objects.create(
             npi=validated_payload.get("npi"),
             record_name=validated_payload.get("recordName", ""),
+            record_id=validated_payload.get("recordId"),
             issues=validated_payload.get("issues", []),
             details=validated_payload.get("details", ""),
             email=validated_payload.get("email", ""),
         )
 
         return Response(
-            {"message": "Feedback submitted successfuly!"},
+            {"message": "Feedback submitted successfully!"},
             status=status.HTTP_201_CREATED,
         )

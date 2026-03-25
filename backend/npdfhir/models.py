@@ -886,6 +886,7 @@ class RelationshipType(models.Model):
 class Feedback(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     npi = models.CharField(max_length=10, blank=True, null=True)
+    record_id = models.UUIDField(null=True, blank=True)
     record_name = models.TextField(blank=True, null=True)
     issues = ArrayField(models.TextField())
     details = models.TextField(blank=True, default="")
@@ -897,4 +898,4 @@ class Feedback(models.Model):
 
     class Meta:
         managed = False
-        db_table = "feedback"
+        db_table = '"app"."feedback"'
