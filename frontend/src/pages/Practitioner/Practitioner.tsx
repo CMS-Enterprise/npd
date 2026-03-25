@@ -21,7 +21,13 @@ import {
   TableHead,
   TableRow,
 } from "@cmsgov/design-system"
+
 import { formatAddress } from "../../helpers/formatters"
+import { EndpointSection } from "../../components/detailSections/EndpointSection"
+import { LocationSection } from "../../components/detailSections/LocationSection"
+import { SectionWithContentOrFallback } from "../../components/detailSections/SectionWithContentOrFallback"
+import { IdentifierSection } from "../../components/detailSections/IdentifierSection"
+import { TaxonomySection } from "../../components/detailSections/TaxonomySection"
 
 export const Practitioner = () => {
   const { t } = useTranslation()
@@ -126,6 +132,9 @@ export const Practitioner = () => {
               </div>
             </div>
           </section>
+          <IdentifierSection identifierData={practitioner.identifiers}/>
+          
+          <TaxonomySection taxonomyData={practitioner.taxonomy}/>
 
           <section className={layout.section}>
             <h2>{t("practitioners.detail.identifiers.title")}</h2>
@@ -294,6 +303,15 @@ export const Practitioner = () => {
               <p>{t("practitioners.detail.organizations.notFound")}</p>
             )}
           </section>
+          <SectionWithContentOrFallback title={t("practitioners.detail.organizations.title")} fallback={t("practitioners.detail.organizations.notFound")} arrayData={Object.keys(practitioner.organizations)}>
+              {Object.entries(practitioner.organizations).map(([id, obj]) => (
+              <React.Fragment key = {id}>
+                    <h3>{`${obj.organization.name} (NPI: ${obj.organization.identifier?.filter(identifier => identifier.system = "http://terminology.hl7.org/NamingSystem/npi")[0].value})`}</h3>
+                      <LocationSection locationData = {obj.locations.map((location) => {return location})} subsection={true} />
+                      <EndpointSection endpointData={obj.endpoints.map((endpoint) => {return endpoint})} subsection={true} />
+                </ React.Fragment>
+                  ))}
+          </SectionWithContentOrFallback>
         </FeatureFlag>
 
         <FeedbackForm

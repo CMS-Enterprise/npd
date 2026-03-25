@@ -24,7 +24,13 @@ from ..models import (
 from .fixtures.address import DefaultAddress
 from .fixtures.organization import DefaultLocation, DefaultOrganization
 from .fixtures.practitioner_role import DefaultPractitionerRole
-from .fixtures.practitioner import DefaultPractitioner, DefaultIndividual, DefaultName, DefaultNPI
+from .fixtures.practitioner import (
+    DefaultPractitioner,
+    DefaultIndividual,
+    DefaultName,
+    DefaultNPI,
+    DefaultOtherID,
+)
 from .fixtures.endpoint import DefaultEndpointInstance
 
 
@@ -136,6 +142,12 @@ class PractitionerRoleViewSetTestCase(APITestCase):
 
         # Generate test data to retrieve specific practitioner role
         DefaultPractitionerRole(id="cad156c0-87fb-489b-bf5e-f15c95ee771e")
+
+        # Generate test data for testing organization identifier filtering
+        DefaultPractitionerRole(organization=DefaultOrganization(npi=DefaultNPI(npi=1000000001)))
+        DefaultPractitionerRole(
+            organization=DefaultOrganization(other_ids=[DefaultOtherID(other_id=1000000001)])
+        )
 
         OrganizationView.refresh_materialized_view()
         ProviderView.refresh_materialized_view()
@@ -261,6 +273,62 @@ class PractitionerRoleViewSetTestCase(APITestCase):
             )
 
             self.assertIn(name_search, org_name)
+
+    def test_filter_by_org_npi(self):
+        org_npi = "1000000001"
+
+        url = reverse("fhir-practitionerrole-list")
+        response = self.client.get(url, {"organization_identifier": f"NPI|{org_npi}"})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert_has_results(self, response)
+
+        bundle = response.data["results"]
+
+        self.assertEqual(1, len(bundle["entry"]))
+
+        for entry in bundle["entry"]:
+            self.assertIn("resource", entry)
+            practitionerrole_entry = entry["resource"]
+            self.assertEqual(practitionerrole_entry["resourceType"], "PractitionerRole")
+            self.assertIn("id", practitionerrole_entry)
+            self.assertIn("organization", practitionerrole_entry)
+
+            organizationResponse = self.client.get(
+                practitionerrole_entry["organization"]["reference"]
+            )
+            organization = organizationResponse.data
+            npi_response = [
+                identifier["value"]
+                for identifier in organization["identifier"]
+                if identifier["type"]["coding"][0]["code"] == "NPI"
+            ]
+            self.assertIn(org_npi, npi_response)
+
+    def test_filter_by_org_identifier(self):
+        org_other_id = "1000000001"
+
+        url = reverse("fhir-practitionerrole-list")
+        response = self.client.get(url, {"organization_identifier": org_other_id})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert_has_results(self, response)
+
+        bundle = response.data["results"]
+
+        self.assertEqual(2, len(bundle["entry"]))
+
+        for entry in bundle["entry"]:
+            self.assertIn("resource", entry)
+            practitionerrole_entry = entry["resource"]
+            self.assertEqual(practitionerrole_entry["resourceType"], "PractitionerRole")
+            self.assertIn("id", practitionerrole_entry)
+            self.assertIn("organization", practitionerrole_entry)
+
+            organizationResponse = self.client.get(
+                practitionerrole_entry["organization"]["reference"]
+            )
+            organization = organizationResponse.data
+            identifiers = [identifier["value"] for identifier in organization["identifier"]]
+            self.assertIn(org_other_id, identifiers)
 
     def test_filter_by_distance_with_km(self):
         lat = -90.194315

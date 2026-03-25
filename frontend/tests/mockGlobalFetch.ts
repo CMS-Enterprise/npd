@@ -24,7 +24,7 @@ export const settingsResponseWithFeature = (
 
 type UrlMatch = string
 // new API response types should be added as a union to ApiResponseType
-type ApiResponseType = FrontendSettings | Organization | Practitioner | FHIRCollection<FHIRPractitionerRole> | Location
+type ApiResponseType = FrontendSettings | Organization | Practitioner | FHIRCollection<FHIRPractitionerRole> | Location | FHIRCollection<Location>
 
 export type MockResponse = [UrlMatch, ApiResponseType]
 

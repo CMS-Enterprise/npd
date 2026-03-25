@@ -18,7 +18,10 @@ import { FeatureFlag } from "../../components/FeatureFlag"
 import { InfoItem } from "../../components/InfoItem"
 import { LoadingIndicator } from "../../components/LoadingIndicator"
 import layout from "../Layout.module.css"
-import styles from "./Organization.module.css"
+import { LocationSection } from "../../components/detailSections/LocationSection"
+import { EndpointSection } from "../../components/detailSections/EndpointSection"
+import { SectionWithContentOrFallback } from "../../components/detailSections/SectionWithContentOrFallback"
+import { IdentifierSection } from "../../components/detailSections/IdentifierSection"
 
 export const Organization = () => {
   const { t } = useTranslation()
@@ -106,43 +109,10 @@ export const Organization = () => {
               </div>
             </div>
           </section>
-
-          <section className={layout.section}>
-            <h2>{t("organizations.identifiers.title")}</h2>
-            {organization.identifiers.length > 0 ? (
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>{t("organizations.identifiers.type")}</TableCell>
-                    <TableCell>
-                      {t("organizations.identifiers.number")}
-                    </TableCell>
-                    <TableCell>
-                      {t("organizations.identifiers.details")}
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {organization.identifiers.map((identifier, index) => (
-                    <TableRow key={index}>
-                      <TableCell>{identifier.type}</TableCell>
-                      <TableCell>{identifier.number}</TableCell>
-                      <TableCell>{identifier.details}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            ) : (
-              <p className="ds-u-color--gray">
-                {t("organizations.identifiers.fallback")}
-              </p>
-            )}
-          </section>
-
-          <section className={layout.section}>
-            <h2>{t("organizations.taxonomy.title")}</h2>
-            {organization.types.length > 0 ? (
-              <div className="ds-l-row">
+          <IdentifierSection identifierData={organization.identifiers}/>
+          
+          <SectionWithContentOrFallback title={t("organizations.taxonomy.title")} fallback={t("organizations.taxonomy.fallback")} arrayData={organization.types}>
+            <div className="ds-l-row">
                 <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
                   <InfoItem
                     label={t("organizations.taxonomy.primary")}
@@ -156,26 +126,38 @@ export const Organization = () => {
                   />
                 </div>
               </div>
+          </SectionWithContentOrFallback>
+
+          <EndpointSection endpointData={organization.endpoints}/>
+
+          <LocationSection locationData={organization.locations} />
+
+          <section className={layout.section}>
+            <h2>{t("organizations.practitioners.title")}</h2>
+            {organization.practitioners.length > 0 ? (
+              <Table data-testid="practitioner-table">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>{t("organizations.practitioners.name")}</TableCell>
+                    <TableCell>
+                      {t("organizations.practitioners.taxonomy")}
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {organization.practitioners.map((practitioner, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{practitioner.name}</TableCell>
+                      <TableCell>{practitioner.taxonomy}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             ) : (
-              <p className={styles.emptyState}>
-                {t("organizations.taxonomy.fallback")}
+              <p className="ds-u-color--gray">
+                {t("organizations.practitioners.fallback")}
               </p>
             )}
-          </section>
-
-          <section className={layout.section}>
-            <h2>{t("organizations.endpoints")}</h2>
-            <p className={styles.emptyState}>No endpoints available</p>
-          </section>
-
-          <section className={layout.section}>
-            <h2>{t("organizations.locations")}</h2>
-            <p className={styles.emptyState}>No locations available</p>
-          </section>
-
-          <section className={layout.section}>
-            <h2>{t("organizations.practitioners")}</h2>
-            <p className={styles.emptyState}>No practitioners available</p>
           </section>
         </FeatureFlag>
 
