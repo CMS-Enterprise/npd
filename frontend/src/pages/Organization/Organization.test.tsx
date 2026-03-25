@@ -1,6 +1,7 @@
 import { screen, within } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
 import { MemoryRouter, Route, Routes } from "react-router"
-import { beforeEach, describe, expect, it } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_ORGANIZATION } from "../../../tests/fixtures"
 import {
   mockGlobalFetch,
@@ -13,6 +14,9 @@ const orgApiResponse: MockResponse = [
   "^/fhir/Organization/.*",
   DEFAULT_ORGANIZATION,
 ]
+
+const EXPECTED_ORGANIZATION_NAME =
+  DEFAULT_ORGANIZATION.name || "EXPECTED_ORGANIZATION_NAME IS UNSET FIXME"
 
 const RoutedOrganization = ({ path }: { path: string }) => {
   return (
@@ -46,6 +50,14 @@ describe("Organization", () => {
   })
 
   describe("with ORGANIZATION_LOOKUP_DETAILS feature flag", () => {
+    beforeEach(() => {
+      mockGlobalFetch([orgApiResponse])
+    })
+
+    afterEach(() => {
+      vi.resetAllMocks()
+    })
+
     it("shows detailed content", async () => {
       render(<RoutedOrganization path="/organizations/12345" />, {
         settings: { feature_flags: { ORGANIZATION_LOOKUP_DETAILS: true } },
@@ -66,6 +78,80 @@ describe("Organization", () => {
       expect(
         screen.queryByText("Taxonomy", { selector: "section h2" }),
       ).toBeInTheDocument()
+    })
+
+    it("renders the feedback CTA", async () => {
+      render(<RoutedOrganization path="/organizations/12345" />, {
+        settings: { feature_flags: { ORGANIZATION_LOOKUP_DETAILS: true } },
+      })
+
+      await screen.findByText("About")
+
+      expect(
+        screen.getByText(
+          "Let us know if you see any problems with this provider record.",
+        ),
+      ).toBeInTheDocument()
+      expect(
+        screen.getByRole("button", { name: "Report an issue" }),
+      ).toBeInTheDocument()
+    })
+
+    describe("feedback form", () => {
+      it("displays the organization name inside the form dialog", async () => {
+        const user = userEvent.setup()
+
+        mockGlobalFetch([orgApiResponse])
+
+        render(<RoutedOrganization path="/organizations/12345" />, {
+          settings: { feature_flags: { ORGANIZATION_LOOKUP_DETAILS: true } },
+        })
+
+        await screen.findByText("About")
+
+        await user.click(
+          screen.getByRole("button", { name: "Report an issue" }),
+        )
+
+        const dialog = screen.getByRole("dialog")
+        expect(dialog).toBeInTheDocument()
+        expect(
+          within(dialog).getByText(EXPECTED_ORGANIZATION_NAME),
+        ).toBeInTheDocument()
+      })
+
+      it("enables submit when 'Other' is selected and details are provided", async () => {
+        const user = userEvent.setup()
+
+        mockGlobalFetch([orgApiResponse])
+
+        render(<RoutedOrganization path="/organizations/12345" />, {
+          settings: { feature_flags: { ORGANIZATION_LOOKUP_DETAILS: true } },
+        })
+
+        await screen.findByText("About")
+
+        await user.click(
+          screen.getByRole("button", { name: "Report an issue" }),
+        )
+
+        const dialog = screen.getByRole("dialog")
+        expect(dialog).toBeInTheDocument()
+
+        const otherCheckbox = within(dialog).getByRole("checkbox", {
+          name: /other/i,
+        })
+        await user.click(otherCheckbox)
+
+        const detailsInput = within(dialog).getByRole("textbox", {
+          name: /details/i,
+        })
+        await user.type(detailsInput, "Additional details about the issue")
+
+        expect(
+          within(dialog).getByRole("button", { name: /submit/i }),
+        ).not.toBeDisabled()
+      })
     })
   })
 })
