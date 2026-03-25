@@ -61,7 +61,9 @@ class Command(BaseCommand):
                 individual=DefaultIndividual(id="6846963d-7814-4c70-ae3d-8a8419a7c9c6"),
                 npi=DefaultNPI(npi=1000000001),
             ),
-            organization=DefaultOrganization(npi=DefaultNPI(npi=1000000002)),
+            organization=DefaultOrganization(
+                id="eca64970-4833-4c64-b3fa-d583f9af7fcc", npi=DefaultNPI(npi=1000000002)
+            ),
         )
 
         # Generate a practitioner with a relationship with an organization, but no associated endpoints
@@ -90,6 +92,24 @@ class Command(BaseCommand):
             organization=DefaultOrganization(npi=DefaultNPI(npi=1000000005)),
         )
 
+        # Generate an organization with a relationship with multiple practitioners
+        DefaultPractitionerRole(
+            practitioner=DefaultPractitioner(
+                individual=DefaultIndividual(
+                    names=[DefaultName(first_name="Test", last_name="Practitioner 1")]
+                )
+            ),
+            organization=DefaultOrganization(id="0c1f8f84-0502-4444-b636-8fee4ab76e32"),
+        )
+        DefaultPractitionerRole(
+            practitioner=DefaultPractitioner(
+                individual=DefaultIndividual(
+                    names=[DefaultName(first_name="Test", last_name="Practitioner 2")]
+                )
+            ),
+            organization=DefaultOrganization(id="0c1f8f84-0502-4444-b636-8fee4ab76e32"),
+        )
+
     def handle(self, *args, **options):
         if options.get("seed", None):
             Faker.seed(int(options["seed"]))
@@ -97,6 +117,16 @@ class Command(BaseCommand):
         provider = DefaultPractitioner(taxonomies=["207R00000X"])
 
         self.stdout.write(f"created Practitioner: {provider.individual.id}")
+
+        # Generate an organization with a location with no endpoints
+        DefaultOrganization(
+            id="53202937-ac54-4c71-b3dc-9a773bd51fc2",
+            names=["No Endpoint Org"],
+            locations=[DefaultLocation(has_endpoint=False)],
+        )
+
+        # Generate an organization with no locations
+        DefaultOrganization(id="8450a7cd-c919-47ee-9c59-bc17538231ef", has_locations=False)
 
         try:
             name = {"first_name": "AAA", "last_name": "Test Practitioner"}
@@ -130,10 +160,14 @@ class Command(BaseCommand):
             # one known NPI
             name = "AAA Test Org"
             organization = DefaultOrganization(
-                names=[name], npi=DefaultNPI(npi=1234567893), taxonomies=["261QP2000X"]
+                names=[name],
+                npi=DefaultNPI(npi=1234567893),
+                taxonomies=["261QP2000X"],
+                locations=[DefaultLocation(has_endpoint=True)],
             )
             self.stdout.write(
                 f"created Organization: {self.to_json(id=organization.id, organizationtoname__name=name)}"
+                f"endpoint instance: {organization.locations[0].endpoint_instance}"
             )
         except IntegrityError:
             organization = None
@@ -148,6 +182,7 @@ class Command(BaseCommand):
                 names=[name],
                 other_ids=[DefaultOtherID(other_id=other_id)],
                 taxonomies=["261QP2000X"],
+                id="98d3090b-0982-495f-9eb9-4e79523d2ba2",
             )
             self.stdout.write(
                 f"created other_id Organization: {self.to_json(id=other_id_organization.id, other_id=other_id, organizationtoname__name=name)}"

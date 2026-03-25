@@ -135,7 +135,7 @@ export const Organization = () => {
           <section className={layout.section}>
             <h2>{t("organizations.practitioners.title")}</h2>
             {organization.practitioners.length > 0 ? (
-              <Table>
+              <Table data-testid="practitioner-table">
                 <TableHead>
                   <TableRow>
                     <TableCell>{t("organizations.practitioners.name")}</TableCell>

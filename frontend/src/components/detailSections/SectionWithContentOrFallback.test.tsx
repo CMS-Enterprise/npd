@@ -2,7 +2,6 @@ import { screen, waitFor } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 import { render } from "../../../tests/render"
 import { SectionWithContentOrFallback } from "./SectionWithContentOrFallback"
-SectionWithContentOrFallback
 
 describe("Taxonomy Section", () => {
   it("does not render children an empty array is passed", async () => {

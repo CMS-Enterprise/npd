@@ -1,6 +1,6 @@
 import layout from "../../Pages/Layout.module.css"
 
-export const SectionWithContentOrFallback = ({title, arrayData, fallback, children, subsection = false, }: React.PropsWithChildren<{ title: string, arrayData: Array<any>, fallback: string, subsection?: boolean }>) => {
+export const SectionWithContentOrFallback = ({title, arrayData, fallback, children, subsection = false, }: React.PropsWithChildren<{ title: string, arrayData: Array<unknown>, fallback: string, subsection?: boolean }>) => {
     if (arrayData.length > 0) {
         return (
           <section className={layout.section}>

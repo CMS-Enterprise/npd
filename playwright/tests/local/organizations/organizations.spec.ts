@@ -7,7 +7,7 @@ let organization = ORGANIZATION
 test.beforeAll(async ({ request }) => {
   // expects a FhirCollection<FhirOrganization> API response
   const response = await request.get(
-    "/fhir/Organization/?identifier=1234567893",
+    "/fhir/Organization/?identifier=NPI|1234567893",
   )
   const payload = await response.json()
 
@@ -129,6 +129,9 @@ test.describe("Organization show", () => {
     await expect(page).toHaveURL(`/organizations/${organization.id}`)
     await expect(page.getByTestId("organization-name")).toContainText(organization.name)
     await expect(page.getByTestId("organization-npi")).toContainText(`NPI: ${organization.npi}`)
+    await expect(page.getByTestId("location-table")).toBeVisible();
+    await expect(page.getByTestId("identifier-table")).toBeVisible();
+    //await expect(page.getByTestId("endpoint-table")).toBeVisible();
   })
 
   test("displays resource type label", async ({ page }) => {
@@ -167,7 +170,65 @@ test.describe("Organization show", () => {
     await expect(page.getByTestId("organization-name")).toBeVisible()
     await expect(page.getByRole("link", { name: /Back to search results/i })).not.toBeVisible()
   })
+
+  test("View an organization with no practitioner relationships", async ({page}) => {
+    await page.goto(`/organizations/98d3090b-0982-495f-9eb9-4e79523d2ba2`)
+
+    await expect(page.getByRole("heading", {name: "Practitioners"})).toBeVisible()
+    await expect(page.getByText("No practitioner information available")).toBeVisible()
+    const practitionerTable = page.locator("[data-testid='practitioner-table']")
+    await expect(practitionerTable).not.toBeVisible()
+  })
+  test("View an organization with one practitioner relationship", async ({page}) => {
+    await page.goto(`/organizations/eca64970-4833-4c64-b3fa-d583f9af7fcc`)
+
+    await expect(page.getByRole("heading", {name: "Practitioners"})).toBeVisible()
+    await expect(page.getByText("No practitioner information available")).not.toBeVisible()
+    const practitionerTable = page.locator("[data-testid='practitioner-table']")
+    await expect(practitionerTable).toBeVisible()
+    const tableRows = practitionerTable.locator('tbody tr');
+    await expect(tableRows).toHaveCount(1);
+    await expect(tableRows).toContainText("Jane Doe")
+  })
+  test("View an organization with multiple practitioner relationships", async ({page}) => {
+    await page.goto(`/organizations/0c1f8f84-0502-4444-b636-8fee4ab76e32`)
+
+    await expect(page.getByRole("heading", {name: "Practitioners"})).toBeVisible()
+    await expect(page.getByText("No practitioner information available")).not.toBeVisible()
+    const practitionerTable = page.locator("[data-testid='practitioner-table']")
+    await expect(practitionerTable).toBeVisible()
+    const tableRows = practitionerTable.locator('tbody tr');
+    await expect(tableRows).toHaveCount(2);
+    await expect(practitionerTable.getByRole('cell', { name: 'Test Practitioner 2' })).toBeVisible()
+    await expect(practitionerTable.getByRole('cell', { name: 'Test Practitioner 1' })).toBeVisible()
+  })
+  test("View an organization with a location but no endpoints", async ({page}) => {
+    await page.goto(`/organizations/0c1f8f84-0502-4444-b636-8fee4ab76e32`)
+
+    await expect(page.getByRole("heading", {name: "Endpoint(s)"})).toBeVisible()
+    await expect(page.getByText("No endpoint information available")).toBeVisible()
+    const endpointTable = page.locator("[data-testid='endpoint-table']")
+    await expect(endpointTable).not.toBeVisible()
+    await expect(page.getByRole("heading", {name: "Endpoint(s)"})).toBeVisible()
+    await expect(page.getByRole("heading", {name: "Location(s)"})).toBeVisible()
+    await expect(page.getByText("No location information available")).not.toBeVisible()
+    const locationTable = page.locator("[data-testid='location-table']")
+    await expect(locationTable).toBeVisible()
+  })
+  test("View an organization with no locations", async ({page}) => {
+    await page.goto(`/organizations/8450a7cd-c919-47ee-9c59-bc17538231ef`)
+
+    await expect(page.getByRole("heading", {name: "Endpoint(s)"})).toBeVisible()
+    await expect(page.getByText("No endpoint information available")).toBeVisible()
+    await expect(page.getByRole("heading", {name: "Location(s)"})).toBeVisible()
+    await expect(page.getByText("No location information available")).toBeVisible()
+    const endpointTable = page.locator("[data-testid='endpoint-table']")
+    await expect(endpointTable).not.toBeVisible()
+    const locationTable = page.locator("[data-testid='location-table']")
+    await expect(locationTable).not.toBeVisible()
+  })
 })
+
 
 test.describe("sort Organizations", () => {
   test("sort dropdown is visible after search", async ({ page }) => {
