@@ -136,7 +136,7 @@ test.describe("Practitioner search", () => {
     )
     await expect(
       page.locator("[data-testid='searchresults']").getByRole("listitem"),
-    ).toHaveCount(6)
+    ).toHaveCount(8)
   })
 })
 
