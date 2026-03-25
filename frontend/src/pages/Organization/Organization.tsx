@@ -22,6 +22,9 @@ import { LocationSection } from "../../components/detailSections/LocationSection
 import { EndpointSection } from "../../components/detailSections/EndpointSection"
 import { SectionWithContentOrFallback } from "../../components/detailSections/SectionWithContentOrFallback"
 import { IdentifierSection } from "../../components/detailSections/IdentifierSection"
+import { FeedbackCTA } from "../../components/forms/feedback/FeedbackCTA"
+import { useState } from "react"
+import { FeedbackForm } from "../../components/forms/feedback/FeedbackForm"
 
 export const Organization = () => {
   const { t } = useTranslation()
@@ -29,6 +32,8 @@ export const Organization = () => {
   const { data, isLoading } = useOrganizationAPI(organizationId)
   const location = useLocation()
   const searchUrl = location.state?.searchUrl
+
+  const [isReportIssueOpen, setIsReportIssueOpen] = useState(false)
 
   if (isLoading) {
     return <LoadingIndicator />
@@ -60,24 +65,37 @@ export const Organization = () => {
 
         <FeatureFlag name="ORGANIZATION_LOOKUP_DETAILS">
           <section className={layout.section}>
-            <h2>{t("organizations.about.title")}</h2>
-            <div className="ds-l-row">
-              <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
-                <InfoItem
-                  label={t("organizations.about.otherNames")}
-                  value={organization.name}
-                />
+            <div className="ds-l-row ds-u-align-items--start">
+              <div className="ds-l-col--12 ds-l-md-col--8">
+                <h2 className="ds-u-margin-top--0">
+                  {t("organizations.about.title")}
+                </h2>
+                <div className="ds-l-row">
+                  <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
+                    <InfoItem
+                      label={t("organizations.about.otherNames")}
+                      value={organization.name}
+                    />
+                  </div>
+                  <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
+                    <InfoItem
+                      label={t("organizations.about.type")}
+                      value={organization.types[0]}
+                    />
+                  </div>
+                  <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
+                    <InfoItem
+                      label={t("organizations.about.parentOrganization")}
+                      value={null}
+                    />
+                  </div>
+                </div>
               </div>
-              <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
-                <InfoItem
-                  label={t("organizations.about.type")}
-                  value={organization.types[0]}
-                />
-              </div>
-              <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
-                <InfoItem
-                  label={t("organizations.about.parentOrganization")}
-                  value={null}
+
+              <div className="ds-l-col--12 ds-l-md-col--4">
+                <FeedbackCTA
+                  subtitle={t("practitioners.detail.feedback.subtitle")}
+                  onButtonClick={() => setIsReportIssueOpen(true)}
                 />
               </div>
             </div>
@@ -109,26 +127,30 @@ export const Organization = () => {
               </div>
             </div>
           </section>
-          <IdentifierSection identifierData={organization.identifiers}/>
-          
-          <SectionWithContentOrFallback title={t("organizations.taxonomy.title")} fallback={t("organizations.taxonomy.fallback")} arrayData={organization.types}>
+          <IdentifierSection identifierData={organization.identifiers} />
+
+          <SectionWithContentOrFallback
+            title={t("organizations.taxonomy.title")}
+            fallback={t("organizations.taxonomy.fallback")}
+            arrayData={organization.types}
+          >
             <div className="ds-l-row">
-                <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
-                  <InfoItem
-                    label={t("organizations.taxonomy.primary")}
-                    value={organization.types[0]}
-                  />
-                </div>
-                <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
-                  <InfoItem
-                    label={t("organizations.taxonomy.secondary")}
-                    value={organization.types[1]}
-                  />
-                </div>
+              <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
+                <InfoItem
+                  label={t("organizations.taxonomy.primary")}
+                  value={organization.types[0]}
+                />
               </div>
+              <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
+                <InfoItem
+                  label={t("organizations.taxonomy.secondary")}
+                  value={organization.types[1]}
+                />
+              </div>
+            </div>
           </SectionWithContentOrFallback>
 
-          <EndpointSection endpointData={organization.endpoints}/>
+          <EndpointSection endpointData={organization.endpoints} />
 
           <LocationSection locationData={organization.locations} />
 
@@ -138,7 +160,9 @@ export const Organization = () => {
               <Table data-testid="practitioner-table">
                 <TableHead>
                   <TableRow>
-                    <TableCell>{t("organizations.practitioners.name")}</TableCell>
+                    <TableCell>
+                      {t("organizations.practitioners.name")}
+                    </TableCell>
                     <TableCell>
                       {t("organizations.practitioners.taxonomy")}
                     </TableCell>
@@ -160,6 +184,16 @@ export const Organization = () => {
             )}
           </section>
         </FeatureFlag>
+
+        <FeedbackForm
+          isOpen={isReportIssueOpen}
+          onExit={() => setIsReportIssueOpen(false)}
+          presenterData={{
+            recordName: organization.name,
+            recordId: organizationId,
+            npi: organization.npi,
+          }}
+        />
 
         <div className="ds-u-margin-top--7"></div>
       </main>

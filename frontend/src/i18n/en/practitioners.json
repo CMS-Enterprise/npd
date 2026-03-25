@@ -27,6 +27,25 @@
     "organizations": {
       "title": "Organization(s)",
       "notFound": "No organization relationship found"
+    },
+    "endpoints": {
+      "title": "Endpoint(s)",
+      "connectionType": "Connection Type",
+      "address": "Address",
+      "fallback": "No endpoint information available"
+    },
+    "locations": {
+      "title": "Location(s)",
+      "name": "Name",
+      "address": "Address",
+      "contact": "Contact",
+      "phone": "Phone",
+      "fax": "Fax",
+      "noContact": "Contact information not available",
+      "fallback": "No location information available"
+    },
+    "feedback": {
+      "subtitle": "Let us know if you see any problems with this provider record."
     }
   },
   "listing": {
