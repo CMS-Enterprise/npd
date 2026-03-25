@@ -69,6 +69,8 @@ export interface FHIREndpoint extends Endpoint {
 export interface FHIRLocation extends Location {
   id: string
   address: Address
+  endpoint?: Array<FHIRReference>
+  telecom?: ContactPoint[] | null
 }
 
 // generated base type is too loosely typed so made this manually

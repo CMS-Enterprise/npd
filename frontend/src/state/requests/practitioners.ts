@@ -6,6 +6,7 @@ import { fetchEndpoint, type EndpointQueryResultType } from "./endpoints"
 import { fetchLocation } from "./locations"
 import { fetchPractitionerRoles } from "./practitionerrole"
 import type { SortOption, SearchParams } from "../../@types/search"
+import type { ContactPoint } from "../../@types/fhir/ContactPoint"
 
 // NOTE: (@abachman-dsac) due to limitations in the fhir.resource.R4B model
 // definitions, we cannot fully generate response types automatically
@@ -34,8 +35,17 @@ export type PractitionerSortKey = keyof typeof PRACTITIONER_SORT_OPTIONS
 export type OrganizationDetails = {
   [key: string]: {
     organization: FHIROrganization,
-    endpoints: Array<FHIREndpoint | null>,
-    locations: Array<FHIRLocation>,
+    endpoints: Array<{
+      id: string,
+      connectionType: string | undefined | null,
+      address: string | undefined | null,
+    } | undefined>,
+    locations: Array<{
+      id: string,
+      name: string | undefined | null,
+      address: string,
+      contact?: Array<ContactPoint> | null | undefined
+    }>,
     roleDetails: FHIRPractitionerRole | undefined,
   }
 }
@@ -47,7 +57,7 @@ export interface PractitionerDetailsType extends FHIRPractitioner {
       endpointData: {[key:string]: FHIREndpoint}
   }
 
-const fetchPractitioner = async (
+export const fetchPractitioner = async (
   practitionerId: string,
 ): Promise<FHIRPractitioner> => {
   const url = apiUrl("/fhir/Practitioner/:practitionerId/", { practitionerId })
