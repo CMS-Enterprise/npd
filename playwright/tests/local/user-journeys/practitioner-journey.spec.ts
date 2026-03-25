@@ -152,8 +152,8 @@ test.describe("Practitioner Journey", () => {
 
     // confirm practitioner name is shown in the form
     await expect(dialog.getByText(practitioner.name)).toBeVisible()
-
-    // add issue and details
+  
+    // check issue type
     await dialog.getByRole("checkbox", { name: /Practice location/i }).check()
     await dialog.getByRole("textbox", { name: /details/i }).fill("Address is outdated")
 
@@ -163,6 +163,9 @@ test.describe("Practitioner Journey", () => {
       dialog.getByRole("checkbox", { name: /Verified/i })
     ).toBeChecked({ timeout: 10000 })
 
+    // fill details after captcha is verified
+    await dialog.getByRole("textbox", { name: /details/i }).fill("Address is outdated")
+  
     await dialog.getByRole("button", { name: "Submit" }).click()
 
     // confirm success message
