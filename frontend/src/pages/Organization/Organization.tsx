@@ -11,6 +11,7 @@ import { useOrganizationAPI } from "../../state/requests/organizations"
 import { OrganizationPresenter } from "../../presenters/OrganizationPresenter"
 
 import classNames from "classnames"
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useLocation, useParams } from "react-router"
 import { DetailPageBanner } from "../../components/DetailPageBanner"
@@ -19,6 +20,8 @@ import { InfoItem } from "../../components/InfoItem"
 import { LoadingIndicator } from "../../components/LoadingIndicator"
 import layout from "../Layout.module.css"
 import styles from "./Organization.module.css"
+import { FeedbackForm } from "../../components/forms/feedback/FeedbackForm"
+import { FeedbackCTA } from "../../components/forms/feedback/FeedbackCTA"
 
 export const Organization = () => {
   const { t } = useTranslation()
@@ -26,6 +29,8 @@ export const Organization = () => {
   const { data, isLoading } = useOrganizationAPI(organizationId)
   const location = useLocation()
   const searchUrl = location.state?.searchUrl
+
+  const [isReportIssueOpen, setIsReportIssueOpen] = useState(false)
 
   if (isLoading) {
     return <LoadingIndicator />
@@ -57,24 +62,35 @@ export const Organization = () => {
 
         <FeatureFlag name="ORGANIZATION_LOOKUP_DETAILS">
           <section className={layout.section}>
-            <h2>{t("organizations.about.title")}</h2>
-            <div className="ds-l-row">
-              <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
-                <InfoItem
-                  label={t("organizations.about.otherNames")}
-                  value={organization.name}
-                />
+            <div className="ds-l-row ds-u-align-items--start">
+              <div className="ds-l-col--12 ds-l-md-col--8">
+                <h2>{t("organizations.about.title")}</h2>
+                <div className="ds-l-row">
+                  <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
+                    <InfoItem
+                      label={t("organizations.about.otherNames")}
+                      value={organization.name}
+                    />
+                  </div>
+                  <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
+                    <InfoItem
+                      label={t("organizations.about.type")}
+                      value={organization.types[0]}
+                    />
+                  </div>
+                  <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
+                    <InfoItem
+                      label={t("organizations.about.parentOrganization")}
+                      value={null}
+                    />
+                  </div>
+                </div>
               </div>
-              <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
-                <InfoItem
-                  label={t("organizations.about.type")}
-                  value={organization.types[0]}
-                />
-              </div>
-              <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
-                <InfoItem
-                  label={t("organizations.about.parentOrganization")}
-                  value={null}
+
+              <div className="ds-l-col--12 ds-l-md-col--4">
+                <FeedbackCTA
+                  subtitle={t("organizations.feedback.subtitle")}
+                  onButtonClick={() => setIsReportIssueOpen(true)}
                 />
               </div>
             </div>
@@ -178,6 +194,16 @@ export const Organization = () => {
             <p className={styles.emptyState}>No practitioners available</p>
           </section>
         </FeatureFlag>
+
+        <FeedbackForm
+          isOpen={isReportIssueOpen}
+          onExit={() => setIsReportIssueOpen(false)}
+          presenterData={{
+            recordName: organization.name,
+            recordId: organizationId,
+            npi: organization.npi,
+          }}
+        />
 
         <div className="ds-u-margin-top--7"></div>
       </main>
