@@ -111,7 +111,7 @@ test.describe("Practitioner search", () => {
     await page.getByRole("button", { name: "Search" }).click()
     await expect(page.getByRole("link", { name: /AAA Test Practitioner/i })).toBeVisible()
     await expect(page.getByRole("caption")).toContainText(
-      "Showing 1 - 10 of 26",
+      "Showing 1 - 10 of 28",
     )
 
     await expect(
@@ -122,7 +122,7 @@ test.describe("Practitioner search", () => {
 
     await expect(page).toHaveURL(/page=2/)
     await expect(page.getByRole("caption")).toContainText(
-      "Showing 11 - 20 of 26",
+      "Showing 11 - 20 of 28",
     )
     await expect(
       page.locator("[data-testid='searchresults']").getByRole("listitem"),
@@ -132,11 +132,11 @@ test.describe("Practitioner search", () => {
 
     await expect(page).toHaveURL(/page=3/)
     await expect(page.locator("span[role='caption']")).toContainText(
-      "Showing 21 - 26 of 26",
+      "Showing 21 - 28 of 28",
     )
     await expect(
       page.locator("[data-testid='searchresults']").getByRole("listitem"),
-    ).toHaveCount(6)
+    ).toHaveCount(8)
   })
 })
 
@@ -157,7 +157,7 @@ test.describe("Practitioner show", () => {
     await expect(page.getByTestId("practitioner-npi")).toContainText(`NPI: 1000000001`)
     await expect(page.getByText("No organization relationship found")).not.toBeVisible()
     await expect(page.getByText("NPI: 1000000002")).toBeVisible()
-    await expect(page.getByText("Location(s)")).toBeVisible()
+    await expect(page.getByRole("heading", { name: "Location(s)" })).toBeVisible()
     await expect(page.getByText("No location information available")).not.toBeVisible()
     await expect(page.getByText("Endpoint(s)")).toBeVisible()
     await expect(page.getByText("No endpoint information available")).not.toBeVisible()
@@ -170,7 +170,7 @@ test.describe("Practitioner show", () => {
     await expect(page.getByTestId("practitioner-npi")).toContainText(`NPI: 1000000011`)
     await expect(page.getByText("No organization relationship found")).not.toBeVisible()
     await expect(page.getByText("NPI: 1000000012")).toBeVisible()
-    await expect(page.getByText("Location(s)")).toBeVisible()
+    await expect(page.getByRole("heading", { name: "Location(s)" })).toBeVisible()
     await expect(page.getByText("No location information available")).not.toBeVisible()
     await expect(page.getByText("Endpoint(s)")).toBeVisible()
     await expect(page.getByText("No endpoint information available")).toBeVisible()
@@ -263,5 +263,109 @@ test.describe("sort Practitioners", () => {
     await expect(page).toHaveURL(/query=AAA/)
     await expect(page).toHaveURL(/sort=last-name-asc/)
     await expect(sortButton).toContainText("Last Name (A-Z)")
+  })
+})
+
+test.describe("Practitioner feedback", () => {
+  test("report an issue button opens the feedback dialog", async ({ page }) => {
+    await page.goto(`/practitioners/${practitioner.id}`)
+
+    await page.getByRole("button", { name: "Report an issue" }).click()
+
+    const dialog = page.getByRole("dialog")
+    await expect(dialog).toBeVisible()
+    await expect(dialog.getByText(practitioner.name)).toBeVisible()
+  })
+
+  test("submit is disabled when no issues are selected", async ({ page }) => {
+    await page.goto(`/practitioners/${practitioner.id}`)
+
+    await page.getByRole("button", { name: "Report an issue" }).click()
+
+    const dialog = page.getByRole("dialog")
+    await expect(dialog).toBeVisible()
+
+    await expect(dialog.getByRole("button", { name: "Submit" })).toBeDisabled()
+  })
+
+  test("submit is enabled after selecting an issue", async ({ page }) => {
+    await page.goto(`/practitioners/${practitioner.id}`)
+
+    await page.getByRole("button", { name: "Report an issue" }).click()
+
+    const dialog = page.getByRole("dialog")
+    await expect(dialog).toBeVisible()
+
+    await dialog.getByRole("checkbox", { name: /Practice location/i }).check()
+
+    await expect(dialog.getByRole("button", { name: "Submit" })).toBeEnabled()
+  })
+
+  test("selecting 'Other' requires details text", async ({ page }) => {
+    await page.goto(`/practitioners/${practitioner.id}`)
+
+    await page.getByRole("button", { name: "Report an issue" }).click()
+
+    const dialog = page.getByRole("dialog")
+    await expect(dialog).toBeVisible()
+
+    await dialog.getByRole("checkbox", { name: /Other/i }).check()
+
+    // submit should be disabled because details is empty when "other" is selected
+    await expect(dialog.getByRole("button", { name: "Submit" })).toBeDisabled()
+
+    // fill in details to enable submit
+    await dialog.getByRole("textbox", { name: /details/i }).fill("Additional details about the issue")
+
+    await expect(dialog.getByRole("button", { name: "Submit" })).toBeEnabled()
+  })
+
+  test("cancel closes the feedback dialog", async ({ page }) => {
+    await page.goto(`/practitioners/${practitioner.id}`)
+
+    await page.getByRole("button", { name: "Report an issue" }).click()
+
+    const dialog = page.getByRole("dialog")
+    await expect(dialog).toBeVisible()
+
+    await dialog.getByRole("button", { name: "Cancel" }).click()
+
+    await expect(dialog).not.toBeVisible()
+  })
+
+  test("submitting feedback shows success message", async ({ page }) => {
+    await page.goto(`/practitioners/${practitioner.id}`)
+
+    await page.getByRole("button", { name: "Report an issue" }).click()
+
+    const dialog = page.getByRole("dialog")
+    await expect(dialog).toBeVisible()
+
+    await dialog.getByRole("checkbox", { name: /Practice location/i }).check()
+
+    const captcha = dialog.getByRole("checkbox", { name: /I'm not a robot/i })
+    await captcha.click()
+    
+    await expect(
+      dialog.getByRole("checkbox", { name: /Verified/i })
+    ).toBeChecked({ timeout: 10000 })
+
+    await dialog.getByRole("button", { name: "Submit" }).click()
+
+    await expect(dialog.getByText(/success/i)).toBeVisible()
+    await dialog.getByRole("button", { name: "Close", exact: true }).click()
+
+    await expect(dialog).not.toBeVisible()
+  })
+
+  test("feedback form shows practitioner name", async ({ page }) => {
+    await page.goto(`/practitioners/${practitioner.id}`)
+
+    await page.getByRole("button", { name: "Report an issue" }).click()
+
+    const dialog = page.getByRole("dialog")
+    await expect(dialog).toBeVisible()
+
+    await expect(dialog.getByText(practitioner.name)).toBeVisible()
   })
 })

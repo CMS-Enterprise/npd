@@ -16,14 +16,20 @@ export const fetchPractitionerRoles = async (
   if (organizationNPI !== undefined) {
     query.push(`organization_identifier=NPI|${organizationNPI}`);
   }
-  const url = apiUrl(`/fhir/PractitionerRole/?${query.join('&')}`);
+  if (query.length > 0) {
+    const url = apiUrl(`/fhir/PractitionerRole/?${query.join('&')}`);
 
-  const response = await fetch(url);
+    const response = await fetch(url);
 
-  if (!response.ok) {
-    console.error(await response.text());
-    return Promise.reject(`error in ${url} request`);
+    if (!response.ok) {
+      console.error(await response.text());
+      return Promise.reject(`error in ${url} request`);
+    }
+
+    return response.json() as Promise<FHIRCollection<FHIRPractitionerRole>>
   }
-
-  return response.json() as Promise<FHIRCollection<FHIRPractitionerRole>>
+  else {
+    console.error('No query params provided');
+    return Promise.reject(`No query params provided`);
+  }
 }

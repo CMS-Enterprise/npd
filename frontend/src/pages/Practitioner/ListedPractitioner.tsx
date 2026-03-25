@@ -1,10 +1,10 @@
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router"
-import type { FHIRPractitioner } from "../../@types/fhir"
 import search from "../Search.module.css"
 import { PractitionerPresenter } from "../../presenters/PractitionerPresenter"
+import type { PractitionerDetailsType } from "../../state/requests/practitioners"
 
-export const ListedPractitioner = ({ data }: { data: FHIRPractitioner }) => {
+export const ListedPractitioner = ({ data }: { data: PractitionerDetailsType }) => {
   const { t } = useTranslation()
   const practitioner = new PractitionerPresenter(data)
 
@@ -27,7 +27,7 @@ export const ListedPractitioner = ({ data }: { data: FHIRPractitioner }) => {
           <div className="ds-l-col--4 ds-m-col--6">
             <strong>{t("practitioners.listing.taxonomy")}</strong>
             <br />
-            {practitioner.taxonomy[0]?.displayCode ?? "---"}
+            {practitioner.taxonomy[0]?.display ?? "---"}
           </div>
           <div
             className="ds-l-col--4 ds-m-col--6"

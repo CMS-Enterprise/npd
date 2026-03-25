@@ -1,7 +1,7 @@
 from django.contrib.auth import views as contrib_auth_views
 from django.urls import path
 
-from .views import authentication, frontend_settings, index
+from .views import authentication, frontend_settings, index, feedback_views
 
 app_name = "provider_directory"
 urlpatterns = [
@@ -10,6 +10,8 @@ urlpatterns = [
     path("accounts/logout/", contrib_auth_views.LogoutView.as_view(), name="logout"),
     # non-FHIR application API endpoints
     path("api/frontend_settings", frontend_settings.frontend_settings, name="frontend_settings"),
+    path("api/altcha", feedback_views.AltchaChallengeView.as_view(), name="altcha_challenge"),
+    path("api/feedback/", feedback_views.FeedbackView.as_view(), name="feedback"),
     path(r"", index.index, name="index"),
     path(r"<path:path>", index.index, name="index_with_path"),
 ]

@@ -57,7 +57,7 @@ test.describe("Swagger - Organization", () => {
 
   test("GET /fhir/Organization/{id}/", async ({ page }) => {
     // First get a valid organization ID
-    const orgResponse = await page.request.get("/fhir/Organization/?identifier=1234567893")
+    const orgResponse = await page.request.get("/fhir/Organization/?identifier=NPI|1234567893")
     const orgData = await orgResponse.json()
     const orgId = orgData.results.entry[0].resource.id
 
@@ -90,7 +90,7 @@ test.describe("Swagger - Practitioner", () => {
 
   test("GET /fhir/Practitioner/{id}/", async ({ page }) => {
     // First get a valid practitioner ID
-    const response = await page.request.get("/fhir/Practitioner/?identifier=1234567894")
+    const response = await page.request.get("/fhir/Practitioner/?identifier=NPI|1234567894")
     const data = await response.json()
     const practitionerId = data.results.entry[0].resource.id
 

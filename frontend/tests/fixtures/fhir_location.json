@@ -15,5 +15,17 @@
     },
     "managingOrganization": {
         "reference": "/fhir/Organization/12345"
-    }
+    },
+    "telecom": [
+        {
+            "system": "phone",
+            "value": "555-555-5555",
+            "use": "work"
+        }
+    ],
+    "endpoint": [
+        {
+            "reference": "/fhir/Endpoint/123"
+        }
+    ]
 }
