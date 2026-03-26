@@ -22,7 +22,7 @@
     "detailsLabel": "Please provide details about the issue(s)",
     "detailsHint": "Describe what information is incorrect or outdated and what corrections should be made, if known",
     "detailsReduceCount": "Reduce character count",
-    "detailsOtherRequired": "Please provide details for 'Other'",
+    "detailsOtherRequired": "Specify and provide details about the issue",
     "emailLabel": "Email address",
     "emailInvalid": "Enter a valid email address",
     "privacyHeading": "Privacy notice",
