@@ -190,7 +190,7 @@ test.describe("Organization show", () => {
     await expect(tableRows).toHaveCount(1);
     await expect(tableRows).toContainText("Jane Doe")
     const practitionerLink = await page.getByRole("link", {name: "Jane Doe"})
-    expect(practitionerLink).toHaveAttribute("href", "/practitioners/f1579a55-b5e1-4717-988d-6e014acbe348")
+    expect(practitionerLink).toHaveAttribute("href", "/practitioners/6846963d-7814-4c70-ae3d-8a8419a7c9c6")
   })
   test("View an organization with multiple practitioner relationships", async ({page}) => {
     await page.goto(`/organizations/0c1f8f84-0502-4444-b636-8fee4ab76e32`)
@@ -204,9 +204,9 @@ test.describe("Organization show", () => {
     await expect(practitionerTable.getByRole('cell', { name: 'Test Practitioner 2' })).toBeVisible()
     await expect(practitionerTable.getByRole('cell', { name: 'Test Practitioner 1' })).toBeVisible()
     const practitionerLink1 = await page.getByRole("link", {name: "Test Practitioner 1"})
-    expect(practitionerLink1).toHaveAttribute("href", "/practitioners/9b309f46-115e-4eed-bc6e-0e414d5f1215")
+    await expect(practitionerLink1).toHaveAttribute("href", "/practitioners/9b309f46-115e-4eed-bc6e-0e414d5f1215")
     const practitionerLink2 = await page.getByRole("link", {name: "Test Practitioner 2"})
-    expect(practitionerLink2).toHaveAttribute("href", "/practitioners/91cc98f8-8f65-4f6c-8ef2-9dbe829ed5c2")
+    await expect(practitionerLink2).toHaveAttribute("href", "/practitioners/91cc98f8-8f65-4f6c-8ef2-9dbe829ed5c2")
   })
   test("View an organization with a location but no endpoints", async ({page}) => {
     await page.goto(`/organizations/53202937-ac54-4c71-b3dc-9a773bd51fc2`)

@@ -72,7 +72,9 @@ class Command(BaseCommand):
                 individual=DefaultIndividual(id="f1579a55-b5e1-4717-988d-6e014acbe348"),
                 npi=DefaultNPI(npi=1000000011),
             ),
-            organization=DefaultOrganization(npi=DefaultNPI(npi=1000000012)),
+            organization=DefaultOrganization(
+                id="893149b6-34de-4030-a2fa-89cc02baccbe", npi=DefaultNPI(npi=1000000012)
+            ),
             location=DefaultLocation(has_endpoint=False),
         )
 
