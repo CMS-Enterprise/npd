@@ -17,7 +17,7 @@ export const ListedPractitioner = ({ data }: { data: PractitionerDetailsType }) 
             to={`/practitioners/${data.id}`}
             state={{ searchUrl: `/practitioners/search${location.search}` }}
           >
-            {practitioner.name}
+            {practitioner.names[0]}
           </Link>
           <span>
             <strong>NPI:</strong> {practitioner.npi}
@@ -27,13 +27,13 @@ export const ListedPractitioner = ({ data }: { data: PractitionerDetailsType }) 
           <div className="ds-l-col--4 ds-m-col--6">
             <strong>{t("practitioners.listing.taxonomy")}</strong>
             <br />
-            {practitioner.taxonomy[0]?.display ?? "---"}
+            {practitioner.taxonomy.map(taxonomy => taxonomy.display).slice(0,5).join(", ") ?? "---"}
           </div>
           <div
             className="ds-l-col--4 ds-m-col--6"
             style={{ whiteSpace: "pre-line " }}
           >
-            <strong>{t("practitioners.listing.location")}</strong>
+            <strong>{t("practitioners.listing.address")}</strong>
             <br />
             {practitioner.address}
           </div>

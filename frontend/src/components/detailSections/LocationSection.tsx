@@ -42,11 +42,24 @@ export const LocationSection = ({locationData, subsection = false}: Props) => {
                     <TableCell>{location.address}</TableCell>
                 {location.contact?.length !== undefined && location.contact?.length > 0 ? (
                     <TableCell>
-                    <strong>{t("detailsections.locations.phone")}: </strong>
-                    {location.contact.filter(contact => contact.system == 'phone')[0]?.value}
+                      {
+                        location.contact.filter(contact => contact.system == 'phone').length !== undefined && location.contact.filter(contact => contact.system == 'phone').length > 0 ? (
+                          <>
+                          <strong>{t("detailsections.locations.phone")}: </strong>
+                          {location.contact.filter(contact => contact.system == 'phone')[0]?.value}
+                          </>
+                        ) : (<></>)
+                      }
                     <br></br>
-                    <strong>{t("detailsections.locations.fax")}: </strong>
-                    {location.contact.filter(contact => contact.system == 'fax')[0]?.value}
+                    {
+                      location.contact.filter(contact => contact.system == 'fax').length !== undefined && location.contact.filter(contact => contact.system == 'fax').length > 0 ? (
+                        <>
+                          <strong>{t("detailsections.locations.fax")}: </strong>
+                          {location.contact.filter(contact => contact.system == 'fax')[0]?.value}
+                        </>
+                      ) : ( <></>)
+                    }
+                    
                     </TableCell>) : 
                     (<TableCell>{t("detailsections.locations.noContact")}</TableCell>)}
                   </TableRow>

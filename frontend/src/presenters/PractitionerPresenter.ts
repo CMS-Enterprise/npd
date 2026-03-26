@@ -3,6 +3,7 @@ import type { OrganizationDetails, PractitionerDetailsType } from "../state/requ
 import {
   formatAddress,
   formatDetails,
+  formatOtherIdentifierType,
 } from "../helpers/formatters"
 import type { LogicalIdOfThisArtifact } from "../@types/fhir/Endpoint"
 
@@ -10,9 +11,9 @@ export class PractitionerPresenter {
   private record: PractitionerDetailsType
   constructor(record: PractitionerDetailsType) {this.record = record}
 
-  get name(): string {
-    const name = this.record.name?.[0]
-    return name?.text || "No name available"
+  get names(): Array<string | undefined | null>  {
+    const names = this.record.name
+    return names?.map(name => name.text) || []
   }
 
   get npi(): string | null {
@@ -53,9 +54,9 @@ export class PractitionerPresenter {
     if (!this.record.identifier?.length) return []
 
     return this.record.identifier.map((identity) => ({
-      type: identity.type?.coding?.[0]?.display || "Unknown",
+      type: formatOtherIdentifierType(identity.type?.coding?.[0]?.code),
       number: identity.value,
-      details: identity.period ? formatDetails(identity.period) : "",
+      details: identity.period || identity.assigner ? formatDetails(identity.period, identity.assigner?.display) : "",
     }))
   }
 
@@ -65,8 +66,8 @@ export class PractitionerPresenter {
     return this.record.qualification.map((taxonomy) => ({
       state: taxonomy.identifier?.[0]?.assigner?.display ?? "",
       licenseNumber: taxonomy.identifier?.[0]?.value ?? "",
-      display: taxonomy.code?.coding?.[0]?.display ?? "Unknown",
-      nuccCode: taxonomy.code?.coding?.[0]?.code ?? "Unknown",
+      display: taxonomy.code?.coding?.[0]?.display ?? "",
+      nuccCode: taxonomy.code?.coding?.[0]?.code ?? "",
     }))
   }
 
