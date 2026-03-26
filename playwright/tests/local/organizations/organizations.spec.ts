@@ -280,3 +280,134 @@ test("search by NPI excludes organizations with matching other_id", async ({ pag
   await expect(page.getByRole("link", { name: "AAA Test Org" })).toBeVisible()
   await expect(page.getByRole("link", { name: "BBB Other ID Org" })).not.toBeVisible()
 })
+
+test.describe("Organization feedback", () => {
+  test("report an issue button opens the feedback dialog", async ({ page }) => {
+    await page.goto(`/organizations/${organization.id}`)
+
+    await page.getByRole("button", { name: "Report an issue" }).click()
+
+    const dialog = page.getByRole("dialog")
+    await expect(dialog).toBeVisible()
+    await expect(dialog.getByText(organization.name)).toBeVisible()
+  })
+
+  test("submitting with no issues selected shows error", async ({ page }) => {
+    await page.goto(`/organizations/${organization.id}`)
+
+    await page.getByRole("button", { name: "Report an issue" }).click()
+
+    const dialog = page.getByRole("dialog")
+    await expect(dialog).toBeVisible()
+
+    await expect(dialog.getByRole("button", { name: "Submit" })).toBeEnabled()
+
+    const captcha = dialog.getByRole("checkbox", { name: /I'm not a robot/i })
+    await captcha.click()
+    
+    await expect(
+      dialog.getByRole("checkbox", { name: /Verified/i })
+    ).toBeChecked({ timeout: 10000 })
+
+    await dialog.getByRole("button", { name: "Submit" }).click()
+
+    const errorAlert = dialog.getByRole('alert', { name: 'Alert: This form contains the' })
+    await expect(errorAlert).toBeVisible()
+    await expect(errorAlert.getByText(/select at least one issue/i)).toBeVisible()
+  })
+
+  test("submit is enabled regardless of selection state", async ({ page }) => {
+    await page.goto(`/organizations/${organization.id}`)
+
+    await page.getByRole("button", { name: "Report an issue" }).click()
+
+    const dialog = page.getByRole("dialog")
+    await expect(dialog).toBeVisible()
+
+    // enabled with nothing selected
+    await expect(dialog.getByRole("button", { name: "Submit" })).toBeEnabled()
+
+    // still enabled after selecting an issue
+    await dialog.getByRole("checkbox", { name: /Practice location/i }).check()
+
+    await expect(dialog.getByRole("button", { name: "Submit" })).toBeEnabled()
+  })
+
+  test("selecting 'Other' and submitting without details shows error", async ({ page }) => {
+    await page.goto(`/organizations/${organization.id}`)
+
+    await page.getByRole("button", { name: "Report an issue" }).click()
+
+    const dialog = page.getByRole("dialog")
+    await expect(dialog).toBeVisible()
+
+    await dialog.getByRole("checkbox", { name: /Other/i }).check()
+
+    const captcha = dialog.getByRole("checkbox", { name: /I'm not a robot/i })
+    await captcha.click()
+    
+    await expect(
+      dialog.getByRole("checkbox", { name: /Verified/i })
+    ).toBeChecked({ timeout: 10000 })
+
+    await dialog.getByRole("button", { name: "Submit" }).click()
+
+    const errorAlert = dialog.getByRole("alert", { name: /this form contains the/i })
+    await expect(errorAlert).toBeVisible()
+
+    await dialog.getByRole("textbox", { name: /details/i }).fill("Additional details about the issue")
+
+    await dialog.getByRole("button", { name: "Submit" }).click()
+
+    await expect(errorAlert).not.toBeVisible()
+  })
+
+  test("xmark closes the feedback dialog", async ({ page }) => {
+    await page.goto(`/organizations/${organization.id}`)
+
+    await page.getByRole("button", { name: "Report an issue" }).click()
+
+    const dialog = page.getByRole("dialog")
+    await expect(dialog).toBeVisible()
+
+    await dialog.getByRole("button", { name: "Close modal dialog" }).click()
+
+    await expect(dialog).not.toBeVisible()
+  })
+
+  test("submitting feedback shows success message", async ({ page }) => {
+    await page.goto(`/organizations/${organization.id}`)
+
+    await page.getByRole("button", { name: "Report an issue" }).click()
+
+    const dialog = page.getByRole("dialog")
+    await expect(dialog).toBeVisible()
+
+    await dialog.getByRole("checkbox", { name: /Practice location/i }).check()
+
+    const captcha = dialog.getByRole("checkbox", { name: /I'm not a robot/i })
+    await captcha.click()
+
+    await expect(
+      dialog.getByRole("checkbox", { name: /Verified/i })
+    ).toBeChecked({ timeout: 10000 })
+
+    await dialog.getByRole("button", { name: "Submit" }).click()
+
+    await expect(dialog.getByText(/success/i)).toBeVisible()
+    await dialog.getByRole("button", { name: "Close", exact: true }).click()
+
+    await expect(dialog).not.toBeVisible()
+  })
+
+  test("feedback form shows organization name", async ({ page }) => {
+    await page.goto(`/organizations/${organization.id}`)
+
+    await page.getByRole("button", { name: "Report an issue" }).click()
+
+    const dialog = page.getByRole("dialog")
+    await expect(dialog).toBeVisible()
+
+    await expect(dialog.getByText(organization.name)).toBeVisible()
+  })
+})

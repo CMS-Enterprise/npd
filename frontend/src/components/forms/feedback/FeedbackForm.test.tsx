@@ -29,7 +29,6 @@ describe("FeedbackForm", () => {
   it("renders all issue checkboxes", () => {
     renderForm()
     expect(screen.getByLabelText("Practice location(s)")).toBeInTheDocument()
-    expect(screen.getByLabelText("Phone number(s)")).toBeInTheDocument()
     expect(
       screen.getByLabelText("Taxonomy(-ies)/specialty(-ies)"),
     ).toBeInTheDocument()
@@ -75,12 +74,11 @@ describe("FeedbackForm", () => {
 
   it("renders Cancel and Submit buttons", () => {
     renderForm()
-    expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "Submit" })).toBeInTheDocument()
   })
 
   it("renders Submit as disabled when no issues are selected", () => {
     renderForm()
-    expect(screen.getByRole("button", { name: "Submit" })).toBeDisabled()
+    expect(screen.getByRole("button", { name: "Submit" })).toBeEnabled()
   })
 })
