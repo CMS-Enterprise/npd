@@ -19,7 +19,7 @@ VALID_ALTCHA = {
 VALID_PAYLOAD = {
     "npi": "1234567890",
     "recordName": "Jane Smith",
-    "issues": ["incorrect_phone_numbers"],
+    "issues": ["incorrect_endpoint"],
     "details": "",
     "email": "test@example.com",
     "altcha": VALID_ALTCHA,
@@ -52,7 +52,10 @@ class FeedbackSerializerTest(TestCase):
         self.assertIn("issues", serializer.errors)
 
     def test_accepts_multiple_valid_issues(self):
-        data = {**VALID_PAYLOAD, "issues": ["incorrect_phone_numbers", "missing_information"]}
+        data = {
+            **VALID_PAYLOAD,
+            "issues": ["incorrect_organization_affiliation", "missing_information"],
+        }
         serializer = FeedbackSerializer(data=data)
         self.assertTrue(serializer.is_valid(), serializer.errors)
 
@@ -126,7 +129,7 @@ class FeedbackViewTest(TestCase):
         record = Feedback.objects.first()
         self.assertEqual(record.npi, "1234567890")
         self.assertEqual(record.record_name, "Jane Smith")
-        self.assertEqual(record.issues, ["incorrect_phone_numbers"])
+        self.assertEqual(record.issues, ["incorrect_endpoint"])
 
     def test_rejects_invalid_payload(self):
         response = self.client.post("/api/feedback/", {"npi": ""}, format="json")
