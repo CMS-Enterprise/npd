@@ -169,7 +169,7 @@ test.describe("Practitioner Journey", () => {
     await dialog.getByRole("button", { name: "Submit" }).click()
 
     // confirm success message
-    await expect(dialog.getByText(/success/i)).toBeVisible()
+    await expect(dialog.getByText(/Issue reported/i)).toBeVisible()
 
     // close the dialog
     await dialog.getByRole("button", { name: "Close", exact: true }).click()

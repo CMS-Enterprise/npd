@@ -52,5 +52,8 @@
   "alert": {
     "heading": "Are you looking for an practitioner?",
     "body": "Visit the [Practitioner search](/practitioners/search) page."
+  },
+  "feedback": {
+    "subtitle": "Let us know if you see any problems with this provider record."
   }
 }

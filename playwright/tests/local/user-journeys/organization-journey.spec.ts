@@ -132,4 +132,28 @@ test.describe("Organization Journey", () => {
 
     await expect(page.getByTestId("organization-name")).toContainText(/TEST/)
   })
+
+  test("search -> detail -> report feedback", async ({ page }) => {
+    await page.goto("/organizations/search")
+
+    await page.getByRole("textbox", { name: "Name or NPI" }).fill(organization.npi)
+    await page.getByRole("button", { name: "Search" }).click()
+
+    await page.getByRole("link", { name: organization.name }).click()
+    await expect(page).toHaveURL(`/organizations/${organization.id}`)
+
+    await expect(page.getByTestId("location-table")).toBeVisible()
+
+    await page.getByRole("button", { name: "Report an issue" }).click()
+
+    const dialog = page.getByRole("dialog")
+    await expect(dialog).toBeVisible()
+    await expect(dialog.getByText(organization.name)).toBeVisible()
+
+    await dialog.getByRole("button", { name: "Cancel" }).click()
+    await expect(dialog).not.toBeVisible()
+
+    await expect(page).toHaveURL(`/organizations/${organization.id}`)
+    await expect(page.getByTestId("organization-name")).toContainText(organization.name)
+  })
 })
