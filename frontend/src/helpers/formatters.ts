@@ -1,5 +1,6 @@
 import type { Address } from "../@types/fhir/Address"
 import type { Period } from "../@types/fhir/Period"
+import type { FHIRReference } from "../@types/fhir"
 
 export const formatAddress = (address?: Address, multiLine: boolean = true): string => {
   if (!address) return ""
@@ -16,6 +17,23 @@ export const formatAddress = (address?: Address, multiLine: boolean = true): str
   }
 }
 
+export const formatOtherIdentifierType = (otherIdentifierType: string | undefined | null): string => {
+  switch (otherIdentifierType) {
+    case "NPI":
+      return "National Provider Identifier"
+    case "UPIN":
+      return "Medicare"
+    case "MCR":
+      return "Medicare"
+    case "MCD":
+      return "Medicaid"
+    case "PPIN":
+      return "Medicare"
+    default:
+      return "Other"
+  }
+}
+
 export const formatDate = (dateString: string): string => {
   const date = new Date(dateString)
 
@@ -26,8 +44,12 @@ export const formatDate = (dateString: string): string => {
   })
 }
 
-export const formatDetails = (period: Period): string => {
+export const formatDetails = (period: Period, assigner: FHIRReference | undefined): string => {
   const parts: string[] = []
+
+  if (assigner?.display) {
+    parts.push(`Issuer: ${assigner.display}`)
+  }
 
   if (period.start) {
     parts.push(`Issued ${formatDate(period.start)}`)

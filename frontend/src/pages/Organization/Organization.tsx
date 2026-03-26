@@ -20,11 +20,11 @@ import { LoadingIndicator } from "../../components/LoadingIndicator"
 import layout from "../Layout.module.css"
 import { LocationSection } from "../../components/detailSections/LocationSection"
 import { EndpointSection } from "../../components/detailSections/EndpointSection"
-import { SectionWithContentOrFallback } from "../../components/detailSections/SectionWithContentOrFallback"
 import { IdentifierSection } from "../../components/detailSections/IdentifierSection"
 import { FeedbackCTA } from "../../components/forms/feedback/FeedbackCTA"
 import { useState } from "react"
 import { FeedbackForm } from "../../components/forms/feedback/FeedbackForm"
+import { TaxonomySection } from "../../components/detailSections/TaxonomySection"
 
 export const Organization = () => {
   const { t } = useTranslation()
@@ -74,13 +74,7 @@ export const Organization = () => {
                   <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
                     <InfoItem
                       label={t("organizations.about.otherNames")}
-                      value={organization.name}
-                    />
-                  </div>
-                  <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
-                    <InfoItem
-                      label={t("organizations.about.type")}
-                      value={organization.types[0]}
+                      value={organization.otherNames.join(";")}
                     />
                   </div>
                   <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
@@ -129,26 +123,7 @@ export const Organization = () => {
           </section>
           <IdentifierSection identifierData={organization.identifiers} />
 
-          <SectionWithContentOrFallback
-            title={t("organizations.taxonomy.title")}
-            fallback={t("organizations.taxonomy.fallback")}
-            arrayData={organization.types}
-          >
-            <div className="ds-l-row">
-              <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
-                <InfoItem
-                  label={t("organizations.taxonomy.primary")}
-                  value={organization.types[0]}
-                />
-              </div>
-              <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
-                <InfoItem
-                  label={t("organizations.taxonomy.secondary")}
-                  value={organization.types[1]}
-                />
-              </div>
-            </div>
-          </SectionWithContentOrFallback>
+          <TaxonomySection taxonomyData={organization.types} />
 
           <EndpointSection endpointData={organization.endpoints} />
 
@@ -171,7 +146,7 @@ export const Organization = () => {
                 <TableBody>
                   {organization.practitioners.map((practitioner, index) => (
                     <TableRow key={index}>
-                      <TableCell>{practitioner.name}</TableCell>
+                      <TableCell><a href={`/practitioners/${practitioner.id}`}>{practitioner.name}</a></TableCell>
                       <TableCell>{practitioner.taxonomy}</TableCell>
                     </TableRow>
                   ))}

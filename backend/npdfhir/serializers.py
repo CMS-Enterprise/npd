@@ -39,7 +39,8 @@ from .models import (
     OrganizationToName,
     ProviderToOrganization,
 )
-from .utils import genReference, get_schema_data, other_id_type_to_fhir
+from .utils import genReference, get_schema_data
+from .mappings import other_id_type_to_fhir
 
 if "runserver" or "test" in sys.argv:
     from .cache import (
@@ -167,9 +168,12 @@ class OtherIdentifierSerializer(serializers.Serializer):
         ]
 
     def to_representation(self, instance):
+        assigner_parts = []
+        if instance.issuer != "" and instance.issuer != " ":
+            assigner_parts.append(instance.issuer)
+        assigner_parts.append(instance.state_code.abbreviation)
         fhir_type = other_id_type_to_fhir(instance.other_id_type.id)
         license_identifier = Identifier(
-            # system="", TODO: Figure out how to associate a system with each identifier
             value=instance.other_id,
             type=CodeableConcept(
                 coding=[
@@ -180,7 +184,7 @@ class OtherIdentifierSerializer(serializers.Serializer):
                     )
                 ]
             ),
-            # use="" TODO: Add use for other identifier
+            assigner=Reference(display=" - ".join(assigner_parts)),
             # period=Period(start=instance.issue_date, end=instance.expiry_date),
         )
         return license_identifier.model_dump()
@@ -234,6 +238,24 @@ class NPISerializer(serializers.ModelSerializer):
     class Meta:
         model = Npi
         fields = "__all__"
+
+    def to_representation(self, instance):
+        npi = Identifier(
+            system="http://terminology.hl7.org/NamingSystem/npi",
+            value=str(instance.npi),
+            type=CodeableConcept(
+                coding=[
+                    Coding(
+                        system="http://terminology.hl7.org/CodeSystem/v2-0203",
+                        code="NPI",
+                        display="National Provider Identifier",
+                    )
+                ]
+            ),
+            use="official",
+            period=Period(start=instance.enumeration_date, end=instance.deactivation_date),
+        )
+        return npi
 
 
 class IndividualSerializer(serializers.Serializer):
@@ -295,17 +317,30 @@ class EndpointIdentifierSerialzier(serializers.Serializer):
             use="official",
             system=instance.system,
             value=instance.other_id,
-            # TODO: Replace with Organization reference
+            # TODO: Replace with Organization reference?
             assigner=Reference(display=str(instance.issuer_id)),
         )
 
         return endpoint_identifier.model_dump()
 
 
+class ClinicalOrganizationSerializer(serializers.Serializer):
+    other_identifier = OtherIdentifierSerializer(
+        source="organizationtootherid_set", many=True, read_only=True
+    )
+    npi = NPISerializer()
+
+    class Meta:
+        fields = ["other_identifier", "npi"]
+
+
 class OrganizationSerializer(serializers.Serializer):
     name = OrganizationNameSerializer(source="organizationtoname_set", many=True, read_only=True)
     authorized_official = IndividualSerializer(read_only=True)
     address = AddressSerializer(source="organizationtoaddress_set", many=True, read_only=True)
+    clinical_organization = ClinicalOrganizationSerializer(
+        source="clinicalorganization", read_only=True
+    )
 
     class Meta:
         model = Organization
@@ -315,7 +350,6 @@ class OrganizationSerializer(serializers.Serializer):
         request = self.context.get("request")
         instance = instance.organization
         representation = super().to_representation(instance)
-
         organization = FHIROrganization()
         organization.id = str(instance.id)
         organization.meta = Meta(
@@ -325,82 +359,39 @@ class OrganizationSerializer(serializers.Serializer):
         identifiers = []
 
         taxonomies = []
-        # if instance.ein:
-        #    ein_identifier = Identifier(
-        #        system="https://terminology.hl7.org/NamingSystem-USEIN.html",
-        #        value=str(instance.ein.ein_id),
-        #        type=CodeableConcept(
-        #            coding=[Coding(
-        #                system="http://terminology.hl7.org/CodeSystem/v2-0203",
-        #                code="TAX",
-        #                display="Tax ID number"
-        #            )]
-        #        )
-        #    )
-        #    identifiers.append(ein_identifier)
 
         if hasattr(instance, "clinicalorganization"):
-            clinical_org = instance.clinicalorganization
-            if clinical_org and clinical_org.npi:
-                npi_identifier = Identifier(
-                    system="http://terminology.hl7.org/NamingSystem/npi",
-                    value=str(clinical_org.npi.npi),
-                    type=CodeableConcept(
-                        coding=[
-                            Coding(
-                                system="http://terminology.hl7.org/CodeSystem/v2-0203",
-                                code="NPI",
-                                display="National provider identifier",
-                            )
-                        ]
-                    ),
-                    use="official",
-                    period=Period(
-                        start=clinical_org.npi.enumeration_date,
-                        end=clinical_org.npi.deactivation_date,
-                    ),
-                )
+            clinical_org_instance = instance.clinicalorganization
+            if "clinical_organization" in representation.keys():
+                clinical_org = representation["clinical_organization"]
+                npi_identifier = clinical_org["npi"]
                 identifiers.append(npi_identifier)
+                if "other_identifier" in clinical_org.keys():
+                    identifiers += clinical_org["other_identifier"]
 
-                for other_id in clinical_org.organizationtootherid_set.all():
-                    other_identifier = Identifier(
-                        system=str(other_id.other_id_type_id),
-                        value=other_id.other_id,
-                        type=CodeableConcept(
-                            coding=[
-                                Coding(
-                                    system="http://terminology.hl7.org/CodeSystem/v2-0203",
-                                    code="test",  # do we define this based on the type of id it is?
-                                    display="test",  # same as above ^
-                                )
-                            ]
-                        ),
-                    )
-                    identifiers.append(other_identifier)
+            for taxonomy in clinical_org_instance.organizationtotaxonomy_set.all():
+                code = CodeableConcept(
+                    coding=[
+                        Coding(
+                            system="http://nucc.org/provider-taxonomy",
+                            code=taxonomy.nucc_code_id,
+                            display=nucc_taxonomy_codes[str(taxonomy.nucc_code_id)],
+                        )
+                    ]
+                )
 
-                for taxonomy in clinical_org.organizationtotaxonomy_set.all():
-                    code = CodeableConcept(
-                        coding=[
-                            Coding(
-                                system="http://nucc.org/provider-taxonomy",
-                                code=taxonomy.nucc_code_id,
-                                display=nucc_taxonomy_codes[str(taxonomy.nucc_code_id)],
-                            )
-                        ]
-                    )
+                # Extend the Organization class
+                # NOTE: fhir.resources really doesn't like when you try to subclass their Pydantic models
 
-                    # Extend the Organization class
-                    # NOTE: fhir.resources really doesn't like when you try to subclass their Pydantic models
+                qualification_ext = Extension(
+                    url="https://build.fhir.org/organization-definitions.html#Organization.qualification",
+                    valueCodeableConcept=code,
+                )
 
-                    qualification_ext = Extension(
-                        url="https://build.fhir.org/organization-definitions.html#Organization.qualification",
-                        valueCodeableConcept=code,
-                    )
+                taxonomies.append(qualification_ext)
 
-                    taxonomies.append(qualification_ext)
-
-                if taxonomies:
-                    organization.extension = taxonomies
+            if taxonomies:
+                organization.extension = taxonomies
 
         organization.identifier = identifiers
 
@@ -475,12 +466,6 @@ class OrganizationAffiliationSerializer(serializers.Serializer):
         )
         organization_affiliation.participatingOrganization.display = str(instance.organization_name)
 
-        # NOTE: Period for OrganizationAffiliation cannot currently be fetched so its blank
-
-        # NOTE: Network here means insurance network, per the FHIR spec. We have not begun to incorporate insurance networks
-        # organization_affiliation.network = [genReference("fhir-organization-detail", instance.id, request)]
-        # organization_affiliation.network[0].display = str(instance.organization_name)
-
         organization_affiliation.code = [
             CodeableConcept(
                 coding=[
@@ -492,10 +477,6 @@ class OrganizationAffiliationSerializer(serializers.Serializer):
                 ]
             )
         ]
-
-        # NOTE: not sure how to do specialty yet
-
-        endpoints = []
 
         locations = [
             genReference("fhir-location-detail", loc_id, request)
@@ -539,21 +520,7 @@ class PractitionerSerializer(serializers.Serializer):
         practitioner.meta = Meta(
             profile=["http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner"]
         )
-        npi_identifier = Identifier(
-            system="http://terminology.hl7.org/NamingSystem/npi",
-            value=str(instance.npi.npi),
-            type=CodeableConcept(
-                coding=[
-                    Coding(
-                        system="http://terminology.hl7.org/CodeSystem/v2-0203",
-                        code="NPI",
-                        display="National provider identifier",
-                    )
-                ]
-            ),
-            use="official",
-            period=Period(start=instance.npi.enumeration_date, end=instance.npi.deactivation_date),
-        )
+        npi_identifier = representation["npi"]
         if representation["individual"]["telecom"] != []:
             practitioner.telecom = representation["individual"]["telecom"]
         if (
@@ -593,8 +560,8 @@ class LocationSerializer(serializers.Serializer):
         else:
             location.status = "inactive"
         location.name = instance.name
-        # if 'phone' in representation.keys():
-        #    location.telecom = representation['phone']
+        if "phone" in representation.keys():
+            location.telecom = representation["phone"]
         if "address" in representation.keys():
             location.address = representation["address"]
             if (
@@ -700,13 +667,6 @@ class EndpointSerializer(serializers.Serializer):
                 system="http://terminology.hl7.org/CodeSystem/endpoint-connection-type",
                 code=instance.endpoint_connection_type.id,
                 display=instance.endpoint_connection_type.display,
-            )
-        # TODO THIS IS TEMPORARY DUE TO INSUFFICIENT DATA
-        else:
-            connection_type = Coding(
-                system="http://terminology.hl7.org/CodeSystem/endpoint-connection-type",
-                code="hl7-fhir-rest",
-                display="HL7 FHIR",
             )
 
         ## TODO extend base fhir spec to ndh spec

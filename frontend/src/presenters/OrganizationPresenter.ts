@@ -1,6 +1,7 @@
 import {
   formatAddress,
   formatDetails,
+  formatOtherIdentifierType,
 } from "../helpers/formatters"
 import type { OrganizationDetailsType } from "../state/requests/organizations"
 
@@ -12,7 +13,11 @@ export class OrganizationPresenter {
     return this.record.name ?? ""
   }
 
-  get types(): string[] {
+  get otherNames(): Array<string | null> {
+    return this.record.alias ?? []
+  }
+
+  get types() {
     return (
       this.record.extension
         ?.filter(
@@ -20,7 +25,11 @@ export class OrganizationPresenter {
             ext.url ===
             "https://build.fhir.org/organization-definitions.html#Organization.qualification",
         )
-        .map((ext) => ext.valueCodeableConcept?.coding?.[0]?.display ?? "") ??
+        .map((ext) => (
+          {
+            display: ext.valueCodeableConcept?.coding?.[0]?.display ?? "",
+            nuccCode: ext.valueCodeableConcept?.coding?.[0]?.code ?? "" 
+          })) ??
       []
     )
   }
@@ -55,9 +64,9 @@ export class OrganizationPresenter {
     if (!this.record.identifier?.length) return []
 
     return this.record.identifier.map((identity) => ({
-      type: identity.type?.coding?.[0]?.display?.trim() || "Unknown",
+      type: formatOtherIdentifierType(identity.type?.coding?.[0]?.code),
       number: identity.value,
-      details: identity.period ? formatDetails(identity.period) : "",
+      details: identity.period ? formatDetails(identity.period, identity.assigner) : "",
     }))
   }
 
@@ -65,6 +74,7 @@ export class OrganizationPresenter {
     if (!this.record.practitionerData?.length) return []
 
     return this.record.practitionerData.map((practitioner) => ({
+      id: practitioner?.id,
       name: practitioner?.name?.[0].text,
       taxonomy: practitioner?.qualification?.[0]?.code?.coding?.[0]?.display ?? "Unknown",
     }))

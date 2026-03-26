@@ -29,7 +29,7 @@
     "fallback": "No taxonomy available"
   },
   "practitioners": {
-    "title": "Practitioners",
+    "title": "Practitioner(s)",
     "name": "Name",
     "taxonomy": "Taxonomy",
     "fallback": "No practitioner information available"
@@ -37,7 +37,7 @@
   "listing": {
     "title": "All Organizations",
     "taxonomy": "Primary taxonomy",
-    "location": "Location"
+    "address": "Address"
   },
   "search": {
     "title": "Organization search",
