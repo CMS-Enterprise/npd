@@ -503,7 +503,7 @@ class Npi(models.Model):
     replacement_npi = models.BigIntegerField(blank=True, null=True)
     enumeration_date = models.DateField()
     last_update_date = models.DateField()
-    deactivation_reason_code = models.CharField(max_length=3, blank=True, null=True)
+    deactivation_reason_code = models.CharField(max_length=20, blank=True, null=True)
     deactivation_date = models.DateField(blank=True, null=True)
     reactivation_date = models.DateField(blank=True, null=True)
     certification_date = models.DateField(blank=True, null=True)

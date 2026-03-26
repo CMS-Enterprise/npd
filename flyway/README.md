@@ -39,6 +39,12 @@ Flyway keeps track of what migrations have been performed by updating a migratio
 For local development, Flyway will check to see if any migrations need to be performed (updating the database accordingly) 
 on `docker compose up`.
 
+## Testing a local migration against the ETL stack's `api-postgres`
+
+If you are developing a migration in the local `npd` repo and want to apply it to the ETL stack's local API database, see the section [Applying local API migrations to `api-postgres`](https://github.com/CMS-Enterprise/npd_etl/tree/main#applying-local-api-migrations-to-api-postgres)
+
+ in the root-level Readme in the npd_etl repo for details.
+
 ## Reference_Data
 
 This directory contains repeatable migrations that add reference fixture data. These are also implemented valid SQL statements.
