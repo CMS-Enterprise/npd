@@ -89,6 +89,11 @@
   }
 }
 
+.feedbackCtaColumn {
+  order: -1;
+  margin-bottom: 32px;
+}
+
 @media (min-width: 768px) {
   .sidebarNavContainer nav {
     height: 100%;
@@ -97,5 +102,10 @@
   .sidebarNav {
     position: sticky;
     top: 20px;
+  }
+
+  .feedbackCtaColumn {
+    order: 0;
+    margin-bottom: 0;
   }
 }

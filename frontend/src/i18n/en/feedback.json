@@ -13,7 +13,6 @@
     "issuesRequired": "Select at least one issue",
     "issues": {
       "incorrect_practice_locations": "Practice location(s)",
-      "incorrect_phone_numbers": "Phone number(s)",
       "incorrect_taxonomy_or_speciality": "Taxonomy(-ies)/specialty(-ies)",
       "incorrect_organization_affiliation": "Organization affiliation (s)",
       "incorrect_endpoint": "FHIR endpoint",
@@ -32,8 +31,9 @@
     "submitError": "There was an error in submitting the form. Please try again.",
     "cancel": "Cancel",
     "submit": "Submit",
-    "successHeading": "Issue reported",
-    "successBody": "Thanks for helping improve the directory. Your report has been submitted and our team will review it.",
+    "successHeading": "Submission sent",
+    "successBody": "Thank you for reporting an issue. We may use your submission to improve our data collection.",
+    "successAlternative": "Report another issue",
     "close": "Close"
   }
 }

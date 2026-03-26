@@ -92,7 +92,12 @@ export const Organization = () => {
                 </div>
               </div>
 
-              <div className="ds-l-col--12 ds-l-md-col--4">
+              <div
+                className={classNames(
+                  "ds-l-col--12 ds-l-md-col--4",
+                  layout.feedbackCtaColumn,
+                )}
+              >
                 <FeedbackCTA
                   subtitle={t("practitioners.detail.feedback.subtitle")}
                   onButtonClick={() => setIsReportIssueOpen(true)}

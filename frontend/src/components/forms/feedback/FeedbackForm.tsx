@@ -13,7 +13,6 @@ import { Altcha } from "./Altcha"
 
 const ISSUE_KEYS = [
   "incorrect_practice_locations",
-  "incorrect_phone_numbers",
   "incorrect_taxonomy_or_speciality",
   "incorrect_organization_affiliation",
   "incorrect_endpoint",
@@ -50,6 +49,7 @@ export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
     handleSubmit,
     control,
     watch,
+    reset,
     formState: { errors },
   } = useForm<ReportIssueFormData>({
     defaultValues: {
@@ -59,12 +59,10 @@ export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
     },
   })
 
-  const maxChars = 500
+  const maxChars = 750
   const selectedIssues = watch("issues")
   const hasOther = selectedIssues.includes("other")
   const detailsLength = watch("details")?.length ?? 0
-  const isSubmitDisabled =
-    selectedIssues.length === 0 || (hasOther && detailsLength === 0)
 
   const issueChoices = ISSUE_KEYS.map((key) => ({
     label: t(`feedback.form.issues.${key}`),
@@ -209,7 +207,7 @@ export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
               className="ds-u-margin-top--3"
             />
             <p className="ds-u-margin-top--1 ds-u-color--gray ds-u-font-size--sm">
-              {detailsLength}/500
+              {detailsLength}/{maxChars}
             </p>
           </div>
 
@@ -236,15 +234,10 @@ export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
           </fieldset>
 
           <div className="ds-u-margin-top--4 ds-u-display--flex ds-u-justify-content--end">
-            <Button variation="ghost" onClick={onExit} type="button">
-              {t("feedback.form.cancel")}
-            </Button>
-
             <Button
               variation="solid"
               type="submit"
               className="ds-u-margin-left--2"
-              disabled={isSubmitDisabled}
             >
               {t("feedback.form.submit")}
             </Button>
@@ -259,6 +252,16 @@ export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
             className="ds-u-margin-top--3"
           >
             {t("feedback.form.close")}
+          </Button>
+
+          <Button
+            onClick={() => {
+              setDialogStatus("form")
+              reset()
+            }}
+            className="ds-u-margin-top--3 ds-u-margin-left--3"
+          >
+            {t("feedback.form.successAlternative")}
           </Button>
         </Alert>
       )}
