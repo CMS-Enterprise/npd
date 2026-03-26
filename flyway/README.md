@@ -41,7 +41,8 @@ on `docker compose up`.
 
 ## Testing a local migration against the ETL stack's `api-postgres`
 
-If you are developing a migration in the local `npd` repo and want to apply it to the ETL stack's local API database, see the section "Applying local API migrations to `api-postgres`"
+If you are developing a migration in the local `npd` repo and want to apply it to the ETL stack's local API database, see the section [Applying local API migrations to `api-postgres`](https://github.com/CMS-Enterprise/npd_etl/tree/main#applying-local-api-migrations-to-api-postgres)
+
  in the root-level Readme in the npd_etl repo for details.
 
 ## Reference_Data
