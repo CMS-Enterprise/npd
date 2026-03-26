@@ -249,6 +249,7 @@ SPECTACULAR_SETTINGS = {
     "LICENSE": {"name": "CC0-1.0 License"},
     "SERVE_INCLUDE_SCHEMA": False,
     "COMPONENT_SPLIT_REQUEST": True,
+    "SCHEMA_PATH_PREFIX": "/fhir/",
 }
 
 if REQUIRE_AUTHENTICATION:
@@ -385,3 +386,6 @@ structlog.configure(
     logger_factory=structlog.stdlib.LoggerFactory(),
     cache_logger_on_first_use=True,
 )
+
+# Altcha configuration
+ALTCHA_HMAC_KEY = os.environ.get("ALTCHA_HMAC_KEY", "")

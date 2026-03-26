@@ -7,7 +7,7 @@ from django.db import IntegrityError
 from faker import Faker
 
 
-from npdfhir.tests.fixtures.organization import DefaultOrganization
+from npdfhir.tests.fixtures.organization import DefaultOrganization, DefaultLocation
 from npdfhir.tests.fixtures.practitioner import (
     DefaultPractitioner,
     DefaultIndividual,
@@ -15,8 +15,9 @@ from npdfhir.tests.fixtures.practitioner import (
     DefaultNPI,
     DefaultName,
 )
+from npdfhir.tests.fixtures.practitioner_role import DefaultPractitionerRole
 
-from npdfhir.models import OrganizationView, ProviderView
+from npdfhir.models import OrganizationView, ProviderView, ProviderToLocationView
 
 
 class Command(BaseCommand):
@@ -53,6 +54,62 @@ class Command(BaseCommand):
                 f"created Practitioner: {practitioner.individual.id} {' '.join(name.values())}"
             )
 
+    def generate_sample_practitioner_roles(self):
+        # Generate a practitioner with a relationship with one organization
+        DefaultPractitionerRole(
+            practitioner=DefaultPractitioner(
+                individual=DefaultIndividual(id="6846963d-7814-4c70-ae3d-8a8419a7c9c6"),
+                npi=DefaultNPI(npi=1000000001),
+            ),
+            organization=DefaultOrganization(
+                id="eca64970-4833-4c64-b3fa-d583f9af7fcc", npi=DefaultNPI(npi=1000000002)
+            ),
+        )
+
+        # Generate a practitioner with a relationship with an organization, but no associated endpoints
+        DefaultPractitionerRole(
+            practitioner=DefaultPractitioner(
+                individual=DefaultIndividual(id="f1579a55-b5e1-4717-988d-6e014acbe348"),
+                npi=DefaultNPI(npi=1000000011),
+            ),
+            organization=DefaultOrganization(npi=DefaultNPI(npi=1000000012)),
+            location=DefaultLocation(has_endpoint=False),
+        )
+
+        # Generate a practitioner with a relationship with multiple organizations
+        DefaultPractitionerRole(
+            practitioner=DefaultPractitioner(
+                individual=DefaultIndividual(id="1d58f0f5-2075-4e9f-b7a5-2245e74f6a16"),
+                npi=DefaultNPI(npi=1000000003),
+            ),
+            organization=DefaultOrganization(npi=DefaultNPI(npi=1000000004)),
+        )
+        DefaultPractitionerRole(
+            practitioner=DefaultPractitioner(
+                individual=DefaultIndividual(id="1d58f0f5-2075-4e9f-b7a5-2245e74f6a16"),
+                npi=DefaultNPI(npi=1000000003),
+            ),
+            organization=DefaultOrganization(npi=DefaultNPI(npi=1000000005)),
+        )
+
+        # Generate an organization with a relationship with multiple practitioners
+        DefaultPractitionerRole(
+            practitioner=DefaultPractitioner(
+                individual=DefaultIndividual(
+                    names=[DefaultName(first_name="Test", last_name="Practitioner 1")]
+                )
+            ),
+            organization=DefaultOrganization(id="0c1f8f84-0502-4444-b636-8fee4ab76e32"),
+        )
+        DefaultPractitionerRole(
+            practitioner=DefaultPractitioner(
+                individual=DefaultIndividual(
+                    names=[DefaultName(first_name="Test", last_name="Practitioner 2")]
+                )
+            ),
+            organization=DefaultOrganization(id="0c1f8f84-0502-4444-b636-8fee4ab76e32"),
+        )
+
     def handle(self, *args, **options):
         if options.get("seed", None):
             Faker.seed(int(options["seed"]))
@@ -60,6 +117,16 @@ class Command(BaseCommand):
         provider = DefaultPractitioner(taxonomies=["207R00000X"])
 
         self.stdout.write(f"created Practitioner: {provider.individual.id}")
+
+        # Generate an organization with a location with no endpoints
+        DefaultOrganization(
+            id="53202937-ac54-4c71-b3dc-9a773bd51fc2",
+            names=["No Endpoint Org"],
+            locations=[DefaultLocation(has_endpoint=False)],
+        )
+
+        # Generate an organization with no locations
+        DefaultOrganization(id="8450a7cd-c919-47ee-9c59-bc17538231ef", has_locations=False)
 
         try:
             name = {"first_name": "AAA", "last_name": "Test Practitioner"}
@@ -93,7 +160,10 @@ class Command(BaseCommand):
             # one known NPI
             name = "AAA Test Org"
             organization = DefaultOrganization(
-                names=[name], npi=DefaultNPI(npi=1234567893), taxonomies=["261QP2000X"]
+                names=[name],
+                npi=DefaultNPI(npi=1234567893),
+                taxonomies=["261QP2000X"],
+                locations=[DefaultLocation(has_endpoint=True)],
             )
             self.stdout.write(
                 f"created Organization: {self.to_json(id=organization.id, organizationtoname__name=name)}"
@@ -111,6 +181,7 @@ class Command(BaseCommand):
                 names=[name],
                 other_ids=[DefaultOtherID(other_id=other_id)],
                 taxonomies=["261QP2000X"],
+                id="98d3090b-0982-495f-9eb9-4e79523d2ba2",
             )
             self.stdout.write(
                 f"created other_id Organization: {self.to_json(id=other_id_organization.id, other_id=other_id, organizationtoname__name=name)}"
@@ -119,6 +190,8 @@ class Command(BaseCommand):
             self.stdout.write("(organization with other_id 1234567893 already exists)")
 
         self.generate_sample_organizations(25)
-        OrganizationView.refresh_materialized_view()
         self.generate_sample_practitioners(25)
+        self.generate_sample_practitioner_roles()
+        OrganizationView.refresh_materialized_view()
         ProviderView.refresh_materialized_view()
+        ProviderToLocationView.refresh_materialized_view()

@@ -1,12 +1,14 @@
-import type { FHIRPractitioner } from "../@types/fhir"
+import type { FHIRReference } from "../@types/fhir"
+import type { OrganizationDetails, PractitionerDetailsType } from "../state/requests/practitioners"
 import {
   formatAddress,
   formatDetails,
-  formatIdentifierType,
 } from "../helpers/formatters"
+import type { LogicalIdOfThisArtifact } from "../@types/fhir/Endpoint"
 
 export class PractitionerPresenter {
-  constructor(private record: FHIRPractitioner) {}
+  private record: PractitionerDetailsType
+  constructor(record: PractitionerDetailsType) {this.record = record}
 
   get name(): string {
     const name = this.record.name?.[0]
@@ -54,7 +56,6 @@ export class PractitionerPresenter {
       type: identity.type?.coding?.[0]?.display || "Unknown",
       number: identity.value,
       details: identity.period ? formatDetails(identity.period) : "",
-      system: formatIdentifierType(identity.system as string) || "Unknown",
     }))
   }
 
@@ -62,9 +63,76 @@ export class PractitionerPresenter {
     if (!this.record.qualification?.length) return []
 
     return this.record.qualification.map((taxonomy) => ({
-      state: "", // we arent capturing this currently, we could use the state they're from?
-      licenseNumber: "", // we arent capturing this either
-      displayCode: taxonomy.code?.coding?.[0]?.display || "Unknown",
+      state: taxonomy.identifier?.[0]?.assigner?.display ?? "",
+      licenseNumber: taxonomy.identifier?.[0]?.value ?? "",
+      display: taxonomy.code?.coding?.[0]?.display ?? "Unknown",
+      nuccCode: taxonomy.code?.coding?.[0]?.code ?? "Unknown",
     }))
+  }
+
+  get organizations() {
+    if (!this.record.practitionerRoleData?.results?.entry?.length) return []
+    const organizationDetailData: OrganizationDetails = {};
+    this.record.practitionerRoleData.results.entry.forEach((role) => {
+      const organizationId = role?.resource.organization.reference.split('/').pop();
+      const locationId = role?.resource.location[0].reference.split('/').pop();
+      const endpointIds = role?.resource.endpoint?.map((endpoint: FHIRReference) => { return endpoint.reference.split('/').pop()});
+      if (organizationId && Object.keys(organizationDetailData).includes(organizationId)) {
+        const existingEndpointIds: Array<string | undefined> = organizationDetailData[organizationId].endpoints?.map((endpoint) => endpoint?.id )
+        endpointIds?.forEach( (endpointId) => {
+          if (endpointId && !existingEndpointIds.includes(endpointId)) {
+            const endpoint = this.record.endpointData[endpointId]
+            const endpointRecord = {
+              id: endpoint.id,
+              address: endpoint.address,
+              connectionType: endpoint.connectionType.display
+            }
+            organizationDetailData[organizationId].endpoints.push(endpointRecord)
+          }
+        })
+        const existingLocationIds: Array<LogicalIdOfThisArtifact | undefined> = organizationDetailData[organizationId].locations.map((location) => location.id)
+        if (locationId && !existingLocationIds.includes(locationId)) {
+          const loc = this.record.locationData[locationId]
+          const locRecord = {
+            id: loc.id,
+            name: loc.name,
+            address: formatAddress(loc.address, false),
+            contact: loc.telecom
+          }
+          organizationDetailData[organizationId].locations.push(locRecord)
+        }
+      }
+      else {
+        if (organizationId && locationId){
+          const loc = this.record.locationData[locationId]
+          const locRecord = {
+            id: loc.id,
+            name: loc.name,
+            address: formatAddress(loc.address, false),
+            contact: loc.telecom
+          }
+          organizationDetailData[organizationId] = {
+            organization: this.record.organizationData[organizationId],
+            endpoints: endpointIds?.map((endpointId) => {
+              if (endpointId) {
+                const endpoint = this.record.endpointData[endpointId]
+                const endpointRecord = {
+                  id: endpoint.id,
+                  address: endpoint.address,
+                  connectionType: endpoint.connectionType.display
+                }
+                return endpointRecord
+              }
+            }) ?? [],
+            locations: [locRecord],
+            roleDetails: role?.resource
+          };
+        }
+      }
+    })
+
+  return {
+    ...organizationDetailData
+  }
   }
 }

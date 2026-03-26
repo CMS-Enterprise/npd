@@ -69,6 +69,24 @@
     font-weight: var(--theme-font-weight-heading-3xl, 700);
     line-height: 130%; /* 2.925rem */
   }
+  & h3 {
+    color: #1E3C70;
+    /* Headings/2xl/2xl - all breakpoints */
+    font-family: var(--theme-font-family-heading, "Open Sans");
+    font-size: var(--theme-font-size-2xl, 24px);
+    font-style: normal;
+    font-weight: var(--theme-font-weight-heading-2xl, 700);
+    line-height: 130%; /* 31.2px */
+  }
+  & h4 {
+    color: #1E3C70;
+    /* Headings/XL - all breakpoints */
+    font-family: var(--theme-font-family-heading, "Open Sans");
+    font-size: var(--theme-font-size-xl, 21px);
+    font-style: normal;
+    font-weight: var(--theme-font-weight-heading-xl, 700);
+    line-height: 130%; /* 27.3px */
+  }
 }
 
 @media (min-width: 768px) {

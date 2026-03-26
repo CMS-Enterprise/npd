@@ -6,4 +6,4 @@ node_modules/
 /blob-report/
 /playwright/.cache/
 /tests/.auth/
-tmp/
+/test-data/tmp/

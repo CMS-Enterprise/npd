@@ -66,7 +66,6 @@ export async function getSpecificNPIRecords(npi_list) {
         var npi = npi_list[i]
         const response = await fetch(`https://npiregistry.cms.hhs.gov/api/?version=2.1&number=${npi}`);
         const body = await response.json();
-        console.log(body)
         if (body.result_count>0 ){
             if(body.results[0].enumeration_type == "NPI-1"){
                 records.type1.push(body.results[0]);
