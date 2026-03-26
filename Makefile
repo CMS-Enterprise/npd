@@ -101,15 +101,21 @@ ifneq ($(NPD_DEVELOPMENT), True)
 	@printf "Are you sure you want to drop your local database? [y/N] " && read ans && ( [[ "$${ans:-N}" == y ]] || ( echo "cancelling changes" && exit 1 ) )
 endif
 	@echo "Dropping development database..."
-	@docker compose up -d db
+	@docker compose up -d --wait db
 	@docker compose run --rm db sh -c 'echo "dropping $$NPD_DB"; PGPASSWORD=$$POSTGRES_PASSWORD psql -h db -U $$POSTGRES_USER -d postgres -c "DROP DATABASE IF EXISTS $$NPD_DB" || echo "failed to drop $$NPD_DB"'
 
 .PHONY: create-db
 create-db:
 	@echo "Creating development database..."
-	@docker compose up -d db
+	@docker compose up -d --wait db
 	# create development database only if it doesn't already exist
-	@docker compose run --rm db sh -c 'echo "creating $$NPD_DB"; PGPASSWORD=$$POSTGRES_PASSWORD psql -h db -U $$POSTGRES_USER -d postgres -c "CREATE DATABASE $$NPD_DB" || echo "$$NPD_DB already exists"'
+	@docker compose run --rm db sh -c '\
+		echo "ensuring $$NPD_DB exists"; \
+		printf "%s\n" \
+			"SELECT '\''CREATE DATABASE $$NPD_DB'\''" \
+			"WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '\''$$NPD_DB'\'')\\gexec" \
+		| PGPASSWORD=$$POSTGRES_PASSWORD psql -v ON_ERROR_STOP=1 -h db -U $$POSTGRES_USER -d postgres \
+	'
 	
 # refresh all materialized views in the development database 
 .PHONY: refresh-views
