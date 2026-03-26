@@ -136,23 +136,44 @@ test.describe("Organization Journey", () => {
   test("search -> detail -> report feedback", async ({ page }) => {
     await page.goto("/organizations/search")
 
-    await page.getByRole("textbox", { name: "Name or NPI" }).fill(organization.npi)
+    await page.getByRole("textbox", { name: "Name or NPI" }).fill("1234567893")
     await page.getByRole("button", { name: "Search" }).click()
 
-    await page.getByRole("link", { name: organization.name }).click()
+    await page.getByRole("link", { name: "AAA Test Org" }).click()
     await expect(page).toHaveURL(`/organizations/${organization.id}`)
 
-    await expect(page.getByTestId("location-table")).toBeVisible()
-
+    // open feedback dialog
     await page.getByRole("button", { name: "Report an issue" }).click()
 
     const dialog = page.getByRole("dialog")
     await expect(dialog).toBeVisible()
-    await expect(dialog.getByText(organization.name)).toBeVisible()
 
-    await dialog.getByRole("button", { name: "Cancel" }).click()
+    // confirm organization name is shown in the form
+    await expect(dialog.getByText(organization.name)).toBeVisible()
+  
+    // check issue type
+    await dialog.getByRole("checkbox", { name: /Practice location/i }).check()
+    await dialog.getByRole("textbox", { name: /details/i }).fill("Address is outdated")
+
+    const captcha = dialog.getByRole("checkbox", { name: /I'm not a robot/i })
+    await captcha.click()
+    await expect(
+      dialog.getByRole("checkbox", { name: /Verified/i })
+    ).toBeChecked({ timeout: 10000 })
+
+    // fill details after captcha is verified
+    await dialog.getByRole("textbox", { name: /details/i }).fill("Address is outdated")
+  
+    await dialog.getByRole("button", { name: "Submit" }).click()
+
+    // confirm success message
+    await expect(dialog.getByText(/Submission sent/i)).toBeVisible()
+
+    // close the dialog
+    await dialog.getByRole("button", { name: "Close", exact: true }).click()
     await expect(dialog).not.toBeVisible()
 
+    // confirm we're still on the detail page
     await expect(page).toHaveURL(`/organizations/${organization.id}`)
     await expect(page.getByTestId("organization-name")).toContainText(organization.name)
   })
