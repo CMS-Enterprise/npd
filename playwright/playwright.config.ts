@@ -103,7 +103,7 @@ export default defineConfig({
   /* Run your local dev server before starting the tests */
   webServer: {
         cwd: "../",
-        command: "bin/npr --test --publish 8008:8008 python manage.py runserver 0.0.0.0:8008",
+        command: "docker compose -f compose.test.yml up django-web",
         url: "http://localhost:8008",
         reuseExistingServer: !process.env.CI,
         timeout: 300000, // give at least 5 minutes to download all container dependencies

@@ -43,7 +43,7 @@ export const Practitioner = () => {
   return (
     <>
       <DetailPageBanner
-        title={practitioner.name}
+        title={practitioner.names[0] || ""}
         subtitle={`${t("practitioners.npi")}: ${practitioner.npi}`}
         pageType={t("practitioners.detail.header.type")}
         testIdPrefix="practitioner"
@@ -74,7 +74,7 @@ export const Practitioner = () => {
                   <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
                     <InfoItem
                       label={t("practitioners.detail.about.name")}
-                      value={practitioner.name}
+                      value={practitioner.names.join("; ") || '—'}
                     />
                   </div>
                   <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
@@ -117,12 +117,6 @@ export const Practitioner = () => {
                   value={practitioner.phone}
                 />
               </div>
-              <div className="ds-l-col--12 ds-l-md-col--3 ds-u-margin-bottom--2">
-                <InfoItem
-                  label={t("practitioners.detail.contact.fax")}
-                  value={practitioner.fax}
-                />
-              </div>
             </div>
           </section>
           <IdentifierSection identifierData={practitioner.identifiers} />
@@ -136,7 +130,7 @@ export const Practitioner = () => {
           >
             {Object.entries(practitioner.organizations).map(([id, obj]) => (
               <React.Fragment key={id}>
-                <h3>{`${obj.organization.name} (NPI: ${obj.organization.identifier?.filter((identifier) => (identifier.system = "http://terminology.hl7.org/NamingSystem/npi"))[0].value})`}</h3>
+                <h3><a href={`/organizations/${id}`}>{`${obj.organization.name} (NPI: ${obj.organization.identifier?.filter((identifier) => (identifier.system = "http://terminology.hl7.org/NamingSystem/npi"))[0].value})`}</a></h3>
                 <LocationSection
                   locationData={obj.locations.map((location) => {
                     return location
@@ -158,7 +152,7 @@ export const Practitioner = () => {
           isOpen={isReportIssueOpen}
           onExit={() => setIsReportIssueOpen(false)}
           presenterData={{
-            recordName: practitioner.name,
+            recordName: practitioner.names[0] || "",
             recordId: practitionerId,
             npi: practitioner.npi,
           }}

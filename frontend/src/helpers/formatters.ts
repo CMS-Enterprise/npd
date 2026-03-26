@@ -16,6 +16,23 @@ export const formatAddress = (address?: Address, multiLine: boolean = true): str
   }
 }
 
+export const formatOtherIdentifierType = (otherIdentifierType: string | undefined | null): string => {
+  switch (otherIdentifierType) {
+    case "NPI":
+      return "National Provider Identifier"
+    case "UPIN":
+      return "Medicare"
+    case "MCR":
+      return "Medicare"
+    case "MCD":
+      return "Medicaid"
+    case "PPIN":
+      return "Medicare"
+    default:
+      return "Other"
+  }
+}
+
 export const formatDate = (dateString: string): string => {
   const date = new Date(dateString)
 
@@ -26,14 +43,18 @@ export const formatDate = (dateString: string): string => {
   })
 }
 
-export const formatDetails = (period: Period): string => {
+export const formatDetails = (period: Period | undefined, assigner: string | null | undefined): string => {
   const parts: string[] = []
 
-  if (period.start) {
+  if (assigner) {
+    parts.push(`Issuer: ${assigner}`)
+  }
+
+  if (period?.start) {
     parts.push(`Issued ${formatDate(period.start)}`)
   }
 
-  if (period.end) {
+  if (period?.end) {
     parts.push(`Deactivated ${formatDate(period.end)}`)
   }
 

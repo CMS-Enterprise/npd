@@ -17,7 +17,7 @@ Django backend that provides a FHIR API for accessing data from the npd database
 - [colima](https://github.com/abiosoft/colima) (if using macOS)
 - a postgres database with the npd schema
 
-### Local dev
+### Local Dev
 
 1. Ensure that either colima (if using macOS) or the docker service is running
 2. Create a `.env` file in this directory, following the template of the `.env_template` file

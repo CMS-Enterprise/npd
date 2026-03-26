@@ -129,9 +129,9 @@ describe("Practitioner", () => {
       await screen.findByText("Organization(s)", { selector: "section h2" })
       await screen.findByText("Endpoint(s)", { selector: "section h4" })
       await screen.findByText("Location(s)", { selector: "section h4" })
-      expect(
-        await screen.getByText("Acme Healthcare System (NPI: 1234567890)"),
-      ).toBeInTheDocument()
+      const organizationHeader = await screen.getByRole("link", {name: "Acme Healthcare System (NPI: 1234567890)"})
+      expect(organizationHeader).toBeInTheDocument()
+      expect(organizationHeader).toHaveAttribute('href', '/organizations/12345');
       expect(
         await screen.getByText("0006 Aspen Glen Court, Edwards, CO 81632"),
       ).toBeInTheDocument()

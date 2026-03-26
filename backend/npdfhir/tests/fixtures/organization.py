@@ -107,7 +107,7 @@ class DefaultOrganization:
                         npi=clinical_organization,
                         other_id=id.other_id,
                         other_id_type_id=id.other_id_type,
-                        state_code=state_code.id,
+                        state_code=state_code,
                     )
                 for taxonomy in self.taxonomies:
                     OrganizationToTaxonomy.objects.create(

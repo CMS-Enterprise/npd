@@ -181,6 +181,11 @@ down:
 	@echo "Shutting down all docker compose services..."
 	@docker compose down
 
+.PHONY: test-down
+test-down:
+	@echo "Shutting down all test docker compose services..."
+	@docker compose -f compose.test.yml down
+
 .PHONY: test-setup
 test-setup:
 	@echo "Setting up test database..."
@@ -206,7 +211,7 @@ test: test-setup
 	@$(MAKE) test-frontend
 
 .PHONY: playwright-local
-playwright-local: test-system-setup build-frontend-test-assets
+playwright-local: test-down test-system-setup build-frontend-test-assets
 	@cd playwright; \
 		npx playwright test --project=local
 
@@ -264,7 +269,7 @@ test-system-setup: test-setup
 
 .PHONY: test-server
 test-server: test-system-setup build-frontend-test-assets
-	bin/npr --test --publish 8008:8008 python manage.py runserver 0.0.0.0:8008
+	docker compose -f compose.test.yml up django-web
 
 ###
 # whole project concerns

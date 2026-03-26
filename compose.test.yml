@@ -1,10 +1,5 @@
 name: npd
 
-# by using `compose.test.yml` alone with `docker compose -f compose.test.yml and
-# the `extends:` settings for each of the named services, we can merge these
-# service definitions cleanly with the ones that already exist in the base
-# compose.yml file
-
 services:
   db:
     extends:
@@ -35,6 +30,9 @@ services:
     depends_on: !override
       - db
       - db-migrations
+    command: python manage.py runserver 0.0.0.0:8008
+    ports:
+      - "8008:8008" 
 
 volumes:
   postgres_data:

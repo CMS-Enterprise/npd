@@ -257,6 +257,17 @@ describe("Organization", () => {
           within(dialog).getByRole("button", { name: /submit/i }),
         ).not.toBeDisabled()
       })
+      const practitionerHeader = await screen.getByRole("link", {name: "DR. KIRK AADALEN"})
+      expect(practitionerHeader).toBeInTheDocument()
+      expect(practitionerHeader).toHaveAttribute('href', '/practitioners/c3a56586-40a8-4fef-9394-2dd0c0ba0b60');
+      expect(await screen.getByText("0006 Aspen Glen Court, Edwards, CO 81632")).toBeInTheDocument()
+      expect (await screen.getByText("555-555-5555", {exact: false})).toBeInTheDocument()
+      expect (await screen.getByText("fhir.test-org.org")).toBeInTheDocument()
+      expect (await screen.getByText("HL7 FHIR")).toBeInTheDocument()
+      expect(await screen.queryByText("Contact information not available")).not.toBeInTheDocument()
+      expect(await screen.queryByText("No location information available")).not.toBeInTheDocument()
+      expect(await screen.queryByText("No endpoint information available")).not.toBeInTheDocument()
+      expect(await screen.queryByText("No practitioner information available")).not.toBeInTheDocument()
     })
   })
   describe("without practitioner role data", () => {
@@ -278,32 +289,23 @@ describe("Organization", () => {
       })
 
       // ensure FeatureFlag and org details components have finished loading
-      await waitFor(() => screen.getByTestId("location-table"))
-      expect(
-        await screen.getByText("0006 Aspen Glen Court, Edwards, CO 81632"),
-      ).toBeInTheDocument()
-      expect(
-        await screen.getByText("555-555-5555", { exact: false }),
-      ).toBeInTheDocument()
-      expect(await screen.getByText("fhir.test-org.org")).toBeInTheDocument()
-      expect(await screen.getByText("HL7 FHIR")).toBeInTheDocument()
-      expect(
-        await screen.queryByText("Contact information not available"),
-      ).not.toBeInTheDocument()
-      expect(
-        await screen.queryByText("No location information available"),
-      ).not.toBeInTheDocument()
-      expect(
-        await screen.queryByText("No endpoint information available"),
-      ).not.toBeInTheDocument()
+      await waitFor(() => screen.getByTestId('location-table'))
+      expect(await screen.getByText("0006 Aspen Glen Court, Edwards, CO 81632")).toBeInTheDocument()
+      expect (await screen.getByText("555-555-5555", {exact: false})).toBeInTheDocument()
+      expect (await screen.getByText("fhir.test-org.org")).toBeInTheDocument()
+      expect (await screen.getByText("HL7 FHIR")).toBeInTheDocument()
+      expect(await screen.queryByText("Contact information not available")).not.toBeInTheDocument()
+      expect(await screen.queryByText("No location information available")).not.toBeInTheDocument()
+      expect(await screen.queryByText("No endpoint information available")).not.toBeInTheDocument()
 
-      expect(
-        await screen.getByText("No practitioner information available"),
-      ).toBeInTheDocument()
-      expect(
-        await screen.queryByText("DR. KIRK AADALEN"),
-      ).not.toBeInTheDocument()
-    })
+      expect(await screen.getByText("No practitioner information available")).toBeInTheDocument()
+      expect(await screen.queryByRole("cell", {name: "DR. KIRK AADALEN"})).not.toBeInTheDocument()
+    
+  })
+  })
+describe("without endpoint data", () => {
+  beforeEach(() => {
+    mockGlobalFetch([orgApiResponse, emptyPractitionerRoleApiResponse, locationsApiResponseNoEndpoints])
   })
   describe("without endpoint data", () => {
     beforeEach(() => {
