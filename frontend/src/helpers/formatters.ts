@@ -1,6 +1,5 @@
 import type { Address } from "../@types/fhir/Address"
 import type { Period } from "../@types/fhir/Period"
-import type { FHIRReference } from "../@types/fhir"
 
 export const formatAddress = (address?: Address, multiLine: boolean = true): string => {
   if (!address) return ""
