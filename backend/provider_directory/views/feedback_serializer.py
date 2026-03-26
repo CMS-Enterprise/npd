@@ -3,6 +3,7 @@ from rest_framework import serializers
 VALID_ISSUES = [
     "incorrect_practice_locations",
     "incorrect_taxonomy_or_speciality",
+    "incorrect_phone_numbers",
     "incorrect_organization_affiliation",
     "incorrect_endpoint",
     "missing_information",

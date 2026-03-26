@@ -14,6 +14,7 @@ import { Altcha } from "./Altcha"
 const ISSUE_KEYS = [
   "incorrect_practice_locations",
   "incorrect_taxonomy_or_speciality",
+  "incorrect_phone_numbers",
   "incorrect_organization_affiliation",
   "incorrect_endpoint",
   "missing_information",
