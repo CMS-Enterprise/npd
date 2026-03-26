@@ -30,7 +30,7 @@ export interface FHIRExtension extends Extension {
 export interface FHIRIdentifer extends Identifier {
   type?: FHIRCodeableConcept
   period?: Period
-  assigner?: Reference
+  assigner?: FHIRReference
 }
 
 export interface FHIRCodeableConcept extends CodeableConcept {

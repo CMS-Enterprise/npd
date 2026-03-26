@@ -81,30 +81,30 @@ export const useOrganizationAPI = (organizationId: string | undefined) => {
       }
     }
   })
-  const endpointIdDups: Array<string | undefined> | undefined = locations?.results.entry.flatMap((role) => { return role?.resource.endpoint?.map((endpoint)=> {return endpoint.reference.split('/').pop() ?? ""})});
-  const endpointIds: Array<string | undefined> = [...new Set(endpointIdDups)];
-  const endpointQueries = useQueries({
-    queries: endpointIds.map((endpointId: string | undefined) => {
-      return {
-        queryKey: ["endpoint", npi, endpointId],
-        queryFn: () => {
-          if (endpointId !== undefined) {
-            return fetchEndpoint(endpointId)
-          }
-          else {
-            return undefined
-          }
-        },
-        enabled: !!endpointIds,
+  const endpointIdDups: Array<string | undefined> | undefined = locations?.results.entry.flatMap((location) => {return location?.resource.endpoint?.map(endpoint => endpoint.reference.split('/').pop() ?? "") }) ?? undefined;
+    const endpointIds: Array<string | undefined> = [...new Set(endpointIdDups)];
+    const endpointQueries = useQueries({
+      queries: endpointIds.map((endpointId: string | undefined) => {
+        return {
+          queryKey: ["endpoint", npi, endpointId],
+          queryFn: () => { 
+            if (endpointId !== undefined) {
+              return fetchEndpoint(endpointId)
+            }
+            else {
+              return undefined
+            }
+          },
+          enabled: !!location && !!endpointIds && !!endpointId,
+        }
+      }),
+      combine: (results) => {
+        return {
+          data: results.map(result => result.data),
+          loading: results.some((result) => result.isLoading) 
+        }
       }
-    }),
-    combine: (results) => {
-      return {
-        data: results.map(result => result.data),
-        loading: results.some((result) => result.isLoading) 
-      }
-    }
-  })
+    })
   return {
     data: {
       ...organization,

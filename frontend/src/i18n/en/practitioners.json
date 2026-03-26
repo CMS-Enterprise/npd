@@ -50,8 +50,8 @@
   },
   "listing": {
     "title": "All Practitioners",
-    "taxonomy": "Primary taxonomy",
-    "location": "Location"
+    "taxonomy": "Taxonomy",
+    "address": "Address"
   },
   "search": {
     "title": "Practitioner search",

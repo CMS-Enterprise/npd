@@ -17,7 +17,7 @@ export const fetchPractitionerRoles = async (
     query.push(`organization_identifier=NPI|${organizationNPI}`);
   }
   if (query.length > 0) {
-    const url = apiUrl(`/fhir/PractitionerRole/?${query.join('&')}`);
+    const url = apiUrl(`/fhir/PractitionerRole/?page_size=1000&${query.join('&')}`);
 
     const response = await fetch(url);
 

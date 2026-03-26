@@ -72,7 +72,9 @@ class Command(BaseCommand):
                 individual=DefaultIndividual(id="f1579a55-b5e1-4717-988d-6e014acbe348"),
                 npi=DefaultNPI(npi=1000000011),
             ),
-            organization=DefaultOrganization(npi=DefaultNPI(npi=1000000012)),
+            organization=DefaultOrganization(
+                id="893149b6-34de-4030-a2fa-89cc02baccbe", npi=DefaultNPI(npi=1000000012)
+            ),
             location=DefaultLocation(has_endpoint=False),
         )
 
@@ -96,16 +98,18 @@ class Command(BaseCommand):
         DefaultPractitionerRole(
             practitioner=DefaultPractitioner(
                 individual=DefaultIndividual(
-                    names=[DefaultName(first_name="Test", last_name="Practitioner 1")]
-                )
+                    id="9b309f46-115e-4eed-bc6e-0e414d5f1215",
+                    names=[DefaultName(first_name="Test", last_name="Practitioner 1")],
+                ),
             ),
             organization=DefaultOrganization(id="0c1f8f84-0502-4444-b636-8fee4ab76e32"),
         )
         DefaultPractitionerRole(
             practitioner=DefaultPractitioner(
                 individual=DefaultIndividual(
-                    names=[DefaultName(first_name="Test", last_name="Practitioner 2")]
-                )
+                    id="91cc98f8-8f65-4f6c-8ef2-9dbe829ed5c2",
+                    names=[DefaultName(first_name="Test", last_name="Practitioner 2")],
+                ),
             ),
             organization=DefaultOrganization(id="0c1f8f84-0502-4444-b636-8fee4ab76e32"),
         )

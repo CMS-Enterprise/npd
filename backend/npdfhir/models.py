@@ -620,7 +620,7 @@ class OrganizationToOtherId(models.Model):
     npi = models.ForeignKey(ClinicalOrganization, models.DO_NOTHING, db_column="npi")
     other_id = models.CharField(max_length=100)
     other_id_type = models.ForeignKey("OtherIdType", models.DO_NOTHING)
-    state_code = models.CharField(max_length=2)
+    state_code = models.ForeignKey(FipsState, models.DO_NOTHING, db_column="state_code")
     issuer = models.CharField(max_length=200)
 
     class Meta:

@@ -125,7 +125,9 @@ describe("Organization", () => {
         within(taxonomySection).getByText("Pediatric Clinic"),
       ).toBeInTheDocument()
 
-      expect(await screen.getByText("DR. KIRK AADALEN")).toBeInTheDocument()
+      const practitionerHeader = await screen.getByRole("link", {name: "DR. KIRK AADALEN"})
+      expect(practitionerHeader).toBeInTheDocument()
+      expect(practitionerHeader).toHaveAttribute('href', '/practitioners/c3a56586-40a8-4fef-9394-2dd0c0ba0b60');
       expect(await screen.getByText("0006 Aspen Glen Court, Edwards, CO 81632")).toBeInTheDocument()
       expect (await screen.getByText("555-555-5555", {exact: false})).toBeInTheDocument()
       expect (await screen.getByText("fhir.test-org.org")).toBeInTheDocument()
@@ -160,7 +162,7 @@ describe("Organization", () => {
       expect(await screen.queryByText("No endpoint information available")).not.toBeInTheDocument()
 
       expect(await screen.getByText("No practitioner information available")).toBeInTheDocument()
-      expect(await screen.queryByText("DR. KIRK AADALEN")).not.toBeInTheDocument()
+      expect(await screen.queryByRole("cell", {name: "DR. KIRK AADALEN"})).not.toBeInTheDocument()
     
   })
   })
