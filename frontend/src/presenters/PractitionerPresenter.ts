@@ -56,7 +56,7 @@ export class PractitionerPresenter {
     return this.record.identifier.map((identity) => ({
       type: formatOtherIdentifierType(identity.type?.coding?.[0]?.code),
       number: identity.value,
-      details: identity.period ? formatDetails(identity.period, identity.assigner) : "",
+      details: identity.period || identity.assigner ? formatDetails(identity.period, identity.assigner?.display) : "",
     }))
   }
 

@@ -36,7 +36,7 @@
   },
   "listing": {
     "title": "All Organizations",
-    "taxonomy": "Primary taxonomy",
+    "taxonomy": "Taxonomy",
     "address": "Address"
   },
   "search": {

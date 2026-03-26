@@ -44,18 +44,18 @@ export const formatDate = (dateString: string): string => {
   })
 }
 
-export const formatDetails = (period: Period, assigner: FHIRReference | undefined): string => {
+export const formatDetails = (period: Period | undefined, assigner: string | null | undefined): string => {
   const parts: string[] = []
 
-  if (assigner?.display) {
-    parts.push(`Issuer: ${assigner.display}`)
+  if (assigner) {
+    parts.push(`Issuer: ${assigner}`)
   }
 
-  if (period.start) {
+  if (period?.start) {
     parts.push(`Issued ${formatDate(period.start)}`)
   }
 
-  if (period.end) {
+  if (period?.end) {
     parts.push(`Deactivated ${formatDate(period.end)}`)
   }
 

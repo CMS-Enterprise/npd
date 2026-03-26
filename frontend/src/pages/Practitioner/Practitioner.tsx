@@ -112,12 +112,6 @@ export const Practitioner = () => {
                   value={practitioner.phone}
                 />
               </div>
-              <div className="ds-l-col--12 ds-l-md-col--3 ds-u-margin-bottom--2">
-                <InfoItem
-                  label={t("practitioners.detail.contact.fax")}
-                  value={practitioner.fax}
-                />
-              </div>
             </div>
           </section>
           <IdentifierSection identifierData={practitioner.identifiers} />

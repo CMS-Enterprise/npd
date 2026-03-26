@@ -560,8 +560,8 @@ class LocationSerializer(serializers.Serializer):
         else:
             location.status = "inactive"
         location.name = instance.name
-        if "phone" in representation.keys():
-            location.telecom = representation["phone"]
+        if "phone" in representation.keys() and representation["phone"] is not None:
+            location.telecom = [representation["phone"]]
         if "address" in representation.keys():
             location.address = representation["address"]
             if (
