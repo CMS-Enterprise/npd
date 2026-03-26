@@ -9,6 +9,10 @@ import type { Organization } from "./Organization"
 import type { Period } from "./Period"
 import type { Practitioner } from "./Practitioner"
 import type { Extension } from "./Extension"
+import type { PractitionerRole } from "./PractitionerRole"
+import type { Endpoint, ProtocolProfileStandardToBeUsedWithThisEndpointConnection } from "./Endpoint"
+import type { Location } from "./Location"
+import type { Reference } from "./Reference"
 
 // NOTE: (@abachman-dsac) due to limitations in the fhir.resource.R4B model
 // definitions, we cannot fully generate response types automatically
@@ -26,11 +30,16 @@ export interface FHIRExtension extends Extension {
 export interface FHIRIdentifer extends Identifier {
   type?: FHIRCodeableConcept
   period?: Period
+  assigner?: Reference
 }
 
 export interface FHIRCodeableConcept extends CodeableConcept {
   coding?: Coding[]
   text?: string
+}
+
+export interface FHIRReference extends Reference {
+  reference: string
 }
 
 export interface FHIRPractitioner extends Practitioner {
@@ -40,11 +49,40 @@ export interface FHIRPractitioner extends Practitioner {
   qualification?: FHIRPractitionerQualification[] | null
 }
 
+export interface FHIRPractitionerRole extends PractitionerRole {
+  organization: FHIRReference
+  practitioner: FHIRReference
+  endpoint?: Array<FHIRReference>
+  location: Array<FHIRReference>
+  telecom?: ContactPoint[] | null
+}
+
+export interface FHIRProtocol extends ProtocolProfileStandardToBeUsedWithThisEndpointConnection {
+  [key: string]: string
+}
+
+export interface FHIREndpoint extends Endpoint {
+  id: string
+  connectionType: FHIRProtocol
+}
+
+export interface FHIRLocation extends Location {
+  id: string
+  address: Address
+  endpoint?: Array<FHIRReference>
+  telecom?: ContactPoint[] | null
+}
+
 // generated base type is too loosely typed so made this manually
 export interface FHIRPractitionerQualification {
   code: FHIRCodeableConcept
   identifier?: FHIRIdentifer[] | null
   period?: Period | null
+}
+
+export interface FHIREntry<T> {
+  fullUrl: string
+  resource: T
 }
 
 export interface FHIRCollection<T> {
@@ -55,9 +93,17 @@ export interface FHIRCollection<T> {
     resourceType: "Bundle" | string
     type: "searchset" | string
     total: number
-    entry: Array<{
-      fullUrl: string
-      resource: T
-    }>
+    entry: Array<FHIREntry<T> | undefined >
+  }
+}
+export interface FHIREmptyCollection {
+  count: number
+  next: string | null
+  previous: string | null
+  results: {
+    resourceType: "Bundle" | string
+    type: "searchset" | string
+    total: number
+    entry: FHIREntry<never>[]
   }
 }

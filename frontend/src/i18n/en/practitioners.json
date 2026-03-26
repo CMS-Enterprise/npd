@@ -1,6 +1,5 @@
 {
   "npi": "NPI",
-
   "detail": {
     "unavailable": "This content is not currently available.",
     "update": {
@@ -25,37 +24,40 @@
       "phone": "Phone",
       "fax": "Fax"
     },
-    "identifiers": {
-      "title": "Identifiers",
-      "type": "Type",
-      "number": "Number",
-      "details": "Details",
-      "fallback": "No identifiers available"
+    "organizations": {
+      "title": "Organization(s)",
+      "notFound": "No organization relationship found"
     },
-    "taxonomy": {
-      "title": "Taxonomy",
-      "state": "State",
-      "licenseNumber": "License number",
-      "taxonomy": "Taxonomy",
-      "fallback": "No taxonomy information available"
+    "endpoints": {
+      "title": "Endpoint(s)",
+      "connectionType": "Connection Type",
+      "address": "Address",
+      "fallback": "No endpoint information available"
     },
-    "organizations": "Organization(s)",
-    "endpoints": "Endpoint(s)",
-    "locations": "Locations"
+    "locations": {
+      "title": "Location(s)",
+      "name": "Name",
+      "address": "Address",
+      "contact": "Contact",
+      "phone": "Phone",
+      "fax": "Fax",
+      "noContact": "Contact information not available",
+      "fallback": "No location information available"
+    },
+    "feedback": {
+      "subtitle": "Let us know if you see any problems with this provider record."
+    }
   },
-
   "listing": {
     "title": "All Practitioners",
     "taxonomy": "Primary taxonomy",
     "location": "Location"
   },
-
   "search": {
     "title": "Practitioner search",
     "inputLabel": "Name or NPI",
     "button": "Search practitioners"
   },
-
   "sort": {
     "by": "Sort by",
     "first-asc": "First Name (A-Z)",
@@ -63,7 +65,6 @@
     "last-asc": "Last Name (A-Z)",
     "last-desc": "Last Name (Z-A)"
   },
-
   "alert": {
     "heading": "Are you looking for an organization?",
     "body": "Visit the [Organization search](/organizations/search) page."

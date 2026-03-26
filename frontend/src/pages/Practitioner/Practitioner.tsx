@@ -1,5 +1,6 @@
 import { Alert } from "@cmsgov/design-system"
 import classNames from "classnames"
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useLocation, useParams } from "react-router"
 import { FeatureFlag } from "../../components/FeatureFlag"
@@ -9,14 +10,14 @@ import { DetailPageBanner } from "../../components/DetailPageBanner"
 import { PractitionerPresenter } from "../../presenters/PractitionerPresenter"
 import { usePractitionerAPI } from "../../state/requests/practitioners"
 import layout from "../Layout.module.css"
-
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-} from "@cmsgov/design-system"
+import React from "react"
+import { EndpointSection } from "../../components/detailSections/EndpointSection"
+import { LocationSection } from "../../components/detailSections/LocationSection"
+import { SectionWithContentOrFallback } from "../../components/detailSections/SectionWithContentOrFallback"
+import { IdentifierSection } from "../../components/detailSections/IdentifierSection"
+import { TaxonomySection } from "../../components/detailSections/TaxonomySection"
+import { FeedbackCTA } from "../../components/forms/feedback/FeedbackCTA"
+import { FeedbackForm } from "../../components/forms/feedback/FeedbackForm"
 
 export const Practitioner = () => {
   const { t } = useTranslation()
@@ -24,6 +25,8 @@ export const Practitioner = () => {
   const { data, error, isLoading } = usePractitionerAPI(practitionerId)
   const location = useLocation()
   const searchUrl = location.state?.searchUrl
+
+  const [isReportIssueOpen, setIsReportIssueOpen] = useState(false)
 
   if (isLoading) {
     return <LoadingIndicator />
@@ -62,18 +65,30 @@ export const Practitioner = () => {
 
         <FeatureFlag name="PRACTITIONER_LOOKUP_DETAILS">
           <section className={layout.section}>
-            <h2>{t("practitioners.detail.about.title")}</h2>
-            <div className="ds-l-row">
-              <div className="ds-l-col--12 ds-l-md-col--3 ds-u-margin-bottom--2">
-                <InfoItem
-                  label={t("practitioners.detail.about.name")}
-                  value={practitioner.name}
-                />
+            <div className="ds-l-row ds-u-align-items--start">
+              <div className="ds-l-col--12 ds-l-md-col--8">
+                <h2 className="ds-u-margin-top--0">
+                  {t("practitioners.detail.about.title")}
+                </h2>
+                <div className="ds-l-row">
+                  <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
+                    <InfoItem
+                      label={t("practitioners.detail.about.name")}
+                      value={practitioner.name}
+                    />
+                  </div>
+                  <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
+                    <InfoItem
+                      label={t("practitioners.detail.about.gender")}
+                      value={practitioner.gender}
+                    />
+                  </div>
+                </div>
               </div>
-              <div className="ds-l-col--12 ds-l-md-col--3 ds-u-margin-bottom--2">
-                <InfoItem
-                  label={t("practitioners.detail.about.gender")}
-                  value={practitioner.gender}
+              <div className="ds-l-col--12 ds-l-md-col--4">
+                <FeedbackCTA
+                  subtitle={t("practitioners.detail.feedback.subtitle")}
+                  onButtonClick={() => setIsReportIssueOpen(true)}
                 />
               </div>
             </div>
@@ -105,81 +120,44 @@ export const Practitioner = () => {
               </div>
             </div>
           </section>
+          <IdentifierSection identifierData={practitioner.identifiers} />
 
-          <section className={layout.section}>
-            <h2>{t("practitioners.detail.identifiers.title")}</h2>
-            {/* TODO: look into modularizing table creation to reduce code duplication */}
-            {practitioner.identifiers.length > 0 ? (
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>
-                      {t("practitioners.detail.identifiers.type")}
-                    </TableCell>
-                    <TableCell>
-                      {t("practitioners.detail.identifiers.number")}
-                    </TableCell>
-                    <TableCell>
-                      {t("practitioners.detail.identifiers.details")}
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {practitioner.identifiers.map((identifier, index) => (
-                    <TableRow key={index}>
-                      <TableCell>{identifier.system}</TableCell>
-                      <TableCell>{identifier.number}</TableCell>
-                      <TableCell>{identifier.details}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            ) : (
-              <p className="ds-u-color--gray">
-                {t("practitioners.detail.identifiers.fallback")}
-              </p>
-            )}
-          </section>
+          <TaxonomySection taxonomyData={practitioner.taxonomy} />
 
-          <section className={layout.section}>
-            <h2>{t("practitioners.detail.taxonomy.title")}</h2>
-            {practitioner.taxonomy.length > 0 ? (
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>
-                      {t("practitioners.detail.taxonomy.state")}
-                    </TableCell>
-                    <TableCell>
-                      {t("practitioners.detail.taxonomy.licenseNumber")}
-                    </TableCell>
-                    <TableCell>
-                      {t("practitioners.detail.taxonomy.taxonomy")}
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {practitioner.taxonomy.map((taxonomy, index) => (
-                    <TableRow key={index}>
-                      <TableCell>{taxonomy.state}</TableCell>
-                      <TableCell>{taxonomy.licenseNumber}</TableCell>
-                      <TableCell>{taxonomy.displayCode}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            ) : (
-              <p className="ds-u-color--gray">
-                {t("practitioners.detail.taxonomy.fallback")}
-              </p>
-            )}
-          </section>
-
-          <section className={layout.section}>
-            <h2>Organization(s)</h2>
-            <p>[endpoint information]</p>
-          </section>
+          <SectionWithContentOrFallback
+            title={t("practitioners.detail.organizations.title")}
+            fallback={t("practitioners.detail.organizations.notFound")}
+            arrayData={Object.keys(practitioner.organizations)}
+          >
+            {Object.entries(practitioner.organizations).map(([id, obj]) => (
+              <React.Fragment key={id}>
+                <h3>{`${obj.organization.name} (NPI: ${obj.organization.identifier?.filter((identifier) => (identifier.system = "http://terminology.hl7.org/NamingSystem/npi"))[0].value})`}</h3>
+                <LocationSection
+                  locationData={obj.locations.map((location) => {
+                    return location
+                  })}
+                  subsection={true}
+                />
+                <EndpointSection
+                  endpointData={obj.endpoints.map((endpoint) => {
+                    return endpoint
+                  })}
+                  subsection={true}
+                />
+              </React.Fragment>
+            ))}
+          </SectionWithContentOrFallback>
         </FeatureFlag>
+
+        <FeedbackForm
+          isOpen={isReportIssueOpen}
+          onExit={() => setIsReportIssueOpen(false)}
+          presenterData={{
+            recordName: practitioner.name,
+            recordId: practitionerId,
+            npi: practitioner.npi,
+          }}
+        />
 
         <div className="ds-u-margin-top--7"></div>
       </main>

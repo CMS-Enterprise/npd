@@ -53,6 +53,11 @@ class PractitionerRoleFilterSet(filters.FilterSet):
         help_text=docs.filters.organization.type,
     )
 
+    organization_identifier = filters.CharFilter(
+        method="filter_organization_identifier",
+        help_text=docs.filters.organization.identifier,
+    )
+
     location_near = filters.CharFilter(
         method="filter_distance",
         help_text=docs.filters.location.near,
@@ -167,6 +172,15 @@ class PractitionerRoleFilterSet(filters.FilterSet):
             value,
             npi_prefix="provider_to_organization__individual__npi__",
             other_prefix="provider_to_organization__individual__providertootherid__",
+        )
+
+    def filter_organization_identifier(self, queryset, name, value):
+        return filter_identifier_general(
+            queryset,
+            name,
+            value,
+            npi_prefix="provider_to_organization__organization__clinicalorganization__npi__",
+            other_prefix="provider_to_organization__organization__clinicalorganization__organizationtootherid__",
         )
 
     def filter_specialty(self, queryset, name, value):

@@ -11,6 +11,8 @@ from .filter_utils import (
     address_use_search,
     general_filter_distance,
     gen_nucc_code_filter,
+    filter_organization_name_gen,
+    filter_identifier_general,
 )
 
 
@@ -19,6 +21,16 @@ class LocationFilterSet(filters.FilterSet):
         field_name="name",
         lookup_expr="contains",
         help_text=docs.filters.location.name,
+    )
+
+    organization_name = filters.CharFilter(
+        method="filter_organization_name",
+        help_text=docs.filters.organization.name,
+    )
+
+    organization_identifier = filters.CharFilter(
+        method="filter_organization_identifier",
+        help_text=docs.filters.organization.identifier,
     )
 
     organization_type = filters.CharFilter(
@@ -61,6 +73,9 @@ class LocationFilterSet(filters.FilterSet):
         model = Location
         fields = [
             "name",
+            "organization_name",
+            "organization_identifier",
+            "organization_type",
             "address",
             "address_city",
             "address_state",
@@ -68,6 +83,19 @@ class LocationFilterSet(filters.FilterSet):
             "address_use",
             "near",
         ]
+
+    def filter_organization_name(self, queryset, name, value):
+        return filter_organization_name_gen(queryset, name, value.upper(), prefix="organization__")
+
+    def filter_organization_identifier(self, queryset, name, value):
+        return filter_identifier_general(
+            queryset,
+            name,
+            value,
+            npi_prefix="organization__clinicalorganization__npi__",
+            ein_prefix="ein__",
+            other_prefix="organization__clinicalorganization__organizationtootherid__",
+        )
 
     def filter_organization_type(self, queryset, name, value):
         return gen_nucc_code_filter(queryset, name, value)
@@ -87,7 +115,7 @@ class LocationFilterSet(filters.FilterSet):
     def filter_address_use(self, queryset, name, value):
         return address_use_search(
             queryset, name, value, prefix="organization__organizationtoaddress"
-        ).distinct()
+        )
 
     def filter_distance(self, queryset, name, value):
         return general_filter_distance(queryset, name, value)

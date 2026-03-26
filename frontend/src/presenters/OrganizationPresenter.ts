@@ -1,12 +1,12 @@
-import type { FHIROrganization } from "../@types/fhir"
 import {
   formatAddress,
   formatDetails,
-  formatIdentifierType,
 } from "../helpers/formatters"
+import type { OrganizationDetailsType } from "../state/requests/organizations"
 
 export class OrganizationPresenter {
-  constructor(private record: FHIROrganization) {}
+  private record: OrganizationDetailsType
+  constructor(record: OrganizationDetailsType) { this.record = record }
 
   get name(): string {
     return this.record.name ?? ""
@@ -58,7 +58,38 @@ export class OrganizationPresenter {
       type: identity.type?.coding?.[0]?.display?.trim() || "Unknown",
       number: identity.value,
       details: identity.period ? formatDetails(identity.period) : "",
-      system: formatIdentifierType(identity.system as string) || "Unknown",
     }))
   }
-}
+
+  get practitioners() {
+    if (!this.record.practitionerData?.length) return []
+
+    return this.record.practitionerData.map((practitioner) => ({
+      name: practitioner?.name?.[0].text,
+      taxonomy: practitioner?.qualification?.[0]?.code?.coding?.[0]?.display ?? "Unknown",
+    }))
+  }
+
+  get locations() {
+    if (!this.record.locationData?.results.entry.length) return []
+
+    return this.record.locationData.results.entry.map((location) => ({
+      id: location?.resource.id,
+      name: location?.resource.name,
+      address: formatAddress(location?.resource.address, false),
+      contact: location?.resource.telecom
+    }))
+  }
+
+  get endpoints() {
+    if (!this.record.endpointData?.length || this.record.endpointData[0] == undefined) return []
+
+    return this.record.endpointData.map((endpoint) => ({
+      id: endpoint?.id,
+      address: endpoint?.address,
+      connectionType: endpoint?.connectionType.display
+    }))
+  }
+
+  }
+

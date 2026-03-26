@@ -17,6 +17,24 @@ def SmartyStreetstoFHIR(address):
     )
 
 
+def other_id_type_to_fhir(other_id_type):
+    fhirIdentifierTypes = {
+        2: {
+            "code": "UPIN",
+            "display": "Medicare/CMS (formerly HCFA)'s Universal Physician Identification numbers",
+        },
+        4: {"code": "MCR", "display": "Practitioner Medicare Number"},
+        5: {"code": "MCD", "display": "Practitioner Medicaid Number"},
+        6: {"code": "MCR", "display": "Practitioner Medicare Number"},
+        7: {"code": "MCR", "display": "Practitioner Medicare Number"},
+        8: {"code": "PPIN", "display": "Medicare/CMS Performing Provider Identification Number"},
+    }
+    if other_id_type in fhirIdentifierTypes.keys():
+        return fhirIdentifierTypes[other_id_type]
+    else:
+        return {"code": "OTHER", "display": "Other"}
+
+
 def get_schema_data(request):
     schema_view = SpectacularJSONAPIView.as_view()
     response = schema_view(request._request)
