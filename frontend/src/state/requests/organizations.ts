@@ -130,9 +130,9 @@ export const useFullOrganizationAPI = (organizationId: string | undefined) => {
     },
     fullDataError: organizationError ?? practitionerRoleError ?? locationsError,
     fullDataLoading: organizationLoading || practitionerRoleLoading || practitionerQueries.loading || locationsLoading || endpointQueries.loading,
-    endpointDataLoading: endpointQueries.loading,
-    locationDataLoading: locationsLoading,
-    practitionerDataLoading: practitionerQueries.loading,
+    endpointDataLoading: practitionerRoleLoading || endpointQueries.loading,
+    locationDataLoading: practitionerRoleLoading || locationsLoading,
+    practitionerDataLoading: practitionerRoleLoading || practitionerQueries.loading,
   }
 }
 
