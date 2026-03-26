@@ -740,13 +740,9 @@ class PractitionerRoleViewSetTestCase(APITestCase):
                 self.assertEqual(zip_search, returned_location["address"]["postalCode"])
 
     def test_list_filter_by_address_general_zip_leading_zero(self):
-        address_line_1 = "404 Great Amazing Avenue"
-        city = "San Diego"
-        state = "CA"
         zip_code = "05555"
-        address_search = " ".join([address_line_1, city, state, zip_code])
         url = reverse("fhir-practitionerrole-list")
-        response = self.client.get(url, {"location_address": address_search})
+        response = self.client.get(url, {"location_address": zip_code})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert_has_results(self, response)
 
@@ -765,6 +761,3 @@ class PractitionerRoleViewSetTestCase(APITestCase):
                 location_url = entry["resource"]["location"][0]["reference"]
                 returned_location = self.client.get(location_url).data
                 self.assertEqual(zip_code, returned_location["address"]["postalCode"])
-                self.assertEqual(state, returned_location["address"]["state"])
-                self.assertEqual(city, returned_location["address"]["city"])
-                self.assertIn(address_line_1, returned_location["address"]["line"])

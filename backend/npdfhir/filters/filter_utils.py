@@ -11,17 +11,11 @@ from uuid import UUID
 
 
 def broad_address_match(queryset, name, value, prefix=""):
-    location_filter_paths = [
-        prefix + "address__address_us__delivery_line_1",
-        prefix + "address__address_us__delivery_line_2",
-        prefix + "address__address_us__city_name",
-        prefix + "address__address_us__state_code__abbreviation",
-        prefix + "address__address_us__zipcode",
-    ]
+    query = SearchQuery(value, search_type="websearch", config="english")
+    path = prefix + "address__address_us__search_vector"
+    arg = {path: query}
 
-    return queryset.annotate(search=SearchVector(*location_filter_paths)).filter(
-        search=SearchQuery(value, search_type="websearch", config="english")
-    )
+    return queryset.filter(**arg)
 
 
 def field_based_vector_search(queryset, name, value, address_path):
@@ -32,12 +26,14 @@ def field_based_vector_search(queryset, name, value, address_path):
 
 def city_address_search(queryset, name, value, prefix=""):
     path = prefix + "address__address_us__city_name"
-    return field_based_vector_search(queryset, name, value, path)
+    arg = {path: value}
+    return queryset.filter(**arg)
 
 
 def state_address_search(queryset, name, value, prefix=""):
     path = prefix + "address__address_us__state_code__abbreviation"
-    return field_based_vector_search(queryset, name, value, path)
+    arg = {path: value}
+    return queryset.filter(**arg)
 
 
 def postalcode_address_search(queryset, name, value, prefix=""):
@@ -153,6 +149,6 @@ def gen_nucc_code_filter(queryset, name, value, prefix=""):
 def gen_nucc_display_filter(queryset, name, value, prefix=""):
     path = (
         prefix
-        + "organization__clinicalorganization__organizationtotaxonomy__nucc_code__display_name"
+        + "organization__clinicalorganization__organizationtotaxonomy__nucc_code__search_vector"
     )
     return field_based_vector_search(queryset, name, value, path)

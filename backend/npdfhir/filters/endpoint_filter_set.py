@@ -40,7 +40,3 @@ class EndpointFilterSet(filters.FilterSet):
     def filter_status(self, queryset, name, value):
         # needs to be implemented
         return queryset
-
-    def filter_organization(self, queryset, name, value):
-        # needs to be implemented
-        return queryset

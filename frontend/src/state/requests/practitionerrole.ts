@@ -4,10 +4,11 @@ import { apiUrl } from "../api"
 interface PractitionerRoleParams {
     practitionerNPI?: string | undefined,
     organizationNPI?: string | undefined,
+    signal: AbortSignal | null | undefined
 }
 
 export const fetchPractitionerRoles = async (
-  {practitionerNPI, organizationNPI}: PractitionerRoleParams
+  {practitionerNPI, organizationNPI, signal}: PractitionerRoleParams
 ): Promise<FHIRCollection<FHIRPractitionerRole>> => {
   const query: Array<string> = []
   if (practitionerNPI !== undefined) {
@@ -19,7 +20,7 @@ export const fetchPractitionerRoles = async (
   if (query.length > 0) {
     const url = apiUrl(`/fhir/PractitionerRole/?page_size=1000&${query.join('&')}`);
 
-    const response = await fetch(url);
+    const response = await fetch(url, {signal});
 
     if (!response.ok) {
       console.error(await response.text());

@@ -2,9 +2,9 @@ import { useTranslation } from "react-i18next"
 import { Link } from "react-router"
 import { OrganizationPresenter } from "../../presenters/OrganizationPresenter"
 import search from "../Search.module.css"
-import type { OrganizationDetailsType } from "../../state/requests/organizations"
+import type { FHIROrganization } from "../../@types/fhir"
 
-export const ListedOrganization = ({ data }: { data: OrganizationDetailsType }) => {
+export const ListedOrganization = ({ data }: { data: FHIROrganization }) => {
   const { t } = useTranslation()
   const organization = new OrganizationPresenter(data)
 

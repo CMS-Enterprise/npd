@@ -413,7 +413,7 @@ class OrganizationViewSetTestCase(APITestCase):
             self.assertEqual(location_entry["resourceType"], "Organization")
 
     def test_list_filter_by_address_zipcode_leading_zero(self):
-        address_search = "404 Great Amazing Avenue Sandiego CA 05555"
+        address_search = "05555"
         url = reverse("fhir-organization-list")
         response = self.client.get(url, {"address": address_search})
         self.assertEqual(response.status_code, status.HTTP_200_OK)

@@ -59,10 +59,11 @@ export interface PractitionerDetailsType extends FHIRPractitioner {
 
 export const fetchPractitioner = async (
   practitionerId: string,
+  signal: AbortSignal | null | undefined
 ): Promise<FHIRPractitioner> => {
   const url = apiUrl("/fhir/Practitioner/:practitionerId/", { practitionerId })
 
-  const response = await fetch(url)
+  const response = await fetch(url, { signal })
 
   if (!response.ok) {
     console.error(await response.text())
@@ -72,22 +73,34 @@ export const fetchPractitioner = async (
   return response.json() as Promise<FHIRPractitioner>
 }
 
-
 export const usePractitionerAPI = (practitionerId: string | undefined) => {
-  const {data: practitioner, isLoading: practitionerLoading, error: practitionerError} = useQuery<FHIRPractitioner>({
+  return useQuery<FHIRPractitioner>({
     queryKey: ["practitioner", practitionerId],
-    queryFn: () => {
+    queryFn: ({ signal }) => {
       if (!practitionerId) {
         return Promise.reject("no practitionerId was provided")
       }
 
-      return fetchPractitioner(practitionerId);
+      return fetchPractitioner(practitionerId, signal);
+    },
+  })
+}
+
+export const useFullPractitionerAPI = (practitionerId: string | undefined) => {
+  const {data: practitioner, isLoading: practitionerLoading, error: practitionerError} = useQuery<FHIRPractitioner>({
+    queryKey: ["practitioner", practitionerId],
+    queryFn: ({ signal }) => {
+      if (!practitionerId) {
+        return Promise.reject("no practitionerId was provided")
+      }
+
+      return fetchPractitioner(practitionerId, signal);
     },
   })
   const npi = practitioner?.identifier?.filter(identifier => identifier.system = "http://terminology.hl7.org/NamingSystem/npi")[0].value?.toString();
   const {data: practitionerRole, isLoading: practitionerRoleLoading, error: practitionerRoleError} = useQuery<FHIRCollection<FHIRPractitionerRole>>({
     queryKey: ["practitionerRole", npi, practitionerId],
-    queryFn: () => fetchPractitionerRoles({practitionerNPI: npi}),
+    queryFn: ({ signal }) => fetchPractitionerRoles({practitionerNPI: npi, signal: signal}),
     enabled: !!npi,
   })
   const organizationIdDups: Array<string> | undefined = practitionerRole?.results.entry.map((role) => { return role?.resource.organization.reference.split('/').pop() ?? ""});
@@ -96,7 +109,7 @@ export const usePractitionerAPI = (practitionerId: string | undefined) => {
     queries: organizationIds.map((organizationId: string) => {
       return {
         queryKey: ["organization", npi, organizationId],
-        queryFn: () => fetchOrganization(organizationId),
+        queryFn: ({ signal }: {signal?: AbortSignal}) => fetchOrganization(organizationId, signal),
         enabled: !!organizationIds,
       }
     }),
@@ -113,7 +126,7 @@ export const usePractitionerAPI = (practitionerId: string | undefined) => {
     queries: locationIds.map((locationId: string) => {
       return {
         queryKey: ["location", npi, locationId],
-        queryFn: () => fetchLocation(locationId),
+        queryFn: ({ signal }: {signal?: AbortSignal}) => fetchLocation(locationId, signal),
         enabled: !!locationIds,
       }
     }),
@@ -130,9 +143,9 @@ export const usePractitionerAPI = (practitionerId: string | undefined) => {
     queries: endpointIds.map((endpointId: string | undefined) => {
       return {
         queryKey: ["endpoint", npi, endpointId],
-        queryFn: () => { 
+        queryFn: ({ signal }: {signal?: AbortSignal}) => { 
           if (endpointId !== undefined) {
-            return fetchEndpoint(endpointId)
+            return fetchEndpoint(endpointId, signal)
           }
           else {
             return undefined
@@ -149,15 +162,15 @@ export const usePractitionerAPI = (practitionerId: string | undefined) => {
     }
   })
   return {
-    data: {
+    fullData: {
       ...practitioner,
       practitionerRoleData: practitionerRole,
       organizationData: organizationQueries.data,
       locationData: locationQueries.data,
       endpointData: endpointQueries.data
     },
-    error: practitionerError ?? practitionerRoleError,
-    isLoading: practitionerLoading || practitionerRoleLoading || organizationQueries.loading || endpointQueries.loading || locationQueries.loading
+    fullDataError: practitionerError ?? practitionerRoleError,
+    fullDataLoading: practitionerLoading || practitionerRoleLoading || organizationQueries.loading || endpointQueries.loading || locationQueries.loading
   }
 }
 

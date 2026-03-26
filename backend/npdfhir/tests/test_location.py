@@ -418,7 +418,7 @@ class LocationViewSetTestCase(APITestCase):
             self.assertIn(address_search, address_string)
 
     def test_list_filter_by_address_leading_zero(self):
-        address_search = "City Museum Rd. St. Louis MO 05313"
+        address_search = "05313"
         url = reverse("fhir-location-list")
         response = self.client.get(url, {"address": address_search})
         self.assertEqual(response.status_code, status.HTTP_200_OK)

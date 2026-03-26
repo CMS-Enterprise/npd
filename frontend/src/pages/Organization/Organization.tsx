@@ -7,8 +7,8 @@ import {
   TableRow,
 } from "@cmsgov/design-system"
 
-import { useOrganizationAPI } from "../../state/requests/organizations"
-import { OrganizationPresenter } from "../../presenters/OrganizationPresenter"
+import { useOrganizationAPI, useFullOrganizationAPI  } from "../../state/requests/organizations"
+import { OrganizationPresenter, FullOrganizationPresenter } from "../../presenters/OrganizationPresenter"
 
 import classNames from "classnames"
 import { useTranslation } from "react-i18next"
@@ -25,11 +25,13 @@ import { FeedbackCTA } from "../../components/forms/feedback/FeedbackCTA"
 import { useState } from "react"
 import { FeedbackForm } from "../../components/forms/feedback/FeedbackForm"
 import { TaxonomySection } from "../../components/detailSections/TaxonomySection"
+import { SectionWithContentOrFallback } from "../../components/detailSections/SectionWithContentOrFallback"
 
 export const Organization = () => {
   const { t } = useTranslation()
   const { organizationId } = useParams()
   const { data, isLoading } = useOrganizationAPI(organizationId)
+  const { fullData, endpointDataLoading, locationDataLoading, practitionerDataLoading } = useFullOrganizationAPI(organizationId)
   const location = useLocation()
   const searchUrl = location.state?.searchUrl
 
@@ -42,6 +44,7 @@ export const Organization = () => {
   const contentClass = classNames(layout.content, "ds-l-container")
 
   const organization = new OrganizationPresenter(data!)
+  const fullOrganization = new FullOrganizationPresenter(fullData!)
 
   return (
     <>
@@ -125,39 +128,64 @@ export const Organization = () => {
 
           <TaxonomySection taxonomyData={organization.types} />
 
-          <EndpointSection endpointData={organization.endpoints} />
-
-          <LocationSection locationData={organization.locations} />
-
-          <section className={layout.section}>
-            <h2>{t("organizations.practitioners.title")}</h2>
-            {organization.practitioners.length > 0 ? (
-              <Table data-testid="practitioner-table">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>
-                      {t("organizations.practitioners.name")}
-                    </TableCell>
-                    <TableCell>
-                      {t("organizations.practitioners.taxonomy")}
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {organization.practitioners.map((practitioner, index) => (
-                    <TableRow key={index}>
-                      <TableCell><a href={`/practitioners/${practitioner.id}`}>{practitioner.name}</a></TableCell>
-                      <TableCell>{practitioner.taxonomy}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+          { endpointDataLoading ?  (
+              <>
+                <section className={layout.section}>
+                  <h2>{t("detailsections.endpoints.title")}</h2>
+                  <LoadingIndicator/>
+                </section>
+              </>
             ) : (
-              <p className="ds-u-color--gray">
-                {t("organizations.practitioners.fallback")}
-              </p>
-            )}
-          </section>
+              <EndpointSection endpointData={fullOrganization.endpoints} />
+            ) 
+          }
+
+          { locationDataLoading ?  (
+              <>
+                <section className={layout.section}>
+                  <h2>{t("detailsections.locations.title")}</h2>
+                  <LoadingIndicator/>
+                </section>
+              </>
+            ) : (
+              <LocationSection locationData={fullOrganization.locations} />
+            ) 
+          }
+
+        { practitionerDataLoading ?  (
+              <>
+                <section className={layout.section}>
+                  <h2>{t("organizations.practitioners.title")}</h2>
+                  <LoadingIndicator/>
+                </section>
+              </>
+            ) : (
+              <SectionWithContentOrFallback title={t("organizations.practitioners.title")} fallback={t("organizations.practitioners.fallback")} arrayData={fullOrganization.practitioners}>
+                  <Table data-testid="practitioner-table">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>
+                            {t("organizations.practitioners.name")}
+                          </TableCell>
+                          <TableCell>
+                            {t("organizations.practitioners.taxonomy")}
+                          </TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {fullOrganization.practitioners.map((practitioner, index) => (
+                          <TableRow key={index}>
+                            <TableCell><a href={`/practitioners/${practitioner.id}`}>{practitioner.name}</a></TableCell>
+                            <TableCell>{practitioner.taxonomy}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                </SectionWithContentOrFallback>
+            ) 
+          }
+
+          
         </FeatureFlag>
 
         <FeedbackForm

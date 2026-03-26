@@ -2,9 +2,9 @@ import { useTranslation } from "react-i18next"
 import { Link } from "react-router"
 import search from "../Search.module.css"
 import { PractitionerPresenter } from "../../presenters/PractitionerPresenter"
-import type { PractitionerDetailsType } from "../../state/requests/practitioners"
+import type { FHIRPractitioner } from "../../@types/fhir"
 
-export const ListedPractitioner = ({ data }: { data: PractitionerDetailsType }) => {
+export const ListedPractitioner = ({ data }: { data: FHIRPractitioner }) => {
   const { t } = useTranslation()
   const practitioner = new PractitionerPresenter(data)
 
