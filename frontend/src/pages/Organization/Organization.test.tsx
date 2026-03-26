@@ -96,19 +96,18 @@ describe("Organization", () => {
         settings: { feature_flags: { ORGANIZATION_LOOKUP_DETAILS: false } },
       })
 
-      // ensure FeatureFlag components have finished loading
       await waitFor(() => screen.findByText("Content not available"))
 
       expect(
         await screen.queryByText("About", { selector: "section h2" }),
       ).toBeNull()
     })
+
     it("shows detailed content with the ORGANIZATION_LOOKUP_DETAILS feature flag", async () => {
       render(<RoutedOrganization path="/organizations/12345" />, {
         settings: { feature_flags: { ORGANIZATION_LOOKUP_DETAILS: true } },
       })
 
-      // ensure FeatureFlag and org details components have finished loading
       await waitFor(() => screen.getByTestId("location-table"))
 
       expect(
@@ -148,7 +147,14 @@ describe("Organization", () => {
         within(taxonomySection).getByText("Pediatric Clinic"),
       ).toBeInTheDocument()
 
-      expect(await screen.getByText("DR. KIRK AADALEN")).toBeInTheDocument()
+      const practitionerHeader = await screen.getByRole("link", {
+        name: "DR. KIRK AADALEN",
+      })
+      expect(practitionerHeader).toBeInTheDocument()
+      expect(practitionerHeader).toHaveAttribute(
+        "href",
+        "/practitioners/c3a56586-40a8-4fef-9394-2dd0c0ba0b60",
+      )
       expect(
         await screen.getByText("0006 Aspen Glen Court, Edwards, CO 81632"),
       ).toBeInTheDocument()
@@ -257,19 +263,9 @@ describe("Organization", () => {
           within(dialog).getByRole("button", { name: /submit/i }),
         ).not.toBeDisabled()
       })
-      const practitionerHeader = await screen.getByRole("link", {name: "DR. KIRK AADALEN"})
-      expect(practitionerHeader).toBeInTheDocument()
-      expect(practitionerHeader).toHaveAttribute('href', '/practitioners/c3a56586-40a8-4fef-9394-2dd0c0ba0b60');
-      expect(await screen.getByText("0006 Aspen Glen Court, Edwards, CO 81632")).toBeInTheDocument()
-      expect (await screen.getByText("555-555-5555", {exact: false})).toBeInTheDocument()
-      expect (await screen.getByText("fhir.test-org.org")).toBeInTheDocument()
-      expect (await screen.getByText("HL7 FHIR")).toBeInTheDocument()
-      expect(await screen.queryByText("Contact information not available")).not.toBeInTheDocument()
-      expect(await screen.queryByText("No location information available")).not.toBeInTheDocument()
-      expect(await screen.queryByText("No endpoint information available")).not.toBeInTheDocument()
-      expect(await screen.queryByText("No practitioner information available")).not.toBeInTheDocument()
     })
   })
+
   describe("without practitioner role data", () => {
     beforeEach(() => {
       mockGlobalFetch([
@@ -288,25 +284,34 @@ describe("Organization", () => {
         settings: { feature_flags: { ORGANIZATION_LOOKUP_DETAILS: true } },
       })
 
-      // ensure FeatureFlag and org details components have finished loading
-      await waitFor(() => screen.getByTestId('location-table'))
-      expect(await screen.getByText("0006 Aspen Glen Court, Edwards, CO 81632")).toBeInTheDocument()
-      expect (await screen.getByText("555-555-5555", {exact: false})).toBeInTheDocument()
-      expect (await screen.getByText("fhir.test-org.org")).toBeInTheDocument()
-      expect (await screen.getByText("HL7 FHIR")).toBeInTheDocument()
-      expect(await screen.queryByText("Contact information not available")).not.toBeInTheDocument()
-      expect(await screen.queryByText("No location information available")).not.toBeInTheDocument()
-      expect(await screen.queryByText("No endpoint information available")).not.toBeInTheDocument()
+      await waitFor(() => screen.getByTestId("location-table"))
 
-      expect(await screen.getByText("No practitioner information available")).toBeInTheDocument()
-      expect(await screen.queryByRole("cell", {name: "DR. KIRK AADALEN"})).not.toBeInTheDocument()
-    
+      expect(
+        await screen.getByText("0006 Aspen Glen Court, Edwards, CO 81632"),
+      ).toBeInTheDocument()
+      expect(
+        await screen.getByText("555-555-5555", { exact: false }),
+      ).toBeInTheDocument()
+      expect(await screen.getByText("fhir.test-org.org")).toBeInTheDocument()
+      expect(await screen.getByText("HL7 FHIR")).toBeInTheDocument()
+      expect(
+        await screen.queryByText("Contact information not available"),
+      ).not.toBeInTheDocument()
+      expect(
+        await screen.queryByText("No location information available"),
+      ).not.toBeInTheDocument()
+      expect(
+        await screen.queryByText("No endpoint information available"),
+      ).not.toBeInTheDocument()
+      expect(
+        await screen.getByText("No practitioner information available"),
+      ).toBeInTheDocument()
+      expect(
+        await screen.queryByRole("cell", { name: "DR. KIRK AADALEN" }),
+      ).not.toBeInTheDocument()
+    })
   })
-  })
-describe("without endpoint data", () => {
-  beforeEach(() => {
-    mockGlobalFetch([orgApiResponse, emptyPractitionerRoleApiResponse, locationsApiResponseNoEndpoints])
-  })
+
   describe("without endpoint data", () => {
     beforeEach(() => {
       mockGlobalFetch([
@@ -323,8 +328,9 @@ describe("without endpoint data", () => {
       render(<RoutedOrganization path="/organizations/123456" />, {
         settings: { feature_flags: { ORGANIZATION_LOOKUP_DETAILS: true } },
       })
-      // ensure FeatureFlag and org details components have finished loading
+
       await waitFor(() => screen.getByTestId("location-table"))
+
       expect(
         await screen.getByText("0006 Aspen Glen Court, Edwards, CO 81632"),
       ).toBeInTheDocument()
@@ -346,6 +352,7 @@ describe("without endpoint data", () => {
       ).toBeInTheDocument()
     })
   })
+
   describe("without location data", () => {
     beforeEach(() => {
       mockGlobalFetch([
@@ -362,8 +369,9 @@ describe("without endpoint data", () => {
       render(<RoutedOrganization path="/organizations/12345" />, {
         settings: { feature_flags: { ORGANIZATION_LOOKUP_DETAILS: true } },
       })
-      // ensure FeatureFlag components have finished loading
+
       await waitFor(() => screen.findByText("About"))
+
       expect(
         await screen.queryByText("0006 Aspen Glen Court, Edwards, CO 81632"),
       ).not.toBeInTheDocument()
