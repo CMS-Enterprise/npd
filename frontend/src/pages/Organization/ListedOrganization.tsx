@@ -27,7 +27,7 @@ export const ListedOrganization = ({ data }: { data: OrganizationDetailsType }) 
           <div className="ds-l-col--4 ds-m-col--6">
             <strong>{t("organizations.listing.taxonomy")}</strong>
             <br />
-            {organization.types.map(taxonomy => taxonomy.display).slice(0,5).join(",") ?? "---"}
+            {organization.types.map(taxonomy => taxonomy.display).slice(0,5).join(", ") ?? "---"}
           </div>
           <div
             className="ds-l-col--4 ds-m-col--6"

@@ -27,7 +27,7 @@ export const ListedPractitioner = ({ data }: { data: PractitionerDetailsType }) 
           <div className="ds-l-col--4 ds-m-col--6">
             <strong>{t("practitioners.listing.taxonomy")}</strong>
             <br />
-            {practitioner.taxonomy.map(taxonomy => taxonomy.display).slice(0,5).join(",") ?? "---"}
+            {practitioner.taxonomy.map(taxonomy => taxonomy.display).slice(0,5).join(", ") ?? "---"}
           </div>
           <div
             className="ds-l-col--4 ds-m-col--6"
