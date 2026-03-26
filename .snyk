@@ -6,11 +6,4 @@ ignore:
     - '*' :
         reason: 'No remediation available'
         expires: '2026-04-04T17:33:45.004Z'
-  SNYK-JS-PICOMATCH-15765511:
-    - '*' :
-        reason: 'No remediation available'
-        expires: '2026-04-04T17:33:45.004Z'
-  SNYK-JS-PICOMATCH-15765513:
-    - '*' :
-        reason: 'No remediation available'
-        expires: '2026-04-04T17:33:45.004Z'
+  
