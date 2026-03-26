@@ -29,10 +29,11 @@ export interface OrganizationDetailsType extends FHIROrganization {
 
 export const fetchOrganization = async (
   organizationId: string ,
+  signal: AbortSignal | null | undefined
 ): Promise<FHIROrganization> => {
   const url = apiUrl("/fhir/Organization/:organizationId/", { organizationId })
 
-  const response = await fetch(url)
+  const response = await fetch(url, {signal})
 
   if (!response.ok) {
     console.error(await response.text())
@@ -43,34 +44,48 @@ export const fetchOrganization = async (
 }
 
 export const useOrganizationAPI = (organizationId: string | undefined) => {
-  const {data: organization, isLoading: organizationLoading, error: organizationError} = useQuery<FHIROrganization>({
+  return useQuery<FHIROrganization>({
     queryKey: ["organization", organizationId],
-    queryFn: () => {
+    queryFn: ({ signal }) => {
       if (!organizationId) {
         return Promise.reject("no organizationId was provided")
       }
 
-      return fetchOrganization(organizationId)
+      return fetchOrganization(organizationId, signal)
+    },
+  })
+}
+
+export const useFullOrganizationAPI = (organizationId: string | undefined) => {
+  const {data: organization, isLoading: organizationLoading, error: organizationError} = useQuery<FHIROrganization>({
+    queryKey: ["organization", organizationId],
+    queryFn: ({ signal }) => {
+      if (!organizationId) {
+        return Promise.reject("no organizationId was provided")
+      }
+
+      return fetchOrganization(organizationId, signal)
     },
   })
   const npi = organization?.identifier?.filter(identifier => identifier.system = "http://terminology.hl7.org/NamingSystem/npi")[0].value?.toString();
   const {data: practitionerRole, isLoading: practitionerRoleLoading, error: practitionerRoleError} = useQuery<FHIRCollection<FHIRPractitionerRole>>({
     queryKey: ["practitionerRole", npi, organizationId],
-    queryFn: () => fetchPractitionerRoles({organizationNPI: npi}),
+    queryFn: ({ signal }) => fetchPractitionerRoles({organizationNPI: npi, signal: signal}),
     enabled: !!npi,
   })
   const {data: locations, isLoading: locationsLoading, error: locationsError} = useQuery<FHIRCollection<FHIRLocation>>({
     queryKey: ["locations", npi, organizationId],
-    queryFn: () => fetchLocations(npi),
+    queryFn: ({ signal }) => fetchLocations(npi, signal),
     enabled: !!npi,
   })
   const practitionerIdDups: Array<string> | undefined = practitionerRole?.results.entry.map((role) => { return role?.resource.practitioner.reference.split('/').pop() ?? ""});
   const practitionerIds: Array<string> = [...new Set(practitionerIdDups)];
+
   const practitionerQueries = useQueries({
     queries: practitionerIds.map((practitionerId: string) => {
       return {
-        queryKey: ["practitioner", npi, practitionerId],
-        queryFn: () => fetchPractitioner(practitionerId),
+        queryKey: ["practitioner", practitionerId],
+        queryFn: ({ signal }: {signal?: AbortSignal}) => fetchPractitioner(practitionerId, signal),
         enabled: !!practitionerIds,
       }
     }),
@@ -87,9 +102,9 @@ export const useOrganizationAPI = (organizationId: string | undefined) => {
       queries: endpointIds.map((endpointId: string | undefined) => {
         return {
           queryKey: ["endpoint", npi, endpointId],
-          queryFn: () => { 
+          queryFn: ({ signal }: {signal?: AbortSignal}) => { 
             if (endpointId !== undefined) {
-              return fetchEndpoint(endpointId)
+              return fetchEndpoint(endpointId, signal)
             }
             else {
               return undefined
@@ -106,15 +121,18 @@ export const useOrganizationAPI = (organizationId: string | undefined) => {
       }
     })
   return {
-    data: {
+    fullData: {
       ...organization,
       practitionerRoleData: practitionerRole,
       practitionerData: practitionerQueries.data,
       locationData: locations,
       endpointData: endpointQueries.data,
     },
-    error: organizationError ?? practitionerRoleError ?? locationsError,
-    isLoading: organizationLoading || practitionerRoleLoading || practitionerQueries.loading || locationsLoading || endpointQueries.loading
+    fullDataError: organizationError ?? practitionerRoleError ?? locationsError,
+    fullDataLoading: organizationLoading || practitionerRoleLoading || practitionerQueries.loading || locationsLoading || endpointQueries.loading,
+    endpointDataLoading: endpointQueries.loading,
+    locationDataLoading: locationsLoading,
+    practitionerDataLoading: practitionerQueries.loading,
   }
 }
 
@@ -130,6 +148,7 @@ const detectSortKey = (value: OrganizationSortKey): string => {
 
 export const fetchOrganizations = async (
   params: PaginationParams & SearchParams,
+  signal: AbortSignal | null | undefined
 ): Promise<FHIRCollection<FHIROrganization>> => {
   const url = new URL(apiUrl("/fhir/Organization/"))
 
@@ -160,7 +179,7 @@ export const fetchOrganizations = async (
     }
   }
 
-  const response = await fetch(url)
+  const response = await fetch(url, { signal })
   if (!response.ok) {
     console.error(await response.text())
     return Promise.reject(`error in ${url} request`)
@@ -183,8 +202,8 @@ export const useOrganizationsAPI = (
     queryFn:
       options?.requireQuery && (!params.query || params.query.length === 0)
         ? skipToken
-        : () => {
-            return fetchOrganizations(params)
+        : ({ signal }) => {
+            return fetchOrganizations(params, signal)
           },
     placeholderData: keepPreviousData,
   })

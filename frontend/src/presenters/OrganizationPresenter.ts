@@ -1,3 +1,4 @@
+import type { FHIROrganization } from "../@types/fhir"
 import {
   formatAddress,
   formatDetails,
@@ -6,8 +7,8 @@ import {
 import type { OrganizationDetailsType } from "../state/requests/organizations"
 
 export class OrganizationPresenter {
-  private record: OrganizationDetailsType
-  constructor(record: OrganizationDetailsType) { this.record = record }
+  private record: FHIROrganization
+  constructor(record: FHIROrganization) { this.record = record }
 
   get name(): string {
     return this.record.name ?? ""
@@ -70,6 +71,12 @@ export class OrganizationPresenter {
     }))
   }
 
+  }
+
+export class FullOrganizationPresenter {
+  private record: OrganizationDetailsType
+  constructor(record: OrganizationDetailsType) { this.record = record }
+
   get practitioners() {
     if (!this.record.practitionerData?.length) return []
 
@@ -102,4 +109,3 @@ export class OrganizationPresenter {
   }
 
   }
-

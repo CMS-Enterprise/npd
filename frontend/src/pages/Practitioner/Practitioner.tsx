@@ -7,8 +7,8 @@ import { FeatureFlag } from "../../components/FeatureFlag"
 import { InfoItem } from "../../components/InfoItem"
 import { LoadingIndicator } from "../../components/LoadingIndicator"
 import { DetailPageBanner } from "../../components/DetailPageBanner"
-import { PractitionerPresenter } from "../../presenters/PractitionerPresenter"
-import { usePractitionerAPI } from "../../state/requests/practitioners"
+import { PractitionerPresenter, FullPractitionerPresenter } from "../../presenters/PractitionerPresenter"
+import { usePractitionerAPI, useFullPractitionerAPI } from "../../state/requests/practitioners"
 import layout from "../Layout.module.css"
 import React from "react"
 import { EndpointSection } from "../../components/detailSections/EndpointSection"
@@ -23,6 +23,7 @@ export const Practitioner = () => {
   const { t } = useTranslation()
   const { practitionerId } = useParams()
   const { data, error, isLoading } = usePractitionerAPI(practitionerId)
+  const { fullData, fullDataLoading } = useFullPractitionerAPI(practitionerId)
   const location = useLocation()
   const searchUrl = location.state?.searchUrl
 
@@ -39,6 +40,7 @@ export const Practitioner = () => {
   const contentClass = classNames(layout.content, "ds-l-container")
 
   const practitioner = new PractitionerPresenter(data)
+  const fullPractitioner = new FullPractitionerPresenter(fullData)
 
   return (
     <>
@@ -123,29 +125,40 @@ export const Practitioner = () => {
 
           <TaxonomySection taxonomyData={practitioner.taxonomy} />
 
-          <SectionWithContentOrFallback
-            title={t("practitioners.detail.organizations.title")}
-            fallback={t("practitioners.detail.organizations.notFound")}
-            arrayData={Object.keys(practitioner.organizations)}
-          >
-            {Object.entries(practitioner.organizations).map(([id, obj]) => (
-              <React.Fragment key={id}>
-                <h3><a href={`/organizations/${id}`}>{`${obj.organization.name} (NPI: ${obj.organization.identifier?.filter((identifier) => (identifier.system = "http://terminology.hl7.org/NamingSystem/npi"))[0].value})`}</a></h3>
-                <LocationSection
-                  locationData={obj.locations.map((location) => {
-                    return location
-                  })}
-                  subsection={true}
-                />
-                <EndpointSection
-                  endpointData={obj.endpoints.map((endpoint) => {
-                    return endpoint
-                  })}
-                  subsection={true}
-                />
-              </React.Fragment>
-            ))}
-          </SectionWithContentOrFallback>
+          {
+            fullDataLoading ? (
+              <section className={layout.section}>
+                <h2>{t("practitioners.detail.organizations.title")}</h2>
+              <LoadingIndicator />
+              </section>
+            ) : (
+              <SectionWithContentOrFallback
+                title={t("practitioners.detail.organizations.title")}
+                fallback={t("practitioners.detail.organizations.notFound")}
+                arrayData={Object.keys(fullPractitioner.organizations)}
+              >
+                {Object.entries(fullPractitioner.organizations).map(([id, obj]) => (
+                  <React.Fragment key={id}>
+                    <h3><a href={`/organizations/${id}`}>{`${obj.organization.name} (NPI: ${obj.organization.identifier?.filter((identifier) => (identifier.system = "http://terminology.hl7.org/NamingSystem/npi"))[0].value})`}</a></h3>
+                    <LocationSection
+                      locationData={obj.locations.map((location) => {
+                        return location
+                      })}
+                      subsection={true}
+                    />
+                    <EndpointSection
+                      endpointData={obj.endpoints.map((endpoint) => {
+                        return endpoint
+                      })}
+                      subsection={true}
+                    />
+                  </React.Fragment>
+                ))}
+              </SectionWithContentOrFallback>
+            )
+          }
+
+          
         </FeatureFlag>
 
         <FeedbackForm

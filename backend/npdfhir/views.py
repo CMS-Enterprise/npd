@@ -1,8 +1,7 @@
 from uuid import UUID
 
 from django.conf import settings
-from django.db.models import CharField, F, Value, Prefetch
-from django.db.models.functions import Concat
+from django.db.models import F, Prefetch
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils.html import escape
@@ -145,6 +144,8 @@ class FHIRPractitionerViewSet(viewsets.GenericViewSet):
         "provider__individual__individualtoemail_set",
         "provider__individual__individualtoname_set",
         "provider__providertootherid_set",
+        "provider__providertootherid_set__other_id_type",
+        "provider__providertootherid_set__state_code",
         "provider__providertotaxonomy_set",
         "provider__providertotaxonomy_set__nucc_code",
     )
@@ -373,19 +374,10 @@ class FHIRLocationViewSet(viewsets.GenericViewSet):
                     "address_use", "address__address_us", "address__address_us__state_code"
                 ),
             ),
+            "locationtoendpointinstance_set",
         )
         .annotate(
             organization_name=F("organization__organizationtoname__name"),
-            address_full=Concat(
-                F("address__address_us__delivery_line_1"),
-                Value(", "),
-                F("address__address_us__city_name"),
-                Value(", "),
-                F("address__address_us__state_code__abbreviation"),
-                Value(" "),
-                F("address__address_us__zipcode"),
-                output_field=CharField(),
-            ),
         )
     )
     if DEBUG:
