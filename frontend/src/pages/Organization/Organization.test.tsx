@@ -148,7 +148,7 @@ describe("Organization", () => {
       ).toBeInTheDocument()
 
       const practitionerHeader = await screen.getByRole("link", {
-        name: "DR. KIRK AADALEN",
+        name: "KIRK AADALEN",
       })
       expect(practitionerHeader).toBeInTheDocument()
       expect(practitionerHeader).toHaveAttribute(
@@ -307,7 +307,7 @@ describe("Organization", () => {
         await screen.getByText("No practitioner information available"),
       ).toBeInTheDocument()
       expect(
-        await screen.queryByRole("cell", { name: "DR. KIRK AADALEN" }),
+        await screen.queryByRole("cell", { name: "KIRK AADALEN" }),
       ).not.toBeInTheDocument()
     })
   })
