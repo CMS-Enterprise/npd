@@ -92,12 +92,11 @@ export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
     ...(submitError ? [submitError] : []),
   ]
 
-  ;(useEffect(() => {
+  useEffect(() => {
     if (!hasOther) {
       clearErrors("details")
     }
-  }),
-    [hasOther, clearErrors])
+  }, [hasOther, clearErrors])
 
   const onSubmit: SubmitHandler<ReportIssueFormData> = async (formData) => {
     try {
