@@ -4,8 +4,9 @@ import {
   ChoiceList,
   Dialog,
   TextField,
+  AlertCircleIcon,
 } from "@cmsgov/design-system"
-import { useRef, useState } from "react"
+import { useRef, useState, useEffect } from "react"
 import { useForm, Controller } from "react-hook-form"
 import type { SubmitHandler } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -43,6 +44,7 @@ export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
   const { t } = useTranslation()
   const [dialogStatus, setDialogStatus] = useState<"form" | "success">("form")
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [captchaError, setCaptchaError] = useState<string | null>(null)
   const altchaRef = useRef<{ value: string | null; reset: () => void }>(null)
 
   const {
@@ -51,6 +53,7 @@ export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
     control,
     watch,
     reset,
+    clearErrors,
     formState: { errors },
   } = useForm<ReportIssueFormData>({
     defaultValues: {
@@ -70,21 +73,41 @@ export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
     value: key,
   }))
 
+  const fieldLabels: Record<string, string> = {
+    issues: "Profile issue(s)",
+    details: "Issue detail(s)",
+    email: "Email address",
+  }
+
   const errorMessages = [
-    ...(Object.values(errors)
-      .map((error) => error?.message)
+    ...(Object.entries(errors)
+      .map(([field, error]) => {
+        const label = fieldLabels[field]
+        const msg = error?.message
+        if (!msg) return null
+        return label ? `${label}: ${msg}` : msg
+      })
       .filter(Boolean) as string[]),
+    ...(captchaError ? [`CAPTCHA: ${captchaError}`] : []),
     ...(submitError ? [submitError] : []),
   ]
+
+  ;(useEffect(() => {
+    if (!hasOther) {
+      clearErrors("details")
+    }
+  }),
+    [hasOther, clearErrors])
 
   const onSubmit: SubmitHandler<ReportIssueFormData> = async (formData) => {
     try {
       setSubmitError(null)
+      setCaptchaError(null)
 
       const altchaValue = altchaRef.current?.value
 
       if (!altchaValue) {
-        setSubmitError(t("feedback.form.captchaRequired"))
+        setCaptchaError(t("feedback.form.captchaRequired"))
         return
       }
 
@@ -114,6 +137,12 @@ export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
     }
   }
 
+  const handleAltchaStateChange = (ev: Event | CustomEvent) => {
+    if ("detail" in ev && ev.detail.payload) {
+      setCaptchaError(null)
+    }
+  }
+
   return (
     <Dialog
       onExit={onExit}
@@ -122,7 +151,7 @@ export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
       backdropClickExits={false}
     >
       {dialogStatus === "form" ? (
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(onSubmit)} noValidate>
           <p className="ds-u-margin-bottom--3 ds-u-margin-top--0">
             {t("feedback.form.description")}
           </p>
@@ -231,7 +260,16 @@ export const FeedbackForm = ({ presenterData, onExit, isOpen }: Props) => {
           </Alert>
 
           <fieldset className="ds-u-margin-top--4">
-            <Altcha ref={altchaRef} />
+            {captchaError && (
+              <p
+                className="ds-u-color--error ds-u-margin-bottom--2 ds-u-font-size--md ds-u-display--flex ds-u-align-items--center"
+                role="alert"
+              >
+                <AlertCircleIcon />
+                <span className="ds-u-margin-left--1">{captchaError}</span>
+              </p>
+            )}
+            <Altcha ref={altchaRef} onStateChange={handleAltchaStateChange} />
           </fieldset>
 
           <div className="ds-u-margin-top--4 ds-u-display--flex ds-u-justify-content--end">
