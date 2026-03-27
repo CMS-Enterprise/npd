@@ -177,7 +177,7 @@ export const Organization = () => {
                       <TableBody>
                         {fullOrganization.practitioners.map((practitioner, index) => (
                           <TableRow key={index}>
-                            <TableCell><a href={`/practitioners/${practitioner.id}`}>{practitioner.name}</a></TableCell>
+                            <TableCell><a data-testid={`practitioner-${index}`} href={`/practitioners/${practitioner.id}`}>{practitioner.name}</a></TableCell>
                           </TableRow>
                         ))}
                       </TableBody>

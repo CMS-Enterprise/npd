@@ -147,14 +147,13 @@ describe("Organization", () => {
         within(taxonomySection).getByText("Pediatric Clinic"),
       ).toBeInTheDocument()
 
-      const practitionerHeader = await screen.getByRole("link", {
-        name: "KIRK AADALEN",
-      })
+      const practitionerHeader = await screen.getByTestId("practitioner-0")
       expect(practitionerHeader).toBeInTheDocument()
       expect(practitionerHeader).toHaveAttribute(
         "href",
         "/practitioners/c3a56586-40a8-4fef-9394-2dd0c0ba0b60",
       )
+      expect(practitionerHeader).toHaveTextContent("KIRK AADALEN")
       expect(
         await screen.getByText("0006 Aspen Glen Court, Edwards, CO 81632"),
       ).toBeInTheDocument()
