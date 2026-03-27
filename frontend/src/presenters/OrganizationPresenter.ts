@@ -82,8 +82,8 @@ export class FullOrganizationPresenter {
 
     return this.record.practitionerData.map((practitioner) => ({
       id: practitioner?.id,
-      name: practitioner?.name?.[0].text,
-      taxonomy: practitioner?.qualification?.[0]?.code?.coding?.[0]?.display ?? "Unknown",
+      name: practitioner?.name,
+      //taxonomy: practitioner?.qualification?.[0]?.code?.coding?.[0]?.display ?? "Unknown",
     }))
   }
 

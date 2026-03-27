@@ -595,20 +595,27 @@ class LocationSerializer(serializers.Serializer):
 class PractitionerRoleSerializer(serializers.Serializer):
     other_phone = PhoneSerializer(read_only=True)
 
-    class Meta:
-        model = ProviderToOrganization
-
     def to_representation(self, instance):
         request = self.context.get("request")
         # representation = super().to_representation(instance)
         practitioner_role = PractitionerRole()
         practitioner_role.id = str(instance.id)
         practitioner_role.active = instance.active
-        practitioner_role.practitioner = genReference(
-            "fhir-practitioner-detail", instance.provider_to_organization.individual_id, request
+        practitioner_display = (
+            instance.practitioner_first_name + " " + instance.practitioner_last_name
         )
+        practitioner_role.practitioner = genReference(
+            "fhir-practitioner-detail",
+            instance.provider_to_organization.individual_id,
+            request,
+            practitioner_display,
+        )
+        organization_display = instance.organization_name
         practitioner_role.organization = genReference(
-            "fhir-organization-detail", instance.provider_to_organization.organization_id, request
+            "fhir-organization-detail",
+            instance.provider_to_organization.organization_id,
+            request,
+            organization_display,
         )
         if hasattr(instance, "specialty_id") and instance.specialty_id is not None:
             practitioner_role.specialty = (

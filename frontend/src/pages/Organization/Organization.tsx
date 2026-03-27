@@ -172,16 +172,12 @@ export const Organization = () => {
                           <TableCell>
                             {t("organizations.practitioners.name")}
                           </TableCell>
-                          <TableCell>
-                            {t("organizations.practitioners.taxonomy")}
-                          </TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
                         {fullOrganization.practitioners.map((practitioner, index) => (
                           <TableRow key={index}>
                             <TableCell><a href={`/practitioners/${practitioner.id}`}>{practitioner.name}</a></TableCell>
-                            <TableCell>{practitioner.taxonomy}</TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
