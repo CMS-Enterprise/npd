@@ -93,7 +93,7 @@ class PractitionerFilterSet(filters.FilterSet):
         )
 
     def filter_practitioner_name(self, queryset, name, value):
-        return filter_individual_name(queryset, name, value, "provider").distinct()
+        return filter_individual_name(queryset, name, value, "provider")
 
     def filter_practitioner_type(self, queryset, name, value):
         return simple_generic_field_search(

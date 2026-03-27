@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.urls import include, path, re_path
 from drf_spectacular.views import (
     SpectacularJSONAPIView,
@@ -18,3 +19,8 @@ urlpatterns = [
     # everything else is passed to the rest_framework router to manage
     path("", include(router.urls), name="index"),
 ]
+
+if settings.DEBUG and not settings.TESTING:
+    from debug_toolbar.toolbar import debug_toolbar_urls
+
+    urlpatterns += debug_toolbar_urls()

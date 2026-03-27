@@ -1,4 +1,4 @@
-import type { FHIRReference } from "../@types/fhir"
+import type { FHIRPractitioner, FHIRReference } from "../@types/fhir"
 import type { OrganizationDetails, PractitionerDetailsType } from "../state/requests/practitioners"
 import {
   formatAddress,
@@ -8,8 +8,8 @@ import {
 import type { LogicalIdOfThisArtifact } from "../@types/fhir/Endpoint"
 
 export class PractitionerPresenter {
-  private record: PractitionerDetailsType
-  constructor(record: PractitionerDetailsType) {this.record = record}
+  private record: FHIRPractitioner
+  constructor(record: FHIRPractitioner) {this.record = record}
 
   get names(): Array<string | undefined | null>  {
     const names = this.record.name
@@ -71,6 +71,12 @@ export class PractitionerPresenter {
     }))
   }
 
+  
+}
+
+export class FullPractitionerPresenter {
+  private record: PractitionerDetailsType
+  constructor(record: PractitionerDetailsType) {this.record = record}
   get organizations() {
     if (!this.record.practitionerRoleData?.results?.entry?.length) return []
     const organizationDetailData: OrganizationDetails = {};

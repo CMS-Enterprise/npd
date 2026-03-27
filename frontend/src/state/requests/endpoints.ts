@@ -3,10 +3,11 @@ import { apiUrl } from "../api"
 
 export const fetchEndpoint = async (
   endpointId: string,
+  signal: AbortSignal | null | undefined
 ): Promise<FHIREndpoint> => {
   const url = apiUrl("/fhir/Endpoint/:endpointId/", { endpointId })
 
-  const response = await fetch(url)
+  const response = await fetch(url, {signal})
 
   if (!response.ok) {
     console.error(`Endpoint error: ${await response.text()}`)

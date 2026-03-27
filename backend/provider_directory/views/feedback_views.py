@@ -14,7 +14,9 @@ from npdfhir.models import Feedback
 
 
 class FeedbackFlowThrottle(AnonRateThrottle):
-    rate = "5/min"
+    rate = (
+        "10/min"  # leaving this back at 10 but we should be changing this value based on CI status
+    )
 
 
 @extend_schema(exclude=True)
