@@ -37,7 +37,6 @@ from .models import (
     Npi,
     Organization,
     OrganizationToName,
-    ProviderToOrganization,
 )
 from .utils import genReference, get_schema_data
 from .mappings import other_id_type_to_fhir

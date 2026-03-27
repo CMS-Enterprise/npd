@@ -1,11 +1,10 @@
 import { skipToken, useQuery, keepPreviousData, useQueries } from "@tanstack/react-query"
-import type { FHIRCollection, FHIROrganization, FHIRPractitioner, FHIRPractitionerRole, FHIRLocation, FHIREndpoint } from "../../@types/fhir"
+import type { FHIRCollection, FHIROrganization, FHIRPractitionerRole, FHIRLocation, FHIREndpoint } from "../../@types/fhir"
 import { apiUrl } from "../api"
 import type { SortOption, SearchParams } from "../../@types/search"
 import { fetchPractitionerRoles } from "./practitionerrole"
 import { fetchLocations } from "./locations"
 import { fetchEndpoint } from "./endpoints"
-import { fetchPractitioner } from "./practitioners"
 
 export const ORGANIZATION_SORT_OPTIONS: Record<string, SortOption> = {
   "name-asc": {
