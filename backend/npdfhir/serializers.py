@@ -413,8 +413,12 @@ class OrganizationSerializer(serializers.Serializer):
             organization.alias = [n["name"] for n in aliases]
 
         if instance.parent_id is not None:
+            organization_display = instance.parent.organizationtoname_set.first().name
             organization.partOf = genReference(
-                "fhir-organization-detail", instance.parent_id, request
+                "fhir-organization-detail",
+                instance.parent_id,
+                request,
+                organization_display,
             )
 
         if hasattr(instance, "authorized_official") and instance.authorized_official is not None:

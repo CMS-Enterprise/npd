@@ -71,6 +71,10 @@ export class OrganizationPresenter {
     }))
   }
 
+  get parent() {
+    return this.record.partOf?.display
+  }
+
   }
 
 export class FullOrganizationPresenter {
