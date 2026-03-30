@@ -21,6 +21,7 @@ export interface FHIROrganization extends Organization {
   contact?: ExtendedContactDetail[] | null
   address?: Address[] | null
   extension?: FHIRExtension[] | null
+  partOf?: FHIRReference
 }
 
 export interface FHIRExtension extends Extension {

@@ -37,7 +37,6 @@ from .models import (
     Npi,
     Organization,
     OrganizationToName,
-    ProviderToOrganization,
 )
 from .utils import genReference, get_schema_data
 from .mappings import other_id_type_to_fhir
@@ -414,8 +413,12 @@ class OrganizationSerializer(serializers.Serializer):
             organization.alias = [n["name"] for n in aliases]
 
         if instance.parent_id is not None:
+            organization_display = instance.parent.organizationtoname_set.first().name
             organization.partOf = genReference(
-                "fhir-organization-detail", instance.parent_id, request
+                "fhir-organization-detail",
+                instance.parent_id,
+                request,
+                organization_display,
             )
 
         if hasattr(instance, "authorized_official") and instance.authorized_official is not None:
@@ -595,20 +598,27 @@ class LocationSerializer(serializers.Serializer):
 class PractitionerRoleSerializer(serializers.Serializer):
     other_phone = PhoneSerializer(read_only=True)
 
-    class Meta:
-        model = ProviderToOrganization
-
     def to_representation(self, instance):
         request = self.context.get("request")
         # representation = super().to_representation(instance)
         practitioner_role = PractitionerRole()
         practitioner_role.id = str(instance.id)
         practitioner_role.active = instance.active
-        practitioner_role.practitioner = genReference(
-            "fhir-practitioner-detail", instance.provider_to_organization.individual_id, request
+        practitioner_display = (
+            instance.practitioner_first_name + " " + instance.practitioner_last_name
         )
+        practitioner_role.practitioner = genReference(
+            "fhir-practitioner-detail",
+            instance.provider_to_organization.individual_id,
+            request,
+            practitioner_display,
+        )
+        organization_display = instance.organization_name
         practitioner_role.organization = genReference(
-            "fhir-organization-detail", instance.provider_to_organization.organization_id, request
+            "fhir-organization-detail",
+            instance.provider_to_organization.organization_id,
+            request,
+            organization_display,
         )
         if hasattr(instance, "specialty_id") and instance.specialty_id is not None:
             practitioner_role.specialty = (

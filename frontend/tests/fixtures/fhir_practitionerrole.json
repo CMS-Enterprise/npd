@@ -13,7 +13,8 @@
                     "resourceType": "PractitionerRole",
                     "id": "123456",
                     "practitioner": {
-                        "reference": "/fhir/Practitioner/c3a56586-40a8-4fef-9394-2dd0c0ba0b60"
+                        "reference": "/fhir/Practitioner/c3a56586-40a8-4fef-9394-2dd0c0ba0b60",
+                        "display": "KIRK AADALEN"
                     },
                     "organization": {
                         "reference": "/fhir/Organization/12345"

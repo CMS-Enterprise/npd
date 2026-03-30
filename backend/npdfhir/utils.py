@@ -26,9 +26,11 @@ def get_schema_data(request):
     return schema_data
 
 
-def genReference(url_name, identifier, request):
+def genReference(url_name, identifier, request, display=None):
     reference = request.build_absolute_uri(reverse(url_name, kwargs={"id": identifier}))
     reference = Reference(reference=reference)
+    if display:
+        reference.display = display
     return reference
 
 
