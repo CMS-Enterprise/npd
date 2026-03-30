@@ -10,7 +10,10 @@ import type { Period } from "./Period"
 import type { Practitioner } from "./Practitioner"
 import type { Extension } from "./Extension"
 import type { PractitionerRole } from "./PractitionerRole"
-import type { Endpoint, ProtocolProfileStandardToBeUsedWithThisEndpointConnection } from "./Endpoint"
+import type {
+  Endpoint,
+  ProtocolProfileStandardToBeUsedWithThisEndpointConnection,
+} from "./Endpoint"
 import type { Location } from "./Location"
 import type { Reference } from "./Reference"
 
@@ -21,6 +24,7 @@ export interface FHIROrganization extends Organization {
   contact?: ExtendedContactDetail[] | null
   address?: Address[] | null
   extension?: FHIRExtension[] | null
+  partOf?: FHIRReference | null
 }
 
 export interface FHIRExtension extends Extension {
@@ -57,7 +61,8 @@ export interface FHIRPractitionerRole extends PractitionerRole {
   telecom?: ContactPoint[] | null
 }
 
-export interface FHIRProtocol extends ProtocolProfileStandardToBeUsedWithThisEndpointConnection {
+export interface FHIRProtocol
+  extends ProtocolProfileStandardToBeUsedWithThisEndpointConnection {
   [key: string]: string
 }
 
@@ -93,7 +98,7 @@ export interface FHIRCollection<T> {
     resourceType: "Bundle" | string
     type: "searchset" | string
     total: number
-    entry: Array<FHIREntry<T> | undefined >
+    entry: Array<FHIREntry<T> | undefined>
   }
 }
 export interface FHIREmptyCollection {

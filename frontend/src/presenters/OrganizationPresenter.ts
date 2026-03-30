@@ -8,7 +8,9 @@ import type { OrganizationDetailsType } from "../state/requests/organizations"
 
 export class OrganizationPresenter {
   private record: FHIROrganization
-  constructor(record: FHIROrganization) { this.record = record }
+  constructor(record: FHIROrganization) {
+    this.record = record
+  }
 
   get name(): string {
     return this.record.name ?? ""
@@ -16,6 +18,10 @@ export class OrganizationPresenter {
 
   get otherNames(): Array<string | null> {
     return this.record.alias ?? []
+  }
+
+  get parentOrganization(): string {
+    return this.record.partOf?.reference.split("/").pop() ?? ""
   }
 
   get types() {
@@ -26,12 +32,10 @@ export class OrganizationPresenter {
             ext.url ===
             "https://build.fhir.org/organization-definitions.html#Organization.qualification",
         )
-        .map((ext) => (
-          {
-            display: ext.valueCodeableConcept?.coding?.[0]?.display ?? "",
-            nuccCode: ext.valueCodeableConcept?.coding?.[0]?.code ?? "" 
-          })) ??
-      []
+        .map((ext) => ({
+          display: ext.valueCodeableConcept?.coding?.[0]?.display ?? "",
+          nuccCode: ext.valueCodeableConcept?.coding?.[0]?.code ?? "",
+        })) ?? []
     )
   }
 
@@ -67,15 +71,19 @@ export class OrganizationPresenter {
     return this.record.identifier.map((identity) => ({
       type: formatOtherIdentifierType(identity.type?.coding?.[0]?.code),
       number: identity.value,
-      details: identity.period || identity.assigner ? formatDetails(identity.period, identity.assigner?.display) : "",
+      details:
+        identity.period || identity.assigner
+          ? formatDetails(identity.period, identity.assigner?.display)
+          : "",
     }))
   }
-
-  }
+}
 
 export class FullOrganizationPresenter {
   private record: OrganizationDetailsType
-  constructor(record: OrganizationDetailsType) { this.record = record }
+  constructor(record: OrganizationDetailsType) {
+    this.record = record
+  }
 
   get practitioners() {
     if (!this.record.practitionerData?.length) return []
@@ -83,7 +91,9 @@ export class FullOrganizationPresenter {
     return this.record.practitionerData.map((practitioner) => ({
       id: practitioner?.id,
       name: practitioner?.name?.[0].text,
-      taxonomy: practitioner?.qualification?.[0]?.code?.coding?.[0]?.display ?? "Unknown",
+      taxonomy:
+        practitioner?.qualification?.[0]?.code?.coding?.[0]?.display ??
+        "Unknown",
     }))
   }
 
@@ -94,18 +104,21 @@ export class FullOrganizationPresenter {
       id: location?.resource.id,
       name: location?.resource.name,
       address: formatAddress(location?.resource.address, false),
-      contact: location?.resource.telecom
+      contact: location?.resource.telecom,
     }))
   }
 
   get endpoints() {
-    if (!this.record.endpointData?.length || this.record.endpointData[0] == undefined) return []
+    if (
+      !this.record.endpointData?.length ||
+      this.record.endpointData[0] == undefined
+    )
+      return []
 
     return this.record.endpointData.map((endpoint) => ({
       id: endpoint?.id,
       address: endpoint?.address,
-      connectionType: endpoint?.connectionType.display
+      connectionType: endpoint?.connectionType.display,
     }))
   }
-
-  }
+}
