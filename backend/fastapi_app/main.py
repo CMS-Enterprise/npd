@@ -11,16 +11,22 @@ from fastapi.openapi.utils import get_openapi
 from fastapi.responses import PlainTextResponse
 
 from .config import settings
-from .endpoint_service import get_endpoint_resource, list_endpoint_resources
-from .location_service import get_location_resource, list_location_resources
-from .organization_affiliation_service import (
+from .endpoint_native_service import get_endpoint_resource, list_endpoint_resources
+from .location_native_service import get_location_resource, list_location_resources
+from .organization_affiliation_native_service import (
     get_organization_affiliation_resource,
     list_organization_affiliation_resources,
 )
-from .organization_service import get_organization_resource, list_organization_resources
+from .organization_native_service import (
+    get_organization_resource,
+    list_organization_resources,
+)
 from .pagination import build_bundle_envelope, get_page_window
-from .practitioner_service import get_practitioner_resource, list_practitioner_resources
-from .practitioner_role_service import (
+from .practitioner_native_service import (
+    get_practitioner_resource,
+    list_practitioner_resources,
+)
+from .practitioner_role_native_service import (
     get_practitioner_role_resource,
     list_practitioner_role_resources,
 )
@@ -40,6 +46,103 @@ app = FastAPI(
     openapi_url=None,
 )
 
+_CAPABILITY_STATEMENT_RESOURCES = [
+    {
+        "type": "Practitioner",
+        "interaction": [{"code": "read"}, {"code": "search-type"}],
+        "searchParam": [
+            {"name": "_sort", "type": "string", "documentation": "Which field to use when ordering the results."},
+            {"name": "address", "type": "string", "documentation": "Filter by any part of address. Address filter accepts websearch syntax."},
+            {"name": "address_city", "type": "string", "documentation": "Filter by city name"},
+            {"name": "address_postalcode", "type": "string", "documentation": "Filter by postal code/zip code"},
+            {"name": "address_state", "type": "string", "documentation": "Filter by state (2-letter abbreviation)"},
+            {"name": "address_use", "type": "string", "documentation": "Filter by address use type\n\n* `home` - home\n* `work` - work\n* `temp` - temp\n* `old` - old\n* `billing` - billing"},
+            {"name": "gender", "type": "string", "documentation": "Filter by practitioner gender\n\n* `Female` - Female\n* `Male` - Male\n* `Other` - Other"},
+            {"name": "identifier", "type": "string", "documentation": "Filter by practitioner identifier (NPI or other). Format: value or system|value"},
+            {"name": "name", "type": "string", "documentation": "Filter by practitioner name (first, middle, last, or full name). Name filter accepts websearch syntax."},
+            {"name": "page", "type": "integer", "documentation": "A page number within the paginated result set."},
+            {"name": "page_size", "type": "integer", "documentation": "Number of results to return per page."},
+            {"name": "practitioner_type", "type": "string", "documentation": "Filter by practitioner type/taxonomy. Practitioner type filter accepts websearch syntax."},
+        ],
+    },
+    {
+        "type": "Organization",
+        "interaction": [{"code": "read"}, {"code": "search-type"}],
+        "searchParam": [
+            {"name": "_sort", "type": "string", "documentation": "Which field to use when ordering the results."},
+            {"name": "address", "type": "string", "documentation": "Filter by any part of address. Address filter accepts websearch syntax."},
+            {"name": "address_city", "type": "string", "documentation": "Filter by city name"},
+            {"name": "address_postalcode", "type": "string", "documentation": "Filter by postal code/zip code"},
+            {"name": "address_state", "type": "string", "documentation": "Filter by state (2-letter abbreviation)"},
+            {"name": "address_use", "type": "string", "documentation": "Filter by address use type\n\n* `home` - home\n* `work` - work\n* `temp` - temp\n* `old` - old\n* `billing` - billing"},
+            {"name": "identifier", "type": "string", "documentation": "Filter by organization identifier (NPI, EIN, or other). Format: value or system|value"},
+            {"name": "name", "type": "string", "documentation": "Filter by organization name"},
+            {"name": "organization_type", "type": "string", "documentation": "Filter by organization type/taxonomy"},
+            {"name": "page", "type": "integer", "documentation": "A page number within the paginated result set."},
+            {"name": "page_size", "type": "integer", "documentation": "Number of results to return per page."},
+        ],
+    },
+    {
+        "type": "Endpoint",
+        "interaction": [{"code": "read"}, {"code": "search-type"}],
+        "searchParam": [
+            {"name": "_sort", "type": "string", "documentation": "Which field to use when ordering the results."},
+            {"name": "connection_type", "type": "string", "documentation": "Filter by endpoint connection type"},
+            {"name": "name", "type": "string", "documentation": "Filter by endpoint name"},
+            {"name": "page", "type": "integer", "documentation": "A page number within the paginated result set."},
+            {"name": "page_size", "type": "integer", "documentation": "Number of results to return per page."},
+            {"name": "payload_type", "type": "string", "documentation": "Filter by endpoint payload type"},
+            {"name": "status", "type": "string", "documentation": "Filter by endpoint status"},
+        ],
+    },
+    {
+        "type": "Location",
+        "interaction": [{"code": "read"}, {"code": "search-type"}],
+        "searchParam": [
+            {"name": "_sort", "type": "string", "documentation": "Which field to use when ordering the results."},
+            {"name": "address", "type": "string", "documentation": "Filter by any part of address. Address filter accepts websearch syntax."},
+            {"name": "address_city", "type": "string", "documentation": "Filter by city name"},
+            {"name": "address_postalcode", "type": "string", "documentation": "Filter by postal code/zip code"},
+            {"name": "address_state", "type": "string", "documentation": "Filter by state (2-letter abbreviation)"},
+            {"name": "address_use", "type": "string", "documentation": "Filter by address use type\n\n* `home` - home\n* `work` - work\n* `temp` - temp\n* `old` - old\n* `billing` - billing"},
+            {"name": "name", "type": "string", "documentation": "Filter by location name"},
+            {"name": "near", "type": "string", "documentation": "Filter by distance from a point expressed as [latitude]|[longitude]|[distance]|[units]. If no units are provided, km is assumed."},
+            {"name": "organization_identifier", "type": "string", "documentation": "Filter by organization identifier (NPI, EIN, or other). Format: value or system|value"},
+            {"name": "organization_name", "type": "string", "documentation": "Filter by organization name"},
+            {"name": "organization_type", "type": "string", "documentation": "Filter by organization type/taxonomy"},
+            {"name": "page", "type": "integer", "documentation": "A page number within the paginated result set."},
+            {"name": "page_size", "type": "integer", "documentation": "Number of results to return per page."},
+        ],
+    },
+    {
+        "type": "PractitionerRole",
+        "interaction": [{"code": "read"}, {"code": "search-type"}],
+        "searchParam": [
+            {"name": "_sort", "type": "string", "documentation": "Which field to use when ordering the results."},
+            {"name": "active", "type": "boolean", "documentation": "Filter by active status"},
+            {"name": "endpoint_connection_type", "type": "string", "documentation": "Filter by endpoint connection type"},
+            {"name": "endpoint_payload_type", "type": "string", "documentation": "Filter by endpoint payload type"},
+            {"name": "endpoint_status", "type": "string", "documentation": "Filter by endpoint status"},
+            {"name": "location_address", "type": "string", "documentation": "Filter by any part of address. Address filter accepts websearch syntax."},
+            {"name": "location_address_city", "type": "string", "documentation": "Filter by city name"},
+            {"name": "location_address_postalcode", "type": "string", "documentation": "Filter by postal code/zip code"},
+            {"name": "location_address_state", "type": "string", "documentation": "Filter by state (2-letter abbreviation)"},
+            {"name": "location_near", "type": "string", "documentation": "Filter by distance from a point expressed as [latitude]|[longitude]|[distance]|[units]. If no units are provided, km is assumed."},
+            {"name": "organization_identifier", "type": "string", "documentation": "Filter by organization identifier (NPI, EIN, or other). Format: value or system|value"},
+            {"name": "organization_name", "type": "string", "documentation": "Filter by organization name"},
+            {"name": "organization_type", "type": "string", "documentation": "Filter by organization type/taxonomy"},
+            {"name": "page", "type": "integer", "documentation": "A page number within the paginated result set."},
+            {"name": "page_size", "type": "integer", "documentation": "Number of results to return per page."},
+            {"name": "practitioner_gender", "type": "string", "documentation": "Filter by practitioner gender\n\n* `Female` - Female\n* `Male` - Male\n* `Other` - Other"},
+            {"name": "practitioner_identifier", "type": "string", "documentation": "Filter by practitioner identifier (NPI or other). Format: value or system|value"},
+            {"name": "practitioner_name", "type": "string", "documentation": "Filter by practitioner name (first, middle, last, or full name). Name filter accepts websearch syntax."},
+            {"name": "practitioner_type", "type": "string", "documentation": "Filter by practitioner type/taxonomy. Practitioner type filter accepts websearch syntax."},
+            {"name": "role", "type": "string", "documentation": "Filter by provider role code"},
+            {"name": "specialty", "type": "string", "documentation": "Filter by Nucc/Snomed specialty code"},
+        ],
+    },
+]
+
 
 def _resource_catalog(request: Request) -> dict[str, str]:
     return {
@@ -55,102 +158,27 @@ def _capability_statement(request: Request) -> dict:
     base_url = str(request.base_url).rstrip("/")
     return {
         "resourceType": "CapabilityStatement",
-        "url": f"{base_url}/fhir/metadata/",
-        "version": settings.app_version,
-        "name": "FHIRCapabilityStatement",
-        "title": "National Provider Directory API - FHIR Capability Statement",
+        "url": f"{base_url}/fhir/metadata",
+        "version": "beta",
+        "name": "FHIRCapablityStatement",
+        "title": "NPD FHIR API -  FHIR Capablity Statement",
         "status": "active",
-        "date": datetime.now(timezone.utc).isoformat(),
+        "date": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
         "publisher": "CMS",
-        "description": "Experimental FastAPI CapabilityStatement used for parity development.",
+        "contact": [{"telecom": [{"system": "email", "value": "npd@cms.hhs.gov"}]}],
+        "description": "This CapabilityStatement describes the capabilities of the National Provider Directory FHIR API, including supported resources, search parameters, and operations.",
         "kind": "instance",
+        "implementation": {
+            "description": "Developers can query and retrieve National Provider Directory data via a REST API. The API structure conforms to the HL7 Fast Healthcare Interoperability Resources (FHIR) standard and it returns JSON responses following the FHIR specification.",
+            "url": f"{base_url}/fhir",
+        },
         "fhirVersion": "4.0.1",
         "format": ["fhir+json"],
         "rest": [
             {
                 "mode": "server",
-                "documentation": "Experimental FastAPI FHIR endpoints for parity testing.",
-                "resource": [
-                    {
-                        "type": "Endpoint",
-                        "interaction": [{"code": "read"}, {"code": "search-type"}],
-                        "searchParam": [
-                            {"name": "name", "type": "string"},
-                            {"name": "connection_type", "type": "string"},
-                            {"name": "payload_type", "type": "string"},
-                            {"name": "status", "type": "string"},
-                        ],
-                    },
-                    {
-                        "type": "Location",
-                        "interaction": [{"code": "read"}, {"code": "search-type"}],
-                        "searchParam": [
-                            {"name": "name", "type": "string"},
-                            {"name": "organization_name", "type": "string"},
-                            {"name": "organization_identifier", "type": "string"},
-                            {"name": "organization_type", "type": "string"},
-                            {"name": "address", "type": "string"},
-                            {"name": "address_city", "type": "string"},
-                            {"name": "address_state", "type": "string"},
-                            {"name": "address_postalcode", "type": "string"},
-                            {"name": "address_use", "type": "string"},
-                            {"name": "near", "type": "string"},
-                        ],
-                    },
-                    {
-                        "type": "Organization",
-                        "interaction": [{"code": "read"}, {"code": "search-type"}],
-                        "searchParam": [
-                            {"name": "name", "type": "string"},
-                            {"name": "identifier", "type": "string"},
-                            {"name": "organization_type", "type": "string"},
-                            {"name": "address", "type": "string"},
-                            {"name": "address_city", "type": "string"},
-                            {"name": "address_state", "type": "string"},
-                            {"name": "address_postalcode", "type": "string"},
-                            {"name": "address_use", "type": "string"},
-                        ],
-                    },
-                    {
-                        "type": "Practitioner",
-                        "interaction": [{"code": "read"}, {"code": "search-type"}],
-                        "searchParam": [
-                            {"name": "identifier", "type": "string"},
-                            {"name": "name", "type": "string"},
-                            {"name": "gender", "type": "string"},
-                            {"name": "practitioner_type", "type": "string"},
-                            {"name": "address", "type": "string"},
-                            {"name": "address_city", "type": "string"},
-                            {"name": "address_state", "type": "string"},
-                            {"name": "address_postalcode", "type": "string"},
-                            {"name": "address_use", "type": "string"},
-                        ],
-                    },
-                    {
-                        "type": "PractitionerRole",
-                        "interaction": [{"code": "read"}, {"code": "search-type"}],
-                        "searchParam": [
-                            {"name": "practitioner_name", "type": "string"},
-                            {"name": "practitioner_gender", "type": "string"},
-                            {"name": "practitioner_type", "type": "string"},
-                            {"name": "practitioner_identifier", "type": "string"},
-                            {"name": "organization_name", "type": "string"},
-                            {"name": "organization_type", "type": "string"},
-                            {"name": "organization_identifier", "type": "string"},
-                            {"name": "location_near", "type": "string"},
-                            {"name": "location_address", "type": "string"},
-                            {"name": "location_address_city", "type": "string"},
-                            {"name": "location_address_state", "type": "string"},
-                            {"name": "location_address_postalcode", "type": "string"},
-                            {"name": "active", "type": "string"},
-                            {"name": "role", "type": "string"},
-                            {"name": "specialty", "type": "string"},
-                            {"name": "endpoint_connection_type", "type": "string"},
-                            {"name": "endpoint_payload_type", "type": "string"},
-                            {"name": "endpoint_status", "type": "string"},
-                        ],
-                    }
-                ],
+                "documentation": "All FHIR endpoints for the National Provider Directory",
+                "resource": _CAPABILITY_STATEMENT_RESOURCES,
             }
         ],
     }

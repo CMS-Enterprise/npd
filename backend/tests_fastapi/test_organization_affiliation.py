@@ -4,7 +4,7 @@ from unittest.mock import patch
 from fastapi.testclient import TestClient
 
 from fastapi_app.main import app
-from fastapi_app.organization_affiliation_service import OrganizationAffiliationListResult
+from fastapi_app.organization_affiliation_native_service import OrganizationAffiliationListResult
 
 
 class OrganizationAffiliationEndpointTestCase(TestCase):

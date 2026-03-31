@@ -4,7 +4,10 @@ from unittest.mock import patch
 from fastapi.testclient import TestClient
 
 from fastapi_app.main import app
-from fastapi_app.organization_service import OrganizationListResult
+from fastapi_app.organization_native_service import (
+    OrganizationListResult,
+    _organization_reference,
+)
 
 
 class OrganizationEndpointTestCase(TestCase):
@@ -67,4 +70,16 @@ class OrganizationEndpointTestCase(TestCase):
         self.assertEqual(
             response.json()["detail"],
             "No OrganizationView matches the given query.",
+        )
+
+    def test_organization_reference_is_canonicalized_without_trailing_slash(self):
+        reference = _organization_reference(
+            "http://fastapi.dev.cnpd.internal.cms.gov/",
+            "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+            "Example Org",
+        )
+
+        self.assertEqual(
+            reference["reference"],
+            "http://fastapi.dev.cnpd.internal.cms.gov/fhir/Organization/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
         )
