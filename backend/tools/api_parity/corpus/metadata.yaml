@@ -1,0 +1,5 @@
+resource: CapabilityStatement
+cases:
+  - name: metadata
+    path: /fhir/metadata/
+    accept: "*/*"

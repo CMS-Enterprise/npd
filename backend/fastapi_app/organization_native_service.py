@@ -75,7 +75,7 @@ SELECT
 
 
 def _organization_reference(base_url: str, organization_id: Any, display: str | None = None) -> dict[str, Any]:
-    reference = Reference(reference=f"{base_url.rstrip('/')}/fhir/Organization/{organization_id}/")
+    reference = Reference(reference=f"{base_url.rstrip('/')}/fhir/Organization/{organization_id}")
     if display:
         reference.display = display
     return reference.model_dump()

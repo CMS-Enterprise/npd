@@ -64,7 +64,7 @@ SELECT
 
 
 def _endpoint_reference(base_url: str, endpoint_instance_id: Any) -> dict[str, Any]:
-    return Reference(reference=f"{base_url.rstrip('/')}/fhir/Endpoint/{endpoint_instance_id}/").model_dump()
+    return Reference(reference=f"{base_url.rstrip('/')}/fhir/Endpoint/{endpoint_instance_id}").model_dump()
 
 
 def _parse_search_params(query_params: Mapping[str, str]) -> LocationSearchParams:

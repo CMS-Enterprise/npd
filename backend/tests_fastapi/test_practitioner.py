@@ -4,7 +4,7 @@ from unittest.mock import patch
 from fastapi.testclient import TestClient
 
 from fastapi_app.main import app
-from fastapi_app.practitioner_service import PractitionerListResult
+from fastapi_app.practitioner_native_service import PractitionerListResult
 
 
 class PractitionerEndpointTestCase(TestCase):
