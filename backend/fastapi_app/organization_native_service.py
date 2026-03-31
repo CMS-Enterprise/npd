@@ -64,6 +64,10 @@ JOIN organization o ON o.id = ov.id
 LEFT JOIN legal_entity le ON le.ein_id = ov.ein_id
 """
 
+_ORGANIZATION_COUNT_FROM = """
+FROM organization_view ov
+"""
+
 _ORGANIZATION_BASE_SELECT = """
 SELECT
     ov.id AS organization_id,
@@ -583,7 +587,7 @@ def list_organization_resources(
     total_count = fetch_scalar(
         f"""
         SELECT COUNT(*) AS total_count
-        {_ORGANIZATION_BASE_FROM}
+        {_ORGANIZATION_COUNT_FROM}
         {sql_filter.where_sql}
         """,
         sql_params,

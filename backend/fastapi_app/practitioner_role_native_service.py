@@ -390,6 +390,48 @@ JOIN endpoint_instance ei_filter ON ei_filter.id = ltei_filter.endpoint_instance
     return ""
 
 
+def _build_count_from(search_params: PractitionerRoleSearchParams) -> str:
+    joins: list[str] = ["FROM provider_to_location_view ptlv"]
+
+    needs_pto_join = any(
+        [
+            search_params.practitioner_name,
+            search_params.practitioner_gender,
+            search_params.practitioner_type,
+            search_params.practitioner_identifier,
+            search_params.organization_name,
+            search_params.organization_type,
+            search_params.organization_identifier,
+        ]
+    )
+    if needs_pto_join:
+        joins.append("JOIN provider_to_organization pto ON pto.id = ptlv.provider_to_organization_id")
+
+    needs_location_join = any(
+        [
+            search_params.location_near,
+            search_params.location_address,
+            search_params.location_address_city,
+            search_params.location_address_state,
+            search_params.location_address_postalcode,
+        ]
+    )
+    if needs_location_join:
+        joins.extend(
+            [
+                "LEFT JOIN location l ON l.id = ptlv.location_id",
+                "LEFT JOIN address a ON a.id = l.address_id",
+                "LEFT JOIN address_us au ON au.id = a.address_us_id",
+            ]
+        )
+
+    extra_joins = _build_extra_joins(search_params).strip()
+    if extra_joins:
+        joins.append(extra_joins)
+
+    return "\n".join(joins)
+
+
 def _build_order_by(sort_param: str | None) -> str:
     ordering_map = {
         "location_name": "ptlv.location_name",
@@ -536,6 +578,7 @@ def list_practitioner_role_resources(
 ) -> PractitionerRoleListResult:
     search_params = _parse_search_params(query_params)
     sql_filter = _build_filters(search_params)
+    count_from_sql = _build_count_from(search_params)
     extra_joins = _build_extra_joins(search_params)
     order_by_sql = _build_order_by(search_params.sort)
     sql_params = dict(sql_filter.params)
@@ -543,8 +586,7 @@ def list_practitioner_role_resources(
     total_count = fetch_scalar(
         f"""
         SELECT COUNT(*) AS total_count
-        {_PRACTITIONER_ROLE_BASE_FROM}
-        {extra_joins}
+        {count_from_sql}
         {sql_filter.where_sql}
         """,
         sql_params,

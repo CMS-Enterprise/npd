@@ -90,6 +90,10 @@ SELECT
     n.deactivation_date
 """
 
+_PRACTITIONER_COUNT_FROM = """
+FROM provider_view pv
+"""
+
 
 def _parse_identifier_query(identifier_value: str) -> tuple[str | None, str]:
     if "|" in identifier_value:
@@ -124,7 +128,16 @@ def _build_filters(search_params: PractitionerSearchParams) -> SqlFilter:
     if search_params.gender:
         gender_value = GENDER_TO_NPD.get(search_params.gender)
         if gender_value is not None:
-            clauses.append("i.gender = %(gender)s")
+            clauses.append(
+                """
+                EXISTS (
+                    SELECT 1
+                    FROM individual i_filter
+                    WHERE i_filter.id = pv.individual_id
+                      AND i_filter.gender = %(gender)s
+                )
+                """
+            )
             params["gender"] = gender_value
 
     if search_params.identifier:
@@ -634,7 +647,7 @@ def list_practitioner_resources(
     total_count = fetch_scalar(
         f"""
         SELECT COUNT(*) AS total_count
-        {_PRACTITIONER_BASE_FROM}
+        {_PRACTITIONER_COUNT_FROM}
         {sql_filter.where_sql}
         """,
         sql_params,

@@ -63,6 +63,29 @@ SELECT
 """
 
 
+def _build_count_from(search_params: LocationSearchParams) -> str:
+    joins: list[str] = ["FROM location l"]
+
+    needs_address_join = any(
+        (
+            search_params.address,
+            search_params.address_city,
+            search_params.address_state,
+            search_params.address_postalcode,
+            search_params.near,
+        )
+    )
+    if needs_address_join:
+        joins.extend(
+            [
+                "LEFT JOIN address a ON a.id = l.address_id",
+                "LEFT JOIN address_us au ON au.id = a.address_us_id",
+            ]
+        )
+
+    return "\n".join(joins)
+
+
 def _endpoint_reference(base_url: str, endpoint_instance_id: Any) -> dict[str, Any]:
     return Reference(reference=f"{base_url.rstrip('/')}/fhir/Endpoint/{endpoint_instance_id}").model_dump()
 
@@ -407,13 +430,14 @@ def list_location_resources(
 ) -> LocationListResult:
     search_params = _parse_search_params(query_params)
     sql_filter = _build_filters(search_params)
+    count_from_sql = _build_count_from(search_params)
     order_by_sql = _build_order_by(search_params.sort)
     sql_params = dict(sql_filter.params)
 
     total_count = fetch_scalar(
         f"""
         SELECT COUNT(*) AS total_count
-        {_LOCATION_BASE_FROM}
+        {count_from_sql}
         {sql_filter.where_sql}
         """,
         sql_params,
