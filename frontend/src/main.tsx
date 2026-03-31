@@ -31,6 +31,7 @@ import {
 import { Search } from "./pages/Search"
 import { FrontendSettingsProvider } from "./state/FrontendSettingsProvider"
 
+
 const queryClient = new QueryClient()
 
 createRoot(document.getElementById("root")!).render(
@@ -55,6 +56,7 @@ createRoot(document.getElementById("root")!).render(
                         path=":organizationId"
                         element={<Organization />}
                       />
+                      <Route path="" element={<OrganizationSearch />} />
                     </Route>
                     <Route path="/practitioners">
                       <Route path="search" element={<PractitionerSearch />} />
@@ -62,6 +64,7 @@ createRoot(document.getElementById("root")!).render(
                         path=":practitionerId"
                         element={<Practitioner />}
                       />
+                      <Route path="" element={<PractitionerSearch />} />
                     </Route>
                   </Route>
                 </Route>
