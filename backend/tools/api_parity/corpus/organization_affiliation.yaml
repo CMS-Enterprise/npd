@@ -1,0 +1,14 @@
+resource: OrganizationAffiliation
+cases:
+  - name: list-default
+    path: /fhir/OrganizationAffiliation/?page_size=1
+  - name: participating-name
+    path: /fhir/OrganizationAffiliation/?page_size=1&participating_organization_name=COLORECTAL
+  - name: location-state
+    path: /fhir/OrganizationAffiliation/?page_size=1&location_address_state=KY
+  - name: retrieve-success
+    path: /fhir/OrganizationAffiliation/42309dab-7864-5b76-b0f0-f0e5d24ced00/
+  - name: malformed-id
+    path: /fhir/OrganizationAffiliation/999999
+  - name: missing-uuid
+    path: /fhir/OrganizationAffiliation/12300000-0000-0000-0000-000000000123

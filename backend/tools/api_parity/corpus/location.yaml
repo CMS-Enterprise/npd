@@ -1,0 +1,16 @@
+resource: Location
+cases:
+  - name: list-default
+    path: /fhir/Location/?page_size=1
+  - name: list-sort-desc-name
+    path: /fhir/Location/?page_size=1&_sort=-name
+  - name: name-search
+    path: /fhir/Location/?page_size=1&name=1ST
+  - name: address-state
+    path: /fhir/Location/?page_size=1&address_state=IN
+  - name: retrieve-success
+    path: /fhir/Location/7e784e10-1875-4d57-bd75-6115e267641b/
+  - name: malformed-id
+    path: /fhir/Location/999999
+  - name: missing-uuid
+    path: /fhir/Location/12300000-0000-0000-0000-000000000123
