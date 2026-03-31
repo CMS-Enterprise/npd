@@ -8,7 +8,7 @@ from uuid import UUID
 from fastapi import FastAPI, Request
 from fastapi.openapi.docs import get_redoc_html, get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
-from fastapi.responses import HTMLResponse, PlainTextResponse
+from fastapi.responses import PlainTextResponse
 
 from .config import settings
 from .endpoint_service import get_endpoint_resource, list_endpoint_resources
