@@ -604,8 +604,10 @@ class PractitionerRoleSerializer(serializers.Serializer):
         practitioner_role = PractitionerRole()
         practitioner_role.id = str(instance.id)
         practitioner_role.active = instance.active
-        practitioner_display = (
-            instance.practitioner_first_name + " " + instance.practitioner_last_name
+        practitioner_display = " ".join(
+            part
+            for part in [instance.practitioner_first_name, instance.practitioner_last_name]
+            if part
         )
         practitioner_role.practitioner = genReference(
             "fhir-practitioner-detail",

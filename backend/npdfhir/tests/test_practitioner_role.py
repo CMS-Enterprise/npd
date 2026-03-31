@@ -143,6 +143,16 @@ class PractitionerRoleViewSetTestCase(APITestCase):
         # Generate test data to retrieve specific practitioner role
         DefaultPractitionerRole(id="cad156c0-87fb-489b-bf5e-f15c95ee771e")
 
+        # Generate a practitioner role whose practitioner has no first name.
+        null_first_name_role = DefaultPractitionerRole(
+            practitioner=DefaultPractitioner(
+                individual=DefaultIndividual(
+                    names=[DefaultName(first_name=None, last_name="Brown")]
+                )
+            )
+        )
+        cls.null_first_name_practitioner_role_id = null_first_name_role.id
+
         # Generate test data for testing organization identifier filtering
         DefaultPractitionerRole(organization=DefaultOrganization(npi=DefaultNPI(npi=1000000001)))
         DefaultPractitionerRole(
@@ -161,6 +171,16 @@ class PractitionerRoleViewSetTestCase(APITestCase):
         response = self.client.get(url)
         assert_fhir_response(self, response)
         assert_has_results(self, response)
+
+    def test_retrieve_handles_missing_practitioner_first_name(self):
+        url = reverse(
+            "fhir-practitionerrole-detail",
+            kwargs={"id": self.null_first_name_practitioner_role_id},
+        )
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["practitioner"]["display"], "Brown")
 
     # Sorting tests
     """def test_list_in_proper_order(self):
