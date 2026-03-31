@@ -13,7 +13,7 @@ from fastapi.responses import PlainTextResponse
 from .config import settings
 from .endpoint_native_service import get_endpoint_resource, list_endpoint_resources
 from .location_native_service import get_location_resource, list_location_resources
-from .organization_affiliation_service import (
+from .organization_affiliation_native_service import (
     get_organization_affiliation_resource,
     list_organization_affiliation_resources,
 )
@@ -26,7 +26,7 @@ from .practitioner_native_service import (
     get_practitioner_resource,
     list_practitioner_resources,
 )
-from .practitioner_role_service import (
+from .practitioner_role_native_service import (
     get_practitioner_role_resource,
     list_practitioner_role_resources,
 )
