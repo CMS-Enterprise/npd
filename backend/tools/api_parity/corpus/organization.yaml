@@ -1,0 +1,23 @@
+resource: Organization
+cases:
+  - name: list-default
+    method: GET
+    path: /fhir/Organization/?page_size=1
+  - name: list-sort-name
+    method: GET
+    path: /fhir/Organization/?page_size=1&_sort=name
+  - name: identifier-npi
+    method: GET
+    path: /fhir/Organization/?page_size=1&identifier=NPI|1679576367
+  - name: name-search
+    method: GET
+    path: /fhir/Organization/?page_size=1&name=CHOICE
+  - name: retrieve-success
+    method: GET
+    path: /fhir/Organization/3ac907f0-c7d0-484e-ad0e-653dd011a55b/
+  - name: malformed-id
+    method: GET
+    path: /fhir/Organization/999999
+  - name: missing-uuid
+    method: GET
+    path: /fhir/Organization/12300000-0000-0000-0000-000000000123

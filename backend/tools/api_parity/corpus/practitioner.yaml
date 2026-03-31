@@ -1,0 +1,21 @@
+resource: Practitioner
+cases:
+  - name: list-default
+    method: GET
+    path: /fhir/Practitioner/?page_size=1
+  - name: list-sort-first-last
+    method: GET
+    path: /fhir/Practitioner/?page_size=1&_sort=first_name,last_name
+  - name: identifier-npi
+    method: GET
+    path: /fhir/Practitioner/?page_size=1&identifier=NPI|1003000100
+  - name: name-search
+    method: GET
+    path: /fhir/Practitioner/?page_size=1&name=Solomon
+  - name: malformed-id
+    method: GET
+    path: /fhir/Practitioner/999999
+  - name: missing-uuid
+    method: GET
+    path: /fhir/Practitioner/12300000-0000-0000-0000-000000000123
+
