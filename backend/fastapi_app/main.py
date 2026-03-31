@@ -19,7 +19,10 @@ from .organization_affiliation_service import (
 )
 from .organization_service import get_organization_resource, list_organization_resources
 from .pagination import build_bundle_envelope, get_page_window
-from .practitioner_service import get_practitioner_resource, list_practitioner_resources
+from .practitioner_native_service import (
+    get_practitioner_resource,
+    list_practitioner_resources,
+)
 from .practitioner_role_service import (
     get_practitioner_role_resource,
     list_practitioner_role_resources,
