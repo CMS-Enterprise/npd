@@ -1,0 +1,16 @@
+resource: Endpoint
+cases:
+  - name: list-default
+    path: /fhir/Endpoint/?page_size=1
+  - name: list-sort-desc-name
+    path: /fhir/Endpoint/?page_size=1&_sort=-name
+  - name: name-search
+    path: /fhir/Endpoint/?page_size=1&name=88
+  - name: connection-type
+    path: /fhir/Endpoint/?page_size=1&connection_type=hl7-fhir-rest
+  - name: retrieve-success
+    path: /fhir/Endpoint/1e9cdb1a-4274-49fe-bb59-f3751c1ae66e/
+  - name: malformed-id
+    path: /fhir/Endpoint/999999
+  - name: missing-uuid
+    path: /fhir/Endpoint/12300000-0000-0000-0000-000000000123

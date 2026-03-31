@@ -31,3 +31,58 @@ clean:
 	$(MAKE) clean-frontend
 	@echo "Cleanup done."
 
+.PHONY: fastapi-run
+fastapi-run:
+	@uvicorn fastapi_app.main:app --host 0.0.0.0 --port 8001 --reload
+
+.PHONY: fastapi-test
+fastapi-test:
+	@python -m unittest discover -s tests_fastapi -p 'test_*.py'
+
+.PHONY: api-parity-practitioner
+api-parity-practitioner:
+	@python -m tools.api_parity.runner \
+		--corpus tools/api_parity/corpus/practitioner.yaml \
+		--django-base-url http://localhost:8000 \
+		--fastapi-base-url http://localhost:8001
+
+.PHONY: api-parity-practitioner-role
+api-parity-practitioner-role:
+	@python -m tools.api_parity.runner \
+		--corpus tools/api_parity/corpus/practitioner_role.yaml \
+		--django-base-url http://localhost:8000 \
+		--fastapi-base-url http://localhost:8001
+
+.PHONY: api-parity-organization-affiliation
+api-parity-organization-affiliation:
+	@python -m tools.api_parity.runner \
+		--corpus tools/api_parity/corpus/organization_affiliation.yaml \
+		--django-base-url http://localhost:8000 \
+		--fastapi-base-url http://localhost:8001
+
+.PHONY: api-parity-all
+api-parity-all:
+	@python -m tools.api_parity.suite \
+		--django-base-url http://localhost:8000 \
+		--fastapi-base-url http://localhost:8001
+
+.PHONY: api-parity-organization
+api-parity-organization:
+	@python -m tools.api_parity.runner \
+		--corpus tools/api_parity/corpus/organization.yaml \
+		--django-base-url http://localhost:8000 \
+		--fastapi-base-url http://localhost:8001
+
+.PHONY: api-parity-location
+api-parity-location:
+	@python -m tools.api_parity.runner \
+		--corpus tools/api_parity/corpus/location.yaml \
+		--django-base-url http://localhost:8000 \
+		--fastapi-base-url http://localhost:8001
+
+.PHONY: api-parity-endpoint
+api-parity-endpoint:
+	@python -m tools.api_parity.runner \
+		--corpus tools/api_parity/corpus/endpoint.yaml \
+		--django-base-url http://localhost:8000 \
+		--fastapi-base-url http://localhost:8001

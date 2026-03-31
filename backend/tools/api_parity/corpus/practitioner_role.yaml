@@ -1,0 +1,16 @@
+resource: PractitionerRole
+cases:
+  - name: list-default
+    path: /fhir/PractitionerRole/?page_size=1
+  - name: practitioner-identifier
+    path: /fhir/PractitionerRole/?page_size=1&practitioner_identifier=NPI|1255334165
+  - name: organization-identifier
+    path: /fhir/PractitionerRole/?page_size=1&organization_identifier=NPI|1316940224
+  - name: endpoint-connection-type
+    path: /fhir/PractitionerRole/?page_size=1&endpoint_connection_type=hl7-fhir-rest
+  - name: retrieve-success
+    path: /fhir/PractitionerRole/eb60df9a-17ab-4bc8-b726-9165d23dcfc2/
+  - name: malformed-id
+    path: /fhir/PractitionerRole/999999
+  - name: missing-uuid
+    path: /fhir/PractitionerRole/12300000-0000-0000-0000-000000000123
