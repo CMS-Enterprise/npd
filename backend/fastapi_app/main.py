@@ -11,13 +11,16 @@ from fastapi.openapi.utils import get_openapi
 from fastapi.responses import PlainTextResponse
 
 from .config import settings
-from .endpoint_service import get_endpoint_resource, list_endpoint_resources
-from .location_service import get_location_resource, list_location_resources
+from .endpoint_native_service import get_endpoint_resource, list_endpoint_resources
+from .location_native_service import get_location_resource, list_location_resources
 from .organization_affiliation_service import (
     get_organization_affiliation_resource,
     list_organization_affiliation_resources,
 )
-from .organization_service import get_organization_resource, list_organization_resources
+from .organization_native_service import (
+    get_organization_resource,
+    list_organization_resources,
+)
 from .pagination import build_bundle_envelope, get_page_window
 from .practitioner_native_service import (
     get_practitioner_resource,
