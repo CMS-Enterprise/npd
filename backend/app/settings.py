@@ -265,8 +265,8 @@ if DEBUG and not TESTING:
 
 CACHES = {
     "default": {
-        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
-        "LOCATION": "/var/tmp/django_cache",
+        "BACKEND": "django_valkey.cache.ValkeyCache",
+        "LOCATION": config("NPD_CACHE_LOCATION", default="valkey://127.0.0.1:6379/0"),
     }
 }
 

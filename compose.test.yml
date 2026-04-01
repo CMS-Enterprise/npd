@@ -30,6 +30,7 @@ services:
     depends_on: !override
       - db
       - db-migrations
+      - valkey
     command: python manage.py runserver 0.0.0.0:8008
     ports:
       - "8008:8008" 
