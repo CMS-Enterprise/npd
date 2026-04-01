@@ -77,6 +77,7 @@ if DEBUG and not TESTING:
     INSTALLED_APPS.append("debug_toolbar")
 
 MIDDLEWARE = [
+    "django.middleware.cache.UpdateCacheMiddleware",
     "django_structlog.middlewares.RequestMiddleware",
     "npdfhir.middleware.HealthCheckMiddleware",
     "corsheaders.middleware.CorsMiddleware",
@@ -89,6 +90,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django.middleware.cache.FetchFromCacheMiddleware"
 ]
 
 if REQUIRE_AUTHENTICATION:
