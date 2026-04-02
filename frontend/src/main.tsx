@@ -20,17 +20,10 @@ import { Landing } from "./pages/Landing"
 import { Layout } from "./pages/Layout"
 import { Login } from "./pages/Login"
 import { NotFound } from "./pages/NotFound.tsx"
-import {
-  Organization,
-  OrganizationSearch,
-} from "./pages/Organization"
-import { 
-  Practitioner,
-  PractitionerSearch
-} from "./pages/Practitioner"
-import { Search } from "./pages/Search"
+import { Organization, OrganizationSearch } from "./pages/Organization"
+import { Practitioner, PractitionerSearch } from "./pages/Practitioner"
+import { UnifiedSearch } from "./pages/Search"
 import { FrontendSettingsProvider } from "./state/FrontendSettingsProvider"
-
 
 const queryClient = new QueryClient()
 
@@ -49,7 +42,7 @@ createRoot(document.getElementById("root")!).render(
                   <Route path="/developers" element={<Developers />} />
 
                   <Route element={<FeatureFlagRoute name="SEARCH_APP" />}>
-                    <Route path="/search" element={<Search />} />
+                    <Route path="/search" element={<UnifiedSearch />} />
                     <Route path="/organizations">
                       <Route path="search" element={<OrganizationSearch />} />
                       <Route

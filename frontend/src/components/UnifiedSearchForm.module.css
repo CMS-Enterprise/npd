@@ -1,0 +1,17 @@
+.actionsRow {
+  padding-bottom: 1.5rem;
+}
+
+.clearButton {
+  background: transparent;
+  border: 1px solid var(--color-primary-dark);
+  color: var(--color-primary-darkest);
+  text-decoration: none;
+}
+
+.clearButton:hover,
+.clearButton:focus {
+  background: rgba(0, 94, 162, 0.08);
+  color: var(--color-primary-darkest);
+  text-decoration: none;
+}
