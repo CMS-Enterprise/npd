@@ -1,11 +1,10 @@
 import { skipToken, useQuery, keepPreviousData, useQueries } from "@tanstack/react-query"
-import type { FHIRCollection, FHIROrganization, FHIRPractitioner, FHIRPractitionerRole, FHIRLocation, FHIREndpoint } from "../../@types/fhir"
+import type { FHIRCollection, FHIROrganization, FHIRPractitionerRole, FHIRLocation, FHIREndpoint } from "../../@types/fhir"
 import { apiUrl } from "../api"
 import type { SortOption, SearchParams } from "../../@types/search"
 import { fetchPractitionerRoles } from "./practitionerrole"
 import { fetchLocations } from "./locations"
 import { fetchEndpoint } from "./endpoints"
-import { fetchPractitioner } from "./practitioners"
 
 export const ORGANIZATION_SORT_OPTIONS: Record<string, SortOption> = {
   "name-asc": {
@@ -22,7 +21,7 @@ export type OrganizationSortKey = keyof typeof ORGANIZATION_SORT_OPTIONS
 
 export interface OrganizationDetailsType extends FHIROrganization {
       practitionerRoleData: FHIRCollection<FHIRPractitionerRole> | undefined,
-      practitionerData: Array<FHIRPractitioner | undefined>,
+      practitionerData: Array<{id: string, name: string | undefined | null}>,
       locationData: FHIRCollection<FHIRLocation> | undefined,
       endpointData: Array<FHIREndpoint | undefined>,
   }
@@ -78,24 +77,13 @@ export const useFullOrganizationAPI = (organizationId: string | undefined) => {
     queryFn: ({ signal }) => fetchLocations(npi, signal),
     enabled: !!npi,
   })
-  const practitionerIdDups: Array<string> | undefined = practitionerRole?.results.entry.map((role) => { return role?.resource.practitioner.reference.split('/').pop() ?? ""});
-  const practitionerIds: Array<string> = [...new Set(practitionerIdDups)];
+  const practitionerDataDups = practitionerRole?.results.entry.map((role) => { 
+    return {
+    id: role?.resource.practitioner.reference.split('/').pop() ?? "", 
+    name: role?.resource.practitioner.display
+  }});
+  const practitionerData = [...new Set(practitionerDataDups)];
 
-  const practitionerQueries = useQueries({
-    queries: practitionerIds.map((practitionerId: string) => {
-      return {
-        queryKey: ["practitioner", practitionerId],
-        queryFn: ({ signal }: {signal?: AbortSignal}) => fetchPractitioner(practitionerId, signal),
-        enabled: !!practitionerIds,
-      }
-    }),
-    combine: (results) => {
-      return {
-        data: results.map(result => result.data),
-        loading: results.some((result) => result.isLoading) 
-      }
-    }
-  })
   const endpointIdDups: Array<string | undefined> | undefined = locations?.results.entry.flatMap((location) => {return location?.resource.endpoint?.map(endpoint => endpoint.reference.split('/').pop() ?? "") }) ?? undefined;
     const endpointIds: Array<string | undefined> = [...new Set(endpointIdDups)];
     const endpointQueries = useQueries({
@@ -124,15 +112,15 @@ export const useFullOrganizationAPI = (organizationId: string | undefined) => {
     fullData: {
       ...organization,
       practitionerRoleData: practitionerRole,
-      practitionerData: practitionerQueries.data,
+      practitionerData: practitionerData,
       locationData: locations,
       endpointData: endpointQueries.data,
     },
     fullDataError: organizationError ?? practitionerRoleError ?? locationsError,
-    fullDataLoading: organizationLoading || practitionerRoleLoading || practitionerQueries.loading || locationsLoading || endpointQueries.loading,
-    endpointDataLoading: endpointQueries.loading,
-    locationDataLoading: locationsLoading,
-    practitionerDataLoading: practitionerQueries.loading,
+    fullDataLoading: organizationLoading || practitionerRoleLoading || locationsLoading || endpointQueries.loading,
+    endpointDataLoading: practitionerRoleLoading || endpointQueries.loading,
+    locationDataLoading: practitionerRoleLoading || locationsLoading,
+    practitionerDataLoading: practitionerRoleLoading,
   }
 }
 

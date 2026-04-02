@@ -35,6 +35,39 @@ services:
       db-migrations:
         condition: service_completed_successfully
 
+  fastapi-web:
+    build:
+      context: ./backend
+    container_name: npd-fastapi
+    env_file:
+      - path: .env
+        required: false
+    entrypoint: []
+    command: uvicorn fastapi_app.main:app --host 0.0.0.0 --port 8001 --reload
+    environment:
+      NPD_DJANGO_SECRET: ${NPD_DJANGO_SECRET:-_pth2#=k8-wf-_^t%2))it+3..8la^@@97^#ock7.v=@792w7}
+      DEBUG: ${DEBUG:-True}
+      DJANGO_LOGLEVEL: ${DJANGO_LOGLEVEL:-INFO}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1,0.0.0.0}
+      NPD_DB_ENGINE: ${NPD_DB_ENGINE:-django.contrib.gis.db.backends.postgis}
+      NPD_DB_NAME: ${NPD_DB_NAME:-npd_development}
+      NPD_DB_USER: ${NPD_DB_USER:-postgres}
+      NPD_DB_PASSWORD: ${NPD_DB_PASSWORD:-postgres}
+      NPD_DB_HOST: ${NPD_DB_HOST:-db}
+      NPD_DB_PORT: ${NPD_DB_PORT:-5432}
+      NPD_REQUIRE_AUTHENTICATION: False
+    ports:
+      - '8001:8001'
+    volumes:
+      - './backend/:/app'
+      - ./backend/artifacts:/app/artifacts:rw
+    restart: on-failure:10
+    depends_on:
+      db:
+        condition: service_healthy
+      db-migrations:
+        condition: service_completed_successfully
+
   db:
     image: 'postgis/postgis:17-3.5'
     platform: linux/x86_64
@@ -48,7 +81,7 @@ services:
       POSTGRES_PASSWORD: ${NPD_DB_PASSWORD:-postgres}
       PGUSER: ${NPD_DB_USER:-postgres}
     ports:
-      - ${NPD_DB_PORT:-5432}:5432
+      - ${NPD_DB_HOST_PORT:-5432}:5432
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./flyway/db-init:/docker-entrypoint-initdb.d/
