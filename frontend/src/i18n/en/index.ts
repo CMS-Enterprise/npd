@@ -1,3 +1,4 @@
+import about from "./about.json"
 import developers from "./developers.json"
 import errors from "./errors.json"
 import footer from "./footer.json"
@@ -31,6 +32,7 @@ import detailsections from "./detailsections.json"
  * use here.
  */
 export const translations = {
+  about,
   detailsections,
   developers,
   errors,

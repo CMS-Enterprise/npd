@@ -8,8 +8,6 @@ import { useFrontendSettings } from "../hooks/useFrontendSettings"
 import { apiUrl } from "../state/api"
 import { CsrfInput } from "./forms/CsrfInput"
 import { getCookie } from "./getCookie"
-import { slugId } from "./markdown/slug"
-
 import styles from "./Header.module.css"
 
 const AuthenticationControl = () => {
@@ -121,42 +119,24 @@ export const Header = ({ hideLinks }: HeaderProps) => {
                         type="button"
                         className="usa-accordion__button usa-nav__link"
                         aria-expanded="false"
-                        aria-controls="basic-nav-section"
+                        aria-controls="resources-nav-section"
                       >
-                        <span>{t("header.link.developers")}</span>
+                        <span>{t("header.link.resources")}</span>
                       </button>
                       <ul
-                        id="basic-nav-section"
+                        id="resources-nav-section"
                         className={`usa-nav__submenu ${styles.submenuList}`}
                         role="menu"
                         hidden
                       >
                         <li className="usa-nav__submenu-item">
-                          <a
-                            href={`/developers${slugId(t("developers.nav.participating"))}`}
-                          >
-                            <span>{t("developers.nav.participating")}</span>
+                          <a href="/about">
+                            <span>{t("header.link.about")}</span>
                           </a>
                         </li>
                         <li className="usa-nav__submenu-item">
-                          <a
-                            href={`/developers${slugId(t("developers.nav.about"))}`}
-                          >
-                            <span>{t("developers.nav.about")}</span>
-                          </a>
-                        </li>
-                        <li className="usa-nav__submenu-item">
-                          <a
-                            href={`/developers${slugId(t("developers.nav.accessing"))}`}
-                          >
-                            <span>{t("developers.nav.accessing")}</span>
-                          </a>
-                        </li>
-                        <li className="usa-nav__submenu-item">
-                          <a
-                            href={`/developers${slugId(t("developers.nav.opensource"))}`}
-                          >
-                            <span>{t("developers.nav.opensource")}</span>
+                          <a href="/developers">
+                            <span>{t("header.link.developers")}</span>
                           </a>
                         </li>
                       </ul>
