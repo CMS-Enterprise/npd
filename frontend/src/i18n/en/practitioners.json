@@ -20,6 +20,7 @@
     },
     "contact": {
       "title": "Contact information",
+      "organization": "Organization",
       "address": "Mailing address",
       "phone": "Phone",
       "fax": "Fax"

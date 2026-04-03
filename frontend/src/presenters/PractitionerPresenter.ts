@@ -22,12 +22,7 @@ export class PractitionerPresenter {
   }
 
   get npi(): string | null {
-    const npiIdentifier = this.record.identifier?.find(
-      (id) =>
-        id.system === "http://terminology.hl7.org/NamingSystem/npi" ||
-        id.system === "http://hl7.org/fhir/sid/us-npi",
-    )
-    return npiIdentifier?.value ?? null
+    return this.findNpiIdentifier(this.record.identifier)?.value ?? null
   }
 
   get address(): string {
@@ -60,25 +55,46 @@ export class PractitionerPresenter {
   get identifiers() {
     if (!this.record.identifier?.length) return []
 
-    return this.record.identifier.map((identity) => ({
-      type: formatOtherIdentifierType(identity.type?.coding?.[0]?.code),
-      number: identity.value,
-      details:
-        identity.period || identity.assigner
-          ? formatDetails(identity.period, identity.assigner?.display)
-          : "",
-    }))
+    return this.record.identifier
+      .filter(
+        (identity) => identity.value && !this.isNpiIdentifier(identity.system),
+      )
+      .map((identity) => ({
+        type: formatOtherIdentifierType(identity.type?.coding?.[0]?.code),
+        number: identity.value,
+        details:
+          identity.period || identity.assigner
+            ? formatDetails(identity.period, identity.assigner?.display)
+            : "",
+      }))
   }
 
   get taxonomy() {
     if (!this.record.qualification?.length) return []
 
-    return this.record.qualification.map((taxonomy) => ({
-      state: taxonomy.identifier?.[0]?.assigner?.display ?? "",
-      licenseNumber: taxonomy.identifier?.[0]?.value ?? "",
-      display: taxonomy.code?.coding?.[0]?.display ?? "",
-      nuccCode: taxonomy.code?.coding?.[0]?.code ?? "",
-    }))
+    return this.record.qualification
+      .map((taxonomy) => ({
+        state: taxonomy.identifier?.[0]?.assigner?.display ?? "",
+        licenseNumber: taxonomy.identifier?.[0]?.value ?? "",
+        display: taxonomy.code?.coding?.[0]?.display ?? "",
+        nuccCode: taxonomy.code?.coding?.[0]?.code ?? "",
+      }))
+      .filter((taxonomy) => taxonomy.display || taxonomy.nuccCode)
+  }
+
+  get primaryTaxonomy(): string | null {
+    return this.taxonomy[0]?.display ?? null
+  }
+
+  private isNpiIdentifier(system: string | undefined): boolean {
+    return (
+      system === "http://terminology.hl7.org/NamingSystem/npi" ||
+      system === "http://hl7.org/fhir/sid/us-npi"
+    )
+  }
+
+  private findNpiIdentifier(identifiers: FHIRPractitioner["identifier"]) {
+    return identifiers?.find((id) => this.isNpiIdentifier(id.system))
   }
 }
 
@@ -111,14 +127,16 @@ export class FullPractitionerPresenter {
         endpointIds?.forEach((endpointId) => {
           if (endpointId && !existingEndpointIds.includes(endpointId)) {
             const endpoint = this.record.endpointData[endpointId]
-            const endpointRecord = {
-              id: endpoint.id,
-              address: endpoint.address,
-              connectionType: endpoint.connectionType.display,
+            if (endpoint) {
+              const endpointRecord = {
+                id: endpoint.id,
+                address: endpoint.address,
+                connectionType: endpoint.connectionType.display,
+              }
+              organizationDetailData[organizationId].endpoints.push(
+                endpointRecord,
+              )
             }
-            organizationDetailData[organizationId].endpoints.push(
-              endpointRecord,
-            )
           }
         })
         const existingLocationIds: Array<LogicalIdOfThisArtifact | undefined> =
@@ -127,39 +145,46 @@ export class FullPractitionerPresenter {
           )
         if (locationId && !existingLocationIds.includes(locationId)) {
           const loc = this.record.locationData[locationId]
-          const locRecord = {
-            id: loc.id,
-            name: loc.name,
-            address: formatAddress(loc.address, false),
-            contact: loc.telecom,
+          if (loc) {
+            const locRecord = {
+              id: loc.id,
+              name: loc.name,
+              address: formatAddress(loc.address, false),
+              contact: loc.telecom,
+            }
+            organizationDetailData[organizationId].locations.push(locRecord)
           }
-          organizationDetailData[organizationId].locations.push(locRecord)
         }
       } else {
         if (organizationId && locationId) {
           const loc = this.record.locationData[locationId]
-          const locRecord = {
-            id: loc.id,
-            name: loc.name,
-            address: formatAddress(loc.address, false),
-            contact: loc.telecom,
-          }
-          organizationDetailData[organizationId] = {
-            organization: this.record.organizationData[organizationId],
-            endpoints:
-              endpointIds?.map((endpointId) => {
-                if (endpointId) {
-                  const endpoint = this.record.endpointData[endpointId]
-                  const endpointRecord = {
-                    id: endpoint.id,
-                    address: endpoint.address,
-                    connectionType: endpoint.connectionType.display,
+          const organization = this.record.organizationData[organizationId]
+          if (organization && loc) {
+            const locRecord = {
+              id: loc.id,
+              name: loc.name,
+              address: formatAddress(loc.address, false),
+              contact: loc.telecom,
+            }
+            organizationDetailData[organizationId] = {
+              organization,
+              endpoints:
+                endpointIds?.map((endpointId) => {
+                  if (endpointId) {
+                    const endpoint = this.record.endpointData[endpointId]
+                    if (endpoint) {
+                      const endpointRecord = {
+                        id: endpoint.id,
+                        address: endpoint.address,
+                        connectionType: endpoint.connectionType.display,
+                      }
+                      return endpointRecord
+                    }
                   }
-                  return endpointRecord
-                }
-              }) ?? [],
-            locations: [locRecord],
-            roleDetails: role?.resource,
+                }) ?? [],
+              locations: [locRecord],
+              roleDetails: role?.resource,
+            }
           }
         }
       }
@@ -168,5 +193,39 @@ export class FullPractitionerPresenter {
     return {
       ...organizationDetailData,
     }
+  }
+
+  get organizationCards() {
+    return Object.entries(this.organizations).map(([id, obj]) => {
+      const organizationNpi =
+        obj.organization.identifier?.find(
+          (identifier) =>
+            identifier.system ===
+              "http://terminology.hl7.org/NamingSystem/npi" ||
+            identifier.system === "http://hl7.org/fhir/sid/us-npi",
+        )?.value ?? null
+
+      return {
+        id,
+        name:
+          obj.organization.name ??
+          obj.roleDetails?.organization.display ??
+          null,
+        npi: organizationNpi,
+        locations: obj.locations.filter(
+          (location) =>
+            location.name ||
+            location.address ||
+            (location.contact?.length ?? 0) > 0,
+        ),
+        endpoints: obj.endpoints.filter(
+          (endpoint) => endpoint?.connectionType || endpoint?.address,
+        ),
+      }
+    })
+  }
+
+  get primaryOrganizationName(): string | null {
+    return this.organizationCards[0]?.name ?? null
   }
 }

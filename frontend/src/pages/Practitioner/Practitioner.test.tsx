@@ -114,24 +114,37 @@ describe("Practitioner", () => {
       const nameElement = await screen.findByTestId("practitioner-name")
 
       expect(nameElement).toHaveTextContent(EXPECTED_NAME)
-      await screen.findByText("About", { selector: "section h2" })
+      expect(screen.getByTestId("practitioner-npi")).toHaveTextContent(
+        `NPI: ${EXPECTED_NPI}`,
+      )
+      expect(screen.getAllByText("Internal Medicine").length).toBeGreaterThan(0)
+      expect(
+        screen.queryByText("About", { selector: "section h2" }),
+      ).not.toBeInTheDocument()
       await screen.findByText("Contact information", { selector: "section h2" })
+      expect(screen.getByText("Organization")).toBeInTheDocument()
+      expect(
+        screen.getAllByText("Acme Healthcare System").length,
+      ).toBeGreaterThan(0)
       expect(
         await screen.findByText(
           /8170 33rd Ave S Stop 21110Q\s+Bloomington, MN 55425/,
         ),
       ).toBeInTheDocument()
-      await screen.findByText("Identifiers", { selector: "section h2" })
+      expect(
+        screen.queryByText("Identifiers", { selector: "section h2" }),
+      ).not.toBeInTheDocument()
       await screen.findByText("Taxonomy", { selector: "section h2" })
-
       expect(await screen.getByText("207R00000X")).toBeInTheDocument()
-      expect(await screen.getByText("Internal Medicine")).toBeInTheDocument()
       await screen.findByText("Organization(s)", { selector: "section h2" })
       await screen.findByText("Endpoint(s)", { selector: "section h4" })
       await screen.findByText("Location(s)", { selector: "section h4" })
-      const organizationHeader = await screen.getByRole("link", {name: "Acme Healthcare System (NPI: 1234567890)"})
+      const organizationHeader = await screen.getByRole("link", {
+        name: "Acme Healthcare System",
+      })
       expect(organizationHeader).toBeInTheDocument()
-      expect(organizationHeader).toHaveAttribute('href', '/organizations/12345');
+      expect(organizationHeader).toHaveAttribute("href", "/organizations/12345")
+      expect(screen.getAllByText("NPI: 1234567890")[0]).toBeInTheDocument()
       expect(
         await screen.getByText("0006 Aspen Glen Court, Edwards, CO 81632"),
       ).toBeInTheDocument()
@@ -149,6 +162,11 @@ describe("Practitioner", () => {
       expect(
         await screen.queryByText("No endpoint information available"),
       ).not.toBeInTheDocument()
+      expect(screen.queryByText(/Medicare Provider/i)).not.toBeInTheDocument()
+      expect(
+        screen.queryByText("jane.smith@acmehealthcare.com"),
+      ).not.toBeInTheDocument()
+      expect(screen.queryByText(/Office Hours/i)).not.toBeInTheDocument()
     })
 
     it("renders the feedback CTA", async () => {
@@ -259,21 +277,24 @@ describe("Practitioner", () => {
       const nameElement = await screen.findByTestId("practitioner-name")
 
       expect(nameElement).toHaveTextContent(EXPECTED_NAME)
-      await screen.findByText("About", { selector: "section h2" })
+      expect(
+        screen.queryByText("About", { selector: "section h2" }),
+      ).not.toBeInTheDocument()
       await screen.findByText("Contact information", { selector: "section h2" })
       expect(
         await screen.findByText(
           /8170 33rd Ave S Stop 21110Q\s+Bloomington, MN 55425/,
         ),
       ).toBeInTheDocument()
-      await screen.findByText("Identifiers", { selector: "section h2" })
+      expect(
+        screen.queryByText("Identifiers", { selector: "section h2" }),
+      ).not.toBeInTheDocument()
       await screen.findByText("Taxonomy", { selector: "section h2" })
       expect(await screen.getByText("207R00000X")).toBeInTheDocument()
-      expect(await screen.getByText("Internal Medicine")).toBeInTheDocument()
-      await screen.findByText("Organization(s)", { selector: "section h2" })
+      expect(screen.getAllByText("Internal Medicine").length).toBeGreaterThan(0)
       expect(
-        await screen.getByText("No organization relationship found"),
-      ).toBeInTheDocument()
+        screen.queryByText("Organization(s)", { selector: "section h2" }),
+      ).not.toBeInTheDocument()
     })
   })
 
@@ -298,22 +319,25 @@ describe("Practitioner", () => {
       const nameElement = await screen.findByTestId("practitioner-name")
 
       expect(nameElement).toHaveTextContent(EXPECTED_NAME)
-      await screen.findByText("About", { selector: "section h2" })
+      expect(
+        screen.queryByText("About", { selector: "section h2" }),
+      ).not.toBeInTheDocument()
       await screen.findByText("Contact information", { selector: "section h2" })
       expect(
         await screen.findByText(
           /8170 33rd Ave S Stop 21110Q\s+Bloomington, MN 55425/,
         ),
       ).toBeInTheDocument()
-      await screen.findByText("Identifiers", { selector: "section h2" })
+      expect(
+        screen.queryByText("Identifiers", { selector: "section h2" }),
+      ).not.toBeInTheDocument()
       await screen.findByText("Taxonomy", { selector: "section h2" })
       expect(await screen.getByText("207R00000X")).toBeInTheDocument()
-      expect(await screen.getByText("Internal Medicine")).toBeInTheDocument()
+      expect(screen.getAllByText("Internal Medicine").length).toBeGreaterThan(0)
       await screen.findByText("Organization(s)", { selector: "section h2" })
-      await screen.findByText("Endpoint(s)", { selector: "section h4" })
       await screen.findByText("Location(s)", { selector: "section h4" })
       expect(
-        await screen.getByText("Acme Healthcare System (NPI: 1234567890)"),
+        await screen.getByRole("link", { name: "Acme Healthcare System" }),
       ).toBeInTheDocument()
       expect(
         await screen.getByText("0006 Aspen Glen Court, Edwards, CO 81632"),
@@ -326,8 +350,11 @@ describe("Practitioner", () => {
       ).not.toBeInTheDocument()
       expect(await screen.queryByText("HL7 FHIR")).not.toBeInTheDocument()
       expect(
-        await screen.getByText("No endpoint information available"),
-      ).toBeInTheDocument()
+        screen.queryByText("Endpoint(s)", { selector: "section h4" }),
+      ).not.toBeInTheDocument()
+      expect(
+        screen.queryByText("No endpoint information available"),
+      ).not.toBeInTheDocument()
     })
   })
 })
