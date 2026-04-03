@@ -9,6 +9,7 @@ import practitioners from "./practitioners.json"
 import search from "./search.json"
 import feedback from "./feedback.json"
 import detailsections from "./detailsections.json"
+import providers from "./providers.json"
 
 /*
  * NOTE: (@abachman-dsac) a word about i18n usage in react components and the
@@ -43,4 +44,5 @@ export const translations = {
   practitioners,
   search,
   feedback,
+  providers,
 }

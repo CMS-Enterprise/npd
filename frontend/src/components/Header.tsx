@@ -139,6 +139,11 @@ export const Header = ({ hideLinks }: HeaderProps) => {
                             <span>{t("header.link.developers")}</span>
                           </a>
                         </li>
+                        <li className="usa-nav__submenu-item">
+                          <a href="/providers">
+                            <span>{t("header.link.providers")}</span>
+                          </a>
+                        </li>
                       </ul>
                     </li>
                   </>

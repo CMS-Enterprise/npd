@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next"
 
 import layoutstyles from "../Layout.module.css"
 
-export const AboutHeading = () => {
+export const ProvidersHeading = () => {
   const { t } = useTranslation()
 
   return (
@@ -11,7 +11,7 @@ export const AboutHeading = () => {
         <div className="ds-l-col--12">
           <div className={layoutstyles.leader}>
             <div role="heading" aria-level={1} className={layoutstyles.title}>
-              {t("about.title")}
+              {t("providers.title")}
             </div>
           </div>
         </div>

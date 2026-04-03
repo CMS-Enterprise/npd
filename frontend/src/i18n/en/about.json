@@ -2,17 +2,6 @@
   "title": "About the directory",
   "subtitle": "About",
   "backtotop": "Back to top",
-  "nav": {
-    "whatis": "What is the National Provider Directory?",
-    "howtosearch": "How to search for providers",
-    "vision": "Long-term vision",
-    "visionpatients": "Helping patients find the care they need",
-    "visionsystem": "Connecting a fragmented system",
-    "foundation": "Building the foundation together",
-    "accounts": "Accounts and secure authentication options",
-    "alreadyhaveaccount": "Already have an account?",
-    "releasenotes": "Release notes"
-  },
   "auth": {
     "idme": {
       "title": "ID.me",
