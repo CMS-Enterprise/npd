@@ -363,6 +363,7 @@ class FHIRLocationViewSet(viewsets.GenericViewSet):
         Location.objects.all()
         .select_related(
             "organization",
+            "phone",
             "address",
             "address__address_us",
             "address__address_us__state_code",
