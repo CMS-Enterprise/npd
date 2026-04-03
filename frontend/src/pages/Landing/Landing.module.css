@@ -1,3 +1,4 @@
+/* Hero Section */
 .hero {
   background: linear-gradient(
     93deg,
@@ -6,88 +7,129 @@
   );
 }
 
-.heroSpacing {
+.heroLayout {
   display: flex;
-  width: var(--spacer-7, 3.5rem);
-  height: var(--spacer-7, 3.5rem);
-  justify-content: center;
-  align-items: center;
+  align-items: stretch;
+  max-width: 1280px;
+  margin: 0 auto;
 }
 
-.heroBody {
+.heroCard {
+  background-color: var(--theme-color-primary-darkest, #00395e);
+  color: #fff;
+  flex: 0 0 40%;
+  display: flex;
+  align-items: center;
+  margin: var(--spacer-3, 2rem);
+  margin-right: 0;
+  border-radius: 4px;
+  border-radius: 10px;
+}
+
+.heroCardInner {
+  padding: var(--spacer-7, 3.5rem) var(--spacer-4, 2rem) var(--spacer-7, 3.5rem)
+    var(--spacer-7, 3.5rem);
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  gap: var(--spacer-3, 1.5rem);
+}
+
+.heroCardText {
+  font-family: var(--theme-font-family-heading, "Open Sans");
+  font-size: var(--theme-font-size-lg, 1.125rem);
+  font-weight: 700;
+  line-height: 150%;
+  margin: 0;
+}
+
+.heroTrusted {
+  color: var(--theme-color-primary-lighter, #4db7ff);
+  text-decoration: underline;
+}
+
+.heroCardButton {
+  align-self: flex-start;
+}
+
+.heroRight {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: var(--spacer-7, 3.5rem) var(--spacer-7, 3.5rem) var(--spacer-7, 3.5rem) var(--spacer-4, 2rem);
   gap: var(--spacer-2, 1rem);
-  align-self: stretch;
 
   & h1 {
     color: var(--theme-color-primary-darkest, #00395e);
-
-    /* Headings/4xl/4xl - LG breakpoint */
     font-family: var(--theme-font-family-heading, "Open Sans");
     font-size: var(--theme-font-size-4xl, 3rem);
     font-style: normal;
     font-weight: var(--theme-font-weight-heading-4xl, 700);
-    line-height: 130%; /* 3.9rem */
+    line-height: 130%;
+    margin: 0;
   }
-}
-
-.heroBadge {
-  padding: 0.5rem;
 }
 
 .tagline {
   color: var(--theme-color-base, #262626);
-
-  /* Headings/3xl/3xl - LG breakpoint */
   font-family: var(--theme-font-family-heading, "Open Sans");
-  font-size: var(--theme-font-size-3xl, 2.25rem);
+  font-size: var(--theme-font-size-xl, 1.5rem);
   font-style: normal;
-  font-weight: var(--theme-font-weight-heading-3xl, 400);
-  line-height: 130%; /* 2.925rem */
+  font-weight: 400;
+  line-height: 150%;
 }
 
-.primaryActions {
-  display: flex;
-  padding: var(--spacer-2, 1rem) 0;
-  align-items: center;
-  gap: var(--spacer-2, 1rem);
-}
-
-/* About */
-.secondary {
+/* Mission Section */
+.missionSection {
   padding: var(--spacer-7, 3.5rem) 0;
+}
+
+.missionHeading {
+  color: var(--theme-color-primary-darkest, #00395e);
+  font-family: var(--theme-font-family-heading, "Open Sans");
+  font-size: var(--theme-font-size-xl, 1.5rem);
+  font-weight: 700;
+  line-height: 140%;
+}
+
+.missionBody {
+  color: var(--theme-color-base, #262626);
+  font-family: var(--theme-font-family-body, "Open Sans");
+  font-size: var(--theme-font-size-md, 1rem);
+  line-height: 170%;
+  margin-bottom: var(--spacer-2, 1rem);
+}
+
+/* Cards Section */
+.cardsSection {
+  background-color: var(--theme-color-primary-darkest, #00395e);
+  padding: var(--spacer-7, 3.5rem) 0;
+}
+
+.card {
+  background-color: var(--theme-color-primary-lightest, #e6f1f8);
+  border-radius: 10px;
+  padding: var(--spacer-4, 2rem);
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: var(--spacer-3, 1.5rem);
-  align-self: stretch;
-}
+  gap: var(--spacer-2, 1rem);
+  height: 100%;
 
-.secondaryContent {
-  & h2 {
+  & h3 {
     color: var(--theme-color-primary-darkest, #00395e);
-
-    /* Headings/3xl/3xl - LG breakpoint */
     font-family: var(--theme-font-family-heading, "Open Sans");
-    font-size: var(--theme-font-size-3xl, 2.25rem);
-    font-style: normal;
-    font-weight: var(--theme-font-weight-heading-3xl, 700);
-    line-height: 130%; /* 2.925rem */
+    font-size: var(--theme-font-size-lg, 1.125rem);
+    font-weight: 700;
+    line-height: 140%;
+    margin: 0;
   }
 
-  & .secondaryDescription {
-    max-width: var(--media-width-md, 48rem);
-    align-self: stretch;
-
+  & p {
     color: var(--theme-color-base, #262626);
-
-    /* Links/Body/Large */
-    font-family: var(--theme-font-family-link, "Open Sans");
-    font-size: var(--theme-font-size-lg, 1.125rem);
-    font-style: normal;
-    font-weight: var(--theme-font-weight-body-lg, 400);
-    line-height: 150%; /* 1.6875rem */
+    font-family: var(--theme-font-family-body, "Open Sans");
+    font-size: var(--theme-font-size-md, 1rem);
+    line-height: 160%;
+    margin: 0;
+    flex: 1;
   }
 }
