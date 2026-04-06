@@ -7,32 +7,32 @@ profile assembled from multiple CoreDM tables.
 Typical usage:
 
 ```
-python3 backend/provider_directory/services/practitioner_identity_lookup.py --env-file backend/provider_directory/services/examples/.env --provider id.me --json-file backend/provider_directory/services/examples/id_me_veronica_example.json
+python3 backend/practitioner_identity_lookup.py --env-file backend/examples/.env --provider id.me --json-file backend/examples/id_me_veronica_example.json
 ```
 OR
 ```
-python3 backend/provider_directory/services/practitioner_identity_lookup.py \
+python3 backend/practitioner_identity_lookup.py \
  --provider login.gov \
  --json-text '{"sub":"abc","given_name":"Jane","family_name":"Doe","birthdate":"1980-01-15"}' \
- --env-file backend/provider_directory/services/examples/.env
+ --env-file backend/examples/.env
 ```
 OR
 ```
-cat backend/provider_directory/services/examples/id_me_veronica_example.json | \
-python3 backend/provider_directory/services/practitioner_identity_lookup.py \
+cat backend/examples/id_me_veronica_example.json | \
+python3 backend/practitioner_identity_lookup.py \
  --provider id.me \
- --env-file backend/provider_directory/services/examples/.env
+ --env-file backend/examples/.env
 ```
 OR
-python3 backend/provider_directory/services/practitioner_identity_lookup.py --env-file backend/provider_directory/services/examples/.env  --id-me-file backend/provider_directory/services/examples/id_me_veronica_example.json
+python3 backend/practitioner_identity_lookup.py --env-file backend/examples/.env  --id-me-file backend/examples/id_me_veronica_example.json
 
 All three
 ```
-python3 backend/provider_directory/services/practitioner_identity_lookup.py --env-file backend/provider_directory/services/examples/.env  --id-me-file backend/provider_directory/services/examples/id_me_veronica_example.json --clear-me-file backend/provider_directory/services/examples/clear_me_veronica_example.json --login-gov-file backend/provider_directory/services/examples/login_gov_veronica_example.json
+python3 backend/practitioner_identity_lookup.py --env-file backend/examples/.env  --id-me-file backend/examples/id_me_veronica_example.json --clear-me-file backend/examples/clear_me_veronica_example.json --login-gov-file backend/examples/login_gov_veronica_example.json
 ```
 Or two
 ```
-python3 backend/provider_directory/services/practitioner_identity_lookup.py --env-file backend/provider_directory/services/examples/.env  --id-me-file backend/provider_directory/services/examples/id_me_veronica_example.json --clear-me-file backend/provider_directory/services/examples/clear_me_veronica_example.json
+python3 backend/practitioner_identity_lookup.py --env-file backend/examples/.env  --id-me-file backend/examples/id_me_veronica_example.json --clear-me-file backend/examples/clear_me_veronica_example.json
 ```
 
 Assumptions:
