@@ -1,0 +1,27 @@
+{
+  "login": {
+    "title": "Sign in or create your account",
+    "description": "You can use one of these free and secure identity verification services to sign in or create your account. You will be redirected to the service you select to verify your identity."
+  },
+  "idme": {
+    "name": "ID.me",
+    "logoAlt": "ID.me logo",
+    "description": "Verify your identity with ID.me, a trusted technology partner of the U.S. government."
+  },
+  "interstitial": {
+    "heading": "You're leaving the National Provider Directory to verify your identity with {{provider}}",
+    "importantLabel": "Important:",
+    "importantText": "Once you connect your account with an identity verification service, you will use that service to sign in going forward.",
+    "needHeading": "To verify your identity you may need:",
+    "needId": "A REAL ID U.S. driver's license, a state-issued photo ID, or your U.S. passport.",
+    "needSsn": "Your Social Security Number (SSN)",
+    "needPhoto": "A photo or video of yourself",
+    "documentsReady": "Make sure you have all your documents ready before you start. If you already have an account with this service, you may need to verify your identity again, but you'll only have to complete this process once.",
+    "returnInfo": "Once you have an account with {{provider}} and it's connected to the National Provider Directory, you can easily return and sign in through that service.",
+    "privacyHeading": "Your privacy is protected",
+    "privacyText": "We provide multiple identity verification options. When using one of the secure services we offer, you're subject to that service's privacy policy and terms of service. {{provider}} won't sell your data, and all of your information stays with the National Provider Directory.",
+    "actionPrompt": "Select \"Continue\" to go to {{provider}}'s site or select \"Cancel\" to choose a different option.",
+    "continue": "Continue",
+    "cancel": "Cancel"
+  }
+}
