@@ -44,6 +44,24 @@ const buildResultItems = (
     return items
   }
 
+  if (searchMode === "npi-lookup") {
+    const hasPractitioner = (practitioners?.results?.entry?.length ?? 0) > 0
+    const hasOrganization = (organizations?.results?.entry?.length ?? 0) > 0
+
+    if (hasPractitioner && practitioners?.results?.entry) {
+      for (const entry of practitioners.results.entry) {
+        if (entry?.resource)
+          items.push({ type: "provider", data: entry.resource })
+      }
+    } else if (hasOrganization && organizations?.results?.entry) {
+      for (const entry of organizations.results.entry) {
+        if (entry?.resource)
+          items.push({ type: "organization", data: entry.resource })
+      }
+    }
+    return items
+  }
+
   if (practitioners?.results?.entry) {
     for (const entry of practitioners.results.entry) {
       if (entry?.resource)
@@ -66,6 +84,10 @@ const getTotalCount = (
   searchMode: SearchMode,
 ): number => {
   if (searchMode === "cross-entity") return practitionerRoles?.count ?? 0
+  if (searchMode === "npi-lookup") {
+    const practCount = practitioners?.count ?? 0
+    return practCount > 0 ? practCount : (organizations?.count ?? 0)
+  }
   return (practitioners?.count ?? 0) + (organizations?.count ?? 0)
 }
 
@@ -79,6 +101,9 @@ const getTotalPages = (
   let maxCount: number
   if (searchMode === "cross-entity") {
     maxCount = practitionerRoles?.count ?? 0
+  } else if (searchMode === "npi-lookup") {
+    const practCount = practitioners?.count ?? 0
+    maxCount = practCount > 0 ? practCount : (organizations?.count ?? 0)
   } else {
     maxCount = Math.max(practitioners?.count ?? 0, organizations?.count ?? 0)
   }

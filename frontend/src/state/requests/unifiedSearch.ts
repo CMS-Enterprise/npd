@@ -11,7 +11,7 @@ export type SearchMode =
   | "providers"
   | "organizations"
   | "cross-entity"
-  | "both"
+  | "npi-lookup"
   | "none"
 
 interface UseUnifiedSearchOptions {
@@ -21,13 +21,13 @@ interface UseUnifiedSearchOptions {
 export const getSearchMode = (params: UnifiedSearchParams): SearchMode => {
   const hasProviderFields = !!params.providerName
   const hasOrgFields = !!params.organizationName
-  const hasAmbiguousFields = !!(params.npi || params.location)
+  const hasNpi = !!params.npi
 
-  if (!hasProviderFields && !hasOrgFields && !hasAmbiguousFields) return "none"
   if (hasProviderFields && hasOrgFields) return "cross-entity"
   if (hasProviderFields) return "providers"
   if (hasOrgFields) return "organizations"
-  return "both"
+  if (hasNpi) return "npi-lookup"
+  return "none"
 }
 
 export const useUnifiedSearchAPI = (
@@ -51,7 +51,7 @@ export const useUnifiedSearchAPI = (
           pagination.sort,
         ],
         queryFn:
-          searchMode === "providers" || searchMode === "both"
+          searchMode === "providers" || searchMode === "npi-lookup"
             ? () => adapter.searchProviders(searchParams, pagination)
             : skipToken,
         placeholderData: keepPreviousData,
@@ -66,7 +66,7 @@ export const useUnifiedSearchAPI = (
           pagination.sort,
         ],
         queryFn:
-          searchMode === "organizations" || searchMode === "both"
+          searchMode === "organizations" || searchMode === "npi-lookup"
             ? () => adapter.searchOrganizations(searchParams, pagination)
             : skipToken,
         placeholderData: keepPreviousData,
