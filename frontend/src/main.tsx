@@ -18,19 +18,13 @@ import { FeatureFlagRoute } from "./components/FeatureFlagRoute"
 import { Developers } from "./pages/Developers"
 import { Landing } from "./pages/Landing"
 import { Layout } from "./pages/Layout"
+import { CspLogin } from "./pages/CspLogin"
 import { Login } from "./pages/Login"
 import { NotFound } from "./pages/NotFound.tsx"
-import {
-  Organization,
-  OrganizationSearch,
-} from "./pages/Organization"
-import { 
-  Practitioner,
-  PractitionerSearch
-} from "./pages/Practitioner"
+import { Organization, OrganizationSearch } from "./pages/Organization"
+import { Practitioner, PractitionerSearch } from "./pages/Practitioner"
 import { Search } from "./pages/Search"
 import { FrontendSettingsProvider } from "./state/FrontendSettingsProvider"
-
 
 const queryClient = new QueryClient()
 
@@ -43,6 +37,7 @@ createRoot(document.getElementById("root")!).render(
             <Routes>
               <Route element={<Layout />}>
                 <Route path="/accounts/login/" element={<Login />} />
+                <Route path="/csp/login/" element={<CspLogin />} />
 
                 <Route element={<AuthenticatedRoute />}>
                   <Route index element={<Landing />} />

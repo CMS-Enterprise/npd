@@ -7,6 +7,7 @@ import organizations from "./organizations.json"
 import practitioners from "./practitioners.json"
 import search from "./search.json"
 import feedback from "./feedback.json"
+import csp from "./csp.json"
 import detailsections from "./detailsections.json"
 
 /*
@@ -31,6 +32,7 @@ import detailsections from "./detailsections.json"
  * use here.
  */
 export const translations = {
+  csp,
   detailsections,
   developers,
   errors,

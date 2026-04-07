@@ -23,7 +23,7 @@ const AuthenticationControl = () => {
     return null
   }
 
-  const path = user?.is_anonymous ? "/accounts/login/" : "/accounts/logout/"
+  const path = user?.is_anonymous ? "/csp/login/" : "/accounts/logout/"
   const label = user?.is_anonymous
     ? t("header.auth.login")
     : t("header.auth.logout")

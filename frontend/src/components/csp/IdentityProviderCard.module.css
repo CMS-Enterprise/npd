@@ -1,0 +1,70 @@
+.card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--spacer-3, 1.5rem);
+  padding: var(--spacer-3, 1.5rem) var(--spacer-4, 2rem);
+  background: #fff;
+  border: 1px solid var(--color-gray-lighter, #d6d7d9);
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.card:hover {
+  border-color: var(--theme-color-primary, #0071bc);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.card:focus {
+  outline: 0.25rem solid #2491ff;
+  outline-offset: 0;
+}
+
+.logoContainer {
+  flex-shrink: 0;
+  width: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo {
+  max-width: 100%;
+  max-height: 48px;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.name {
+  font-family: var(--theme-font-family-heading, "Open Sans");
+  font-size: var(--theme-font-size-md, 1rem);
+  font-weight: 700;
+  color: #1b1b1b;
+}
+
+.description {
+  font-family: var(--theme-font-family-body, "Open Sans");
+  font-size: var(--theme-font-size-sm, 0.875rem);
+  font-weight: 400;
+  color: var(--color-gray-dark, #5b616b);
+  line-height: 1.5;
+}
+
+.iconContainer {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+}
