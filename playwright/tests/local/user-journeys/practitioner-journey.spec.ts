@@ -117,48 +117,48 @@ test.describe("Practitioner Journey", () => {
     await expect(page).toHaveURL(`/practitioners/${practitioner.id}`)
   })
 
-  // test("search -> detail -> report feedback", async ({ page }) => {
-  //   await page.goto("/practitioners/search")
+  test("search -> detail -> report feedback", async ({ page }) => {
+    await page.goto("/search")
 
-  //   await page.getByRole("textbox", { name: "Name or NPI" }).fill("1234567894")
-  //   await page.getByRole("button", { name: "Search" }).click()
+    await page.getByRole("textbox", { name: /npi number/i }).fill("1234567894")
+    await page.getByRole("button", { name: /search providers/i }).click()
 
-  //   await page.getByRole("link", { name: /AAA Test Practitioner/i }).click()
-  //   await expect(page).toHaveURL(`/practitioners/${practitioner.id}`)
+    await page.getByRole("link", { name: /AAA Test Practitioner/i }).click()
+    await expect(page).toHaveURL(`/practitioners/${practitioner.id}`)
 
-  //   // open feedback dialog
-  //   await page.getByRole("button", { name: "Report an issue" }).click()
+    // open feedback dialog
+    await page.getByRole("button", { name: "Report an issue" }).click()
 
-  //   const dialog = page.getByRole("dialog")
-  //   await expect(dialog).toBeVisible()
+    const dialog = page.getByRole("dialog")
+    await expect(dialog).toBeVisible()
 
-  //   // confirm practitioner name is shown in the form
-  //   await expect(dialog.getByText(practitioner.name)).toBeVisible()
-  
-  //   // check issue type
-  //   await dialog.getByRole("checkbox", { name: /Practice location/i }).check()
-  //   await dialog.getByRole("textbox", { name: /details/i }).fill("Address is outdated")
+    // confirm practitioner name is shown in the form
+    await expect(dialog.getByText(practitioner.name)).toBeVisible()
 
-  //   const captcha = dialog.getByRole("checkbox", { name: /I'm not a robot/i })
-  //   await captcha.click()
-  //   await expect(
-  //     dialog.getByRole("checkbox", { name: /Verified/i })
-  //   ).toBeChecked({ timeout: 10000 })
+    // check issue type
+    await dialog.getByRole("checkbox", { name: /Practice location/i }).check()
+    await dialog.getByRole("textbox", { name: /details/i }).fill("Address is outdated")
 
-  //   // fill details after captcha is verified
-  //   await dialog.getByRole("textbox", { name: /details/i }).fill("Address is outdated")
-  
-  //   await dialog.getByRole("button", { name: "Submit" }).click()
+    const captcha = dialog.getByRole("checkbox", { name: /I'm not a robot/i })
+    await captcha.click()
+    await expect(
+      dialog.getByRole("checkbox", { name: /Verified/i })
+    ).toBeChecked({ timeout: 10000 })
 
-  //   // confirm success message
-  //   await expect(dialog.getByText(/Submission sent/i)).toBeVisible()
+    // fill details after captcha is verified
+    await dialog.getByRole("textbox", { name: /details/i }).fill("Address is outdated")
 
-  //   // close the dialog
-  //   await dialog.getByRole("button", { name: "Close", exact: true }).click()
-  //   await expect(dialog).not.toBeVisible()
+    await dialog.getByRole("button", { name: "Submit" }).click()
 
-  //   // confirm we're still on the detail page
-  //   await expect(page).toHaveURL(`/practitioners/${practitioner.id}`)
-  //   await expect(page.getByTestId("practitioner-name")).toContainText(practitioner.name)
-  // })
+    // confirm success message
+    await expect(dialog.getByText(/Submission sent/i)).toBeVisible()
+
+    // close the dialog
+    await dialog.getByRole("button", { name: "Close", exact: true }).click()
+    await expect(dialog).not.toBeVisible()
+
+    // confirm we're still on the detail page
+    await expect(page).toHaveURL(`/practitioners/${practitioner.id}`)
+    await expect(page.getByTestId("practitioner-name")).toContainText(practitioner.name)
+  })
 })
