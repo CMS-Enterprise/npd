@@ -10,17 +10,31 @@
     "subtitle": "Learn how to",
     "link": "update your information."
   },
-  "about": {
-    "title": "About",
-    "otherNames": "Other name(s)",
-    "type": "Type",
-    "parentOrganization": "Parent organization"
+  "basicInfo": {
+    "title": "Basic Information",
+    "npi": "NPI Number",
+    "dateOfEnumeration": "Date of Enumeration",
+    "phone": "Phone"
   },
-  "contact": {
-    "title": "Contact information",
-    "address": "Mailing address",
-    "authorizedOfficial": "Authorized official",
-    "authorizedOfficialPhone": "Authorized official phone"
+  "authorizedOfficial": {
+    "title": "Authorized Official",
+    "name": "Name",
+    "title_label": "Title",
+    "phone": "Phone"
+  },
+  "cmsNetworks": {
+    "title": "CMS Aligned Networks",
+    "empty": "No CMS aligned networks on record for this organization."
+  },
+  "practiceLocations": {
+    "title": "Practice Locations",
+    "empty": "No practice location information available."
+  },
+  "dataExchangeEndpoints": {
+    "title": "Data Exchange Endpoints",
+    "type": "Type",
+    "url": "URL",
+    "empty": "No endpoint information available."
   },
   "taxonomy": {
     "title": "Taxonomy",
