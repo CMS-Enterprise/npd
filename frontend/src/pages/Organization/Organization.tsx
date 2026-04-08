@@ -1,5 +1,4 @@
 import { Alert, Button } from "@cmsgov/design-system"
-import { FaRegComment } from "react-icons/fa"
 import classNames from "classnames"
 import { useState, useEffect } from "react"
 import { useTranslation } from "react-i18next"
