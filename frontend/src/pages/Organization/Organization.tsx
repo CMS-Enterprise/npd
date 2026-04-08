@@ -249,16 +249,11 @@ export const Organization = () => {
 
               <div className={classNames(styles.card, styles.actionsCard)}>
                 <h3 className={styles.actionsTitle}>Actions</h3>
-
                 <Button
-                  variation="ghost"
-                  className={classNames(
-                    styles.actionsButton,
-                    styles.reportButton,
-                  )}
+                  variation="solid"
+                  className={styles.actionsButton}
                   onClick={() => setIsReportIssueOpen(true)}
                 >
-                  <FaRegComment className={styles.actionButtonIcon} />
                   Report Issue with This Record
                 </Button>
                 <p className={styles.feedbackText}>

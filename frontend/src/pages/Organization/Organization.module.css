@@ -148,6 +148,7 @@
 .detailValue {
   color: var(--color-base);
   white-space: pre-line;
+  margin-left: 0;
 }
 
 .emptyState {
