@@ -71,7 +71,7 @@ class FeedbackSerializerTest(TestCase):
         self.assertTrue(serializer.is_valid(), serializer.errors)
 
     def test_details_max_length(self):
-        data = {**VALID_PAYLOAD, "details": "x" * 501}
+        data = {**VALID_PAYLOAD, "details": "x" * 751}
         serializer = FeedbackSerializer(data=data)
         self.assertFalse(serializer.is_valid())
         self.assertIn("details", serializer.errors)

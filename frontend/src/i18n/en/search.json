@@ -20,10 +20,11 @@
     "noResults": "No results found. Try adjusting your search criteria.",
     "resultsFound": "results found",
     "initialPromptHeading": "Search",
-    "initialPrompt": "Use the form above to search for providers and organizations by name, NPI, location, or organization.",
+    "initialPrompt": "Enter a provider name, organization name, or NPI number to search. Use the location field to refine your results.",
     "providerBadge": "Provider",
     "organizationBadge": "Organization",
     "crossEntityBadge": "Provider at Organization",
-    "unknownProvider": "Unknown Provider"
+    "unknownProvider": "Unknown Provider",
+    "locationHint": "Please also enter a provider name, organization name, or NPI number to search."
   }
 }

@@ -1,5 +1,5 @@
 import type { FormEvent, ChangeEvent } from "react"
-import { Button } from "@cmsgov/design-system"
+import { Alert, Button } from "@cmsgov/design-system"
 import { useTranslation } from "react-i18next"
 import styles from "./UnifiedSearchForm.module.css"
 
@@ -31,12 +31,12 @@ export const UnifiedSearchForm = ({
       onChange({ ...values, [field]: e.target.value })
     }
 
-  const hasAnyValue = !!(
+  const canSearch = !!(
     values.providerName ||
-    values.npi ||
-    values.location ||
-    values.organizationName
+    values.organizationName ||
+    values.npi
   )
+  const showLocationHint = !!values.location && !canSearch
 
   return (
     <form onSubmit={handleSubmit}>
@@ -104,6 +104,14 @@ export const UnifiedSearchForm = ({
         </div>
       </div>
 
+      {showLocationHint && (
+        <div className="ds-u-margin-top--2">
+          <Alert variation="warn" hideIcon>
+            {t("search.unified.locationHint")}
+          </Alert>
+        </div>
+      )}
+
       <div className="ds-l-row ds-u-margin-top--3">
         <div
           className={`ds-l-col--12 ds-u-display--flex ds-u-align-items--center ${styles.actionsRow}`}
@@ -111,7 +119,7 @@ export const UnifiedSearchForm = ({
           <Button
             type="submit"
             variation="solid"
-            disabled={!hasAnyValue || isLoading}
+            disabled={!canSearch || isLoading}
           >
             {isLoading
               ? t("search.searching")

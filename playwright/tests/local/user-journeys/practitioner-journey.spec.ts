@@ -36,16 +36,7 @@ test.beforeAll(async ({ request }) => {
 
 test.describe("Practitioner Journey", () => {
   test("landing -> search hub -> practitioner search -> detail view", async ({ page }) => {
-    // first, start at landing page
-    await page.goto("/")
-    await expect(page).toHaveURL("/")
-
-    // then, navigate to search hub
-    await page.getByRole("link", { name: /search/i }).first().click()
-    await expect(page).toHaveURL("/search")
-
-    // then, select Practitioner search
-    await page.getByRole("link", { name: /practitioner/i }).click()
+    await page.goto("/practitioners/search")
     await expect(page).toHaveURL("/practitioners/search")
     await expect(page.getByText("Search Practitioners")).toBeVisible()
 
@@ -66,11 +57,8 @@ test.describe("Practitioner Journey", () => {
   })
 
   test("landing -> last page -> practitioner detail", async ({ page }) => {
-    await page.goto("/")
-  
-    await page.getByRole("link", { name: /search/i }).first().click()
-    await page.getByRole("link", { name: /practitioner/i }).click()
-  
+    await page.goto("/practitioners/search")
+
     await page.getByRole("textbox", { name: "Name or NPI" }).fill("TEST")
     await page.getByRole("button", { name: "Search" }).click()
   
@@ -95,10 +83,7 @@ test.describe("Practitioner Journey", () => {
   })
 
   test("practitioner journey with partial name search", async ({ page }) => {
-    await page.goto("/")
-
-    await page.getByRole("link", { name: /search/i }).first().click()
-    await page.getByRole("link", { name: /practitioner/i }).click()
+    await page.goto("/practitioners/search")
 
     await page.getByRole("textbox", { name: "Name or NPI" }).fill("AAA")
     await page.getByRole("button", { name: "Search" }).click()
@@ -110,10 +95,7 @@ test.describe("Practitioner Journey", () => {
   })
 
   test("practitioner journey with sorting functionality", async ({ page }) => {
-    await page.goto("/")
-
-    await page.getByRole("link", { name: /search/i }).first().click()
-    await page.getByRole("link", { name: /practitioner/i }).click()
+    await page.goto("/practitioners/search")
 
     await page.getByRole("textbox", { name: "Name or NPI" }).fill("AAA")
     await page.getByRole("button", { name: "Search" }).click()
@@ -136,10 +118,10 @@ test.describe("Practitioner Journey", () => {
   })
 
   test("search -> detail -> report feedback", async ({ page }) => {
-    await page.goto("/practitioners/search")
+    await page.goto("/search")
 
-    await page.getByRole("textbox", { name: "Name or NPI" }).fill("1234567894")
-    await page.getByRole("button", { name: "Search" }).click()
+    await page.getByRole("textbox", { name: /npi number/i }).fill("1234567894")
+    await page.getByRole("button", { name: /search providers/i }).click()
 
     await page.getByRole("link", { name: /AAA Test Practitioner/i }).click()
     await expect(page).toHaveURL(`/practitioners/${practitioner.id}`)
@@ -152,7 +134,7 @@ test.describe("Practitioner Journey", () => {
 
     // confirm practitioner name is shown in the form
     await expect(dialog.getByText(practitioner.name)).toBeVisible()
-  
+
     // check issue type
     await dialog.getByRole("checkbox", { name: /Practice location/i }).check()
     await dialog.getByRole("textbox", { name: /details/i }).fill("Address is outdated")
@@ -165,7 +147,7 @@ test.describe("Practitioner Journey", () => {
 
     // fill details after captcha is verified
     await dialog.getByRole("textbox", { name: /details/i }).fill("Address is outdated")
-  
+
     await dialog.getByRole("button", { name: "Submit" }).click()
 
     // confirm success message

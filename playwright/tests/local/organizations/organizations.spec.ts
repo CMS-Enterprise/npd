@@ -189,8 +189,8 @@ test.describe("Organization show", () => {
     const tableRows = practitionerTable.locator('tbody tr');
     await expect(tableRows).toHaveCount(1);
     await expect(tableRows).toContainText("Jane Doe")
-    const practitionerLink = await page.getByRole("link", {name: "Jane Doe"})
-    expect(practitionerLink).toHaveAttribute("href", "/practitioners/6846963d-7814-4c70-ae3d-8a8419a7c9c6")
+    const practitionerLink = page.getByRole("link", {name: "Jane Doe"})
+    await expect(practitionerLink).toHaveAttribute("href", "/practitioners/6846963d-7814-4c70-ae3d-8a8419a7c9c6")
   })
   test("View an organization with multiple practitioner relationships", async ({page}) => {
     await page.goto(`/organizations/0c1f8f84-0502-4444-b636-8fee4ab76e32`)

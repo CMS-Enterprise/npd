@@ -1,9 +1,9 @@
-Django==5.2.12
+Django==5.2.13
 Faker==38.2.0
 Jinja2==3.1.6
 MarkupSafe==3.0.2
 PyYAML==6.0.2
-Pygments==2.19.2
+Pygments==2.20.0
 SQLAlchemy==2.0.41
 WTForms==3.1.2
 altcha==1.0.0
