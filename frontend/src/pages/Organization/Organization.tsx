@@ -1,7 +1,7 @@
 import { Alert, Button } from "@cmsgov/design-system"
-import { FaShieldAlt, FaRegComment } from "react-icons/fa"
+import { FaRegComment } from "react-icons/fa"
 import classNames from "classnames"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { useLocation, useParams } from "react-router"
 import { FeatureFlag } from "../../components/FeatureFlag"
@@ -14,19 +14,7 @@ import {
   useOrganizationAPI,
   useFullOrganizationAPI,
 } from "../../state/requests/organizations"
-import { LocationSection } from "../../components/detailSections/LocationSection"
-import { EndpointSection } from "../../components/detailSections/EndpointSection"
-import { IdentifierSection } from "../../components/detailSections/IdentifierSection"
-import { TaxonomySection } from "../../components/detailSections/TaxonomySection"
-import { SectionWithContentOrFallback } from "../../components/detailSections/SectionWithContentOrFallback"
 import { FeedbackForm } from "../../components/forms/feedback/FeedbackForm"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-} from "@cmsgov/design-system"
 import styles from "./Organization.module.css"
 
 const DetailRows = ({
@@ -50,16 +38,17 @@ export const Organization = () => {
   const { t } = useTranslation()
   const { organizationId } = useParams()
   const { data, isLoading } = useOrganizationAPI(organizationId)
-  const {
-    fullData,
-    endpointDataLoading,
-    locationDataLoading,
-    practitionerDataLoading,
-  } = useFullOrganizationAPI(organizationId)
+  const { fullData, endpointDataLoading, locationDataLoading } =
+    useFullOrganizationAPI(organizationId)
   const location = useLocation()
   const searchUrl = location.state?.searchUrl
 
   const [isReportIssueOpen, setIsReportIssueOpen] = useState(false)
+
+  useEffect(() => {
+    document.body.classList.add("gray-bg")
+    return () => document.body.classList.remove("gray-bg")
+  }, [])
 
   if (isLoading) {
     return <LoadingIndicator />
@@ -68,28 +57,28 @@ export const Organization = () => {
   const organization = new OrganizationPresenter(data!)
   const fullOrganization = new FullOrganizationPresenter(fullData!)
 
-  const aboutItems = [
+  const basicInfoItems = [
     {
-      label: t("organizations.about.otherNames"),
-      value: organization.otherNames.join("; ") || null,
+      label: t("organizations.basicInfo.npi"),
+      value: organization.npi,
     },
     {
-      label: t("organizations.about.parentOrganization"),
-      value: null,
+      label: t("organizations.basicInfo.dateOfEnumeration"),
+      value: organization.enumerationDate,
+    },
+    {
+      label: t("organizations.basicInfo.phone"),
+      value: organization.authorizedPhone,
     },
   ]
 
-  const contactItems = [
+  const authorizedOfficialItems = [
     {
-      label: t("organizations.contact.address"),
-      value: organization.address,
-    },
-    {
-      label: t("organizations.contact.authorizedOfficial"),
+      label: t("organizations.authorizedOfficial.name"),
       value: organization.authorizedOfficial,
     },
     {
-      label: t("organizations.contact.authorizedOfficialPhone"),
+      label: t("organizations.authorizedOfficial.phone"),
       value: organization.authorizedPhone,
     },
   ]
@@ -132,117 +121,135 @@ export const Organization = () => {
             <div className={styles.mainColumn}>
               <section className={styles.card}>
                 <h2 className={styles.sectionTitle}>
-                  {t("organizations.about.title")}
+                  {t("organizations.basicInfo.title")}
                 </h2>
-                <DetailRows items={aboutItems} />
+                <DetailRows items={basicInfoItems} />
               </section>
-
-              <section className={styles.card}>
-                <h2 className={styles.sectionTitle}>
-                  {t("organizations.contact.title")}
-                </h2>
-                <DetailRows items={contactItems} />
-              </section>
-
-              {organization.identifiers.length > 0 && (
-                <section className={classNames(styles.card, styles.tableWrap)}>
-                  <IdentifierSection
-                    identifierData={organization.identifiers}
-                  />
-                </section>
-              )}
-
-              {organization.types.length > 0 && (
-                <section className={classNames(styles.card, styles.tableWrap)}>
-                  <TaxonomySection taxonomyData={organization.types} />
-                </section>
-              )}
-
-              {endpointDataLoading ? (
-                <section className={styles.card}>
-                  <h2 className={styles.sectionTitle}>
-                    {t("detailsections.endpoints.title")}
-                  </h2>
-                  <LoadingIndicator />
-                </section>
-              ) : (
-                <section className={classNames(styles.card, styles.tableWrap)}>
-                  <EndpointSection endpointData={fullOrganization.endpoints} />
-                </section>
-              )}
 
               {locationDataLoading ? (
                 <section className={styles.card}>
                   <h2 className={styles.sectionTitle}>
-                    {t("detailsections.locations.title")}
+                    {t("organizations.practiceLocations.title")}
                   </h2>
                   <LoadingIndicator />
                 </section>
               ) : (
-                <section className={classNames(styles.card, styles.tableWrap)}>
-                  <LocationSection locationData={fullOrganization.locations} />
+                <section className={styles.card}>
+                  <h2 className={styles.sectionTitle}>
+                    {t("organizations.practiceLocations.title")}
+                  </h2>
+                  {fullOrganization.locations.length === 0 ? (
+                    <p className={styles.emptyState}>
+                      {t("organizations.practiceLocations.empty")}
+                    </p>
+                  ) : (
+                    <div className={styles.locationList}>
+                      {fullOrganization.locations.map((loc) => {
+                        const phone = loc.contact?.find(
+                          (c) => c.system === "phone",
+                        )?.value
+                        return (
+                          <div key={loc.id} className={styles.locationCard}>
+                            {loc.name && (
+                              <div className={styles.locationName}>
+                                {loc.name}
+                              </div>
+                            )}
+                            {loc.address && (
+                              <div className={styles.locationDetail}>
+                                {loc.address}
+                              </div>
+                            )}
+                            {phone && (
+                              <a
+                                href={`tel:${phone}`}
+                                className={styles.locationPhone}
+                              >
+                                {phone}
+                              </a>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
                 </section>
               )}
 
-              {practitionerDataLoading ? (
+              <section className={styles.card}>
+                <h2 className={styles.sectionTitle}>
+                  {t("organizations.cmsNetworks.title")}
+                </h2>
+                <p className={styles.emptyState}>
+                  {t("organizations.cmsNetworks.empty")}
+                </p>
+              </section>
+
+              {endpointDataLoading ? (
                 <section className={styles.card}>
                   <h2 className={styles.sectionTitle}>
-                    {t("organizations.practitioners.title")}
+                    {t("organizations.dataExchangeEndpoints.title")}
                   </h2>
                   <LoadingIndicator />
                 </section>
               ) : (
-                <section className={classNames(styles.card, styles.tableWrap)}>
-                  <SectionWithContentOrFallback
-                    title={t("organizations.practitioners.title")}
-                    fallback={t("organizations.practitioners.fallback")}
-                    arrayData={fullOrganization.practitioners}
-                  >
-                    <Table data-testid="practitioner-table">
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>
-                            {t("organizations.practitioners.name")}
-                          </TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {fullOrganization.practitioners.map(
-                          (practitioner, index) => (
-                            <TableRow key={index}>
-                              <TableCell>
-                                <a
-                                  data-testid={`practitioner-${index}`}
-                                  href={`/practitioners/${practitioner.id}`}
-                                >
-                                  {practitioner.name}
-                                </a>
-                              </TableCell>
-                            </TableRow>
-                          ),
-                        )}
-                      </TableBody>
-                    </Table>
-                  </SectionWithContentOrFallback>
+                <section className={styles.card}>
+                  <h2 className={styles.sectionTitle}>
+                    {t("organizations.dataExchangeEndpoints.title")}
+                  </h2>
+                  {fullOrganization.endpoints.length === 0 ? (
+                    <p className={styles.emptyState}>
+                      {t("organizations.dataExchangeEndpoints.empty")}
+                    </p>
+                  ) : (
+                    <div className={styles.endpointList}>
+                      {fullOrganization.endpoints.map((ep) => (
+                        <div key={ep.id} className={styles.endpointCard}>
+                          {ep.name && (
+                            <div className={styles.endpointName}>{ep.name}</div>
+                          )}
+                          <div className={styles.endpointMeta}>
+                            <span className={styles.endpointMetaLabel}>
+                              {t("organizations.dataExchangeEndpoints.type")}:
+                            </span>{" "}
+                            {ep.connectionType || "—"}
+                          </div>
+                          <div className={styles.endpointMeta}>
+                            <span className={styles.endpointMetaLabel}>
+                              {t("organizations.dataExchangeEndpoints.url")}:
+                            </span>{" "}
+                            {ep.address ? (
+                              <a
+                                href={ep.address}
+                                className={styles.endpointUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                {ep.address}
+                              </a>
+                            ) : (
+                              "—"
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </section>
               )}
             </div>
 
             <aside className={styles.sidebarColumn}>
+              <div className={styles.card}>
+                <h3 className={styles.sectionTitle}>
+                  {t("organizations.authorizedOfficial.title")}
+                </h3>
+                <DetailRows items={authorizedOfficialItems} />
+              </div>
+
               <div className={classNames(styles.card, styles.actionsCard)}>
                 <h3 className={styles.actionsTitle}>Actions</h3>
-                <p className={styles.feedbackText}>
-                  Let us know if you see any problems with this provider record.
-                </p>
-                <Button variation="solid" className={styles.actionsButton}>
-                  <FaShieldAlt className={styles.actionButtonIcon} />
-                  This Is Me
-                </Button>
-                <p className={styles.actionsDescription}>
-                  Claim this record to update your information. You'll be asked
-                  to securely log in, then review and verify your record. Once
-                  completed, your record will be <strong>IAL2 Verified</strong>.
-                </p>
+
                 <Button
                   variation="ghost"
                   className={classNames(
@@ -254,6 +261,10 @@ export const Organization = () => {
                   <FaRegComment className={styles.actionButtonIcon} />
                   Report Issue with This Record
                 </Button>
+                <p className={styles.feedbackText}>
+                  Found incorrect information? Let us know so we can update this
+                  record.
+                </p>
               </div>
             </aside>
           </div>

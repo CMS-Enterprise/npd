@@ -1,6 +1,6 @@
 import { Alert, Button } from "@cmsgov/design-system"
 import classNames from "classnames"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { Link, useLocation, useParams } from "react-router"
 import { FeatureFlag } from "../../components/FeatureFlag"
@@ -45,6 +45,11 @@ export const Practitioner = () => {
 
   const [isReportIssueOpen, setIsReportIssueOpen] = useState(false)
 
+  useEffect(() => {
+    document.body.classList.add("gray-bg")
+    return () => document.body.classList.remove("gray-bg")
+  }, [])
+
   if (isLoading) {
     return <LoadingIndicator />
   }
@@ -62,6 +67,10 @@ export const Practitioner = () => {
     {
       label: t("practitioners.detail.contact.npi"),
       value: practitioner.npi,
+    },
+    {
+      label: t("practitioners.detail.contact.dateOfEnumeration"),
+      value: practitioner.enumerationDate,
     },
     {
       label: t("practitioners.detail.contact.phone"),
@@ -118,9 +127,6 @@ export const Practitioner = () => {
                 <h3 className={styles.actionsTitle}>
                   {t("practitioners.detail.actions.title")}
                 </h3>
-                <p className={styles.feedbackText}>
-                  {t("practitioners.detail.feedback.subtitle")}
-                </p>
                 <p className={styles.actionsDescription}>
                   {t("practitioners.detail.actions.description.before")}{" "}
                   <strong>

@@ -150,6 +150,87 @@
   white-space: pre-line;
 }
 
+.emptyState {
+  color: var(--color-muted);
+  margin: 0;
+}
+
+.locationList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.locationCard {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.locationName {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-base);
+}
+
+.locationDetail {
+  color: var(--color-muted);
+  font-size: var(--font-size-sm);
+}
+
+.locationPhone {
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  text-decoration: none;
+}
+
+.locationPhone:hover {
+  text-decoration: underline;
+}
+
+.endpointList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.endpointCard {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.endpointName {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-base);
+  margin-bottom: 4px;
+}
+
+.endpointMeta {
+  font-size: var(--font-size-sm);
+  color: var(--color-muted);
+}
+
+.endpointMetaLabel {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-base);
+}
+
+.endpointUrl {
+  color: var(--color-primary);
+  word-break: break-all;
+  text-decoration: none;
+}
+
+.endpointUrl:hover {
+  text-decoration: underline;
+}
+
 .tableWrap :global(table) {
   margin-bottom: 0;
   width: 100%;

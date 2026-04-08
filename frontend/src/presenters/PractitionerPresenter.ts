@@ -5,6 +5,7 @@ import type {
 } from "../state/requests/practitioners"
 import {
   formatAddress,
+  formatDate,
   formatDetails,
   formatOtherIdentifierType,
 } from "../helpers/formatters"
@@ -80,6 +81,11 @@ export class PractitionerPresenter {
         nuccCode: taxonomy.code?.coding?.[0]?.code ?? "",
       }))
       .filter((taxonomy) => taxonomy.display || taxonomy.nuccCode)
+  }
+
+  get enumerationDate(): string | null {
+    const npiId = this.findNpiIdentifier(this.record.identifier)
+    return npiId?.period?.start ? formatDate(npiId.period.start) : null
   }
 
   get primaryTaxonomy(): string | null {
