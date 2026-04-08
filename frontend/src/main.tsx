@@ -44,20 +44,20 @@ createRoot(document.getElementById("root")!).render(
                   <Route element={<FeatureFlagRoute name="SEARCH_APP" />}>
                     <Route path="/search" element={<UnifiedSearch />} />
                     <Route path="/organizations">
-                      <Route path="search" element={<OrganizationSearch />} />
+                      {/* <Route path="search" element={<OrganizationSearch />} /> */}
                       <Route
                         path=":organizationId"
                         element={<Organization />}
                       />
-                      <Route path="" element={<OrganizationSearch />} />
+                      {/* <Route path="" element={<OrganizationSearch />} /> */}
                     </Route>
                     <Route path="/practitioners">
-                      <Route path="search" element={<PractitionerSearch />} />
+                      {/* <Route path="search" element={<PractitionerSearch />} /> */}
                       <Route
                         path=":practitionerId"
                         element={<Practitioner />}
                       />
-                      <Route path="" element={<PractitionerSearch />} />
+                      {/* <Route path="" element={<PractitionerSearch />} /> */}
                     </Route>
                   </Route>
                 </Route>

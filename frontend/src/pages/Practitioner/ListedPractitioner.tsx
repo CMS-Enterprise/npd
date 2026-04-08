@@ -79,7 +79,7 @@ export const ListedPractitioner = ({
   const resolvedOrganizationName =
     organizationName ?? roleOrganizations[0]?.name
   const detailUrl = practitionerId ? `/practitioners/${practitionerId}` : null
-  const backLink = searchUrl ?? `/practitioners/search${location.search}`
+  const backLink = searchUrl ?? `/search${location.search}`
 
   return (
     <div role="listitem" className="ds-u-border-top--1 ds-u-padding-y--2">
