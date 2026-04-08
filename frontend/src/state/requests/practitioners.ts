@@ -157,8 +157,13 @@ export const useFullPractitionerAPI = (practitionerId: string | undefined) => {
     },
   })
   const locationIdDups: Array<string> | undefined =
-    practitionerRole?.results.entry.map((role) => {
-      return role?.resource.location[0].reference.split("/").pop() ?? ""
+    practitionerRole?.results.entry.flatMap((role) => {
+      return (
+        role?.resource.location.map(
+          (locationReference) =>
+            locationReference.reference.split("/").pop() ?? "",
+        ) ?? []
+      )
     })
   const locationIds: Array<string> = [...new Set(locationIdDups)]
   const locationQueries = useQueries({

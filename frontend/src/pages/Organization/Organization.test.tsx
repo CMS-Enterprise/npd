@@ -113,6 +113,8 @@ describe("Organization", () => {
       expect(
         await screen.queryByText("About", { selector: "section h2" }),
       ).toBeInTheDocument()
+      expect(screen.getByText("Parent organization")).toBeInTheDocument()
+      expect(screen.getAllByText("—").length).toBeGreaterThan(0)
       expect(
         await screen.queryByText("Contact information", {
           selector: "section h2",
@@ -189,7 +191,7 @@ describe("Organization", () => {
         ),
       ).toBeInTheDocument()
       expect(
-        screen.getByRole("button", { name: "Report an issue" }),
+        screen.getByRole("button", { name: "Report Issue with This Record" }),
       ).toBeInTheDocument()
     })
 
@@ -216,7 +218,9 @@ describe("Organization", () => {
         await waitFor(() => screen.getByTestId("location-table"))
 
         await user.click(
-          screen.getByRole("button", { name: "Report an issue" }),
+          screen.getByRole("button", {
+            name: "Report Issue with This Record",
+          }),
         )
 
         const dialog = screen.getByRole("dialog")
@@ -242,7 +246,9 @@ describe("Organization", () => {
         await waitFor(() => screen.getByTestId("location-table"))
 
         await user.click(
-          screen.getByRole("button", { name: "Report an issue" }),
+          screen.getByRole("button", {
+            name: "Report Issue with This Record",
+          }),
         )
 
         const dialog = screen.getByRole("dialog")

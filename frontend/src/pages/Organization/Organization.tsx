@@ -34,18 +34,12 @@ const DetailRows = ({
 }: {
   items: Array<{ label: string; value: string | null | undefined }>
 }) => {
-  const visibleItems = items.filter((item) => item.value)
-
-  if (visibleItems.length === 0) {
-    return null
-  }
-
   return (
     <dl className={styles.detailsList}>
-      {visibleItems.map((item) => (
+      {items.map((item) => (
         <div className={styles.detailRow} key={item.label}>
           <dt className={styles.detailLabel}>{item.label}</dt>
-          <dd className={styles.detailValue}>{item.value}</dd>
+          <dd className={styles.detailValue}>{item.value || "—"}</dd>
         </div>
       ))}
     </dl>
@@ -102,7 +96,7 @@ export const Organization = () => {
 
   return (
     <>
-      <main className="ds-l-container">
+      <main className={classNames("ds-l-container", styles.pageShell)}>
         {searchUrl && (
           <a href={searchUrl} className={styles.backLink}>
             {t("organizations.header.search")}
@@ -136,23 +130,19 @@ export const Organization = () => {
         <FeatureFlag name="ORGANIZATION_LOOKUP_DETAILS">
           <div className={styles.pageGrid}>
             <div className={styles.mainColumn}>
-              {aboutItems.some((item) => item.value) && (
-                <section className={styles.card}>
-                  <h2 className={styles.sectionTitle}>
-                    {t("organizations.about.title")}
-                  </h2>
-                  <DetailRows items={aboutItems} />
-                </section>
-              )}
+              <section className={styles.card}>
+                <h2 className={styles.sectionTitle}>
+                  {t("organizations.about.title")}
+                </h2>
+                <DetailRows items={aboutItems} />
+              </section>
 
-              {contactItems.some((item) => item.value) && (
-                <section className={styles.card}>
-                  <h2 className={styles.sectionTitle}>
-                    {t("organizations.contact.title")}
-                  </h2>
-                  <DetailRows items={contactItems} />
-                </section>
-              )}
+              <section className={styles.card}>
+                <h2 className={styles.sectionTitle}>
+                  {t("organizations.contact.title")}
+                </h2>
+                <DetailRows items={contactItems} />
+              </section>
 
               {organization.identifiers.length > 0 && (
                 <section className={classNames(styles.card, styles.tableWrap)}>
@@ -241,6 +231,9 @@ export const Organization = () => {
             <aside className={styles.sidebarColumn}>
               <div className={classNames(styles.card, styles.actionsCard)}>
                 <h3 className={styles.actionsTitle}>Actions</h3>
+                <p className={styles.feedbackText}>
+                  Let us know if you see any problems with this provider record.
+                </p>
                 <Button variation="solid" className={styles.actionsButton}>
                   <FaShieldAlt className={styles.actionButtonIcon} />
                   This Is Me

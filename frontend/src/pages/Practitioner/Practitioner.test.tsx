@@ -19,6 +19,7 @@ import { render } from "../../../tests/render"
 import type { FHIRPractitioner } from "../../@types/fhir"
 import { Practitioner } from "./Practitioner"
 import { vi } from "vitest"
+
 const practitionerApiResponse: MockResponse = [
   "^/fhir/Practitioner/.*",
   DEFAULT_PRACTITIONER,
@@ -60,6 +61,59 @@ const EXPECTED_NPI =
 const EXPECTED_NAME =
   (DEFAULT_PRACTITIONER as FHIRPractitioner)["name"]?.[0]?.text ||
   "EXPECTED_NAME IS UNSET FIXME"
+const PRIMARY_LOCATION_NAME = "0006 Aspen Glen Court"
+const PRIMARY_LOCATION_ADDRESS = "0006 Aspen Glen Court, Edwards, CO 81632"
+const SECONDARY_LOCATION_ID = "secondary-location-id"
+const SECONDARY_LOCATION_NAME = "North Clinic"
+const SECONDARY_LOCATION_ADDRESS = "200 Market Street, Denver, CO 80205"
+
+const practitionerRoleWithAdditionalLocation = {
+  ...DEFAULT_PRACTITIONERROLE,
+  results: {
+    ...DEFAULT_PRACTITIONERROLE.results,
+    entry: [
+      ...(DEFAULT_PRACTITIONERROLE.results.entry ?? []),
+      {
+        fullUrl: `/fhir/PractitionerRole/${SECONDARY_LOCATION_ID}`,
+        resource: {
+          ...DEFAULT_PRACTITIONERROLE.results.entry?.[0]?.resource,
+          id: `${SECONDARY_LOCATION_ID}-role`,
+          location: [{ reference: `/fhir/Location/${SECONDARY_LOCATION_ID}` }],
+          telecom: [
+            {
+              system: "phone",
+              value: "555-555-5555",
+              use: "work",
+            },
+          ],
+        },
+      },
+    ],
+  },
+}
+
+const secondaryLocationResponse: MockResponse = [
+  `^/fhir/Location/${SECONDARY_LOCATION_ID}/?$`,
+  {
+    ...DEFAULT_LOCATION,
+    id: SECONDARY_LOCATION_ID,
+    name: SECONDARY_LOCATION_NAME,
+    address: {
+      ...DEFAULT_LOCATION.address,
+      line: ["200 Market Street"],
+      city: "Denver",
+      state: "CO",
+      postalCode: "80205",
+    },
+    telecom: [
+      {
+        system: "phone",
+        value: "555-777-8888",
+        use: "work",
+      },
+    ],
+  },
+]
 
 const RoutedPractitioner = ({ path }: { path: string }) => {
   return (
@@ -98,7 +152,8 @@ describe("Practitioner", () => {
       // ensure loading has finished
       await screen.findByRole("heading", { name: EXPECTED_NAME })
 
-      expect(screen.queryByText(`NPI: ${EXPECTED_NPI}`)).toBeInTheDocument()
+      expect(screen.queryByText(`NPI: ${EXPECTED_NPI}`)).not.toBeInTheDocument()
+      expect(screen.getByText("Not verified")).toBeInTheDocument()
       expect(
         screen.queryByText("About", { selector: "section h2" }),
       ).not.toBeInTheDocument()
@@ -114,53 +169,40 @@ describe("Practitioner", () => {
       const nameElement = await screen.findByTestId("practitioner-name")
 
       expect(nameElement).toHaveTextContent(EXPECTED_NAME)
-      expect(screen.getByTestId("practitioner-npi")).toHaveTextContent(
-        `NPI: ${EXPECTED_NPI}`,
-      )
       expect(screen.getAllByText("Internal Medicine").length).toBeGreaterThan(0)
+      expect(screen.getByText("Not verified")).toBeInTheDocument()
+      await screen.findByText("Basic information", { selector: "section h2" })
+      expect(screen.getByText("NPI")).toBeInTheDocument()
+      expect(screen.getByText(EXPECTED_NPI)).toBeInTheDocument()
       expect(
-        screen.queryByText("About", { selector: "section h2" }),
+        screen.queryByText("Taxonomy", { selector: "section h2" }),
       ).not.toBeInTheDocument()
-      await screen.findByText("Contact information", { selector: "section h2" })
-      expect(screen.getByText("Organization")).toBeInTheDocument()
       expect(
-        screen.getAllByText("Acme Healthcare System").length,
-      ).toBeGreaterThan(0)
-      expect(
-        await screen.findByText(
-          /8170 33rd Ave S Stop 21110Q\s+Bloomington, MN 55425/,
-        ),
+        screen.getByRole("button", { name: "Claim this record" }),
       ).toBeInTheDocument()
       expect(
-        screen.queryByText("Identifiers", { selector: "section h2" }),
-      ).not.toBeInTheDocument()
-      await screen.findByText("Taxonomy", { selector: "section h2" })
-      expect(await screen.getByText("207R00000X")).toBeInTheDocument()
-      await screen.findByText("Organization(s)", { selector: "section h2" })
-      await screen.findByText("Endpoint(s)", { selector: "section h4" })
-      await screen.findByText("Location(s)", { selector: "section h4" })
-      const organizationHeader = await screen.getByRole("link", {
-        name: "Acme Healthcare System",
-      })
-      expect(organizationHeader).toBeInTheDocument()
-      expect(organizationHeader).toHaveAttribute("href", "/organizations/12345")
-      expect(screen.getAllByText("NPI: 1234567890")[0]).toBeInTheDocument()
-      expect(
-        await screen.getByText("0006 Aspen Glen Court, Edwards, CO 81632"),
+        screen.getByRole("button", { name: "Report issue with this record" }),
       ).toBeInTheDocument()
       expect(
         await screen.getByText("555-555-5555", { exact: false }),
       ).toBeInTheDocument()
-      expect(await screen.getByText("fhir.test-org.org")).toBeInTheDocument()
-      expect(await screen.getByText("HL7 FHIR")).toBeInTheDocument()
       expect(
-        await screen.queryByText("Contact information not available"),
+        screen.queryByText("Organization(s)", { selector: "section h2" }),
       ).not.toBeInTheDocument()
       expect(
-        await screen.queryByText("No location information available"),
+        screen.queryByText("Endpoint(s)", { selector: "section h4" }),
       ).not.toBeInTheDocument()
       expect(
-        await screen.queryByText("No endpoint information available"),
+        screen.queryByText("Location(s)", { selector: "section h4" }),
+      ).not.toBeInTheDocument()
+      expect(
+        screen.getByText("Locations", { selector: "section h2" }),
+      ).toBeInTheDocument()
+      expect(screen.getByText("Acme Healthcare System")).toBeInTheDocument()
+      expect(screen.getByText(PRIMARY_LOCATION_ADDRESS)).toBeInTheDocument()
+      expect(screen.queryByText("Fax")).not.toBeInTheDocument()
+      expect(
+        screen.queryByText("Identifiers", { selector: "section h2" }),
       ).not.toBeInTheDocument()
       expect(screen.queryByText(/Medicare Provider/i)).not.toBeInTheDocument()
       expect(
@@ -170,9 +212,12 @@ describe("Practitioner", () => {
     })
 
     it("renders the feedback CTA", async () => {
-      render(<RoutedPractitioner path="/practitioners/12345" />, {
-        settings: { feature_flags: { PRACTITIONER_LOOKUP_DETAILS: true } },
-      })
+      render(
+        <RoutedPractitioner path="/practitioners/without-organization" />,
+        {
+          settings: { feature_flags: { PRACTITIONER_LOOKUP_DETAILS: true } },
+        },
+      )
 
       await screen.findByTestId("practitioner-name")
 
@@ -182,7 +227,7 @@ describe("Practitioner", () => {
         ),
       ).toBeInTheDocument()
       expect(
-        screen.getByRole("button", { name: "Report an issue" }),
+        screen.getByRole("button", { name: "Report issue with this record" }),
       ).toBeInTheDocument()
     })
 
@@ -209,7 +254,7 @@ describe("Practitioner", () => {
         await screen.findByTestId("practitioner-name")
 
         await user.click(
-          screen.getByRole("button", { name: "Report an issue" }),
+          screen.getByRole("button", { name: "Report issue with this record" }),
         )
 
         const dialog = screen.getByRole("dialog")
@@ -235,7 +280,7 @@ describe("Practitioner", () => {
         await screen.findByTestId("practitioner-name")
 
         await user.click(
-          screen.getByRole("button", { name: "Report an issue" }),
+          screen.getByRole("button", { name: "Report issue with this record" }),
         )
 
         const dialog = screen.getByRole("dialog")
@@ -270,31 +315,30 @@ describe("Practitioner", () => {
     })
 
     it("shows detailed content without organization information", async () => {
-      render(<RoutedPractitioner path="/practitioners/12345" />, {
+      render(<RoutedPractitioner path="/practitioners/extra-locations" />, {
         settings: { feature_flags: { PRACTITIONER_LOOKUP_DETAILS: true } },
       })
 
       const nameElement = await screen.findByTestId("practitioner-name")
 
       expect(nameElement).toHaveTextContent(EXPECTED_NAME)
-      expect(
-        screen.queryByText("About", { selector: "section h2" }),
-      ).not.toBeInTheDocument()
-      await screen.findByText("Contact information", { selector: "section h2" })
-      expect(
-        await screen.findByText(
-          /8170 33rd Ave S Stop 21110Q\s+Bloomington, MN 55425/,
-        ),
-      ).toBeInTheDocument()
+      await screen.findByText("Basic information", { selector: "section h2" })
+      expect(screen.getByText("NPI")).toBeInTheDocument()
+      expect(screen.getByText(EXPECTED_NPI)).toBeInTheDocument()
       expect(
         screen.queryByText("Identifiers", { selector: "section h2" }),
       ).not.toBeInTheDocument()
-      await screen.findByText("Taxonomy", { selector: "section h2" })
-      expect(await screen.getByText("207R00000X")).toBeInTheDocument()
       expect(screen.getAllByText("Internal Medicine").length).toBeGreaterThan(0)
+      expect(
+        screen.queryByText("Taxonomy", { selector: "section h2" }),
+      ).not.toBeInTheDocument()
       expect(
         screen.queryByText("Organization(s)", { selector: "section h2" }),
       ).not.toBeInTheDocument()
+      expect(screen.getAllByText("—").length).toBeGreaterThan(0)
+      expect(
+        screen.getByText("Locations", { selector: "section h2" }),
+      ).toBeInTheDocument()
     })
   })
 
@@ -322,39 +366,90 @@ describe("Practitioner", () => {
       expect(
         screen.queryByText("About", { selector: "section h2" }),
       ).not.toBeInTheDocument()
-      await screen.findByText("Contact information", { selector: "section h2" })
-      expect(
-        await screen.findByText(
-          /8170 33rd Ave S Stop 21110Q\s+Bloomington, MN 55425/,
-        ),
-      ).toBeInTheDocument()
+      await screen.findByText("Basic information", { selector: "section h2" })
+      expect(screen.getByText(EXPECTED_NPI)).toBeInTheDocument()
       expect(
         screen.queryByText("Identifiers", { selector: "section h2" }),
       ).not.toBeInTheDocument()
-      await screen.findByText("Taxonomy", { selector: "section h2" })
-      expect(await screen.getByText("207R00000X")).toBeInTheDocument()
       expect(screen.getAllByText("Internal Medicine").length).toBeGreaterThan(0)
-      await screen.findByText("Organization(s)", { selector: "section h2" })
-      await screen.findByText("Location(s)", { selector: "section h4" })
       expect(
-        await screen.getByRole("link", { name: "Acme Healthcare System" }),
-      ).toBeInTheDocument()
+        screen.queryByText("Taxonomy", { selector: "section h2" }),
+      ).not.toBeInTheDocument()
       expect(
-        await screen.getByText("0006 Aspen Glen Court, Edwards, CO 81632"),
+        await screen.getByText(PRIMARY_LOCATION_ADDRESS),
       ).toBeInTheDocument()
       expect(
         await screen.getByText("555-555-5555", { exact: false }),
       ).toBeInTheDocument()
-      expect(
-        await screen.queryByText("fhir.test-org.org"),
-      ).not.toBeInTheDocument()
-      expect(await screen.queryByText("HL7 FHIR")).not.toBeInTheDocument()
+      expect(screen.queryByText("Fax")).not.toBeInTheDocument()
       expect(
         screen.queryByText("Endpoint(s)", { selector: "section h4" }),
       ).not.toBeInTheDocument()
       expect(
         screen.queryByText("No endpoint information available"),
       ).not.toBeInTheDocument()
+    })
+  })
+
+  describe("with additional locations", () => {
+    beforeEach(() => {
+      mockGlobalFetch([
+        practitionerApiResponse,
+        ["^/fhir/PractitionerRole/.*", practitionerRoleWithAdditionalLocation],
+        organizationApiResponse,
+        secondaryLocationResponse,
+        locationApiResponse,
+      ])
+    })
+
+    afterEach(() => {
+      vi.resetAllMocks()
+    })
+
+    it("shows all provider locations including the primary practice location", async () => {
+      render(<RoutedPractitioner path="/practitioners/12345" />, {
+        settings: { feature_flags: { PRACTITIONER_LOOKUP_DETAILS: true } },
+      })
+
+      await screen.findByTestId("practitioner-name")
+
+      expect(
+        await screen.findByText("Locations", { selector: "section h2" }),
+      ).toBeInTheDocument()
+      const locationsSection = screen
+        .getByText("Locations", { selector: "section h2" })
+        .closest("section")
+      expect(locationsSection).toBeTruthy()
+      expect(
+        within(locationsSection as HTMLElement).getByText(
+          SECONDARY_LOCATION_NAME,
+        ),
+      ).toBeInTheDocument()
+      expect(
+        within(locationsSection as HTMLElement).getByText(
+          SECONDARY_LOCATION_ADDRESS,
+        ),
+      ).toBeInTheDocument()
+      expect(
+        within(locationsSection as HTMLElement).getAllByText(
+          "Acme Healthcare System",
+        ).length,
+      ).toBeGreaterThan(0)
+      expect(
+        within(locationsSection as HTMLElement).getAllByRole("link", {
+          name: "1234567890",
+        })[0],
+      ).toHaveAttribute("href", "/organizations/12345")
+      expect(
+        within(locationsSection as HTMLElement).getByText(
+          PRIMARY_LOCATION_NAME,
+        ),
+      ).toBeInTheDocument()
+      expect(
+        within(locationsSection as HTMLElement).getByText(
+          PRIMARY_LOCATION_ADDRESS,
+        ),
+      ).toBeInTheDocument()
     })
   })
 })

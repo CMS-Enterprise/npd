@@ -11,6 +11,9 @@
       "type": "Practitioner",
       "search": "Back to search results"
     },
+    "verification": {
+      "notVerified": "Not verified"
+    },
     "about": {
       "title": "About",
       "name": "Name(s)",
@@ -19,11 +22,19 @@
       "status": "Active status"
     },
     "contact": {
-      "title": "Contact information",
-      "organization": "Organization",
-      "address": "Mailing address",
+      "title": "Basic information",
+      "npi": "NPI",
       "phone": "Phone",
       "fax": "Fax"
+    },
+    "actions": {
+      "title": "Actions",
+      "claim": "Claim this record",
+      "report": "Report issue with this record",
+      "description": {
+        "before": "Claim this record to update your information. You'll be asked to securely log in, then review and verify your record. Once completed, your record will be",
+        "emphasis": "IAL2 Verified"
+      }
     },
     "organizations": {
       "title": "Organization(s)",
@@ -36,7 +47,7 @@
       "fallback": "No endpoint information available"
     },
     "locations": {
-      "title": "Location(s)",
+      "title": "Locations",
       "name": "Name",
       "address": "Address",
       "contact": "Contact",

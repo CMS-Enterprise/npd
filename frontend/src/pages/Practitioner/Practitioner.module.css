@@ -1,6 +1,15 @@
+.pageShell {
+  background: #f2f2f2;
+  padding-top: var(--spacer-4);
+  padding-bottom: var(--spacer-6);
+  box-shadow: 0 0 0 100vmax #f2f2f2;
+  clip-path: inset(0 -100vmax);
+  --detail-top-card-height: 224px;
+}
+
 .backLink {
   display: inline-block;
-  margin-top: var(--spacer-4);
+  margin-top: 0;
   margin-bottom: var(--spacer-3);
   color: var(--color-primary);
   text-decoration: none;
@@ -11,7 +20,7 @@
   text-decoration: underline;
 }
 
-.pageGrid {
+.contentGrid {
   display: grid;
   gap: var(--spacer-4);
   margin-top: var(--spacer-3);
@@ -24,7 +33,7 @@
 }
 
 .actionsTitle {
-  margin: 0 0 4px;
+  margin: 0;
   color: #1e3c70;
   font-family: var(--theme-font-family-heading, "Open Sans");
   font-size: var(--theme-font-size-xl, 1.3125rem);
@@ -36,10 +45,6 @@
   width: 100%;
   justify-content: center;
   gap: 8px;
-}
-
-.actionButtonIcon {
-  flex-shrink: 0;
 }
 
 .reportButton {
@@ -59,29 +64,31 @@
   line-height: 1.5;
 }
 
-.mainColumn {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacer-4);
+.feedbackText {
+  margin: 0;
+  color: var(--color-base);
+  line-height: 1.5;
 }
 
 .sidebarColumn {
   display: flex;
   flex-direction: column;
-  gap: var(--spacer-4);
+  align-self: stretch;
 }
 
 .card {
   background: var(--color-background);
-  border: 1px solid var(--color-border);
-  border-radius: 14px;
-  box-shadow: 0 2px 10px rgba(32, 55, 90, 0.08);
+  border: 1px solid #d7dce3;
+  border-radius: 0;
+  box-shadow: 0 2px 8px rgba(32, 55, 90, 0.08);
   padding: 24px;
 }
 
 .summaryCard {
   position: relative;
   overflow: hidden;
+  padding-top: 20px;
+  padding-bottom: 20px;
 }
 
 .summaryHeading {
@@ -96,19 +103,27 @@
 .summaryMeta {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .taxonomy {
   color: var(--color-base);
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
+  font-size: 1rem;
+  line-height: 1.5;
 }
 
-.npi {
-  color: var(--color-muted);
-  font-size: var(--font-size-base);
+.verificationPill {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 4px 12px;
+  border: 1px solid #d7dce3;
+  border-radius: 999px;
+  background: #f2f2f2;
+  color: #1e3c70;
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
 }
 
 .sectionTitle {
@@ -132,6 +147,7 @@
 }
 
 .detailLabel {
+  margin: 0;
   color: var(--color-muted);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
@@ -140,97 +156,95 @@
 }
 
 .detailValue {
+  margin: 0;
   color: var(--color-base);
   white-space: pre-line;
 }
 
-.organizationCard {
-  border-top: 1px solid var(--color-border);
-  padding-top: 20px;
-  margin-top: 20px;
+.contactCard {
+  grid-column: 1;
 }
 
-.organizationCard:first-of-type {
-  border-top: 0;
+.locationsCard {
+  grid-column: 1;
+}
+
+.locationList {
+  display: grid;
+  gap: 16px;
+}
+
+.locationItem {
+  padding-top: 16px;
+  border-top: 1px solid #d7dce3;
+}
+
+.locationItem:first-child {
   padding-top: 0;
-  margin-top: 0;
+  border-top: 0;
 }
 
-.organizationTitle {
-  margin: 0 0 12px;
-  color: #1e3c70;
-  font-family: var(--theme-font-family-heading, "Open Sans");
-  font-size: var(--theme-font-size-xl, 1.3125rem);
-  font-weight: var(--theme-font-weight-heading-xl, 700);
-  line-height: 1.3;
+.locationTitle {
+  color: var(--color-base);
+  font-weight: var(--font-weight-bold);
 }
 
-.organizationTitle a {
+.locationOrganization {
+  margin-top: 4px;
+  color: var(--color-muted);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-normal);
+}
+
+.locationTitleMeta {
+  font-weight: var(--font-weight-bold);
+}
+
+.locationLink {
   color: inherit;
-  text-decoration: none;
-}
-
-.organizationTitle a:hover {
   text-decoration: underline;
 }
 
-.organizationMeta {
-  margin-bottom: 16px;
-  color: var(--color-muted);
-  font-weight: var(--font-weight-bold);
-}
-
-.subsection {
-  margin-top: 16px;
-}
-
-.subsectionTitle {
-  margin: 0 0 10px;
+.locationLink:hover {
   color: #1e3c70;
-  font-family: var(--theme-font-family-heading, "Open Sans");
-  font-size: var(--theme-font-size-lg, 1.125rem);
-  font-weight: var(--font-weight-bold);
 }
 
-.stackedList {
-  display: grid;
-  gap: 12px;
+.locationAddressList {
+  margin: 8px 0 0 20px;
+  padding: 0;
 }
 
-.stackedItem {
-  border: 1px solid var(--color-border);
-  border-radius: 10px;
-  padding: 14px 16px;
+.locationAddressList li + li {
+  margin-top: 6px;
 }
 
-.stackedItemTitle {
-  margin: 0 0 6px;
-  font-weight: var(--font-weight-bold);
+.locationAddress {
+  margin-top: 0;
+  color: #1e3c70;
+  font-weight: 400;
 }
 
-.tableWrap :global(table) {
-  margin-bottom: 0;
-  width: 100%;
-}
-
-.tableWrap :global(th),
-.tableWrap :global(td) {
-  border-left: none;
-  border-right: none;
-}
-
-.sidebarCard {
-  max-width: none;
+.locationEmpty {
+  color: var(--color-base);
 }
 
 @media (min-width: 768px) {
-  .pageGrid {
+  .contentGrid {
     grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
-    align-items: start;
+    align-items: stretch;
   }
 
   .sidebarColumn {
-    position: sticky;
-    top: 20px;
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: stretch;
+  }
+
+  .contactCard {
+    min-height: var(--detail-top-card-height);
+  }
+
+  .actionsCard {
+    min-height: var(--detail-top-card-height);
   }
 }

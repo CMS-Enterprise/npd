@@ -86,6 +86,18 @@ export class PractitionerPresenter {
     return this.taxonomy[0]?.display ?? null
   }
 
+  get specialtySummary(): string | null {
+    const specialties = [
+      ...new Set(
+        this.taxonomy
+          .map((taxonomy) => taxonomy.display)
+          .filter((value): value is string => Boolean(value)),
+      ),
+    ]
+
+    return specialties.length > 0 ? specialties.join(", ") : null
+  }
+
   private isNpiIdentifier(system: string | undefined): boolean {
     return (
       system === "http://terminology.hl7.org/NamingSystem/npi" ||
@@ -103,6 +115,61 @@ export class FullPractitionerPresenter {
   constructor(record: PractitionerDetailsType) {
     this.record = record
   }
+
+  private get roleEntries() {
+    return this.record.practitionerRoleData?.results?.entry ?? []
+  }
+
+  private getPrimaryLocationId(roleLocationReference?: string): string | null {
+    return roleLocationReference?.split("/").pop() ?? null
+  }
+
+  private getPrimaryPhone(
+    roleDetails: FHIRPractitionerRole | undefined,
+    locationId: string | null,
+  ): string | null {
+    const rolePhone = roleDetails?.telecom?.find(
+      (item) => item.system === "phone",
+    )?.value
+
+    if (rolePhone) {
+      return rolePhone
+    }
+
+    if (!locationId) {
+      return null
+    }
+
+    return (
+      this.record.locationData[locationId]?.telecom?.find(
+        (item) => item.system === "phone",
+      )?.value ?? null
+    )
+  }
+
+  private getPrimaryFax(
+    roleDetails: FHIRPractitionerRole | undefined,
+    locationId: string | null,
+  ): string | null {
+    const roleFax = roleDetails?.telecom?.find(
+      (item) => item.system === "fax",
+    )?.value
+
+    if (roleFax) {
+      return roleFax
+    }
+
+    if (!locationId) {
+      return null
+    }
+
+    return (
+      this.record.locationData[locationId]?.telecom?.find(
+        (item) => item.system === "fax",
+      )?.value ?? null
+    )
+  }
+
   get organizations() {
     if (!this.record.practitionerRoleData?.results?.entry?.length) return []
     const organizationDetailData: OrganizationDetails = {}
@@ -227,5 +294,100 @@ export class FullPractitionerPresenter {
 
   get primaryOrganizationName(): string | null {
     return this.organizationCards[0]?.name ?? null
+  }
+
+  get primaryPractice() {
+    const primaryRole = this.roleEntries[0]?.resource
+    const organizationId =
+      primaryRole?.organization.reference.split("/").pop() ?? null
+    const primaryLocationId = this.getPrimaryLocationId(
+      primaryRole?.location?.[0]?.reference,
+    )
+    const organization = organizationId
+      ? this.record.organizationData[organizationId]
+      : undefined
+    const primaryLocation = primaryLocationId
+      ? this.record.locationData[primaryLocationId]
+      : undefined
+
+    return {
+      organizationName:
+        organization?.name ?? primaryRole?.organization.display ?? null,
+      address: primaryLocation?.address
+        ? formatAddress(primaryLocation.address, false)
+        : null,
+      phone: this.getPrimaryPhone(primaryRole, primaryLocationId),
+      fax: this.getPrimaryFax(primaryRole, primaryLocationId),
+      locationId: primaryLocationId,
+    }
+  }
+
+  get locations() {
+    const seenLocationIds = new Set<string>()
+
+    return this.roleEntries
+      .flatMap((role) => {
+        const resource = role?.resource
+        const organizationId =
+          resource?.organization.reference.split("/").pop() ?? null
+        const organization = organizationId
+          ? this.record.organizationData[organizationId]
+          : undefined
+        const organizationNpi =
+          organization?.identifier?.find(
+            (identifier) =>
+              identifier.system ===
+                "http://terminology.hl7.org/NamingSystem/npi" ||
+              identifier.system === "http://hl7.org/fhir/sid/us-npi",
+          )?.value ?? null
+
+        return (
+          resource?.location?.map((locationReference) => {
+            const locationId = this.getPrimaryLocationId(
+              locationReference.reference,
+            )
+
+            if (!locationId) {
+              return null
+            }
+
+            if (seenLocationIds.has(locationId)) {
+              return null
+            }
+
+            seenLocationIds.add(locationId)
+
+            const location = this.record.locationData[locationId]
+
+            if (!location) {
+              return null
+            }
+
+            return {
+              id: location.id,
+              organizationId,
+              organizationName:
+                organization?.name ?? resource.organization.display ?? null,
+              organizationNpi,
+              name: location.name ?? null,
+              address: location.address
+                ? formatAddress(location.address, false)
+                : null,
+            }
+          }) ?? []
+        )
+      })
+      .filter(
+        (
+          location,
+        ): location is {
+          id: string
+          organizationId: string | null
+          organizationName: string | null
+          organizationNpi: string | null
+          name: string | null
+          address: string | null
+        } => Boolean(location && (location.name || location.address)),
+      )
   }
 }
