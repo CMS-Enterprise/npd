@@ -3,5 +3,28 @@
   "subtitle": "Search by name or NPI number to see the details of any practitioner or organization in the database.",
   "practitioner": "Practitioner search",
   "organization": "Organization search",
-  "searching": "Searching..."
+  "searching": "Searching...",
+  "unified": {
+    "title": "Search Providers",
+    "providerNameLabel": "Provider Name",
+    "providerNamePlaceholder": "Enter provider name",
+    "npiLabel": "NPI Number",
+    "npiPlaceholder": "Enter 10-digit NPI",
+    "locationLabel": "Location",
+    "locationPlaceholder": "City, State or ZIP code",
+    "organizationLabel": "Organization",
+    "organizationPlaceholder": "Hospital or organization name",
+    "searchButton": "Search Providers",
+    "clearButton": "Clear",
+    "viewFullProfile": "View Full Profile",
+    "noResults": "No results found. Try adjusting your search criteria.",
+    "resultsFound": "results found",
+    "initialPromptHeading": "Search",
+    "initialPrompt": "Enter a provider name, organization name, or NPI number to search. Use the location field to refine your results.",
+    "providerBadge": "Provider",
+    "organizationBadge": "Organization",
+    "crossEntityBadge": "Provider at Organization",
+    "unknownProvider": "Unknown Provider",
+    "locationHint": "Please also enter a provider name, organization name, or NPI number to search."
+  }
 }

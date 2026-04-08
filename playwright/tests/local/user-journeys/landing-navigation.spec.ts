@@ -12,33 +12,27 @@ test.describe("Landing Page → Search Page Navigation", () => {
     await expect(page).toHaveURL("/search")
   })
 
-  test("search hub displays both resource type options", async ({ page }) => {
+  test("unified search form is displayed at /search", async ({ page }) => {
     await page.goto("/search")
     await expect(page).toHaveURL("/search")
 
-    const practitionerButton = page.getByRole("link", { name: /practitioner/i })
-    const organizationButton = page.getByRole("link", { name: /organization/i })
-
-    await expect(practitionerButton).toBeVisible()
-    await expect(organizationButton).toBeVisible()
-
-    await expect(practitionerButton).toHaveAttribute("href", "/practitioners/search")
-    await expect(organizationButton).toHaveAttribute("href", "/organizations/search")
+    await expect(page.getByRole("heading", { name: "Search Providers" })).toBeVisible()
+    await expect(page.getByRole("textbox", { name: /provider name/i })).toBeVisible()
+    await expect(page.getByRole("textbox", { name: /npi number/i })).toBeVisible()
   })
 
-  test("search hub practitioner button navigates correctly", async ({ page }) => {
+  test("search button is disabled with no input at /search", async ({ page }) => {
     await page.goto("/search")
 
-    await page.getByRole("link", { name: /practitioner/i }).click()
-    await expect(page).toHaveURL("/practitioners/search")
-    await expect(page.getByText("Search Practitioners")).toBeVisible()
+    await expect(page.getByRole("button", { name: /search providers/i })).toBeDisabled()
   })
 
-  test("search hub organization button navigates correctly", async ({ page }) => {
+  test("navigating to /search shows unified search form with all inputs", async ({ page }) => {
     await page.goto("/search")
 
-    await page.getByRole("link", { name: /organization/i }).click()
-    await expect(page).toHaveURL("/organizations/search")
-    await expect(page.getByText("Organization search")).toBeVisible()
+    await expect(page.getByRole("textbox", { name: /provider name/i })).toBeVisible()
+    await expect(page.getByRole("textbox", { name: /organization/i })).toBeVisible()
+    await expect(page.getByRole("textbox", { name: /npi number/i })).toBeVisible()
+    await expect(page.getByRole("textbox", { name: /location/i })).toBeVisible()
   })
 })

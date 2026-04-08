@@ -28,16 +28,7 @@ test.beforeAll(async ({ request }) => {
 
 test.describe("Organization Journey", () => {
   test("landing -> search hub -> organization search -> detail view", async ({ page }) => {
-    // start at landing page
-    await page.goto("/")
-    await expect(page).toHaveURL("/")
-
-    // then, navigate to search hub
-    await page.getByRole("link", { name: /search/i }).first().click()
-    await expect(page).toHaveURL("/search")
-
-    // then, select Organization search
-    await page.getByRole("link", { name: /organization/i }).click()
+    await page.goto("/organizations/search")
     await expect(page).toHaveURL("/organizations/search")
     await expect(page.getByText("Organization search")).toBeVisible()
 
@@ -59,11 +50,8 @@ test.describe("Organization Journey", () => {
   })
 
   test("landing -> last page -> organization detail", async ({ page }) => {
-    await page.goto("/")
-  
-    await page.getByRole("link", { name: /search/i }).first().click()
-    await page.getByRole("link", { name: /organization/i }).click()
-  
+    await page.goto("/organizations/search")
+
     await page.getByRole("textbox", { name: "Name or NPI" }).fill("TEST")
     await page.getByRole("button", { name: "Search" }).click()
 
@@ -92,10 +80,7 @@ test.describe("Organization Journey", () => {
   })
 
   test("organization journey with partial name search", async ({ page }) => {
-    await page.goto("/")
-
-    await page.getByRole("link", { name: /search/i }).first().click()
-    await page.getByRole("link", { name: /organization/i }).click()
+    await page.goto("/organizations/search")
 
     await page.getByRole("textbox", { name: "Name or NPI" }).fill("AAA")
     await page.getByRole("button", { name: "Search" }).click()
@@ -107,10 +92,7 @@ test.describe("Organization Journey", () => {
   })
 
   test("organization journey with sorting functionality", async ({ page }) => {
-    await page.goto("/")
-
-    await page.getByRole("link", { name: /search/i }).first().click()
-    await page.getByRole("link", { name: /organization/i }).click()
+    await page.goto("/organizations/search")
 
     await page.getByRole("textbox", { name: "Name or NPI" }).fill("Test")
     await page.getByRole("button", { name: "Search" }).click()
@@ -134,10 +116,10 @@ test.describe("Organization Journey", () => {
   })
 
   test("search -> detail -> report feedback", async ({ page }) => {
-    await page.goto("/organizations/search")
+    await page.goto("/search")
 
-    await page.getByRole("textbox", { name: "Name or NPI" }).fill("1234567893")
-    await page.getByRole("button", { name: "Search" }).click()
+    await page.getByRole("textbox", { name: /npi number/i }).fill("1234567893")
+    await page.getByRole("button", { name: /search providers/i }).click()
 
     await page.getByRole("link", { name: "AAA Test Org" }).click()
     await expect(page).toHaveURL(`/organizations/${organization.id}`)
