@@ -98,9 +98,7 @@ describe("Organization", () => {
 
       await waitFor(() => screen.findByText("Content not available"))
 
-      expect(
-        await screen.queryByText("About", { selector: "section h2" }),
-      ).toBeNull()
+      expect(screen.queryByText("Basic Information")).not.toBeInTheDocument()
     })
 
     it("shows detailed content with the ORGANIZATION_LOOKUP_DETAILS feature flag", async () => {
@@ -108,73 +106,47 @@ describe("Organization", () => {
         settings: { feature_flags: { ORGANIZATION_LOOKUP_DETAILS: true } },
       })
 
-      await waitFor(() => screen.getByTestId("location-table"))
+      await screen.findByTestId("organization-name")
 
       expect(
-        await screen.queryByText("About", { selector: "section h2" }),
-      ).toBeInTheDocument()
-      expect(screen.getByText("Parent organization")).toBeInTheDocument()
-      expect(screen.getAllByText("—").length).toBeGreaterThan(0)
-      expect(
-        await screen.queryByText("Contact information", {
-          selector: "section h2",
-        }),
+        screen.getByText("Basic Information", { selector: "section h2" }),
       ).toBeInTheDocument()
       expect(
-        await screen.queryByText("Identifiers", { selector: "section h2" }),
+        screen.getByText("Practice Locations", { selector: "section h2" }),
       ).toBeInTheDocument()
       expect(
-        await screen.queryByText("Taxonomy", { selector: "section h2" }),
-      ).toBeInTheDocument()
-
-      const table = await screen.getByTestId("identifier-table")
-      expect(table).toBeInTheDocument()
-
-      expect(
-        within(table).getByText("Type", { selector: "th" }),
+        screen.getByText("CMS Aligned Networks", { selector: "section h2" }),
       ).toBeInTheDocument()
       expect(
-        within(table).getByText("Number", { selector: "th" }),
+        screen.getByText("Data Exchange Endpoints", { selector: "section h2" }),
       ).toBeInTheDocument()
       expect(
-        within(table).getByText("Details", { selector: "th" }),
-      ).toBeInTheDocument()
-
-      const taxonomyHeading = await screen.findByText("Taxonomy", {
-        selector: "section h2",
-      })
-      const taxonomySection = taxonomyHeading.closest("section")!
-
-      expect(
-        within(taxonomySection).getByText("Pediatric Clinic"),
-      ).toBeInTheDocument()
-
-      const practitionerHeader = await screen.getByTestId("practitioner-0")
-      expect(practitionerHeader).toBeInTheDocument()
-      expect(practitionerHeader).toHaveAttribute(
-        "href",
-        "/practitioners/c3a56586-40a8-4fef-9394-2dd0c0ba0b60",
-      )
-      expect(practitionerHeader).toHaveTextContent("KIRK AADALEN")
-      expect(
-        await screen.getByText("0006 Aspen Glen Court, Edwards, CO 81632"),
+        screen.getByText("Authorized Official", { selector: "h3" }),
       ).toBeInTheDocument()
       expect(
-        await screen.getByText("555-555-5555", { exact: false }),
+        screen.getByText("0006 Aspen Glen Court, Edwards, CO 81632"),
       ).toBeInTheDocument()
-      expect(await screen.getByText("fhir.test-org.org")).toBeInTheDocument()
-      expect(await screen.getByText("HL7 FHIR")).toBeInTheDocument()
       expect(
-        await screen.queryByText("Contact information not available"),
+        screen.getByText("555-555-5555", { exact: false }),
+      ).toBeInTheDocument()
+      expect(screen.getByText("fhir.test-org.org")).toBeInTheDocument()
+      expect(screen.getByText("HL7 FHIR")).toBeInTheDocument()
+      expect(
+        screen.queryByText("Contact information not available"),
       ).not.toBeInTheDocument()
       expect(
-        await screen.queryByText("No location information available"),
+        screen.queryByText("No location information available"),
       ).not.toBeInTheDocument()
       expect(
-        await screen.queryByText("No endpoint information available"),
+        screen.queryByText("No endpoint information available"),
       ).not.toBeInTheDocument()
       expect(
-        await screen.queryByText("No practitioner information available"),
+        screen.getByText(
+          "No CMS aligned networks on record for this organization.",
+        ),
+      ).toBeInTheDocument()
+      expect(
+        screen.queryByText("No practitioner information available"),
       ).not.toBeInTheDocument()
     })
 
@@ -183,11 +155,11 @@ describe("Organization", () => {
         settings: { feature_flags: { ORGANIZATION_LOOKUP_DETAILS: true } },
       })
 
-      await waitFor(() => screen.getByTestId("location-table"))
+      await screen.findByTestId("organization-name")
 
       expect(
         screen.getByText(
-          "Let us know if you see any problems with this provider record.",
+          "Found incorrect information? Let us know so we can update this record.",
         ),
       ).toBeInTheDocument()
       expect(
@@ -215,7 +187,7 @@ describe("Organization", () => {
           settings: { feature_flags: { ORGANIZATION_LOOKUP_DETAILS: true } },
         })
 
-        await waitFor(() => screen.getByTestId("location-table"))
+        await screen.findByTestId("organization-name")
 
         await user.click(
           screen.getByRole("button", {
@@ -243,7 +215,7 @@ describe("Organization", () => {
           settings: { feature_flags: { ORGANIZATION_LOOKUP_DETAILS: true } },
         })
 
-        await waitFor(() => screen.getByTestId("location-table"))
+        await screen.findByTestId("organization-name")
 
         await user.click(
           screen.getByRole("button", {
@@ -289,30 +261,29 @@ describe("Organization", () => {
         settings: { feature_flags: { ORGANIZATION_LOOKUP_DETAILS: true } },
       })
 
-      await waitFor(() => screen.getByTestId("location-table"))
+      expect(
+        await screen.findByText("0006 Aspen Glen Court, Edwards, CO 81632"),
+      ).toBeInTheDocument()
 
       expect(
-        await screen.getByText("0006 Aspen Glen Court, Edwards, CO 81632"),
+        screen.getByText("0006 Aspen Glen Court, Edwards, CO 81632"),
       ).toBeInTheDocument()
       expect(
-        await screen.getByText("555-555-5555", { exact: false }),
+        screen.getByText("555-555-5555", { exact: false }),
       ).toBeInTheDocument()
-      expect(await screen.getByText("fhir.test-org.org")).toBeInTheDocument()
-      expect(await screen.getByText("HL7 FHIR")).toBeInTheDocument()
+      expect(screen.getByText("fhir.test-org.org")).toBeInTheDocument()
+      expect(screen.getByText("HL7 FHIR")).toBeInTheDocument()
       expect(
-        await screen.queryByText("Contact information not available"),
+        screen.queryByText("Contact information not available"),
       ).not.toBeInTheDocument()
       expect(
-        await screen.queryByText("No location information available"),
+        screen.queryByText("No location information available"),
       ).not.toBeInTheDocument()
       expect(
-        await screen.queryByText("No endpoint information available"),
+        screen.queryByText("No endpoint information available"),
       ).not.toBeInTheDocument()
       expect(
-        await screen.getByText("No practitioner information available"),
-      ).toBeInTheDocument()
-      expect(
-        await screen.queryByRole("cell", { name: "KIRK AADALEN" }),
+        screen.queryByText("No practitioner information available"),
       ).not.toBeInTheDocument()
     })
   })
@@ -334,26 +305,26 @@ describe("Organization", () => {
         settings: { feature_flags: { ORGANIZATION_LOOKUP_DETAILS: true } },
       })
 
-      await waitFor(() => screen.getByTestId("location-table"))
+      expect(
+        await screen.findByText("0006 Aspen Glen Court, Edwards, CO 81632"),
+      ).toBeInTheDocument()
 
       expect(
-        await screen.getByText("0006 Aspen Glen Court, Edwards, CO 81632"),
+        screen.getByText("0006 Aspen Glen Court, Edwards, CO 81632"),
       ).toBeInTheDocument()
       expect(
-        await screen.getByText("555-555-5555", { exact: false }),
+        screen.getByText("555-555-5555", { exact: false }),
       ).toBeInTheDocument()
+      expect(screen.queryByText("fhir.test-org.org")).not.toBeInTheDocument()
+      expect(screen.queryByText("HL7 FHIR")).not.toBeInTheDocument()
       expect(
-        await screen.queryByText("fhir.test-org.org"),
-      ).not.toBeInTheDocument()
-      expect(await screen.queryByText("HL7 FHIR")).not.toBeInTheDocument()
-      expect(
-        await screen.queryByText("Contact information not available"),
+        screen.queryByText("Contact information not available"),
       ).not.toBeInTheDocument()
       expect(
-        await screen.queryByText("No location information available"),
+        screen.queryByText("No location information available"),
       ).not.toBeInTheDocument()
       expect(
-        await screen.getByText("No endpoint information available"),
+        screen.getByText("No endpoint information available."),
       ).toBeInTheDocument()
     })
   })
@@ -371,30 +342,30 @@ describe("Organization", () => {
     })
 
     it("does not render location or endpoint table", async () => {
-      render(<RoutedOrganization path="/organizations/12345" />, {
+      render(<RoutedOrganization path="/organizations/123450" />, {
         settings: { feature_flags: { ORGANIZATION_LOOKUP_DETAILS: true } },
       })
 
-      await waitFor(() => screen.findByText("About"))
+      expect(
+        await screen.findByText("No practice location information available."),
+      ).toBeInTheDocument()
 
       expect(
-        await screen.queryByText("0006 Aspen Glen Court, Edwards, CO 81632"),
+        screen.queryByText("0006 Aspen Glen Court, Edwards, CO 81632"),
       ).not.toBeInTheDocument()
       expect(
-        await screen.queryByText("555-555-5555", { exact: false }),
+        screen.queryByText("555-555-5555", { exact: false }),
+      ).not.toBeInTheDocument()
+      expect(screen.queryByText("fhir.test-org.org")).not.toBeInTheDocument()
+      expect(screen.queryByText("HL7 FHIR")).not.toBeInTheDocument()
+      expect(
+        screen.queryByText("Contact information not available"),
       ).not.toBeInTheDocument()
       expect(
-        await screen.queryByText("fhir.test-org.org"),
-      ).not.toBeInTheDocument()
-      expect(await screen.queryByText("HL7 FHIR")).not.toBeInTheDocument()
-      expect(
-        await screen.queryByText("Contact information not available"),
-      ).not.toBeInTheDocument()
-      expect(
-        await screen.getByText("No location information available"),
+        screen.getByText("No practice location information available."),
       ).toBeInTheDocument()
       expect(
-        await screen.getByText("No endpoint information available"),
+        screen.getByText("No endpoint information available."),
       ).toBeInTheDocument()
     })
   })

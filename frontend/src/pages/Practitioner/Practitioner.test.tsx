@@ -176,9 +176,12 @@ describe("Practitioner", () => {
       await screen.findByTestId("practitioner-name")
 
       expect(
-        screen.getByText(
-          "Let us know if you see any problems with this provider record.",
-        ),
+        screen.getByText("Actions", { selector: "h3" }),
+      ).toBeInTheDocument()
+      expect(
+        screen.getByText(/Claim this record to update your information\./, {
+          exact: false,
+        }),
       ).toBeInTheDocument()
       expect(
         screen.getByRole("button", { name: "Report issue with this record" }),
