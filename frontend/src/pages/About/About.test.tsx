@@ -19,22 +19,12 @@ describe("About", () => {
       }),
     ).toBeInTheDocument()
     expect(
-      screen.getByText("How to search for providers", { selector: "h1" }),
-    ).toBeInTheDocument()
-    expect(
-      screen.getByText("Long-term vision", { selector: "h1" }),
+      screen.getByText("Long-term vision: Connecting a fragmented system", { selector: "h1" }),
     ).toBeInTheDocument()
     expect(
       screen.getByText("Building the foundation together", { selector: "h1" }),
     ).toBeInTheDocument()
-    expect(
-      screen.getByText("Accounts and secure authentication options", {
-        selector: "h1",
-      }),
-    ).toBeInTheDocument()
-    expect(
-      screen.getByText("Release notes", { selector: "h1" }),
-    ).toBeInTheDocument()
+    
   })
 
   it("renders introductory content", () => {
@@ -42,7 +32,7 @@ describe("About", () => {
 
     expect(
       screen.getByText(
-        /The National Provider Directory \(NPD\) beta is a first step/,
+        /The National Provider Directory \(NPD\) minimum viable product \(MVP\) release is a first step/,
         { selector: "p" },
       ),
     ).toBeInTheDocument()
