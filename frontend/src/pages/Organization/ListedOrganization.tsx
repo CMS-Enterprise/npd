@@ -22,7 +22,7 @@ export const ListedOrganization = ({ data }: { data: FHIROrganization }) => {
             <Link
               className={search.name}
               to={`/organizations/${data.id}`}
-              state={{ searchUrl: `/organizations/search${location.search}` }}
+              state={{ searchUrl: `/search${location.search}` }}
             >
               {organization.name}
             </Link>
@@ -48,7 +48,7 @@ export const ListedOrganization = ({ data }: { data: FHIROrganization }) => {
           <Link
             className={search.actionButton}
             to={`/organizations/${data.id}`}
-            state={{ searchUrl: `/organizations/search${location.search}` }}
+            state={{ searchUrl: `/search${location.search}` }}
           >
             {t("search.unified.viewFullProfile")}
           </Link>

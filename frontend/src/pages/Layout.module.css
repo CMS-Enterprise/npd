@@ -68,6 +68,7 @@
     font-style: normal;
     font-weight: var(--theme-font-weight-heading-3xl, 700);
     line-height: 130%; /* 2.925rem */;
+    margin-top: 0;
     margin-bottom: 10px;
   }
   & h3 {
@@ -78,6 +79,7 @@
     font-style: normal;
     font-weight: var(--theme-font-weight-heading-2xl, 700);
     line-height: 130%; /* 31.2px */;
+    margin-top: 0;
     margin-bottom: 10px;
   }
   & h4 {
@@ -88,6 +90,7 @@
     font-style: normal;
     font-weight: var(--theme-font-weight-heading-xl, 700);
     line-height: 130%; /* 27.3px */;
+    margin-top: 0;
     margin-bottom: 10px
   }
 }
