@@ -1,0 +1,31 @@
+{
+    "resourceType": "Location",
+    "id": "2",
+    "status": "active",
+    "name": "North Clinic",
+    "address": {
+        "use": "work",
+        "line": [
+            "200 Market Street"
+        ],
+        "city": "Denver",
+        "state": "CO",
+        "postalCode": "80205",
+        "country": "US"
+    },
+    "managingOrganization": {
+        "reference": "/fhir/Organization/12345"
+    },
+    "telecom": [
+        {
+            "system": "phone",
+            "value": "555-555-5555",
+            "use": "work"
+        }
+    ],
+    "endpoint": [
+        {
+            "reference": "/fhir/Endpoint/123"
+        }
+    ]
+}
