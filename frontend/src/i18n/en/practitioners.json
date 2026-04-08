@@ -24,6 +24,7 @@
     "contact": {
       "title": "Basic information",
       "npi": "NPI",
+      "dateOfEnumeration": "Date of Enumeration",
       "phone": "Phone",
       "fax": "Fax"
     },

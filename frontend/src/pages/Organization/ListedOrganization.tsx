@@ -40,7 +40,9 @@ export const ListedOrganization = ({ data }: { data: FHIROrganization }) => {
             <div className={search.value}>{organization.address || "---"}</div>
           </div>
           <div className={search.field}>
-            <div className={search.label}>{t("organizations.about.type")}</div>
+            <div className={search.label}>
+              {t("organizations.dataExchangeEndpoints.type")}
+            </div>
             <div className={search.value}>{types || "---"}</div>
           </div>
         </div>
