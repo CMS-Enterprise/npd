@@ -68,34 +68,6 @@ const EXPECTED_NAME =
   "EXPECTED_NAME IS UNSET FIXME"
 const PRIMARY_LOCATION_NAME = "0006 Aspen Glen Court"
 const PRIMARY_LOCATION_ADDRESS = "0006 Aspen Glen Court, Edwards, CO 81632"
-const SECONDARY_LOCATION_ID = "secondary-location-id"
-const SECONDARY_LOCATION_NAME = "North Clinic"
-const SECONDARY_LOCATION_ADDRESS = "200 Market Street, Denver, CO 80205"
-
-const practitionerRoleWithAdditionalLocation = {
-  ...DEFAULT_PRACTITIONERROLE,
-  results: {
-    ...DEFAULT_PRACTITIONERROLE.results,
-    entry: [
-      ...(DEFAULT_PRACTITIONERROLE.results.entry ?? []),
-      {
-        fullUrl: `/fhir/PractitionerRole/${SECONDARY_LOCATION_ID}`,
-        resource: {
-          ...DEFAULT_PRACTITIONERROLE.results.entry?.[0]?.resource,
-          id: `${SECONDARY_LOCATION_ID}-role`,
-          location: [{ reference: `/fhir/Location/${SECONDARY_LOCATION_ID}` }],
-          telecom: [
-            {
-              system: "phone",
-              value: "555-555-5555",
-              use: "work",
-            },
-          ],
-        },
-      },
-    ],
-  },
-}
 
 const RoutedPractitioner = ({ path }: { path: string }) => {
   return (

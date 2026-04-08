@@ -27,14 +27,14 @@ test.beforeAll(async ({ request }) => {
 })
 
 test.describe("Organization Journey", () => {
-  test("landing -> search hub -> organization search -> detail view", async ({ page }) => {
-    await page.goto("/organizations/search")
-    await expect(page).toHaveURL("/organizations/search")
-    await expect(page.getByText("Organization search")).toBeVisible()
+  test("landing -> search hub -> Search -> detail view", async ({ page }) => {
+    await page.goto("/search")
+    await expect(page).toHaveURL("/search")
+    await expect(page.getByText("Search Providers")).toBeVisible()
 
     // then, perform search by NPI
-    await page.getByRole("textbox", { name: "Name or NPI" }).fill("1234567893")
-    await page.getByRole("button", { name: "Search" }).click()
+    await page.getByRole("textbox", { name: "NPI" }).fill("1234567893")
+    await page.getByRole("button", { name: "Search Providers" }).click()
 
     // then, confirm search results appear
     await expect(page.getByRole("link", { name: "AAA Test Org" })).toBeVisible()
@@ -50,10 +50,10 @@ test.describe("Organization Journey", () => {
   })
 
   test("landing -> last page -> organization detail", async ({ page }) => {
-    await page.goto("/organizations/search")
+    await page.goto("/search")
 
-    await page.getByRole("textbox", { name: "Name or NPI" }).fill("TEST")
-    await page.getByRole("button", { name: "Search" }).click()
+    await page.getByRole("textbox", { name: "Organization" }).fill("TEST")
+    await page.getByRole("button", { name: "Search Providers" }).click()
 
     const sortButton = page.locator(".ds-c-dropdown__button")
     await expect(sortButton).toContainText("Name (A-Z)")
@@ -80,10 +80,10 @@ test.describe("Organization Journey", () => {
   })
 
   test("organization journey with partial name search", async ({ page }) => {
-    await page.goto("/organizations/search")
+    await page.goto("/search")
 
-    await page.getByRole("textbox", { name: "Name or NPI" }).fill("AAA")
-    await page.getByRole("button", { name: "Search" }).click()
+    await page.getByRole("textbox", { name: "Organization" }).fill("AAA")
+    await page.getByRole("button", { name: "Search Providers" }).click()
 
     await expect(page.getByRole("link", { name: "AAA Test Org" })).toBeVisible()
     await page.getByRole("link", { name: "AAA Test Org" }).click()
@@ -92,10 +92,10 @@ test.describe("Organization Journey", () => {
   })
 
   test("organization journey with sorting functionality", async ({ page }) => {
-    await page.goto("/organizations/search")
+    await page.goto("/search")
 
-    await page.getByRole("textbox", { name: "Name or NPI" }).fill("Test")
-    await page.getByRole("button", { name: "Search" }).click()
+    await page.getByRole("textbox", { name: "Organization" }).fill("Test")
+    await page.getByRole("button", { name: "Search Providers" }).click()
 
     await expect(page.locator("[data-testid='searchresults']").getByRole("listitem").first()).toBeVisible()
 

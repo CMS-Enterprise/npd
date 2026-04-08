@@ -36,13 +36,13 @@ test.beforeAll(async ({ request }) => {
 
 test.describe("Practitioner Journey", () => {
   test("landing -> search hub -> practitioner search -> detail view", async ({ page }) => {
-    await page.goto("/practitioners/search")
-    await expect(page).toHaveURL("/practitioners/search")
-    await expect(page.getByText("Search Practitioners")).toBeVisible()
+    await page.goto("/search")
+    await expect(page).toHaveURL("/search")
+    await expect(page.getByText("Search Providers")).toBeVisible()
 
     // then, perform search by NPI
-    await page.getByRole("textbox", { name: "Name or NPI" }).fill("1234567894")
-    await page.getByRole("button", { name: "Search" }).click()
+    await page.getByRole("textbox", { name: "NPI" }).fill("1234567894")
+    await page.getByRole("button", { name: "Search Providers" }).click()
 
     // then, confirm search results appear
     await expect(page.getByRole("link", { name: /AAA Test Practitioner/i })).toBeVisible()
@@ -53,14 +53,14 @@ test.describe("Practitioner Journey", () => {
     // finally, confirm detail page content
     await expect(page).toHaveURL(`/practitioners/${practitioner.id}`)
     await expect(page.getByTestId("practitioner-name")).toContainText(practitioner.name)
-    await expect(page.getByTestId("practitioner-npi")).toContainText(`NPI: ${practitioner.npi}`)
+    await expect(page.getByText(`NPI: ${practitioner.npi}`)).toBeVisible()
   })
 
   test("landing -> last page -> practitioner detail", async ({ page }) => {
-    await page.goto("/practitioners/search")
+    await page.goto("/search")
 
-    await page.getByRole("textbox", { name: "Name or NPI" }).fill("TEST")
-    await page.getByRole("button", { name: "Search" }).click()
+    await page.getByRole("textbox", { name: "Provider Name" }).fill("TEST")
+    await page.getByRole("button", { name: "Search Providers" }).click()
   
     const sortButton = page.locator(".ds-c-dropdown__button")
     await expect(sortButton).toContainText("First Name (A-Z)")
@@ -83,10 +83,10 @@ test.describe("Practitioner Journey", () => {
   })
 
   test("practitioner journey with partial name search", async ({ page }) => {
-    await page.goto("/practitioners/search")
+    await page.goto("/search")
 
-    await page.getByRole("textbox", { name: "Name or NPI" }).fill("AAA")
-    await page.getByRole("button", { name: "Search" }).click()
+    await page.getByRole("textbox", { name: "Provider Name" }).fill("AAA")
+    await page.getByRole("button", { name: "Search Providers" }).click()
 
     await expect(page.getByRole("link", { name: /AAA Test Practitioner/i })).toBeVisible()
     await page.getByRole("link", { name: /AAA Test Practitioner/i }).click()
@@ -95,10 +95,10 @@ test.describe("Practitioner Journey", () => {
   })
 
   test("practitioner journey with sorting functionality", async ({ page }) => {
-    await page.goto("/practitioners/search")
+    await page.goto("/search")
 
-    await page.getByRole("textbox", { name: "Name or NPI" }).fill("AAA")
-    await page.getByRole("button", { name: "Search" }).click()
+    await page.getByRole("textbox", { name: "Provider Name" }).fill("AAA")
+    await page.getByRole("button", { name: "Search Providers" }).click()
 
     await expect(page.locator("[data-testid='searchresults']").getByRole("listitem").first()).toBeVisible()
 
