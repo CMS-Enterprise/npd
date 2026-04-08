@@ -8,30 +8,42 @@ describe("Landing", () => {
     expect(
       screen.getByText("National Provider Directory", { selector: "h1" }),
     ).toBeInTheDocument()
-    expect(screen.getByText("LIMITED-RELEASE BETA")).toBeInTheDocument()
   })
 
   it("renders the tagline", () => {
     render(<Landing />)
     expect(
-      screen.getByText("Building the new infrastructure for health data interoperability"),
+      screen.getByText(
+        "Building the infrastructure for a modern healthcare experience",
+      ),
     ).toBeInTheDocument()
   })
 
-  it("renders developer resources link", () => {
-    render(<Landing />)
-    const link = screen.getByRole("link", { name: "Developer resources" })
-    expect(link).toHaveAttribute("href", "/developers")
-  })
-
-  it("renders search link", () => {
+  it("renders search the data link", () => {
     render(<Landing />)
     const link = screen.getByRole("link", { name: "Search the data" })
     expect(link).toHaveAttribute("href", "/search")
   })
 
-  it("renders the beta alert", () => {
+  it("renders developer documentation link", () => {
     render(<Landing />)
-    expect(screen.getByText("This project is in beta")).toBeInTheDocument()
+    const link = screen.getByRole("link", { name: "Developer documentation" })
+    expect(link).toHaveAttribute("href", "/developers")
+  })
+
+  it("renders the mission heading", () => {
+    render(<Landing />)
+    expect(
+      screen.getByText(
+        "Finding care should be simple; accurate data makes it possible",
+      ),
+    ).toBeInTheDocument()
+  })
+
+  it("renders the three cards", () => {
+    render(<Landing />)
+    expect(screen.getByText("Explore the directory")).toBeInTheDocument()
+    expect(screen.getByText("For providers")).toBeInTheDocument()
+    expect(screen.getByText("For developers")).toBeInTheDocument()
   })
 })

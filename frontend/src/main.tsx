@@ -15,6 +15,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { AuthenticatedRoute } from "./components/AuthenticatedRoute"
 import { ErrorBoundary, ErrorFallback } from "./components/ErrorBoundary.tsx"
 import { FeatureFlagRoute } from "./components/FeatureFlagRoute"
+import { About } from "./pages/About"
+import { Providers } from "./pages/Providers"
 import { Developers } from "./pages/Developers"
 import { Landing } from "./pages/Landing"
 import { Layout } from "./pages/Layout"
@@ -39,7 +41,9 @@ createRoot(document.getElementById("root")!).render(
 
                 <Route element={<AuthenticatedRoute />}>
                   <Route index element={<Landing />} />
+                  <Route path="/about" element={<About />} />
                   <Route path="/developers" element={<Developers />} />
+                  <Route path="/providers" element={<Providers />} />
 
                   <Route element={<FeatureFlagRoute name="SEARCH_APP" />}>
                     <Route path="/search" element={<UnifiedSearch />} />

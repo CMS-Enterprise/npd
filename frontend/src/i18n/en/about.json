@@ -1,0 +1,30 @@
+{
+  "title": "About the directory",
+  "subtitle": "About",
+  "backtotop": "Back to top",
+  "auth": {
+    "idme": {
+      "title": "ID.me",
+      "description": "Trusted digital identity network used by government agencies and private companies",
+      "feature1": "Bank-level security encryption",
+      "feature2": "Used by VA and other government agencies",
+      "feature3": "Quick verification process"
+    },
+    "clear": {
+      "title": "CLEAR",
+      "badge": "Coming soon",
+      "description": "Secure identity verification platform using biometric authentication",
+      "feature1": "Biometric authentication",
+      "feature2": "Fast and convenient",
+      "feature3": "Privacy-focused"
+    },
+    "logingov": {
+      "title": "Login.gov",
+      "badge": "Coming soon",
+      "description": "Official U.S. government identity verification service for accessing federal agencies",
+      "feature1": "Government trusted",
+      "feature2": "Multi-factor authentication",
+      "feature3": "One account for multiple agencies"
+    }
+  }
+}

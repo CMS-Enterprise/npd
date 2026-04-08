@@ -20,7 +20,7 @@ class FeedbackSerializer(serializers.Serializer):
         min_length=1,
         max_length=len(VALID_ISSUES),
     )
-    details = serializers.CharField(max_length=500, required=False, allow_blank=True)
+    details = serializers.CharField(max_length=750, required=False, allow_blank=True)
     email = serializers.EmailField(required=False, allow_blank=True)
     altcha = serializers.JSONField()
 
