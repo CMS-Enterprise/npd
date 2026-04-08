@@ -134,15 +134,16 @@ export const Practitioner = () => {
                   </strong>
                   .
                 </p>
-                <Button variation="solid" className={styles.actionsButton}>
+                <Button
+                  variation="solid"
+                  className={styles.actionsButton}
+                  disabled={true}
+                >
                   {t("practitioners.detail.actions.claim")}
                 </Button>
                 <Button
-                  variation="ghost"
-                  className={classNames(
-                    styles.actionsButton,
-                    styles.reportButton,
-                  )}
+                  variation="solid"
+                  className={styles.actionsButton}
                   onClick={() => setIsReportIssueOpen(true)}
                 >
                   {t("practitioners.detail.actions.report")}
