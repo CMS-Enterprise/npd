@@ -23,12 +23,14 @@ def _fetch(
     path: str,
     auth: tuple[str, str] | None,
     *,
+    accept: str,
     local_netlocs: set[str],
+    strip_local_trailing_slash: bool,
 ):
     response = requests.get(
         f"{base_url.rstrip('/')}{path}",
         auth=auth,
-        headers={"Accept": "application/fhir+json"},
+        headers={"Accept": accept},
         timeout=30,
     )
     return {
@@ -39,6 +41,7 @@ def _fetch(
             response.headers.get("content-type"),
             response.text,
             local_netlocs=local_netlocs,
+            strip_local_trailing_slash=strip_local_trailing_slash,
         ),
     }
 
@@ -70,17 +73,23 @@ def run_corpus(
     failures = 0
 
     for case in corpus.get("cases", []):
+        accept = case.get("accept", "application/fhir+json")
+        strip_local_trailing_slash = case.get("strip_local_trailing_slash", True)
         django_result = _fetch(
             django_base_url,
             case["path"],
             django_auth,
+            accept=accept,
             local_netlocs=local_netlocs,
+            strip_local_trailing_slash=strip_local_trailing_slash,
         )
         fastapi_result = _fetch(
             fastapi_base_url,
             case["path"],
             fastapi_auth,
+            accept=accept,
             local_netlocs=local_netlocs,
+            strip_local_trailing_slash=strip_local_trailing_slash,
         )
 
         comparison = classify_response_pair(
@@ -95,6 +104,7 @@ def run_corpus(
         case_report = {
             "name": case["name"],
             "path": case["path"],
+            "strip_local_trailing_slash": strip_local_trailing_slash,
             "django": django_result,
             "fastapi": fastapi_result,
             "comparison": {

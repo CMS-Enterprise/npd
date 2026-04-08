@@ -3,7 +3,10 @@ from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 
-from fastapi_app.location_service import LocationListResult
+from fastapi_app.location_native_service import (
+    LocationListResult,
+    _endpoint_reference,
+)
 from fastapi_app.main import app
 
 
@@ -67,4 +70,15 @@ class LocationEndpointTestCase(TestCase):
         self.assertEqual(
             response.json()["detail"],
             "No Location matches the given query.",
+        )
+
+    def test_endpoint_reference_is_canonicalized_without_trailing_slash(self):
+        reference = _endpoint_reference(
+            "http://fastapi.dev.cnpd.internal.cms.gov/",
+            "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+        )
+
+        self.assertEqual(
+            reference["reference"],
+            "http://fastapi.dev.cnpd.internal.cms.gov/fhir/Endpoint/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
         )

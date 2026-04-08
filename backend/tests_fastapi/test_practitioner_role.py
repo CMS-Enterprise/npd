@@ -4,7 +4,7 @@ from unittest.mock import patch
 from fastapi.testclient import TestClient
 
 from fastapi_app.main import app
-from fastapi_app.practitioner_role_service import PractitionerRoleListResult
+from fastapi_app.practitioner_role_native_service import PractitionerRoleListResult
 
 
 class PractitionerRoleEndpointTestCase(TestCase):

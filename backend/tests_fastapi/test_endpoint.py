@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 
-from fastapi_app.endpoint_service import EndpointListResult
+from fastapi_app.endpoint_native_service import EndpointListResult
 from fastapi_app.main import app
 
 
