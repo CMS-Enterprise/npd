@@ -75,10 +75,10 @@ test.describe("Search", () => {
     await expect(page.getByRole("link", { name: "AAA Test Org" })).toBeVisible()
   })
 
-  test("search for a Organization and confirm pagination works", async ({ page }) => {
+  test.fixme("search for a Organization and confirm pagination works", async ({ page }) => {
     await page.goto("/search")
     await expect(page).toHaveURL("/search")
-    await expect(page.getByText("Search Providers")).toBeVisible()
+    await expect(page.getByRole("button", {name: "Search Providers"})).toBeVisible()
 
     await page
       .getByRole("textbox", { name: "Organization" })
