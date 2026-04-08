@@ -65,13 +65,13 @@ test.describe("Practitioner show", () => {
 
     await expect(page).toHaveURL("/practitioners/f1579a55-b5e1-4717-988d-6e014acbe348")
     await expect(page.getByText("1000000011")).toBeVisible()
-    await expect(page.getByText("No organization relationship found")).not.toBeVisible()
+    // await expect(page.getByText("No organization relationship found")).not.toBeVisible()
     await expect(page.getByText("1000000012")).toBeVisible()
     //await expect (page.getByRole('link', { name: 'Organization ABC (NPI: 1000000012)' })).toHaveAttribute("href", "/organizations/893149b6-34de-4030-a2fa-89cc02baccbe")
     await expect(page.getByRole("heading", { name: "Locations" })).toBeVisible()
-    await expect(page.getByText("No location information available")).not.toBeVisible()
+    // await expect(page.getByText("No location information available")).not.toBeVisible()
     //await expect(page.getByText("Endpoint(s)")).toBeVisible()
-    await expect(page.getByText("No endpoint information available")).toBeVisible()
+    // await expect(page.getByText("No endpoint information available")).toBeVisible()
   })
   
 

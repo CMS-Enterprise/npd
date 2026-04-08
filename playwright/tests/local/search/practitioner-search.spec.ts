@@ -136,6 +136,6 @@ test.describe("Practitioner search", () => {
     
         await expect(page).toHaveURL(`/practitioners/${practitioner.id}`)
         await expect(page.getByTestId("practitioner-name")).toContainText(practitioner.name)
-        await expect(page.getByTestId("practitioner-npi")).toContainText(`NPI: ${practitioner.npi}`)
+        await expect(page.getByRole("definition").filter({ hasText: practitioner.npi })).toBeVisible()
       })
 })
