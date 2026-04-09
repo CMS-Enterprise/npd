@@ -1,4 +1,4 @@
-import { Badge, Button, SkipNav, UsaBanner } from "@cmsgov/design-system"
+import { Alert, Button, SkipNav, UsaBanner } from "@cmsgov/design-system"
 import classnames from "classnames"
 import { useTranslation } from "react-i18next"
 
@@ -62,7 +62,6 @@ export const Header = ({ hideLinks }: HeaderProps) => {
     settings: { user },
   } = useFrontendSettings()
   const classes = classnames("usa-header", "usa-header--basic", styles.header)
-  const badgeClasses = classnames(styles.betaBadge)
   const textContainerClasses = classnames(
     "ds-u-md-display--flex",
     "ds-u-display--none",
@@ -72,6 +71,7 @@ export const Header = ({ hideLinks }: HeaderProps) => {
   return (
     <>
       <SkipNav href="#after-header">{t("header.skip")}</SkipNav>
+      <Alert heading={t("header.alert")} />
       <UsaBanner />
       <header className={classes} role="banner">
         <div className="usa-nav-container">
@@ -87,9 +87,6 @@ export const Header = ({ hideLinks }: HeaderProps) => {
                   <em className={`${styles.logoText} usa-logo__text`}>
                     {t("header.title")}
                   </em>
-                  <Badge variation="info" className={badgeClasses}>
-                    {t("header.badge")}
-                  </Badge>
                 </div>
               </a>
             </div>
@@ -105,7 +102,6 @@ export const Header = ({ hideLinks }: HeaderProps) => {
               <button type="button" className="usa-nav__close">
                 <img src={close} role="img" alt="Close" />
               </button>
-
               <ul className="usa-nav__primary usa-accordion" role="navigation">
                 {user && !user?.is_anonymous && (
                   <>
@@ -115,36 +111,14 @@ export const Header = ({ hideLinks }: HeaderProps) => {
                       </a>
                     </li>
                     <li className="usa-nav__primary-item">
-                      <button
-                        type="button"
-                        className="usa-accordion__button usa-nav__link"
-                        aria-expanded="false"
-                        aria-controls="resources-nav-section"
-                      >
-                        <span>{t("header.link.resources")}</span>
-                      </button>
-                      <ul
-                        id="resources-nav-section"
-                        className={`usa-nav__submenu ${styles.submenuList}`}
-                        role="menu"
-                        hidden
-                      >
-                        <li className="usa-nav__submenu-item">
-                          <a href="/about">
-                            <span>{t("header.link.about")}</span>
-                          </a>
-                        </li>
-                        <li className="usa-nav__submenu-item">
-                          <a href="/developers">
+                          <a href="/developers" className="usa-nav__link">
                             <span>{t("header.link.developers")}</span>
                           </a>
-                        </li>
-                        <li className="usa-nav__submenu-item">
-                          <a href="/providers">
+                    </li>
+                    <li className="usa-nav__primary-item">
+                          <a href="/providers" className="usa-nav__link">
                             <span>{t("header.link.providers")}</span>
                           </a>
-                        </li>
-                      </ul>
                     </li>
                   </>
                 )}

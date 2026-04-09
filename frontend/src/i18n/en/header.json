@@ -2,6 +2,7 @@
   "skip": "Skip navigation",
   "title": "National Provider Directory",
   "badge": "Under Development",
+  "alert": "This is an early release of the National Provider Directory. CMS will be improving the experience throughout 2026.",
   "auth": {
     "login": "Sign in",
     "logout": "Sign out"
