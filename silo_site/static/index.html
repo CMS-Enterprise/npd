@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NPD Local Bulk Data Viewer</title>
+    <link rel="icon" type="image/x-icon" href="/assets/npd-favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/npd-favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/npd-favicon-16.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="/assets/npd-favicon-192.png" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <img
+          class="hero-logo"
+          src="/assets/cms-gov-logo.png"
+          alt="Centers for Medicare & Medicaid Services"
+        />
+        <div class="hero-stats" id="hero-stats"></div>
+        <p class="hero-copy">
+          Please find the National Provider Directory Public Use files below.
+          The files are in NDJSON format and they are compressed using
+          <a href="https://en.wikipedia.org/wiki/Zstd" target="_blank" rel="noreferrer">zstd</a>.
+          The files are very large (&gt;8GB) and even larger when uncompressed
+          (&gt;50GB). You will not be able to open these files with Excel or other
+          desktop applications.
+        </p>
+      </header>
+
+      <main class="layout">
+        <section class="panel">
+          <div class="panel-header">
+            <h2>Release Files</h2>
+            <p>Direct local downloads from the branch worktree.</p>
+          </div>
+          <div id="file-grid" class="file-grid"></div>
+        </section>
+
+        <section class="panel split-panel">
+          <div>
+            <div class="panel-header">
+              <h2>Additional Notes</h2>
+              <p>Compression notes and quick install commands for zstd tools.</p>
+            </div>
+            <ul id="notes-list" class="notes-list"></ul>
+          </div>
+          <div>
+            <div class="panel-header">
+              <h2>Shell Commands</h2>
+              <p>Quick commands for inspecting the local archives directly.</p>
+            </div>
+            <div id="commands-list" class="commands-list"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <template id="file-card-template">
+      <article class="file-card">
+        <div class="file-head">
+          <div>
+            <p class="file-label"></p>
+            <h3 class="file-name"></h3>
+          </div>
+          <a class="download-link" target="_blank" rel="noreferrer">Download</a>
+        </div>
+        <dl class="metrics">
+          <div>
+            <dt>Compressed</dt>
+            <dd class="compressed-size"></dd>
+          </div>
+          <div>
+            <dt>Original</dt>
+            <dd class="original-size"></dd>
+          </div>
+          <div>
+            <dt>Compression</dt>
+            <dd class="ratio"></dd>
+          </div>
+        </dl>
+        <div class="card-actions">
+          <button class="sample-button" type="button">Load samples</button>
+        </div>
+        <div class="samples"></div>
+      </article>
+    </template>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>
