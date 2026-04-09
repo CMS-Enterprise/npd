@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+    <div id="live-region" class="sr-only" aria-live="polite" aria-atomic="true"></div>
     <div class="page-shell">
       <header class="hero">
         <img
@@ -18,53 +20,71 @@
           src="/assets/cms-gov-logo.png"
           alt="Centers for Medicare & Medicaid Services"
         />
-        <div class="hero-stats" id="hero-stats"></div>
+        <p class="hero-kicker">National Provider Directory</p>
+        <h1>Public use files</h1>
         <p class="hero-copy">
-          Please find the National Provider Directory Public Use files below.
-          The files are in NDJSON format and they are compressed using
-          <a href="https://en.wikipedia.org/wiki/Zstd" target="_blank" rel="noreferrer">zstd</a>.
-          The files are very large (&gt;8GB) and even larger when uncompressed
-          (&gt;50GB). You will not be able to open these files with Excel or other
-          desktop applications.
+          Download the National Provider Directory public use files below. The
+          files are in NDJSON format and compressed using
+          <a href="https://en.wikipedia.org/wiki/Zstd" target="_blank" rel="noreferrer">
+            zstd<span class="sr-only"> (opens in a new tab)</span>
+          </a>.
+          These files are very large and are not intended for spreadsheet tools
+          such as Excel. Use the sample record buttons if you need a quick preview.
         </p>
+        <div class="hero-stats" id="hero-stats" aria-label="Release summary"></div>
       </header>
 
-      <main class="layout">
-        <section class="panel">
+      <main id="main-content" class="layout" tabindex="-1">
+        <section class="panel" aria-labelledby="release-files-heading">
           <div class="panel-header">
-            <h2>Release Files</h2>
-            <p>Direct local downloads from the branch worktree.</p>
+            <h2 id="release-files-heading">Release files</h2>
+            <p>Direct downloads for the current release.</p>
           </div>
-          <div id="file-grid" class="file-grid"></div>
+          <div id="file-grid" class="file-grid" role="list" aria-describedby="release-files-heading"></div>
         </section>
 
-        <section class="panel split-panel">
+        <section class="panel split-panel" aria-labelledby="release-guidance-heading">
           <div>
             <div class="panel-header">
-              <h2>Additional Notes</h2>
-              <p>Compression notes and quick install commands for zstd tools.</p>
+              <h2 id="release-guidance-heading">Release guidance</h2>
+              <p>Compression notes and installation commands for zstd tools.</p>
             </div>
             <ul id="notes-list" class="notes-list"></ul>
           </div>
           <div>
             <div class="panel-header">
-              <h2>Shell Commands</h2>
-              <p>Quick commands for inspecting the local archives directly.</p>
+              <h2 id="shell-commands-heading">Shell commands</h2>
+              <p>Commands for inspecting the compressed release files.</p>
             </div>
-            <div id="commands-list" class="commands-list"></div>
+            <div id="commands-list" class="commands-list" aria-labelledby="shell-commands-heading"></div>
           </div>
         </section>
+
+        <section class="panel" aria-labelledby="accessibility-heading">
+          <div class="panel-header">
+            <h2 id="accessibility-heading">Accessibility and support</h2>
+            <p>This page is designed for keyboard, screen reader, and zoom support.</p>
+          </div>
+          <p class="support-copy">
+            If you need help accessing the files or sample records, contact the
+            National Provider Directory support team through the CMS support process.
+          </p>
+        </section>
       </main>
+
+      <footer class="site-footer">
+        <p>Centers for Medicare &amp; Medicaid Services</p>
+      </footer>
     </div>
 
     <template id="file-card-template">
-      <article class="file-card">
+      <article class="file-card" role="listitem">
         <div class="file-head">
           <div>
             <p class="file-label"></p>
             <h3 class="file-name"></h3>
           </div>
-          <a class="download-link" target="_blank" rel="noreferrer">Download</a>
+          <a class="download-link">Download</a>
         </div>
         <dl class="metrics">
           <div>
@@ -81,9 +101,9 @@
           </div>
         </dl>
         <div class="card-actions">
-          <button class="sample-button" type="button">Load samples</button>
+          <button class="sample-button" type="button">Load sample records</button>
         </div>
-        <div class="samples"></div>
+        <div class="samples" aria-live="polite"></div>
       </article>
     </template>
 
