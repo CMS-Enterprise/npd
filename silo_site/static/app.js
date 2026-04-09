@@ -9,6 +9,20 @@ const state = {
   release: null,
 }
 
+const appendSoftWrappedText = (element, value) => {
+  const parts = value
+    .split(/(?<=[a-z])(?=[A-Z])|(?<=\.)/g)
+    .filter(Boolean)
+
+  element.replaceChildren()
+  parts.forEach((part, index) => {
+    element.append(document.createTextNode(part))
+    if (index < parts.length - 1) {
+      element.append(document.createElement("wbr"))
+    }
+  })
+}
+
 const messageNode = (text) => {
   const paragraph = document.createElement("p")
   paragraph.className = "sample-empty"
@@ -142,8 +156,8 @@ const renderFiles = (files) => {
 
       const sampleRegionId = `samples-${file.resource_name.toLowerCase()}`
       const headingId = `file-heading-${file.resource_name.toLowerCase()}`
-      label.textContent = file.resource_name
-      name.textContent = file.filename
+      appendSoftWrappedText(label, file.resource_name)
+      appendSoftWrappedText(name, file.filename)
       name.id = headingId
       card.setAttribute("aria-labelledby", headingId)
       downloadLink.href = file.download_path

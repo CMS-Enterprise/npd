@@ -233,7 +233,12 @@ button:focus-visible {
 
 .file-name,
 .file-label {
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+.file-name {
+  line-height: 1.25;
 }
 
 .download-link,
@@ -280,7 +285,7 @@ button:focus-visible {
 
 .metrics {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.75rem;
   margin: 0;
 }
