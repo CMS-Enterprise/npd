@@ -133,6 +133,29 @@ We are taking an iterative approach to the development of this project, starting
 
 **For more information on contributing, including notes on project setup and development, see: [CONTRIBUTING.md](./CONTRIBUTING.md).**
 
+### Test DB Snapshots
+
+To create a restorable snapshot of the local test Postgres database, run:
+
+```sh
+bin/test-db-snapshot dump
+```
+
+If `npd_test` doesn't exist yet, the helper will run `make test-setup` first.
+Snapshots are written under `backend/artifacts/db-dumps/`.
+
+To restore a snapshot:
+
+```sh
+bin/test-db-snapshot restore backend/artifacts/db-dumps/<timestamp>
+```
+
+Each snapshot directory contains:
+
+- `globals.sql`
+- `npd_test.dump`
+- `metadata.json`
+
 ## Community
 
 The NPD team is taking a community-first and open source approach to the product development of this tool. We believe government software should be made in the open and be built and licensed such that anyone can download the code, run it themselves without paying money to third parties or using proprietary software, and use it as they will.
