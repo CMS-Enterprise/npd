@@ -1,0 +1,140 @@
+#!/bin/zsh
+
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+COMPOSE_FILE="$ROOT_DIR/compose.test.yml"
+DEFAULT_DB_NAME="npd_test"
+DEFAULT_OUTPUT_ROOT="$ROOT_DIR/backend/artifacts/db-dumps"
+export NPD_DB_HOST_PORT="${NPD_DB_HOST_PORT:-55432}"
+
+usage() {
+  cat <<'EOF'
+Usage:
+  bin/test-db-snapshot dump [output_dir]
+  bin/test-db-snapshot restore <snapshot_dir>
+
+The dump command creates:
+  - globals.sql
+  - npd_test.dump
+  - metadata.json
+
+The restore command expects those files in the snapshot directory.
+EOF
+}
+
+ensure_db() {
+  docker compose -f "$COMPOSE_FILE" up -d --wait db >/dev/null
+}
+
+run_test_migrations() {
+  docker run --rm \
+    --entrypoint flyway \
+    -v "$ROOT_DIR/flyway/sql:/flyway/sql" \
+    -e FLYWAY_URL="jdbc:postgresql://host.docker.internal:${NPD_DB_HOST_PORT}/$DEFAULT_DB_NAME" \
+    -e FLYWAY_USER="postgres" \
+    -e FLYWAY_PASSWORD="postgres" \
+    -e FLYWAY_DEFAULT_SCHEMA="public" \
+    -e FLYWAY_PLACEHOLDERS_apiSchema="npd" \
+    -e FLYWAY_PLACEHOLDERS_superuserDefaultPassword="" \
+    -e FLYWAY_PLACEHOLDERS_npdReadonlyUserPassword="test-password-123" \
+    -e FLYWAY_PLACEHOLDERS_loadTesterPassword="" \
+    flyway/flyway:10 \
+    migrate \
+    -outputType=json \
+    -locations=filesystem:/flyway/sql/django_migrations,filesystem:/flyway/sql/django_reference_data,filesystem:/flyway/sql/migrations,filesystem:/flyway/sql/reference_data
+}
+
+ensure_test_database() {
+  ensure_db
+
+  local exists
+  exists="$(
+    docker compose -f "$COMPOSE_FILE" exec -T db \
+      sh -lc "PGPASSWORD=\"\$POSTGRES_PASSWORD\" psql -U \"\$POSTGRES_USER\" -d postgres -tAc \"SELECT 1 FROM pg_database WHERE datname = '$DEFAULT_DB_NAME'\""
+  )"
+
+  if [[ "$exists" != "1" ]]; then
+    echo "Test database $DEFAULT_DB_NAME does not exist. Creating and migrating it."
+    docker compose -f "$COMPOSE_FILE" exec -T db \
+      sh -lc "PGPASSWORD=\"\$POSTGRES_PASSWORD\" psql -U \"\$POSTGRES_USER\" -d postgres -c \"DROP DATABASE IF EXISTS $DEFAULT_DB_NAME;\" && PGPASSWORD=\"\$POSTGRES_PASSWORD\" psql -U \"\$POSTGRES_USER\" -d postgres -c \"CREATE DATABASE $DEFAULT_DB_NAME;\""
+    run_test_migrations
+  fi
+}
+
+dump_snapshot() {
+  local output_dir="${1:-$DEFAULT_OUTPUT_ROOT/$(date +%Y%m%d-%H%M%S)}"
+  mkdir -p "$output_dir"
+
+  ensure_test_database
+
+  echo "Dumping globals to $output_dir/globals.sql"
+  docker compose -f "$COMPOSE_FILE" exec -T db \
+    sh -lc 'PGPASSWORD="$POSTGRES_PASSWORD" pg_dumpall -U "$POSTGRES_USER" --globals-only' \
+    > "$output_dir/globals.sql"
+
+  echo "Dumping $DEFAULT_DB_NAME to $output_dir/$DEFAULT_DB_NAME.dump"
+  docker compose -f "$COMPOSE_FILE" exec -T db \
+    sh -lc "PGPASSWORD=\"\$POSTGRES_PASSWORD\" pg_dump -U \"\$POSTGRES_USER\" -d \"$DEFAULT_DB_NAME\" -Fc -b --create --clean --if-exists" \
+    > "$output_dir/$DEFAULT_DB_NAME.dump"
+
+  cat > "$output_dir/metadata.json" <<EOF
+{
+  "database": "$DEFAULT_DB_NAME",
+  "created_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+  "globals_file": "globals.sql",
+  "database_dump_file": "$DEFAULT_DB_NAME.dump"
+}
+EOF
+
+  echo "Snapshot complete:"
+  ls -lh "$output_dir"
+}
+
+restore_snapshot() {
+  local snapshot_dir="${1:-}"
+  if [[ -z "$snapshot_dir" ]]; then
+    usage
+    exit 1
+  fi
+
+  local globals_file="$snapshot_dir/globals.sql"
+  local db_dump_file="$snapshot_dir/$DEFAULT_DB_NAME.dump"
+
+  if [[ ! -f "$globals_file" || ! -f "$db_dump_file" ]]; then
+    echo "Missing restore inputs in $snapshot_dir" >&2
+    exit 1
+  fi
+
+  ensure_db
+
+  echo "Restoring globals from $globals_file"
+  cat "$globals_file" | docker compose -f "$COMPOSE_FILE" exec -T db \
+    sh -lc 'PGPASSWORD="$POSTGRES_PASSWORD" psql -U "$POSTGRES_USER" -d postgres'
+
+  echo "Restoring $DEFAULT_DB_NAME from $db_dump_file"
+  cat "$db_dump_file" | docker compose -f "$COMPOSE_FILE" exec -T db \
+    sh -lc 'PGPASSWORD="$POSTGRES_PASSWORD" pg_restore -U "$POSTGRES_USER" -d postgres'
+
+  echo "Restore complete."
+}
+
+main() {
+  local cmd="${1:-}"
+  case "$cmd" in
+    dump)
+      shift
+      dump_snapshot "${1:-}"
+      ;;
+    restore)
+      shift
+      restore_snapshot "${1:-}"
+      ;;
+    *)
+      usage
+      exit 1
+      ;;
+  esac
+}
+
+main "$@"
