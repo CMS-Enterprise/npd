@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Mapping
-from typing import Any
+from typing import Any, Callable
 
+import psycopg
 from psycopg.conninfo import make_conninfo
 from psycopg.rows import dict_row
 from psycopg_pool import ConnectionPool
@@ -12,6 +14,7 @@ from psycopg_pool import ConnectionPool
 from .config import settings
 
 _pool: ConnectionPool | None = None
+logger = logging.getLogger(__name__)
 
 
 def _build_conninfo() -> str:
@@ -51,18 +54,52 @@ def get_pool() -> ConnectionPool:
     return _pool
 
 
+def reset_pool() -> None:
+    global _pool
+    if _pool is not None:
+        _pool.close()
+        _pool = None
+
+
+def _is_retryable_connection_error(exc: BaseException) -> bool:
+    message = str(exc).lower()
+    return any(
+        token in message
+        for token in (
+            "ssl syscall error: eof detected",
+            "consuming input failed",
+            "server closed the connection unexpectedly",
+            "connection not open",
+            "closed the connection",
+        )
+    )
+
+
+def _execute_with_retry(
+    sql: str,
+    params: Mapping[str, Any] | None,
+    fetch: Callable[[Any], Any],
+) -> Any:
+    for attempt in range(2):
+        try:
+            with get_pool().connection() as connection:
+                with connection.cursor() as cursor:
+                    cursor.execute(sql, params or {})
+                    return fetch(cursor)
+        except (psycopg.OperationalError, psycopg.InterfaceError) as exc:
+            if attempt == 0 and _is_retryable_connection_error(exc):
+                logger.warning("Retrying DB query after connection error: %s", exc)
+                reset_pool()
+                continue
+            raise
+
+
 def fetch_all(sql: str, params: Mapping[str, Any] | None = None) -> list[dict[str, Any]]:
-    with get_pool().connection() as connection:
-        with connection.cursor() as cursor:
-            cursor.execute(sql, params or {})
-            return list(cursor.fetchall())
+    return _execute_with_retry(sql, params, lambda cursor: list(cursor.fetchall()))
 
 
 def fetch_one(sql: str, params: Mapping[str, Any] | None = None) -> dict[str, Any] | None:
-    with get_pool().connection() as connection:
-        with connection.cursor() as cursor:
-            cursor.execute(sql, params or {})
-            return cursor.fetchone()
+    return _execute_with_retry(sql, params, lambda cursor: cursor.fetchone())
 
 
 def fetch_scalar(sql: str, params: Mapping[str, Any] | None = None) -> Any:

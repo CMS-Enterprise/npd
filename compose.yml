@@ -21,6 +21,7 @@ services:
       NPD_DB_PASSWORD: ${NPD_DB_PASSWORD:-postgres}
       NPD_DB_HOST: ${NPD_DB_HOST:-db}
       NPD_DB_PORT: ${NPD_DB_PORT:-5432}
+      NPD_DB_SSLMODE: ${NPD_DB_SSLMODE:-}
       NPD_REQUIRE_AUTHENTICATION: False
     ports:
       - '8000:8000'
