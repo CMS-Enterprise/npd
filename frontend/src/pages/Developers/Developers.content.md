@@ -72,6 +72,13 @@ The initial beta release of the National Provider Directory API makes the follow
 | /fhir/Practitioner/<id>     | lists individuals that provide healthcare services (I.e. individuals having a type 1 National Provider Identifier), as well as details about those practitioners; supplying an id allows developers to retrieve a single practitioner record                                                                                                                                        |
 | /fhir/PractitionerRole/<id> | lists relationships between individuals that provide healthcare services, the organizations within which they provide healthcare services, the locations at which they practice, and the interoperability endpoints that pertain to those relationships; supplying an id allows developers to retrieve a single practitioner role record                                            |
 
+## Health Tech Ecosystem
+
+- [Health Tech Ecosystem Data Release Specifications](https://github.com/ftrotter-gov/HTE_data_release_specifications)
+- [CMS Health Tech Ecosystem Interoperability Framework](https://www.cms.gov/health-technology-ecosystem/interoperability-framework)
+
+To report issues with these files please send an email to [npd@cms.hhs.gov](npd@cms.hhs.gov)
+
 # Developer sandbox
 
 To explore the data in an interactive developer sandbox integrated with detailed documentation, please visit the National Provider Directory [Swagger documentation](/fhir/docs/).
