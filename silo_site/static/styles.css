@@ -263,7 +263,7 @@ button:focus-visible {
   background: var(--primary);
 }
 
-.download-link:hover {
+.download-link:visited, .download-link:hover {
   color: #ffffff;
   background: var(--primary-dark);
 }

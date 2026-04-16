@@ -38,7 +38,7 @@ psycopg==3.2.12
 psycopg_binary==3.2.12
 python-dateutil==2.9.0.post0
 python-decouple==3.8
-python-multipart==0.0.22
+python-multipart==0.0.26
 python-slugify==8.0.4
 requests==2.33.0
 rich==14.0.0
