@@ -137,6 +137,8 @@ services:
   bulk-download:
     build:
       context: silo_site
+    volumes:
+      - ./silo_site/static:/app/static
     ports:
     - "8080:8080"
     environment:
