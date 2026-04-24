@@ -1,6 +1,0 @@
-{
-  "database": "npd_test",
-  "created_at": "2026-04-14T19:30:58Z",
-  "globals_file": "globals.sql",
-  "database_dump_file": "npd_test.dump"
-}
