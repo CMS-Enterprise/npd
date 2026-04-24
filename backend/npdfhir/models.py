@@ -764,6 +764,7 @@ class ProviderToCredential(models.Model):
     )
     credential_type = models.ForeignKey(CredentialType, models.DO_NOTHING)
     license_number = models.CharField(max_length=20)
+    credential_description = models.TextField(blank=True, null=True)
     state_code = models.ForeignKey(FipsState, models.DO_NOTHING, db_column="state_code")
     provider_to_taxonomy = models.ForeignKey("ProviderToTaxonomy", models.DO_NOTHING)
 
