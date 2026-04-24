@@ -1,13 +1,39 @@
 {
   "badge": "LIMITED-RELEASE BETA",
   "title": "National Provider Directory",
-  "tagline": "Building the new infrastructure for health data interoperability",
+  "tagline": "Building the infrastructure for a modern healthcare experience",
   "about": {
     "title": "About the directory",
     "description": "The National Provider Directory uses data from multiple publicly-available data sources and combines them to create a trusted source of truth for information about healthcare providers."
   },
   "beta": {
     "heading": "This project is in beta"
+  },
+  "hero": {
+    "cta": "CMS is improving access to healthcare by creating a single, <trusted>trusted resource</trusted> for provider and payer information across the U.S. healthcare system",
+    "aboutButton": "About the directory"
+  },
+  "mission": {
+    "heading": "Finding care should be simple; accurate data makes it possible",
+    "body1": "The directory is a first-of-its-kind tool designed to tackle some of the most complex and longstanding challenges in healthcare technology. Today's healthcare landscape presents real opportunities for improvement. Accurate provider data helps reduce costs and streamline care delivery. This tool rises to meet those opportunities head-on.",
+    "body2": "At its core, the directory makes the essential functions of modern healthcare\u2014sharing provider data, locating records, and maintaining accurate information\u2014not just possible, but seamless. <bold>This product represents a bold new vision for healthcare delivery: one that puts patients and providers first, making it easier than ever to access the care people need.</bold>"
+  },
+  "cards": {
+    "explore": {
+      "heading": "Explore the directory",
+      "description": "Look up providers and provide feedback on their listings.",
+      "link": "Search the data"
+    },
+    "providers": {
+      "heading": "For providers",
+      "description": "Every individual and organization with a National Provider Identifier (NPI) is in the directory. The directory combines information from NPI applications, Medicare enrollments, and other sources.",
+      "link": "Information for providers"
+    },
+    "developers": {
+      "heading": "For developers",
+      "description": "The directory provides application developers with the information they need to help patients and providers connect their health record",
+      "link": "Developer documentation"
+    }
   },
   "links": {
     "developers": "Developer resources",

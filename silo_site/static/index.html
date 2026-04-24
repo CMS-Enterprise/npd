@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NPD Local Bulk Data Viewer</title>
+    <link rel="icon" type="image/x-icon" href="/assets/npd-favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/npd-favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/npd-favicon-16.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="/assets/npd-favicon-192.png" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+    <div id="live-region" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+    <div class="page-shell">
+      <header class="hero">
+        <img
+          class="hero-logo"
+          src="/assets/cms-gov-logo.png"
+          alt="Centers for Medicare & Medicaid Services"
+        />
+        <p class="hero-kicker">National Provider Directory</p>
+        <h1>Public use files</h1>
+        <p class="hero-copy">
+          Download the National Provider Directory public use files below. The
+          files are in NDJSON format and compressed using
+          <a href="https://en.wikipedia.org/wiki/Zstd" target="_blank" rel="noreferrer">
+            zstd<span class="sr-only"> (opens in a new tab)</span>
+          </a>.
+          These files are very large and are not intended for spreadsheet tools
+          such as Excel. Use the sample record buttons if you need a quick preview.
+        </p>
+        <div class="hero-stats" id="hero-stats" aria-label="Release summary"></div>
+      </header>
+
+      <main id="main-content" class="layout" tabindex="-1">
+        <section class="panel" aria-labelledby="health-tech-ecosystem-links">
+          <div class="panel-header">
+            <h2 id="health-tech-ecosystem-links">Health Tech Ecosystem</h2>
+            <p>Information about how ecosystem partners work together.</p>
+          </div>
+          <ul>
+              <li><a href="https://github.com/ftrotter-gov/HTE_data_release_specifications">Health Tech Ecosystem Data Release Specifications</a></li>
+              <li><a href="https://www.cms.gov/health-technology-ecosystem/interoperability-framework">CMS Health Tech Ecosystem Interoperability Framework</a></li>
+          </ul>
+          <p>To report issues with these files please send an email to <a href="mailto:npd@cms.hhs.gov">npd@cms.hhs.gov</a></p>
+        </section>
+
+        <section class="panel" aria-labelledby="release-files-heading">
+          <div class="panel-header">
+            <h2 id="release-files-heading">Release files</h2>
+            <p>Direct downloads for the current release.</p>
+          </div>
+          <div id="file-grid" class="file-grid" role="list" aria-describedby="release-files-heading"></div>
+        </section>
+
+        <section class="panel split-panel" aria-labelledby="release-guidance-heading">
+          <div>
+            <div class="panel-header">
+              <h2 id="release-guidance-heading">Release guidance</h2>
+              <p>Compression notes and installation commands for zstd tools.</p>
+            </div>
+            <ul id="notes-list" class="notes-list"></ul>
+          </div>
+          <div>
+            <div class="panel-header">
+              <h2 id="shell-commands-heading">Shell commands</h2>
+              <p>Commands for inspecting the compressed release files.</p>
+            </div>
+            <div id="commands-list" class="commands-list" aria-labelledby="shell-commands-heading"></div>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="accessibility-heading">
+          <div class="panel-header">
+            <h2 id="accessibility-heading">Accessibility and support</h2>
+            <p>This page is designed for keyboard, screen reader, and zoom support.</p>
+          </div>
+          <p class="support-copy">
+            If you need help accessing the files or sample records, contact the
+            National Provider Directory support team through the CMS support process.
+          </p>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <p>Centers for Medicare &amp; Medicaid Services</p>
+      </footer>
+    </div>
+
+    <template id="file-card-template">
+      <article class="file-card" role="listitem">
+        <div class="file-head">
+          <div>
+            <p class="file-label"></p>
+            <h3 class="file-name"></h3>
+          </div>
+          <a class="download-link">Download</a>
+        </div>
+        <dl class="metrics">
+          <div>
+            <dt>Compressed</dt>
+            <dd class="compressed-size"></dd>
+          </div>
+          <div>
+            <dt>Original</dt>
+            <dd class="original-size"></dd>
+          </div>
+          <div>
+            <dt>Compression</dt>
+            <dd class="ratio"></dd>
+          </div>
+        </dl>
+        <div class="card-actions">
+          <button class="sample-button" type="button">Load sample records</button>
+        </div>
+        <div class="samples" aria-live="polite"></div>
+      </article>
+    </template>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>

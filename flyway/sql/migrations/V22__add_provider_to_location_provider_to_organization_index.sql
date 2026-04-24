@@ -1,0 +1,2 @@
+CREATE INDEX IF NOT EXISTS idx_provider_to_location_provider_to_organization_id
+ON npd.provider_to_location (provider_to_organization_id);

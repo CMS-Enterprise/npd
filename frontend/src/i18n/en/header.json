@@ -7,7 +7,9 @@
     "logout": "Sign out"
   },
   "link": {
+    "about": "About",
     "search": "Search the data",
+    "resources": "Resources",
     "developers": "For developers",
     "providers": "For providers"
   },

@@ -10,7 +10,7 @@
     "providerName": "Provider name",
     "issuesLabel": "What issue(s) do you want to report on this profile?",
     "issuesHint": "Select all that apply",
-    "issuesRequired": "Select at least one issue",
+    "issuesRequired": "Select at least one issue to report",
     "issues": {
       "incorrect_practice_locations": "Practice location(s)",
       "incorrect_taxonomy_or_speciality": "Taxonomy(-ies)/specialty(-ies)",
@@ -28,7 +28,7 @@
     "emailInvalid": "Enter a valid email address",
     "privacyHeading": "Privacy notice",
     "privacyBody": "The information you provide will be used solely to improve the accuracy of the National Provider Directory. Your email will only be used to send you updates about this specific issue submission.",
-    "captchaRequired": "Please complete the CAPTCHA verification",
+    "captchaRequired": "Verify you are human",
     "submitError": "There was an error in submitting the form. Please try again.",
     "cancel": "Cancel",
     "submit": "Submit",

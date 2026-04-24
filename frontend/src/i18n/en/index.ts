@@ -1,3 +1,4 @@
+import about from "./about.json"
 import developers from "./developers.json"
 import errors from "./errors.json"
 import footer from "./footer.json"
@@ -8,6 +9,7 @@ import practitioners from "./practitioners.json"
 import search from "./search.json"
 import feedback from "./feedback.json"
 import detailsections from "./detailsections.json"
+import providers from "./providers.json"
 
 /*
  * NOTE: (@abachman-dsac) a word about i18n usage in react components and the
@@ -31,6 +33,7 @@ import detailsections from "./detailsections.json"
  * use here.
  */
 export const translations = {
+  about,
   detailsections,
   developers,
   errors,
@@ -41,4 +44,5 @@ export const translations = {
   practitioners,
   search,
   feedback,
+  providers,
 }

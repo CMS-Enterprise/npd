@@ -1,65 +1,114 @@
-import {
-  Alert,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-} from "@cmsgov/design-system"
-
-import { useOrganizationAPI, useFullOrganizationAPI  } from "../../state/requests/organizations"
-import { OrganizationPresenter, FullOrganizationPresenter } from "../../presenters/OrganizationPresenter"
-
+import { Alert, Button } from "@cmsgov/design-system"
 import classNames from "classnames"
+import { useState, useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { useLocation, useParams } from "react-router"
-import { DetailPageBanner } from "../../components/DetailPageBanner"
 import { FeatureFlag } from "../../components/FeatureFlag"
-import { InfoItem } from "../../components/InfoItem"
 import { LoadingIndicator } from "../../components/LoadingIndicator"
-import layout from "../Layout.module.css"
-import { LocationSection } from "../../components/detailSections/LocationSection"
-import { EndpointSection } from "../../components/detailSections/EndpointSection"
-import { IdentifierSection } from "../../components/detailSections/IdentifierSection"
-import { FeedbackCTA } from "../../components/forms/feedback/FeedbackCTA"
-import { useState } from "react"
+import {
+  OrganizationPresenter,
+  FullOrganizationPresenter,
+} from "../../presenters/OrganizationPresenter"
+import {
+  useOrganizationAPI,
+  useFullOrganizationAPI,
+} from "../../state/requests/organizations"
 import { FeedbackForm } from "../../components/forms/feedback/FeedbackForm"
-import { TaxonomySection } from "../../components/detailSections/TaxonomySection"
-import { SectionWithContentOrFallback } from "../../components/detailSections/SectionWithContentOrFallback"
+import styles from "./Organization.module.css"
+
+const DetailRows = ({
+  items,
+}: {
+  items: Array<{ label: string; value: string | null | undefined }>
+}) => {
+  return (
+    <dl className={styles.detailsList}>
+      {items.map((item) => (
+        <div className={styles.detailRow} key={item.label}>
+          <dt className={styles.detailLabel}>{item.label}</dt>
+          <dd className={styles.detailValue}>{item.value || "—"}</dd>
+        </div>
+      ))}
+    </dl>
+  )
+}
 
 export const Organization = () => {
   const { t } = useTranslation()
   const { organizationId } = useParams()
   const { data, isLoading } = useOrganizationAPI(organizationId)
-  const { fullData, endpointDataLoading, locationDataLoading, practitionerDataLoading } = useFullOrganizationAPI(organizationId)
+  const { fullData, endpointDataLoading, locationDataLoading } =
+    useFullOrganizationAPI(organizationId)
   const location = useLocation()
   const searchUrl = location.state?.searchUrl
 
   const [isReportIssueOpen, setIsReportIssueOpen] = useState(false)
 
+  useEffect(() => {
+    document.body.classList.add("gray-bg")
+    return () => document.body.classList.remove("gray-bg")
+  }, [])
+
   if (isLoading) {
     return <LoadingIndicator />
   }
 
-  const contentClass = classNames(layout.content, "ds-l-container")
-
   const organization = new OrganizationPresenter(data!)
   const fullOrganization = new FullOrganizationPresenter(fullData!)
 
+  const basicInfoItems = [
+    {
+      label: t("organizations.basicInfo.npi"),
+      value: organization.npi,
+    },
+    {
+      label: t("organizations.basicInfo.dateOfEnumeration"),
+      value: organization.enumerationDate,
+    },
+    {
+      label: t("organizations.basicInfo.phone"),
+      value: organization.authorizedPhone,
+    },
+  ]
+
+  const authorizedOfficialItems = [
+    {
+      label: t("organizations.authorizedOfficial.name"),
+      value: organization.authorizedOfficial,
+    },
+    {
+      label: t("organizations.authorizedOfficial.phone"),
+      value: organization.authorizedPhone,
+    },
+  ]
+
   return (
     <>
-      <DetailPageBanner
-        title={organization.name}
-        subtitle={`${t("organizations.header.npi")}: ${organization.npi}`}
-        pageType={t("organizations.header.title")}
-        testIdPrefix="organization"
-        backLink={
-          searchUrl
-            ? { label: t("organizations.header.search"), href: searchUrl }
-            : undefined
-        }
-      />
-      <main className={contentClass}>
+      <main className={classNames("ds-l-container", styles.pageShell)}>
+        {searchUrl && (
+          <a href={searchUrl} className={styles.backLink}>
+            {t("organizations.header.search")}
+          </a>
+        )}
+
+        <section className={classNames(styles.card, styles.summaryCard)}>
+          <div className={styles.summaryMeta}>
+            <h1
+              role="heading"
+              data-testid="organization-name"
+              aria-level={1}
+              className={styles.summaryHeading}
+            >
+              {organization.name}
+            </h1>
+            {organization.npi && (
+              <div data-testid="organization-npi" className={styles.npi}>
+                {t("organizations.header.npi")}: {organization.npi}
+              </div>
+            )}
+          </div>
+        </section>
+
         <FeatureFlag inverse name="ORGANIZATION_LOOKUP_DETAILS">
           <Alert variation="warn" heading="Content not available">
             {t("organizations.unavailable")}
@@ -67,126 +116,152 @@ export const Organization = () => {
         </FeatureFlag>
 
         <FeatureFlag name="ORGANIZATION_LOOKUP_DETAILS">
-          <section className={layout.section}>
-            <div className="ds-l-row ds-u-align-items--start">
-              <div className="ds-l-col--12 ds-l-md-col--8">
-                <h2 className="ds-u-margin-top--0">
-                  {t("organizations.about.title")}
+          <div className={styles.pageGrid}>
+            <div className={styles.mainColumn}>
+              <section className={styles.card}>
+                <h2 className={styles.sectionTitle}>
+                  {t("organizations.basicInfo.title")}
                 </h2>
-                <div className="ds-l-row">
-                  <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
-                    <InfoItem
-                      label={t("organizations.about.otherNames")}
-                      value={organization.otherNames.join(";")}
-                    />
-                  </div>
-                  <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
-                    <InfoItem
-                      label={t("organizations.about.parentOrganization")}
-                      value={null}
-                    />
-                  </div>
-                </div>
-              </div>
+                <DetailRows items={basicInfoItems} />
+              </section>
 
-              <div
-                className={classNames(
-                  "ds-l-col--12 ds-l-md-col--4",
-                  layout.feedbackCtaColumn,
-                )}
-              >
-                <FeedbackCTA
-                  subtitle={t("practitioners.detail.feedback.subtitle")}
-                  onButtonClick={() => setIsReportIssueOpen(true)}
-                />
-              </div>
+              {locationDataLoading ? (
+                <section className={styles.card}>
+                  <h2 className={styles.sectionTitle}>
+                    {t("organizations.practiceLocations.title")}
+                  </h2>
+                  <LoadingIndicator />
+                </section>
+              ) : (
+                <section className={styles.card}>
+                  <h2 className={styles.sectionTitle}>
+                    {t("organizations.practiceLocations.title")}
+                  </h2>
+                  {fullOrganization.locations.length === 0 ? (
+                    <p className={styles.emptyState}>
+                      {t("organizations.practiceLocations.empty")}
+                    </p>
+                  ) : (
+                    <div className={styles.locationList}>
+                      {fullOrganization.locations.map((loc) => {
+                        const phone = loc.contact?.find(
+                          (c) => c.system === "phone",
+                        )?.value
+                        return (
+                          <div key={loc.id} className={styles.locationCard}>
+                            {loc.name && (
+                              <div className={styles.locationName}>
+                                {loc.name}
+                              </div>
+                            )}
+                            {loc.address && (
+                              <div className={styles.locationDetail}>
+                                {loc.address}
+                              </div>
+                            )}
+                            {phone && (
+                              <a
+                                href={`tel:${phone}`}
+                                className={styles.locationPhone}
+                              >
+                                {phone}
+                              </a>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </section>
+              )}
+
+              <section className={styles.card}>
+                <h2 className={styles.sectionTitle}>
+                  {t("organizations.cmsNetworks.title")}
+                </h2>
+                <p className={styles.emptyState}>
+                  {t("organizations.cmsNetworks.empty")}
+                </p>
+              </section>
+
+              {endpointDataLoading ? (
+                <section className={styles.card}>
+                  <h2 className={styles.sectionTitle}>
+                    {t("organizations.dataExchangeEndpoints.title")}
+                  </h2>
+                  <LoadingIndicator />
+                </section>
+              ) : (
+                <section className={styles.card}>
+                  <h2 className={styles.sectionTitle}>
+                    {t("organizations.dataExchangeEndpoints.title")}
+                  </h2>
+                  {fullOrganization.endpoints.length === 0 ? (
+                    <p className={styles.emptyState}>
+                      {t("organizations.dataExchangeEndpoints.empty")}
+                    </p>
+                  ) : (
+                    <div className={styles.endpointList}>
+                      {fullOrganization.endpoints.map((ep) => (
+                        <div key={ep.id} className={styles.endpointCard}>
+                          {ep.name && (
+                            <div className={styles.endpointName}>{ep.name}</div>
+                          )}
+                          <div className={styles.endpointMeta}>
+                            <span className={styles.endpointMetaLabel}>
+                              {t("organizations.dataExchangeEndpoints.type")}:
+                            </span>{" "}
+                            {ep.connectionType || "—"}
+                          </div>
+                          <div className={styles.endpointMeta}>
+                            <span className={styles.endpointMetaLabel}>
+                              {t("organizations.dataExchangeEndpoints.url")}:
+                            </span>{" "}
+                            {ep.address ? (
+                              <a
+                                href={ep.address}
+                                className={styles.endpointUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                {ep.address}
+                              </a>
+                            ) : (
+                              "—"
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </section>
+              )}
             </div>
-          </section>
 
-          <section className={layout.section}>
-            <h2>{t("organizations.contact.title")}</h2>
-            <div className="ds-l-row">
-              <div
-                className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2"
-                style={{ whiteSpace: "pre-line" }}
-              >
-                <InfoItem
-                  label={t("organizations.contact.address")}
-                  value={organization.address}
-                />
+            <aside className={styles.sidebarColumn}>
+              <div className={styles.card}>
+                <h3 className={styles.sectionTitle}>
+                  {t("organizations.authorizedOfficial.title")}
+                </h3>
+                <DetailRows items={authorizedOfficialItems} />
               </div>
-              <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
-                <InfoItem
-                  label={t("organizations.contact.authorizedOfficial")}
-                  value={organization.authorizedOfficial}
-                />
+
+              <div className={classNames(styles.card, styles.actionsCard)}>
+                <h3 className={styles.actionsTitle}>Actions</h3>
+                <Button
+                  variation="solid"
+                  className={styles.actionsButton}
+                  onClick={() => setIsReportIssueOpen(true)}
+                >
+                  Report Issue with This Record
+                </Button>
+                <p className={styles.feedbackText}>
+                  Found incorrect information? Let us know so we can update this
+                  record.
+                </p>
               </div>
-              <div className="ds-l-col--12 ds-l-md-col--4 ds-u-margin-bottom--2">
-                <InfoItem
-                  label={t("organizations.contact.authorizedOfficialPhone")}
-                  value={organization.authorizedPhone}
-                />
-              </div>
-            </div>
-          </section>
-          <IdentifierSection identifierData={organization.identifiers} />
-
-          <TaxonomySection taxonomyData={organization.types} />
-
-          { endpointDataLoading ?  (
-              <>
-                <section className={layout.section}>
-                  <h2>{t("detailsections.endpoints.title")}</h2>
-                  <LoadingIndicator/>
-                </section>
-              </>
-            ) : (
-              <EndpointSection endpointData={fullOrganization.endpoints} />
-            ) 
-          }
-
-          { locationDataLoading ?  (
-              <>
-                <section className={layout.section}>
-                  <h2>{t("detailsections.locations.title")}</h2>
-                  <LoadingIndicator/>
-                </section>
-              </>
-            ) : (
-              <LocationSection locationData={fullOrganization.locations} />
-            ) 
-          }
-
-        { practitionerDataLoading ?  (
-              <>
-                <section className={layout.section}>
-                  <h2>{t("organizations.practitioners.title")}</h2>
-                  <LoadingIndicator/>
-                </section>
-              </>
-            ) : (
-              <SectionWithContentOrFallback title={t("organizations.practitioners.title")} fallback={t("organizations.practitioners.fallback")} arrayData={fullOrganization.practitioners}>
-                  <Table data-testid="practitioner-table">
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>
-                            {t("organizations.practitioners.name")}
-                          </TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {fullOrganization.practitioners.map((practitioner, index) => (
-                          <TableRow key={index}>
-                            <TableCell><a data-testid={`practitioner-${index}`} href={`/practitioners/${practitioner.id}`}>{practitioner.name}</a></TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                </SectionWithContentOrFallback>
-            ) 
-          }
-
-          
+            </aside>
+          </div>
         </FeatureFlag>
 
         <FeedbackForm

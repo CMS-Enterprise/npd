@@ -15,22 +15,17 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { AuthenticatedRoute } from "./components/AuthenticatedRoute"
 import { ErrorBoundary, ErrorFallback } from "./components/ErrorBoundary.tsx"
 import { FeatureFlagRoute } from "./components/FeatureFlagRoute"
+import { About } from "./pages/About"
+import { Providers } from "./pages/Providers"
 import { Developers } from "./pages/Developers"
 import { Landing } from "./pages/Landing"
 import { Layout } from "./pages/Layout"
 import { Login } from "./pages/Login"
 import { NotFound } from "./pages/NotFound.tsx"
-import {
-  Organization,
-  OrganizationSearch,
-} from "./pages/Organization"
-import { 
-  Practitioner,
-  PractitionerSearch
-} from "./pages/Practitioner"
-import { Search } from "./pages/Search"
+import { Organization } from "./pages/Organization"
+import { Practitioner } from "./pages/Practitioner"
+import { UnifiedSearch } from "./pages/Search"
 import { FrontendSettingsProvider } from "./state/FrontendSettingsProvider"
-
 
 const queryClient = new QueryClient()
 
@@ -46,25 +41,27 @@ createRoot(document.getElementById("root")!).render(
 
                 <Route element={<AuthenticatedRoute />}>
                   <Route index element={<Landing />} />
+                  <Route path="/about" element={<About />} />
                   <Route path="/developers" element={<Developers />} />
+                  <Route path="/providers" element={<Providers />} />
 
                   <Route element={<FeatureFlagRoute name="SEARCH_APP" />}>
-                    <Route path="/search" element={<Search />} />
+                    <Route path="/search" element={<UnifiedSearch />} />
                     <Route path="/organizations">
-                      <Route path="search" element={<OrganizationSearch />} />
+                      {/* <Route path="search" element={<OrganizationSearch />} /> */}
                       <Route
                         path=":organizationId"
                         element={<Organization />}
                       />
-                      <Route path="" element={<OrganizationSearch />} />
+                      {/* <Route path="" element={<OrganizationSearch />} /> */}
                     </Route>
                     <Route path="/practitioners">
-                      <Route path="search" element={<PractitionerSearch />} />
+                      {/* <Route path="search" element={<PractitionerSearch />} /> */}
                       <Route
                         path=":practitionerId"
                         element={<Practitioner />}
                       />
-                      <Route path="" element={<PractitionerSearch />} />
+                      {/* <Route path="" element={<PractitionerSearch />} /> */}
                     </Route>
                   </Route>
                 </Route>

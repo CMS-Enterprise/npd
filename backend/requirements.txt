@@ -1,9 +1,9 @@
-Django==5.2.12
+Django==5.2.13
 Faker==38.2.0
 Jinja2==3.1.6
 MarkupSafe==3.0.2
 PyYAML==6.0.2
-Pygments==2.19.2
+Pygments==2.20.0
 SQLAlchemy==2.0.41
 WTForms==3.1.2
 altcha==1.0.0
@@ -38,7 +38,7 @@ psycopg==3.2.12
 psycopg_binary==3.2.12
 python-dateutil==2.9.0.post0
 python-decouple==3.8
-python-multipart==0.0.22
+python-multipart==0.0.26
 python-slugify==8.0.4
 requests==2.33.0
 rich==14.0.0

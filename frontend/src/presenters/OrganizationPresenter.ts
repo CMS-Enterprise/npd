@@ -1,6 +1,7 @@
 import type { FHIROrganization } from "../@types/fhir"
 import {
   formatAddress,
+  formatDate,
   formatDetails,
   formatOtherIdentifierType,
 } from "../helpers/formatters"
@@ -8,7 +9,9 @@ import type { OrganizationDetailsType } from "../state/requests/organizations"
 
 export class OrganizationPresenter {
   private record: FHIROrganization
-  constructor(record: FHIROrganization) { this.record = record }
+  constructor(record: FHIROrganization) {
+    this.record = record
+  }
 
   get name(): string {
     return this.record.name ?? ""
@@ -26,12 +29,10 @@ export class OrganizationPresenter {
             ext.url ===
             "https://build.fhir.org/organization-definitions.html#Organization.qualification",
         )
-        .map((ext) => (
-          {
-            display: ext.valueCodeableConcept?.coding?.[0]?.display ?? "",
-            nuccCode: ext.valueCodeableConcept?.coding?.[0]?.code ?? "" 
-          })) ??
-      []
+        .map((ext) => ({
+          display: ext.valueCodeableConcept?.coding?.[0]?.display ?? "",
+          nuccCode: ext.valueCodeableConcept?.coding?.[0]?.code ?? "",
+        })) ?? []
     )
   }
 
@@ -67,19 +68,41 @@ export class OrganizationPresenter {
     return this.record.identifier.map((identity) => ({
       type: formatOtherIdentifierType(identity.type?.coding?.[0]?.code),
       number: identity.value,
-      details: identity.period || identity.assigner ? formatDetails(identity.period, identity.assigner?.display) : "",
+      details:
+        identity.period || identity.assigner
+          ? formatDetails(identity.period, identity.assigner?.display)
+          : "",
     }))
+  }
+
+  get enumerationDate(): string | null {
+    const npiIdentifier = this.record.identifier?.find(
+      (id) =>
+        id.system === "http://terminology.hl7.org/NamingSystem/npi" ||
+        id.system === "http://hl7.org/fhir/sid/us-npi",
+    )
+    return npiIdentifier?.period?.start
+      ? formatDate(npiIdentifier.period.start)
+      : null
+  }
+
+  get authorizedOfficialTitle(): string | null {
+    const contact = this.record.contact?.[0]
+    return (
+      contact?.purpose?.text ?? contact?.purpose?.coding?.[0]?.display ?? null
+    )
   }
 
   get parent() {
     return this.record.partOf?.display
   }
-
-  }
+}
 
 export class FullOrganizationPresenter {
   private record: OrganizationDetailsType
-  constructor(record: OrganizationDetailsType) { this.record = record }
+  constructor(record: OrganizationDetailsType) {
+    this.record = record
+  }
 
   get practitioners() {
     if (!this.record.practitionerData?.length) return []
@@ -98,18 +121,22 @@ export class FullOrganizationPresenter {
       id: location?.resource.id,
       name: location?.resource.name,
       address: formatAddress(location?.resource.address, false),
-      contact: location?.resource.telecom
+      contact: location?.resource.telecom,
     }))
   }
 
   get endpoints() {
-    if (!this.record.endpointData?.length || this.record.endpointData[0] == undefined) return []
+    if (
+      !this.record.endpointData?.length ||
+      this.record.endpointData[0] == undefined
+    )
+      return []
 
     return this.record.endpointData.map((endpoint) => ({
       id: endpoint?.id,
+      name: endpoint?.name ?? null,
       address: endpoint?.address,
-      connectionType: endpoint?.connectionType.display
+      connectionType: endpoint?.connectionType.display,
     }))
   }
-
-  }
+}
