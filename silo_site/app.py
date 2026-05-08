@@ -65,6 +65,8 @@ def _guess_release_date() -> str | None:
 def _resource_filename(resource_name: str) -> str:
     return f"{resource_name}.ndjson.zst"
 
+def _get_resource_from_filename(filename: str) -> str:
+    return filename.split("_")[0]
 
 def _sample_fields(record: dict[str, Any]) -> dict[str, Any]:
     ordered_keys = [
@@ -142,13 +144,13 @@ class ReleaseStoreBase:
         manifest = self.manifest()
         files_meta = manifest.get("files", {})
         records: list[FileRecord] = []
-        for resource_name in RESOURCE_ORDER:
-            filename = _resource_filename(resource_name)
+
+        for filename in files_meta.keys():
             manifest_key = filename.removesuffix(".zst")
             meta = files_meta.get(manifest_key, {})
             records.append(
                 FileRecord(
-                    resource_name=resource_name,
+                    resource_name=_get_resource_from_filename(filename),
                     filename=filename,
                     download_path=f"/downloads/{filename}",
                     compressed_bytes=self.compressed_bytes(filename),
