@@ -18,7 +18,6 @@ from botocore.exceptions import ClientError
 from flask import Flask, Response, abort, jsonify, redirect, send_file
 import zstandard
 
-
 ROOT_DIR = Path(__file__).resolve().parent.parent
 SITE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = SITE_DIR / "static"
@@ -67,6 +66,16 @@ def _resource_filename(resource_name: str) -> str:
 
 def _get_resource_from_filename(filename: str) -> str:
     return filename.split("_")[0]
+
+def _append_zst(filename: str) -> str:
+    return filename + ".zst"
+
+def _sort_keys_by_resource_order(keys: list[str]) -> list[str]:
+    output = [0 for i in range(len(RESOURCE_ORDER))]
+    for key in keys:
+        index = RESOURCE_ORDER.index(_get_resource_from_filename(key))
+        output[index] = key
+    return output
 
 def _sample_fields(record: dict[str, Any]) -> dict[str, Any]:
     ordered_keys = [
@@ -145,12 +154,13 @@ class ReleaseStoreBase:
         files_meta = manifest.get("files", {})
         records: list[FileRecord] = []
 
-        for filename in files_meta.keys():
-            manifest_key = filename.removesuffix(".zst")
-            meta = files_meta.get(manifest_key, {})
+        for filename in _sort_keys_by_resource_order(files_meta.keys()):
+            meta = files_meta.get(filename, {})
+            resource_name = _get_resource_from_filename(filename)
+            filename = _append_zst(filename)
             records.append(
                 FileRecord(
-                    resource_name=_get_resource_from_filename(filename),
+                    resource_name=resource_name,
                     filename=filename,
                     download_path=f"/downloads/{filename}",
                     compressed_bytes=self.compressed_bytes(filename),
