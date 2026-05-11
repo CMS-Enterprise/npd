@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import datetime, timezone
 import io
@@ -70,12 +71,12 @@ def _get_resource_from_filename(filename: str) -> str:
 def _append_zst(filename: str) -> str:
     return filename + ".zst"
 
-def _sort_keys_by_resource_order(keys: list[str]) -> list[str]:
-    output = [0 for i in range(len(RESOURCE_ORDER))]
-    for key in keys:
-        index = RESOURCE_ORDER.index(_get_resource_from_filename(key))
-        output[index] = key
-    return output
+
+def _sort_keys_by_resource_order(keys: Iterable[str]) -> list[str]:
+    return sorted(
+        keys,
+        key=lambda key: RESOURCE_ORDER.index(_get_resource_from_filename(key)),
+    )
 
 def _sample_fields(record: dict[str, Any]) -> dict[str, Any]:
     ordered_keys = [
