@@ -153,7 +153,6 @@ class ReleaseStoreBase:
         manifest = self.manifest()
         files_meta = manifest.get("files", {})
         records: list[FileRecord] = []
-
         for filename in _sort_keys_by_resource_order(files_meta.keys()):
             meta = files_meta.get(filename, {})
             resource_name = _get_resource_from_filename(filename)
