@@ -71,7 +71,6 @@ def _get_resource_from_filename(filename: str) -> str:
 def _append_zst(filename: str) -> str:
     return filename + ".zst"
 
-
 def _sort_keys_by_resource_order(keys: Iterable[str]) -> list[str]:
     return sorted(
         keys,
