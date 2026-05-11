@@ -4,4 +4,4 @@ sqlalchemy==2.0.41
 python-dotenv==1.2.2
 pangres==4.2.1
 psycopg2-binary==2.9.10
-urllib3==2.6.3
+urllib3==2.7.0
