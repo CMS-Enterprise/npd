@@ -1,4 +1,4 @@
-Django==5.2.13
+Django==5.2.14
 Faker==38.2.0
 Jinja2==3.1.6
 MarkupSafe==3.0.2
@@ -15,7 +15,7 @@ binaryornot==0.4.4
 certifi==2025.6.15
 chardet==5.2.0
 charset-normalizer==3.4.2
-click==8.2.1
+click==8.3.3
 cookiecutter==2.6.0
 django-cors-headers==4.8.0
 django-debug-toolbar==5.2.0
