@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import datetime, timezone
 import io
@@ -17,7 +18,6 @@ from botocore.config import Config
 from botocore.exceptions import ClientError
 from flask import Flask, Response, abort, jsonify, redirect, send_file
 import zstandard
-
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 SITE_DIR = Path(__file__).resolve().parent
@@ -65,6 +65,17 @@ def _guess_release_date() -> str | None:
 def _resource_filename(resource_name: str) -> str:
     return f"{resource_name}.ndjson.zst"
 
+def _get_resource_from_filename(filename: str) -> str:
+    return filename.split("_")[0]
+
+def _append_zst(filename: str) -> str:
+    return filename + ".zst"
+
+def _sort_keys_by_resource_order(keys: Iterable[str]) -> list[str]:
+    return sorted(
+        keys,
+        key=lambda key: RESOURCE_ORDER.index(_get_resource_from_filename(key)),
+    )
 
 def _sample_fields(record: dict[str, Any]) -> dict[str, Any]:
     ordered_keys = [
@@ -142,10 +153,10 @@ class ReleaseStoreBase:
         manifest = self.manifest()
         files_meta = manifest.get("files", {})
         records: list[FileRecord] = []
-        for resource_name in RESOURCE_ORDER:
-            filename = _resource_filename(resource_name)
-            manifest_key = filename.removesuffix(".zst")
-            meta = files_meta.get(manifest_key, {})
+        for filename in _sort_keys_by_resource_order(files_meta.keys()):
+            meta = files_meta.get(filename, {})
+            resource_name = _get_resource_from_filename(filename)
+            filename = _append_zst(filename)
             records.append(
                 FileRecord(
                     resource_name=resource_name,

@@ -10,4 +10,6 @@ COPY app.py .
 ADD static ./static
 # Run the app on 8080
 EXPOSE 8080/tcp
+ENV PYTHONUNBUFFERED=1
+
 CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "2", "app:app"]
