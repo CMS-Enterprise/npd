@@ -20,6 +20,11 @@ services:
       - ./flyway/sql/migrations:/flyway/sql/migrations
       - ./flyway/sql/reference_data:/flyway/sql/reference_data
 
+  valkey:
+    image: valkey/valkey:8-alpine
+    ports:
+      - ${NPD_CACHE_PORT:-6379}:6379
+
   django-web:
     extends:
       file: compose.yml
@@ -30,6 +35,7 @@ services:
     depends_on: !override
       - db
       - db-migrations
+      - valkey
     command: python manage.py runserver 0.0.0.0:8008
     ports:
       - "8008:8008" 

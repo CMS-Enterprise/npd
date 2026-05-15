@@ -21,6 +21,7 @@ services:
       NPD_DB_PASSWORD: ${NPD_DB_PASSWORD:-postgres}
       NPD_DB_HOST: ${NPD_DB_HOST:-db}
       NPD_DB_PORT: ${NPD_DB_PORT:-5432}
+      NPD_CACHE_LOCATION: ${NPD_CACHE_LOCATION:-valkey://valkey:6379/0}
       NPD_REQUIRE_AUTHENTICATION: False
     ports:
       - '8000:8000'
@@ -34,6 +35,8 @@ services:
         condition: service_healthy
       db-migrations:
         condition: service_completed_successfully
+      valkey:
+        condition: service_started
 
   fastapi-web:
     build:
@@ -55,6 +58,7 @@ services:
       NPD_DB_PASSWORD: ${NPD_DB_PASSWORD:-postgres}
       NPD_DB_HOST: ${NPD_DB_HOST:-db}
       NPD_DB_PORT: ${NPD_DB_PORT:-5432}
+      NPD_CACHE_LOCATION: ${NPD_CACHE_LOCATION:-valkey://valkey:6379/0}
       NPD_REQUIRE_AUTHENTICATION: False
     ports:
       - '8001:8001'
@@ -67,6 +71,13 @@ services:
         condition: service_healthy
       db-migrations:
         condition: service_completed_successfully
+      valkey:
+        condition: service_started
+
+  valkey:
+    image: valkey/valkey:8-alpine
+    ports:
+      - ${NPD_CACHE_PORT:-6379}:6379
 
   db:
     image: 'postgis/postgis:17-3.5'
