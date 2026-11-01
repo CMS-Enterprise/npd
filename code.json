@@ -1,6 +1,6 @@
 {
   "name": "npd",
-  "version": "",
+  "version": "0.5.2",
   "description": "A modern version of a health provider directory to serve as a single source of truth for the benefit of all",
   "longDescription": "The CMS National Provider Directory addresses fragmented healthcare provider data that costs the industry an estimated $2.76 billion annually. Currently, provider information is duplicated and corrected across over 5,000 systems, leading to widespread inaccuracy. NPD creates a unified FHIR-compliant directory combining data from CMS sources (NPPES, PECOS) and industry partners into a single authoritative source. Built with Django REST Framework and React, the system provides APIs and a search interface for accessing provider practices, addresses, specialties, licenses, quality scores, insurance plan participation, and interoperability endpoints. By serving as the definitive provider directory, NPD reduces data collection burden on providers and payers while improving accuracy for over 100 million Medicare and Medicaid beneficiaries.",
   "status": "Development",
@@ -25,9 +25,9 @@
   "disclaimerURL": "",
   "disclaimerText": "",
   "vcs": "git",
-  "laborHours": 17280,
+  "laborHours": 18449,
   "reuseFrequency": {
-    "forks": 1,
+    "forks": 6,
     "clones": 0
   },
   "platforms": [
@@ -114,8 +114,8 @@
   "partners": [],
   "date": {
     "created": "2025-06-13T17:11:32Z",
-    "lastModified": "2025-12-31T16:34:25Z",
-    "metadataLastUpdated": "2026-01-01T02:23:10.003Z"
+    "lastModified": "2026-10-24T19:43:46Z",
+    "metadataLastUpdated": "2026-11-01T00:35:48.591Z"
   },
   "tags": [
     "providers",
